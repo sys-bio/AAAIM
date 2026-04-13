@@ -5,22 +5,40 @@ Handles database searches for annotation candidates.
 Currently supports ChEBI, extensible to other databases.
 """
 
+from pathlib import Path
+import sys
+
+# Make repo root importable when this module is executed directly (e.g. via debugger)
+# or when the working directory is not the repository root.
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+
 import os
 import re
 import lzma
 import pickle
 from typing import Any, Dict, List, Mapping, Optional, Set, Tuple
-from pathlib import Path
 from dataclasses import dataclass
 import logging
 from collections import Counter, defaultdict
 from itertools import product
-import sys
 import chromadb
 from chromadb.utils import embedding_functions
-from utils.constants import REF_CHEBI2LABEL, REF_NAMES2CHEBI, REF_NCBIGENE2LABEL, REF_NAMES2NCBIGENE, REF_UNIPROT2LABEL, REF_NAMES2UNIPROT
-from utils.constants import REF_CHEBI2KEGG_COMPOUND, REF_KEGG_REACTION2NAME, REF_KEGG2EC, REF_KEGG_REACTION_FEATURES, REF_KEGG_PARSED_REACTIONS
-# from utils.constants import SYNONYM_WORDS_TO_REMOVE
+from utils.constants import (
+    REF_CHEBI2LABEL, 
+    REF_NAMES2CHEBI, 
+    REF_NCBIGENE2LABEL, 
+    REF_NAMES2NCBIGENE, 
+    REF_UNIPROT2LABEL, 
+    REF_NAMES2UNIPROT,
+    REF_CHEBI2KEGG_COMPOUND, 
+    REF_KEGG_REACTION2NAME, 
+    REF_KEGG2EC, 
+    REF_KEGG_REACTION_FEATURES, 
+    REF_KEGG_PARSED_REACTIONS
+    ) # from utils.constants import SYNONYM_WORDS_TO_REMOVE
 from core.data_types import Recommendation, ReactionRecommendation
 from core.reaction.hierarchy_relaxation import (
     expand_chebi_with_metadata,
