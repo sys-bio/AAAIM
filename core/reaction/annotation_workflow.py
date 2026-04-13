@@ -253,6 +253,18 @@ def rank_kegg_annotations_with_llm(
     result_df = recommendations_df.copy()
 
     kegg_features = KEGGReactionFeatures.load_from_file(kegg_features_file)
+    # Some models may yield zero candidates (or an unexpected recommendations_df shape).
+    # In that case, return an empty ranked dataframe instead of failing.
+    if result_df.empty or "annotation" not in result_df.columns or "id" not in result_df.columns:
+        if "reaction_definition" not in result_df.columns:
+            result_df["reaction_definition"] = pd.Series(dtype="object")
+
+        base = Path(csv_path) if csv_path else Path(f"{Path(model_file).name}_recommendations")
+        ranked_out_path = base.with_name(base.stem + "_llm_ranked.csv")
+        result_df.iloc[0:0].copy().to_csv(ranked_out_path, index=False)
+        logger.info("LLM-ranked recommendations saved to %s", ranked_out_path)
+        return result_df.iloc[0:0].copy()
+
     result_df["reaction_definition"] = result_df["annotation"].map(kegg_features.get_definition)
 
     if csv_path is not None:
