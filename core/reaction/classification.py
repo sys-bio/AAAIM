@@ -15,10 +15,19 @@ def classify_reaction(
     """
     Classify a reaction by score eligibility.
 
+    ``filtered_species`` is the set of KEGG compound IDs still in play after
+    cofactor filtering (non-ignored metabolites on this reaction).
+
     Returns:
-        - "non_mappable": no species remain after filtering
-        - "ambiguous_mapping": mappable species exist but no KEGG candidates
-        - "mappable": eligible and has at least one candidate
+        - "ambiguous_mapping": ``filtered_species`` is empty (vacuous ``all()``),
+          or every ID in it is a configured cofactor KEGG id
+          (see :attr:`CofactorConfig.kegg_ids`). The transformation is
+          underdetermined for a unique KEGG reaction mapping.
+        - "non_mappable": the equation string has no ``->`` or ``=>``, an empty
+          LHS/RHS after splitting, or there are zero candidate KEGG reactions
+          after database filtering.
+        - "mappable": equation parses, at least one candidate KEGG reaction id,
+          and not classified as ambiguous_mapping above.
     """
     filtered = list(filtered_species) if filtered_species is not None else []
     cand = list(candidates) if candidates is not None else []

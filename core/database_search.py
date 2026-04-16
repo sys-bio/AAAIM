@@ -1162,8 +1162,6 @@ def _get_kegg_recommendations_rulebased(
             reaction_penalty = 0.0
 
             # Keep selected mapping (strict or relaxed) on recommendation payload.
-            model_subs = active_subs
-            model_prods = active_prods
             reaction_type = classify_reaction(
                 reaction_str,
                 filtered_species=filtered_species,
@@ -1228,8 +1226,8 @@ def _get_kegg_recommendations_rulebased(
                 id=reaction_label,
                 synonyms=[],
                 equation=reaction_str, 
-                substrates=model_subs,
-                products=model_prods,
+                substrates=active_subs,
+                products=active_prods,
                 candidates=candidates,
                 candidate_names=candidate_names,
                 match_score=match_scores,
@@ -1242,14 +1240,9 @@ def _get_kegg_recommendations_rulebased(
                         key=lambda x: (x.get("species_id", ""), x.get("kegg_id", "")),
                     ),
                     "reaction_penalty": reaction_penalty,
-                    "failed_default_score": 0.0,
                 },
             )
-            if reaction_type == "failed_mapping":
-                # Keep one record so downstream aggregation can score failed-but-eligible reactions.
-                recommendation.match_score = [0.0]
-                recommendations.append(recommendation)
-            elif reaction_type == "non_mappable":
+            if reaction_type == "non_mappable":
                 # Keep one record for coverage tracking; excluded by aggregator from scoring.
                 recommendation.match_score = []
                 recommendations.append(recommendation)

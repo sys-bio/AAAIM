@@ -221,8 +221,15 @@ def map_metabolites_to_kegg(
                     'candidates': choices
                 }
             except (KeyError, IndexError):
+                # Keep unmapped metabolites so downstream logic can:
+                # - preserve stoichiometry (coeff)
+                # - perform ChEBI-based recovery/relaxation to find candidates later
                 logger.debug(f"No KEGG mapping found for metabolite: {met}")
-                continue
+                id_choices[met] = {
+                    "species_id": met,
+                    "coeff": coeff,
+                    "candidates": [],
+                }
         
         if not id_choices:
             return []

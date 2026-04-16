@@ -49,7 +49,6 @@ def _per_reaction_best_scores(match_results: List[Any]) -> Dict[str, Optional[fl
     best_by_rxn: Dict[str, float] = {}
     classification_by_rxn: Dict[str, str] = {}
     ambiguous_default_by_rxn: Dict[str, float] = {}
-    failed_default_by_rxn: Dict[str, float] = {}
     for rec in match_results:
         rid = rec.id
         meta = getattr(rec, "metadata", None) or {}
@@ -57,8 +56,6 @@ def _per_reaction_best_scores(match_results: List[Any]) -> Dict[str, Optional[fl
         classification_by_rxn[rid] = rtype
         if rtype == "ambiguous_mapping":
             ambiguous_default_by_rxn[rid] = float(meta.get("ambiguous_default_score", 0.0))
-        if rtype == "failed_mapping":
-            failed_default_by_rxn[rid] = float(meta.get("failed_default_score", 0.0))
         if rtype != "mappable":
             continue
         if not rec.match_score:
@@ -75,9 +72,6 @@ def _per_reaction_best_scores(match_results: List[Any]) -> Dict[str, Optional[fl
             continue
         if rtype == "ambiguous_mapping":
             out[rid] = float(ambiguous_default_by_rxn.get(rid, 0.0))
-            continue
-        if rtype == "failed_mapping":
-            out[rid] = float(failed_default_by_rxn.get(rid, 0.0))
             continue
         if rid in best_by_rxn:
             out[rid] = float(best_by_rxn[rid])
