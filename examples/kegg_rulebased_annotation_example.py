@@ -45,6 +45,10 @@ TOP_K = 10
 # If True, run the full evaluation workflow (scoring + EM-like participant updates).
 RUN_EVALUATION = False
 
+# If True, attempt candidate generation for exchange reactions (empty LHS or RHS).
+# If False (default), exchange reactions are retained but returned with no candidates.
+INCLUDE_EXCHANGE_REACTIONS = False
+
 
 def main() -> pd.DataFrame:
     logger.info("AAAIM KEGG Reaction Annotation Example")
@@ -59,6 +63,7 @@ def main() -> pd.DataFrame:
         top_k=TOP_K,
         species_recommendations_df=recommendations_df,
         evaluate_candidates=RUN_EVALUATION,
+        include_exchange_reactions=INCLUDE_EXCHANGE_REACTIONS,
     )
 
     csv_path = Path(f"{Path(model_file).name}_recommendations.csv")

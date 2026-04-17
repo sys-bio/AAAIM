@@ -381,6 +381,7 @@ def map_reactions_to_kegg_with_relaxation(
     penalty_lam: float = 0.1,
     run_matching: bool = True,
     evaluate_candidates: bool = True,
+    include_exchange_reactions: bool = False,
 ) -> Tuple[List[Dict[str, Any]], List[Any], Dict[str, int]]:
     """
     Single iterative loop: normalize -> penalized KEGG matching -> relax targets -> converge.
@@ -421,6 +422,9 @@ def map_reactions_to_kegg_with_relaxation(
             ``_get_kegg_recommendations_rulebased`` (no similarity scoring / objective
             ranking). This disables relaxation iterations; the function returns after
             one normalized mapping pass.
+        include_exchange_reactions: If True, attempt candidate generation for exchange
+            reactions (empty LHS or RHS). If False, exchange reactions are retained but
+            returned with no candidates.
 
     Returns:
         (normalized_reactions, kegg_match_results, species_relax_level_by_id)
@@ -491,6 +495,7 @@ def map_reactions_to_kegg_with_relaxation(
             top_k=top_k,
             spectators=spectators,
             evaluate_candidates=True,
+            include_exchange_reactions=include_exchange_reactions,
             relaxation_levels_by_entity=levels,
             penalty_lam=penalty_lam,
             max_relax_level=max_relax_level,
@@ -574,6 +579,7 @@ def map_reactions_to_kegg_with_relaxation(
             top_k=top_k,
             spectators=spectators,
             evaluate_candidates=evaluate_candidates,
+            include_exchange_reactions=include_exchange_reactions,
             relaxation_levels_by_entity=relax_level,
             penalty_lam=penalty_lam,
             max_relax_level=max_relax_level,

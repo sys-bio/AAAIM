@@ -897,13 +897,8 @@ def update_participant_likelihoods(
             top_k=None,
         )
 
-        allowed_reaction_types = {"mappable", "ambiguous_mapping"}
-        match_results = [
-            rec
-            for rec in match_results
-            if str((getattr(rec, "metadata", None) or {}).get("reaction_type", "mappable"))
-            in allowed_reaction_types
-        ]
+        # Keep all reactions (including those with zero candidates) so the workflow
+        # can attempt candidate generation everywhere.
         
         logger.info(f"Iteration {iteration}: Generating recommendation table")
         updated_kegg_recommendations_df = _generate_recommendation_table(

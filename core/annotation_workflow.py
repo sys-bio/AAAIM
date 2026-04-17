@@ -57,6 +57,7 @@ def annotate_single_model(
     chunk_size: int = 50,
     species_recommendations_df = None,
     evaluate_candidates: bool = False,
+    include_exchange_reactions: bool = False,
 ) -> Tuple[pd.DataFrame, Dict[str, Any]]:
     """
     Annotate a single model that has no or limited existing annotations.
@@ -77,6 +78,9 @@ def annotate_single_model(
         evaluate_candidates: Only used for ``method="rulebased"`` (KEGG reaction workflow).
             If True, run scoring + EM-like participant updates; if False (default), run
             generation-only and skip evaluation steps.
+        include_exchange_reactions: Only used for ``method="rulebased"``.
+            If True, generate reaction candidates for exchange reactions (empty LHS or RHS).
+            If False (default), exchange reactions are retained but returned with no candidates.
         
     Returns:
         Tuple of (recommendations_df, metrics_dict)
@@ -180,6 +184,7 @@ def annotate_single_model(
             species_recommendations_df,
             existing_annotations=existing_annotations,
             evaluate_candidates=bool(evaluate_candidates),
+            include_exchange_reactions=bool(include_exchange_reactions),
         )
 
 

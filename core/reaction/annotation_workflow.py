@@ -51,6 +51,7 @@ def run_kegg_annotation_workflow_rulebased(
     convergence_config: Optional[ConvergenceConfig] = None,
     matching_config: Optional[MatchingConfig] = None,
     evaluate_candidates: bool = False,
+    include_exchange_reactions: bool = False,
 ) -> Optional[KeggAnnotationWorkflowResult]:
     """Run the complete KEGG annotation workflow.
 
@@ -100,15 +101,8 @@ def run_kegg_annotation_workflow_rulebased(
         cofactors_to_ignore=cofactor_config.kegg_ids,
         top_k=None,
         evaluate_candidates=bool(evaluate_candidates),
+        include_exchange_reactions=bool(include_exchange_reactions),
     )
-
-    # Only keep reaction candidates that are eligible for updating.
-    allowed_reaction_types = {"mappable", "ambiguous_mapping"}
-    match_results = [
-        rec
-        for rec in match_results
-        if str((getattr(rec, "metadata", None) or {}).get("reaction_type", "mappable")) in allowed_reaction_types
-    ]
 
     kegg_recommendations_df = _generate_recommendation_table(
         model_file,
