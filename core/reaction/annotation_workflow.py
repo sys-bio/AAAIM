@@ -50,6 +50,7 @@ def run_kegg_annotation_workflow_rulebased(
     cofactor_config: Optional[CofactorConfig] = None,
     convergence_config: Optional[ConvergenceConfig] = None,
     matching_config: Optional[MatchingConfig] = None,
+    evaluate_candidates: bool = False,
 ) -> Optional[KeggAnnotationWorkflowResult]:
     """Run the complete KEGG annotation workflow.
 
@@ -98,6 +99,7 @@ def run_kegg_annotation_workflow_rulebased(
         spectators=False,
         cofactors_to_ignore=cofactor_config.kegg_ids,
         top_k=None,
+        evaluate_candidates=bool(evaluate_candidates),
     )
 
     # Only keep reaction candidates that are eligible for updating.
@@ -117,6 +119,15 @@ def run_kegg_annotation_workflow_rulebased(
         database,
         {},
     )
+
+    if not evaluate_candidates:
+        logger.info("Generation-only mode: skipping scoring/participant update steps.")
+        return KeggAnnotationWorkflowResult(
+            high_score_recommendations=high_score_recommendations,
+            kegg_recommendations=kegg_recommendations_df,
+            scored_reactions=pd.DataFrame(),
+            updated_participants=pd.DataFrame(),
+        )
 
     kegg_recommendations_df["match_score_norm"] = (
         kegg_recommendations_df["match_score"]

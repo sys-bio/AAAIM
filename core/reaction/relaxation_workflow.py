@@ -380,6 +380,7 @@ def map_reactions_to_kegg_with_relaxation(
     top_k: Optional[int] = None,
     penalty_lam: float = 0.1,
     run_matching: bool = True,
+    evaluate_candidates: bool = True,
 ) -> Tuple[List[Dict[str, Any]], List[Any], Dict[str, int]]:
     """
     Single iterative loop: normalize -> penalized KEGG matching -> relax targets -> converge.
@@ -416,6 +417,10 @@ def map_reactions_to_kegg_with_relaxation(
             score per reaction changes by less than this vs the previous iteration.
         run_matching: If False, performs a single mapping pass and returns an empty
             match list (no refinement).
+        evaluate_candidates: If False, run only candidate generation/filtering in
+            ``_get_kegg_recommendations_rulebased`` (no similarity scoring / objective
+            ranking). This disables relaxation iterations; the function returns after
+            one normalized mapping pass.
 
     Returns:
         (normalized_reactions, kegg_match_results, species_relax_level_by_id)
@@ -485,6 +490,7 @@ def map_reactions_to_kegg_with_relaxation(
             cofactors_to_ignore=cofactors,
             top_k=top_k,
             spectators=spectators,
+            evaluate_candidates=True,
             relaxation_levels_by_entity=levels,
             penalty_lam=penalty_lam,
             max_relax_level=max_relax_level,
@@ -561,12 +567,13 @@ def map_reactions_to_kegg_with_relaxation(
             match_results = []
             break
 
-        # --- Step 2: KEGG matching (raw similarity inside matcher; ranking = penalized only) ---
+        # --- Step 2: KEGG matching ---
         match_results = _get_kegg_recommendations_rulebased(
             normalized_reactions,
             cofactors_to_ignore=cofactors,
             top_k=top_k,
             spectators=spectators,
+            evaluate_candidates=evaluate_candidates,
             relaxation_levels_by_entity=relax_level,
             penalty_lam=penalty_lam,
             max_relax_level=max_relax_level,
@@ -577,6 +584,9 @@ def map_reactions_to_kegg_with_relaxation(
             max_ancestor_depth=max_ancestor_depth,
             max_descendant_depth=down_depth,
         )
+        if not evaluate_candidates:
+            # Generation-only mode: do not score, do not relax, return after first pass.
+            break
         score = _aggregate_best_penalized_scores(match_results)
         coverage = _reaction_coverage_stats(match_results)
         logger.info(f"Reaction coverage: {coverage}")

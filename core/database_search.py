@@ -784,6 +784,7 @@ def _get_kegg_recommendations_rulebased(
     top_k: int = None,
     spectators: bool = False,
     *,
+    evaluate_candidates: bool = False,
     relaxation_levels_by_entity: Optional[Mapping[str, int]] = None,
     penalty_lam: float = 0.0,
     max_relax_level: int = 1,
@@ -803,6 +804,9 @@ def _get_kegg_recommendations_rulebased(
         species_ids: List of reaction IDs to evaluate
         cofactors_to_ignore: Set of KEGG IDs of cofactors to ignore
         top_k: Number of top candidates to return per reaction
+        evaluate_candidates: If True, compute similarity scores / objective ranking.
+            If False (default), run only candidate generation/filtering and return
+            ``match_score=[]``.
         
     Returns:
         List of Recommendation objects with candidates and match scores
@@ -1043,9 +1047,12 @@ def _get_kegg_recommendations_rulebased(
     try:
         logger.info(f"Loading KEGG reaction data...")
         # Load KEGG reaction data
-        kegg_parsed_reactions_dict = load_kegg_parsed_reactions_dict()
+        kegg_parsed_reactions_dict = None
+        if evaluate_candidates:
+            kegg_parsed_reactions_dict = load_kegg_parsed_reactions_dict()
         kegg_reaction_features_dict = load_kegg_reaction_features_dict()
-        logger.info(f"Loaded {len(kegg_parsed_reactions_dict)} parsed KEGG reactions")
+        if evaluate_candidates and kegg_parsed_reactions_dict is not None:
+            logger.info(f"Loaded {len(kegg_parsed_reactions_dict)} parsed KEGG reactions")
         logger.info(f"Loaded {len(kegg_reaction_features_dict)} KEGG reaction features")
         
         recommendations = []
@@ -1168,6 +1175,41 @@ def _get_kegg_recommendations_rulebased(
                 candidates=filtered_reaction_list,
             )
             matches = []
+
+            # Optional short-circuit: return generated candidates only (no scoring / ranking).
+            if not evaluate_candidates:
+                candidate_ids = sorted(filtered_reaction_list) if filtered_reaction_list else []
+                if top_k:
+                    candidate_ids = candidate_ids[:top_k]
+
+                candidate_names = []
+                for kegg_id in candidate_ids:
+                    orthology = kegg_reaction_features_dict.get(kegg_id, kegg_id).get("ORTHOLOGY", "")
+                    candidate_names.append(extract_classifications(orthology, 'orthology'))
+
+                recommendation = ReactionRecommendation(
+                    id=reaction_label,
+                    synonyms=[],
+                    equation=reaction_str,
+                    substrates=active_subs,
+                    products=active_prods,
+                    candidates=candidate_ids,
+                    candidate_names=candidate_names,
+                    match_score=[],
+                    metadata={
+                        "reaction_type": reaction_type,
+                        "filtered_species_count": int(len(filtered_species)),
+                        "candidate_count": int(len(filtered_reaction_list)),
+                        "participant_relaxation": sorted(
+                            participant_relaxation.values(),
+                            key=lambda x: (x.get("species_id", ""), x.get("kegg_id", "")),
+                        ),
+                        "reaction_penalty": reaction_penalty,
+                        "scoring_skipped": True,
+                    },
+                )
+                recommendations.append(recommendation)
+                continue
 
             # Create a (substrates, products) pair in Counter form for similarity scoring
             cartesian_products = [(sub_counter, prod_counter)]

@@ -55,7 +55,9 @@ def annotate_single_model(
     database: str | DatabaseID = DatabaseID.CHEBI,
     tax_id: str = None,
     chunk_size: int = 50,
-    species_recommendations_df = None) -> Tuple[pd.DataFrame, Dict[str, Any]]:
+    species_recommendations_df = None,
+    evaluate_candidates: bool = False,
+) -> Tuple[pd.DataFrame, Dict[str, Any]]:
     """
     Annotate a single model that has no or limited existing annotations.
     
@@ -72,6 +74,9 @@ def annotate_single_model(
         database: Target database ("chebi", "ncbigene", "uniprot")
         tax_id: For gene/protein annotations, the organism's tax_id for species-specific lookup
         chunk_size: Size of chunks to split large models into (default: 50, None for no chunking)
+        evaluate_candidates: Only used for ``method="rulebased"`` (KEGG reaction workflow).
+            If True, run scoring + EM-like participant updates; if False (default), run
+            generation-only and skip evaluation steps.
         
     Returns:
         Tuple of (recommendations_df, metrics_dict)
@@ -174,6 +179,7 @@ def annotate_single_model(
             model_file,
             species_recommendations_df,
             existing_annotations=existing_annotations,
+            evaluate_candidates=bool(evaluate_candidates),
         )
 
 
@@ -467,14 +473,16 @@ def _generate_recommendation_table(model_file: str,
         for i, candidate in enumerate(rec.candidates):
             candidate_display = f"{database.upper()}:{candidate}"
             is_existing = candidate in existing_annotations.get(rec.id, [])
-            match_score = rec.match_score[i]
+            match_score = 0.0
+            if getattr(rec, "match_score", None) and i < len(rec.match_score):
+                match_score = rec.match_score[i]
 
             if is_existing:
                 status = 'original and predicted'
                 update_action = 'keep'
             else:
                 status = 'predicted only'
-                if i == 0 and match_score > 0.5:
+                if i == 0 and match_score is not None and float(match_score) > 0.5:
                     update_action = 'add'
                 else:
                     update_action = 'ignore'
