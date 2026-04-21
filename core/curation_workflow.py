@@ -14,7 +14,12 @@ import logging
 import warnings
 
 from utils.constants import DatabaseID, EntityType
-from core.model_info import find_species_with_chebi_annotations, find_species_with_annotations_and_qualifiers, find_species_with_ncbigene_annotations, find_species_with_uniprot_annotations, extract_model_info, format_prompt
+from core.model_info import (
+    find_species_with_annotations_and_qualifiers,
+    find_reactions_with_kegg_annotations,
+    extract_model_info,
+    format_prompt,
+)
 from core.llm_interface import get_system_prompt, query_llm, parse_llm_response
 from core.data_types import Recommendation
 from core.database_search import get_species_recommendations_direct, get_species_recommendations_rag, load_uniprot_label_dict, load_ncbigene_label_dict, load_chebi_label_dict
@@ -32,7 +37,11 @@ def curate_single_model(model_file: str,
                   entity_type: str | EntityType = EntityType.CHEMICAL,
                   database: str | DatabaseID = DatabaseID.CHEBI,
                   tax_id: str = None,
-                  chunk_size: int = 50) -> Tuple[pd.DataFrame, Dict[str, Any]]:
+                  chunk_size: int = 50,
+                  *,
+                  evaluate_candidates: bool = False,
+                  include_exchange_reactions: bool = False,
+                  ) -> Tuple[pd.DataFrame, Dict[str, Any]]:
     """
     This is the main function users will call to get curation recommendations
     for a model that already has existing annotations.
@@ -85,6 +94,9 @@ def curate_single_model(model_file: str,
     elif entity_type == EntityType.PROTEIN and database == DatabaseID.UNIPROT:
         existing_annotations, qualifier_annotations = find_species_with_annotations_and_qualifiers(model_file, DatabaseID.UNIPROT.value)
         logger.info(f"Found {len(existing_annotations)} entities with existing annotations")
+    elif entity_type == EntityType.REACTION and database == DatabaseID.KEGG:
+        existing_annotations, qualifier_annotations = find_reactions_with_kegg_annotations(model_file)
+        logger.info(f"Found {len(existing_annotations)} reactions with existing annotations")
     else:
         # Future: support other entity types and databases
         logger.warning(f"Entity type {entity_type.value} with database {database.value} not yet supported")
@@ -102,6 +114,27 @@ def curate_single_model(model_file: str,
     else:
         specs_to_evaluate = list(existing_annotations.keys())
         logger.info(f"Curation all {len(specs_to_evaluate)} entities")
+
+    # Special-case: curate reaction->KEGG using the rulebased workflow.
+    # This path is LLM-free; it uses existing species annotations (ChEBI, or
+    # KEGG-compound as a fallback) as the metabolite evidence for KEGG
+    # reaction matching. See :func:`curate_reactions_kegg_rulebased` for the
+    # full logic.
+    if entity_type == EntityType.REACTION and database == DatabaseID.KEGG:
+        from core.reaction.annotation_workflow import curate_reactions_kegg_rulebased
+
+        return curate_reactions_kegg_rulebased(
+            model_file,
+            existing_annotations,
+            qualifier_annotations,
+            specs_to_evaluate,
+            evaluate_candidates=bool(evaluate_candidates),
+            include_exchange_reactions=bool(include_exchange_reactions),
+            llm_model=llm_model,
+            top_k=top_k,
+            tax_id=tax_id,
+            start_time=start_time,
+        )
     
     # Extract model context
     logger.info(">>>Step 2: Extracting model context...<<<")

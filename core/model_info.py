@@ -18,6 +18,7 @@ from utils.constants import (
     ModelType,
     CHEBI_URI_PATTERNS,
     KEGG_REACTION_URI_PATTERNS,
+    KEGG_COMPOUND_URI_PATTERNS,
     NCBIGENE_URI_PATTERNS,
     UNIPROT_URI_PATTERNS,
 )
@@ -299,7 +300,8 @@ def find_species_with_annotations_and_qualifiers(model_file: str, database: str,
 
     Args:
         model_file: Path to the SBML model file
-        database: Database to search ("chebi", "ncbigene", "uniprot")
+        database: Database to search ("chebi", "ncbigene", "uniprot", "kegg").
+            For species, "kegg" means KEGG compound IDs (C#####).
         bqbiol_qualifiers: List of bqbiol qualifiers to extract (e.g. ['is', 'isVersionOf', 'hasPart'])
 
     Returns:
@@ -328,6 +330,8 @@ def find_species_with_annotations_and_qualifiers(model_file: str, database: str,
         uri_patterns = NCBIGENE_URI_PATTERNS
     elif database == DatabaseID.UNIPROT.value:
         uri_patterns = UNIPROT_URI_PATTERNS
+    elif database == DatabaseID.KEGG.value:
+        uri_patterns = KEGG_COMPOUND_URI_PATTERNS
     else:
         logger.warning(f"Database {database} not supported")
         return {}, {}
@@ -453,6 +457,7 @@ def find_species_with_uniprot_annotations(model_file: str, bqbiol_qualifiers: li
         )
 
     return uniprot_annotations
+
 
 def find_reactions_with_kegg_annotations(model_file: str, bqbiol_qualifiers: list = None) -> Dict[str, List[str]]:
     """

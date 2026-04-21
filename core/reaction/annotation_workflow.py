@@ -1,27 +1,32 @@
 import logging
+import time
 from collections import Counter
 from pathlib import Path
-from typing import Dict, List, NamedTuple, Optional
+from typing import Any, Dict, List, NamedTuple, Optional, Tuple, Union
 
 import pandas as pd
 
 from core.annotation_workflow import _generate_recommendation_table
+from core.database_search import _get_kegg_recommendations_rulebased
 from core.llm_interface import query_llm
 from core.model_info import (
     extract_model_info,
     extract_reactions_from_sbml,
+    find_species_with_annotations_and_qualifiers,
+    find_species_with_chebi_annotations,
     get_all_reaction_ids,
     map_reaction_ids_to_stoichiometry_strings,
 )
 
 from .amendment import LikelihoodCalculator, update_participant_likelihoods
+from .matching import map_reactions_to_kegg
 from .scoring import SimilarityCalculator
 from .amendment_config import CofactorConfig, ConvergenceConfig, MatchingConfig
 from .kegg_features import KEGGReactionFeatures, REF_KEGG_REACTION_FEATURES
 from .relaxation_workflow import map_reactions_to_kegg_with_relaxation
 from .species_probability import init_species_probs_from_dict
 from .utils import check_environment, extract_reaction_participants, map_chebi_to_kegg
-from utils.constants import EntityType
+from utils.constants import DatabaseID, EntityType
 
 logging.basicConfig(
     level=logging.INFO,
@@ -82,9 +87,11 @@ def run_kegg_annotation_workflow_rulebased(
 
     logger.info("\nSample of ChEBI to KEGG mapping:")
     if not high_score_recommendations.empty:
+        sample_cols = ["id", "display_name", "annotation", "KEGG_ID", "match_score"]
+        sample_cols = [c for c in sample_cols if c in high_score_recommendations.columns]
         logger.info(
             high_score_recommendations[
-                ["id", "display_name", "annotation", "KEGG_ID", "match_score"]
+                sample_cols
             ].head()
         )
 
@@ -331,3 +338,171 @@ def rank_kegg_annotations_with_llm(
     logger.info("LLM-ranked recommendations saved to %s", ranked_out_path)
 
     return ranked_df
+
+
+# ---------------------------------------------------------------------------
+# Reaction-KEGG curation entry point (no LLM)
+# ---------------------------------------------------------------------------
+
+def curate_reactions_kegg_rulebased(
+    model_file: str,
+    existing_annotations: Dict[str, List[str]],
+    qualifier_annotations: Dict[str, Dict[str, str]],
+    specs_to_evaluate: List[str],
+    *,
+    evaluate_candidates: bool = False,
+    include_exchange_reactions: bool = False,
+    llm_model: str = "",
+    top_k: Optional[int] = None,
+    tax_id: Optional[str] = None,
+    start_time: Optional[float] = None,
+) -> Union["AnnotationResult", Tuple[pd.DataFrame, Dict[str, Any]]]:
+    """Curate KEGG reaction annotations using the rule-based pipeline.
+
+    Tries species ChEBI annotations first (full ChEBI->KEGG mapping + ontology
+    relaxation via :func:`run_kegg_annotation_workflow_rulebased`). If no ChEBI
+    species annotations are present, falls back to species annotated directly
+    with KEGG compound IDs (no ontology relaxation), feeding the species->KEGG
+    table straight into :func:`_get_kegg_recommendations_rulebased`.
+
+    The result is filtered to ``specs_to_evaluate`` (the curation target set),
+    saved as ``<model_stem>_recommendations.csv``, and wrapped in an
+    :class:`AnnotationResult` with an empty LLM conversation (this path is
+    LLM-free).
+
+    Returns an :class:`AnnotationResult` on success, or an
+    ``(empty_df, {"error": ...})`` tuple on early-exit error cases (to match
+    the error-return convention of :func:`curate_single_model`).
+    """
+    from core.feedback import AnnotationResult, build_initial_conversation
+
+    if start_time is None:
+        start_time = time.time()
+
+    species_chebi = find_species_with_chebi_annotations(model_file)
+    kegg_recommendations_df: Optional[pd.DataFrame] = None
+
+    if species_chebi:
+        # Preferred path: ChEBI species annotations drive the full ChEBI->KEGG
+        # mapping + ontology relaxation pipeline.
+        rows = [
+            {"id": str(sid), "annotation": str(chebi), "match_score": 1.0}
+            for sid, chebis in species_chebi.items()
+            for chebi in chebis
+            if chebi
+        ]
+        species_recommendations_df = pd.DataFrame(rows)
+        if species_recommendations_df.empty:
+            return pd.DataFrame(), {"error": "Empty species ChEBI table"}
+
+        result = run_kegg_annotation_workflow_rulebased(
+            model_file=model_file,
+            recommendations_df=species_recommendations_df,
+            existing_annotations=existing_annotations,
+            evaluate_candidates=bool(evaluate_candidates),
+            include_exchange_reactions=bool(include_exchange_reactions),
+        )
+        if result is None:
+            return pd.DataFrame(), {"error": "Rulebased KEGG reaction curation failed"}
+        kegg_recommendations_df = result.kegg_recommendations
+    else:
+        # Fallback: species annotated with KEGG compound IDs directly.
+        # ChEBI-hierarchy relaxation isn't applicable, so we bypass
+        # ``map_reactions_to_kegg_with_relaxation`` and feed a direct
+        # species->KEGG mapping into the rule-based candidate generator.
+        species_kegg, _ = find_species_with_annotations_and_qualifiers(
+            model_file, DatabaseID.KEGG.value
+        )
+        if not species_kegg:
+            logger.warning(
+                "No existing ChEBI or KEGG-compound species annotations found; "
+                "cannot run rulebased KEGG reaction curation."
+            )
+            return pd.DataFrame(), {
+                "error": "No existing ChEBI or KEGG-compound species annotations found"
+            }
+
+        logger.info(
+            "No ChEBI species annotations found; falling back to existing KEGG "
+            "compound species annotations (%d species).",
+            len(species_kegg),
+        )
+
+        id_rows = [
+            {"id": str(sid), "KEGG_ID": str(kegg_id)}
+            for sid, kegg_ids in species_kegg.items()
+            for kegg_id in kegg_ids
+            if kegg_id
+        ]
+        id_df = pd.DataFrame(id_rows)
+        if id_df.empty:
+            return pd.DataFrame(), {"error": "Empty species KEGG compound table"}
+
+        reaction_ids = get_all_reaction_ids(model_file)
+        rxn_list, _ = extract_reactions_from_sbml(model_file, list(id_df["id"].unique()))
+
+        normalized_reactions = map_reactions_to_kegg(
+            rxn_list, reaction_ids, id_df, spectators=False
+        )
+
+        cofactor_config = CofactorConfig()
+        match_results = _get_kegg_recommendations_rulebased(
+            normalized_reactions,
+            cofactors_to_ignore=cofactor_config.kegg_ids,
+            top_k=None,
+            spectators=False,
+            evaluate_candidates=bool(evaluate_candidates),
+            include_exchange_reactions=bool(include_exchange_reactions),
+        )
+
+        rxn_model_info = extract_model_info(model_file, reaction_ids, EntityType.REACTION)
+        kegg_recommendations_df = _generate_recommendation_table(
+            model_file,
+            match_results,
+            existing_annotations,
+            rxn_model_info,
+            EntityType.REACTION.value,
+            DatabaseID.KEGG.value,
+            {},
+        )
+
+    # Filter output down to reactions that had existing KEGG annotations (curation target set).
+    kegg_recommendations_df = kegg_recommendations_df[
+        kegg_recommendations_df["id"].astype(str).isin(set(map(str, specs_to_evaluate)))
+    ].copy()
+
+    total_time = time.time() - start_time
+    has_prediction = kegg_recommendations_df["annotation"].astype(str).str.strip() != ""
+    metrics = {
+        "total_time": total_time,
+        "total_entities": len(specs_to_evaluate),
+        "entities_with_predictions": int(has_prediction.sum()),
+        "annotation_rate": float(has_prediction.mean() if len(kegg_recommendations_df) else 0.0),
+    }
+
+    csv_path = f"{Path(model_file).name}_recommendations.csv"
+    kegg_recommendations_df.to_csv(csv_path, index=False)
+    print(f"Recommendations saved to {csv_path}")
+    logger.info(
+        "Curation completed in %.2fs – %d recommendations",
+        total_time,
+        len(kegg_recommendations_df),
+    )
+
+    return AnnotationResult(
+        kegg_recommendations_df,
+        metrics,
+        model_file=model_file,
+        conversation_history=build_initial_conversation("", "", ""),
+        entities_to_evaluate=specs_to_evaluate,
+        entity_type=EntityType.REACTION,
+        database=DatabaseID.KEGG,
+        method="rulebased",
+        llm_model=llm_model,
+        top_k=top_k,
+        tax_id=tax_id,
+        existing_annotations=existing_annotations,
+        qualifier_annotations=qualifier_annotations,
+        model_info=extract_model_info(model_file, specs_to_evaluate, EntityType.REACTION),
+        csv_path=csv_path,
+    )

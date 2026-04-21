@@ -147,12 +147,14 @@ UNIPROT_URI_PATTERNS = [
 ]
 
 KEGG_REACTION_URI_PATTERNS = [
-    r'https?://identifiers\.org/kegg\.reaction:(R\d+)',
+    # identifiers.org supports both `prefix:ID` and `prefix/ID` forms
+    r'https?://identifiers\.org/kegg\.reaction[:/](R\d+)',
     r'urn:miriam:kegg\.reaction:(R\d+)'
 ]
 
 KEGG_COMPOUND_URI_PATTERNS = [
-    r'https?://identifiers\.org/kegg\.compound:(C\d+)',
+    # identifiers.org supports both `prefix:ID` and `prefix/ID` forms
+    r'https?://identifiers\.org/kegg\.compound[:/](C\d+)',
     r'urn:miriam:kegg\.compound:(C\d+)'
 ]
 
