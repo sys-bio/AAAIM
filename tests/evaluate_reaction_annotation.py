@@ -52,8 +52,9 @@ from utils.constants import DatabaseID  # noqa: E402
 # ---------------------------------------------------------------------------
 
 DEFAULT_MODEL_LIST = REPO_ROOT / "tests" / "kegg_annotated_files.txt"
-DEFAULT_PER_REACTION_OUT = REPO_ROOT / "tests" / "reaction_eval_per_reaction.csv"
-DEFAULT_SUMMARY_OUT = REPO_ROOT / "tests" / "reaction_eval_summary.csv"
+DEFAULT_RESULTS_DIR = (
+    REPO_ROOT / "tests" / "reaction_evaluation_results" / "curated_species"
+)
 
 # Rule-based generation-only is fast; set True for the slower scored/EM pipeline.
 EVALUATE_CANDIDATES = False
@@ -396,20 +397,35 @@ def main() -> int:
         help="Text file listing model paths (default: tests/kegg_annotated_files.txt).",
     )
     parser.add_argument(
+        "--results-dir",
+        type=Path,
+        default=DEFAULT_RESULTS_DIR,
+        help=(
+            "Base output directory. Each run writes into a new timestamped "
+            "subdirectory under this path."
+        ),
+    )
+    parser.add_argument(
         "--limit", type=int, default=None,
         help="Process only the first N models (for smoke testing).",
     )
     parser.add_argument(
-        "--per-reaction-out", type=Path, default=DEFAULT_PER_REACTION_OUT,
-        help="Output CSV path for per-reaction results.",
+        "--run-id",
+        type=str,
+        default=None,
+        help=(
+            "Optional run identifier (subdirectory name). Defaults to a timestamp, "
+            "e.g. 20260421_134455."
+        ),
     )
     parser.add_argument(
-        "--summary-out", type=Path, default=DEFAULT_SUMMARY_OUT,
-        help="Output CSV path for the aggregate summary.",
-    )
-    parser.add_argument(
-        "--work-dir", type=Path, default=REPO_ROOT / "tests" / "_eval_work",
-        help="Scratch directory for intermediate CSVs.",
+        "--work-dir",
+        type=Path,
+        default=None,
+        help=(
+            "Optional scratch directory for intermediate CSVs. Defaults to "
+            "<run_dir>/_work."
+        ),
     )
     args = parser.parse_args()
 
@@ -418,8 +434,17 @@ def main() -> int:
         model_paths = model_paths[: args.limit]
     logger.info("Evaluating %d models", len(model_paths))
 
-    work_dir = args.work_dir
+    run_id = args.run_id or time.strftime("%Y%m%d_%H%M%S")
+    run_dir = args.results_dir / run_id
+    run_dir.mkdir(parents=True, exist_ok=True)
+
+    per_reaction_out = run_dir / "per_reaction_results.csv"
+    summary_out = run_dir / "results_summary.csv"
+
+    work_dir = args.work_dir or (run_dir / "_work")
     work_dir.mkdir(parents=True, exist_ok=True)
+
+    logger.info("Run directory: %s", run_dir)
 
     logger.info("Loading KEGG reaction features (for BRITE/orthology grouping)...")
     features = load_kegg_reaction_features_dict()
@@ -434,21 +459,20 @@ def main() -> int:
             rows = []
         all_rows.extend(rows)
         # Incremental checkpoint so long runs don't lose progress.
-        args.per_reaction_out.parent.mkdir(parents=True, exist_ok=True)
-        pd.DataFrame(all_rows).to_csv(args.per_reaction_out, index=False)
+        pd.DataFrame(all_rows).to_csv(per_reaction_out, index=False)
         logger.info(
             "  [%d/%d] %s -> %d rows (%.1fs)",
             i, len(model_paths), model_file.name, len(rows), time.time() - t0,
         )
 
     per_reaction_df = pd.DataFrame(all_rows)
-    per_reaction_df.to_csv(args.per_reaction_out, index=False)
+    per_reaction_df.to_csv(per_reaction_out, index=False)
     logger.info("Per-reaction results written to %s (%d rows)",
-                args.per_reaction_out, len(per_reaction_df))
+                per_reaction_out, len(per_reaction_df))
 
     summary_df = summarize(per_reaction_df)
-    summary_df.to_csv(args.summary_out, index=False)
-    logger.info("Summary written to %s", args.summary_out)
+    summary_df.to_csv(summary_out, index=False)
+    logger.info("Summary written to %s", summary_out)
 
     print()
     print("=== Aggregate reaction-annotation evaluation ===")
