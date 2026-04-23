@@ -49,6 +49,8 @@ from typing import (
 
 import pandas as pd
 
+from .kegg_compound_ids import parse_kegg_compound_id
+
 # Baseline vs leave-one-ChEBI-out scores for ``detect_problematic_metabolites``.
 # Call with ``exclude_chebi=None`` for full reaction; with a ChEBI id to drop
 # that term's contribution on both sides of the fingerprint.
@@ -316,6 +318,11 @@ def chebi_best_kegg_meta_with_ontology_fallback(
     if not seed:
         return {}
 
+    # Species annotated with bare KEGG compound ids (instead of ChEBI): identity map.
+    kc = parse_kegg_compound_id(seed)
+    if kc:
+        return {kc: {"direction": "exact", "distance": 0}}
+
     # Strict mapping first (no ontology walk).
     direct_keggs = kegg_ids_for_chebi_term(seed, chebi_to_kegg)
     if direct_keggs:
@@ -414,6 +421,10 @@ def normalize_chebi(
     for whole reactions). For multi-metabolite ChEBI lists use
     ``normalize_reaction``.
     """
+    kc_id = parse_kegg_compound_id(chebi_id)
+    if kc_id:
+        return {kc_id}
+
     if level <= 0:
         return kegg_ids_for_chebi_term(chebi_id, chebi_to_kegg)
 

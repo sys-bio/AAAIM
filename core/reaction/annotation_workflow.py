@@ -96,20 +96,34 @@ def run_kegg_annotation_workflow_rulebased(
         )
 
     logger.info("Step 3: Begin rule-based matching to identify reactions")
-    reactions, _ = extract_reactions_from_sbml(
-        model_file,
-        list(high_score_recommendations["id"].unique()),
-    )
-    _, match_results, _species_relax_levels = map_reactions_to_kegg_with_relaxation(
-        reactions,
-        reaction_ids, 
-        high_score_recommendations,
-        spectators=False,
-        cofactors_to_ignore=cofactor_config.kegg_ids,
-        top_k=None,
-        evaluate_candidates=bool(evaluate_candidates),
-        include_exchange_reactions=bool(include_exchange_reactions),
-    )
+    # ``map_chebi_to_kegg`` returns an empty DataFrame with no columns when every
+    # species ChEBI term fails ChEBI→KEGG mapping; avoid ``df["id"]`` on schema-less
+    # frames.
+    if high_score_recommendations.empty or "id" not in high_score_recommendations.columns:
+        mapped_species_ids: List[str] = []
+        logger.warning(
+            "No high-score ChEBI→KEGG compound mappings (species evidence); "
+            "skipping relaxation-based reaction matching."
+        )
+    else:
+        mapped_species_ids = list(high_score_recommendations["id"].astype(str).unique())
+
+    reactions, _ = extract_reactions_from_sbml(model_file, mapped_species_ids)
+
+    if high_score_recommendations.empty or "id" not in high_score_recommendations.columns:
+        match_results: List[Any] = []
+        _species_relax_levels: Dict[str, int] = {}
+    else:
+        _, match_results, _species_relax_levels = map_reactions_to_kegg_with_relaxation(
+            reactions,
+            reaction_ids,
+            high_score_recommendations,
+            spectators=False,
+            cofactors_to_ignore=cofactor_config.kegg_ids,
+            top_k=None,
+            evaluate_candidates=bool(evaluate_candidates),
+            include_exchange_reactions=bool(include_exchange_reactions),
+        )
 
     kegg_recommendations_df = _generate_recommendation_table(
         model_file,
@@ -285,6 +299,7 @@ def rank_kegg_annotations_with_llm(
 
     reaction_ids = get_all_reaction_ids(model_file)
     id_to_equation = map_reaction_ids_to_stoichiometry_strings(model_file)
+    model_context = "\n".join(id_to_equation.get(rid, str(rid)) for rid in reaction_ids)
 
     ranked_reaction_ids: list[str] = []
     ranked_responses: list[list[str]] = []
@@ -299,6 +314,7 @@ def rank_kegg_annotations_with_llm(
             continue
 
         prompt = REACTION_ANNOTATION_RANKING_PROMPT.format(
+            model_context=model_context,
             model_reaction=model_reaction,
             reaction_annotation_choices=reaction_annotation_choices,
         )
