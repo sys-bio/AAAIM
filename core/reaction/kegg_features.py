@@ -7,13 +7,15 @@ import lzma
 import pickle
 import re
 from pathlib import Path
-from typing import Dict
+from typing import Dict, FrozenSet
 
 from utils.constants import REF_KEGG_REACTION_FEATURES
 
 from .kegg_definition import extract_classifications
 
 logger = logging.getLogger(__name__)
+
+_K_NUMBER_RE = re.compile(r"\bK\d{5,}\b")
 
 
 def _normalize_kegg_reaction_id(annotation) -> str:
@@ -82,6 +84,26 @@ class KEGGReactionFeatures:
             return ""
         raw = (self._features.get(kegg_id, {}) or {}).get("DEFINITION", "") or ""
         result = " ".join(ln.strip() for ln in str(raw).splitlines() if ln.strip())
+        self._cache[key] = result
+        return result
+
+    def get_orthology_k_numbers(self, annotation: str) -> FrozenSet[str]:
+        """KEGG Orthology K-numbers parsed from the reaction's ORTHOLOGY field.
+
+        Reactions sharing any K-number belong to the same KEGG-Orthology
+        (BRITE) group, used for collapsing near-duplicate candidates before
+        LLM ranking.
+        """
+        key = ("orthology_k_numbers", annotation)
+        cached = self._cache.get(key)
+        if cached is not None:
+            return cached
+        kegg_id = _normalize_kegg_reaction_id(annotation)
+        if not kegg_id:
+            self._cache[key] = frozenset()
+            return frozenset()
+        raw = (self._features.get(kegg_id, {}) or {}).get("ORTHOLOGY", "") or ""
+        result = frozenset(_K_NUMBER_RE.findall(str(raw)))
         self._cache[key] = result
         return result
 

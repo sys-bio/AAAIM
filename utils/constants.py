@@ -306,7 +306,7 @@ Instructions:
 - Order multiple IDs from best to worst match.
 - If none match, return: UNK
 - Interpret the reaction within the full model context (all other reactions). Prefer KEGG reactions that are biochemically consistent with the network (shared metabolites, cofactors, and plausible pathway context).
-- If multiple candidates differ only in specificity, rank the most general reaction highest (e.g., fructose > D-fructose > beta-D-fructose).
+- If multiple candidates differ only in specificity, rank the most specific reaction highest (e.g., beta-D-fructose > D-fructose > fructose).
 - Consider biochemical equivalence (e.g., isomers, implicit conversions like DHAP ↔ G3P).
 
 Output format:
@@ -322,8 +322,8 @@ R10049: Methylglyoxal + D-Fructose 1,6-bisphosphate <=> D-Glyceraldehyde 3-phosp
 R01070: beta-D-Fructose 1,6-bisphosphate <=> Glycerone phosphate + D-Glyceraldehyde 3-phosphate
 
 Output:
-R01068
 R01070
+R01068
 
 Now you try: 
 
@@ -335,4 +335,6 @@ Model reaction:
 
 Candidate KEGG reactions:
 {reaction_annotation_choices}
+
+Again, return the ID(s) ONLY. Do NOT explain your reasoning. Do NOT include any other text.
 """

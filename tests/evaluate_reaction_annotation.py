@@ -9,7 +9,10 @@ For every model listed in ``tests/kegg_annotated_files.txt`` this script:
    fallback) in the ``pd.read_csv``-compatible shape expected by
    ``annotate_model``.
 3. Runs ``annotate_model(method="rulebased", entity_type="reaction",
-   database="kegg")`` to produce candidate KEGG reaction IDs per reaction.
+   database="kegg")`` to produce candidate KEGG reaction IDs per reaction,
+   then (unless ``--skip-llm-ranking``) calls
+   ``rank_kegg_annotations_with_llm`` so ``<model>_recommendations_llm_ranked.csv``
+   is written alongside the rule-based CSV under the run ``_work/`` folder.
 4. Normalizes candidate ranks by KEGG-Orthology (BRITE) group — candidates
    that share at least one K-number are collapsed to the best (lowest) rank
    in their group.
@@ -30,6 +33,7 @@ import time
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
+from dotenv import load_dotenv
 import pandas as pd
 
 # Make repo root importable when running from tests/.
@@ -37,8 +41,12 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+# API keys (OPENAI_API_KEY, OPENROUTER_API_KEY, etc.) for LLM ranking.
+load_dotenv(REPO_ROOT / ".env")
+
 from core import annotate_model  # noqa: E402
 from core.database_search import load_kegg_reaction_features_dict  # noqa: E402
+from core.reaction.annotation_workflow import rank_kegg_annotations_with_llm  # noqa: E402
 from core.model_info import (  # noqa: E402
     find_reactions_with_kegg_annotations,
     find_species_with_annotations_and_qualifiers,
@@ -51,7 +59,7 @@ from utils.constants import DatabaseID  # noqa: E402
 # Configuration
 # ---------------------------------------------------------------------------
 
-DEFAULT_MODEL_LIST = REPO_ROOT / "tests" / "kegg_annotated_files.txt"
+DEFAULT_MODEL_LIST = REPO_ROOT / "tests" / "kegg_annotated_files-test.txt"
 DEFAULT_RESULTS_DIR = (
     REPO_ROOT / "tests" / "reaction_evaluation_results" / "curated_species"
 )
@@ -59,7 +67,12 @@ DEFAULT_RESULTS_DIR = (
 # Rule-based generation-only is fast; set True for the slower scored/EM pipeline.
 EVALUATE_CANDIDATES = False
 INCLUDE_EXCHANGE_REACTIONS = False
-LLM_MODEL = "Llama-3.3-70B-Instruct"  # ignored in rulebased/generation-only
+LLM_MODEL = "Llama-3.3-70B-Instruct"
+# LLM_MODEL = "Llama-4-Maverick-17B-128E-Instruct-FP8"
+# LLM_MODEL = "gpt-5-mini-2025-08-07"
+DEFAULT_LLM_TOP_K = 10
+# Default ``kegg_reaction_features.lzma`` is resolved under ``data/kegg/`` by the loader.
+DEFAULT_KEGG_FEATURES_FILE = "kegg_reaction_features.lzma"
 
 _K_NUMBER_RE = re.compile(r"\bK\d{5,}\b")
 
@@ -112,39 +125,70 @@ def extract_ground_truth_reactions(model_file: Path) -> Dict[str, str]:
 def build_species_recommendations_df(model_file: Path) -> Tuple[Optional[pd.DataFrame], str]:
     """Build the species->annotation table expected by the rulebased workflow.
 
-    Prefers ChEBI. Falls back to KEGG-compound IDs if no ChEBI annotations
-    exist. Returns ``(df, source)`` where ``source`` is ``"chebi"``,
-    ``"kegg_compound"``, or ``"none"``. A ``None`` DataFrame means the model
-    has no usable species annotations.
+    Per **species**, if ChEBI annotations exist they are used; otherwise KEGG
+    compound IDs are used for that species. A model may therefore mix rows
+    where some metabolites came from ChEBI and others from bare KEGG compounds.
+
+    The rule-based pipeline maps ChEBI→KEGG via reference tables and treats bare
+    KEGG compound ids (``C#####``) as identity mappings (see
+    :func:`core.reaction.utils.map_chebi_to_kegg` and
+    :mod:`core.reaction.kegg_compound_ids`).
+
+    Returns ``(df, source)`` where ``source`` is ``"chebi"`` (all rows from
+    ChEBI), ``"kegg_compound"`` (all from KEGG compounds), ``"mixed"``
+    (both conventions appear), or ``"none"``. A ``None`` DataFrame means no
+    species had usable annotations.
 
     The returned DataFrame has columns ``id, annotation, match_score`` and
     round-trips through ``pd.read_csv`` cleanly.
     """
     chebi = find_species_with_chebi_annotations(str(model_file))
-    if chebi:
-        rows = [
-            {"id": str(sid), "annotation": f"CHEBI:{str(cid).split(':', 1)[-1]}", "match_score": 1.0}
-            for sid, ids in chebi.items()
-            for cid in ids
-            if str(cid).strip()
-        ]
-        if rows:
-            return pd.DataFrame(rows), "chebi"
-
     kegg, _ = find_species_with_annotations_and_qualifiers(
         str(model_file), DatabaseID.KEGG.value
     )
-    if kegg:
-        rows = [
-            {"id": str(sid), "annotation": str(kid).strip(), "match_score": 1.0}
-            for sid, ids in kegg.items()
-            for kid in ids
-            if str(kid).strip()
-        ]
-        if rows:
-            return pd.DataFrame(rows), "kegg_compound"
 
-    return None, "none"
+    rows: List[Dict[str, object]] = []
+
+    all_ids = sorted(set(chebi.keys()) | set(kegg.keys()))
+    for sid in all_ids:
+        sid_str = str(sid)
+        ch_list = chebi.get(sid) if chebi else None
+        if ch_list:
+            for cid in ch_list:
+                if str(cid).strip():
+                    rows.append(
+                        {
+                            "id": sid_str,
+                            "annotation": f"CHEBI:{str(cid).split(':', 1)[-1]}",
+                            "match_score": 1.0,
+                        }
+                    )
+            continue
+
+        kg_list = kegg.get(sid) if kegg else None
+        if kg_list:
+            for kid in kg_list:
+                ks = str(kid).strip()
+                if ks:
+                    rows.append(
+                        {"id": sid_str, "annotation": ks, "match_score": 1.0}
+                    )
+
+    if not rows:
+        return None, "none"
+
+    species_with_chebi = {s for s in all_ids if chebi and chebi.get(s)}
+    species_kegg_only = {
+        s for s in all_ids if (not (chebi and chebi.get(s))) and kegg and kegg.get(s)
+    }
+    if species_with_chebi and species_kegg_only:
+        source = "mixed"
+    elif species_kegg_only and not species_with_chebi:
+        source = "kegg_compound"
+    else:
+        source = "chebi"
+
+    return pd.DataFrame(rows), source
 
 
 # ---------------------------------------------------------------------------
@@ -152,21 +196,32 @@ def build_species_recommendations_df(model_file: Path) -> Tuple[Optional[pd.Data
 # ---------------------------------------------------------------------------
 
 def run_annotation(
-    model_file: Path, species_df: pd.DataFrame, work_dir: Path
-) -> Optional[pd.DataFrame]:
-    """Run ``annotate_model`` and return the resulting recommendations DataFrame.
+    model_file: Path,
+    species_df: pd.DataFrame,
+    work_dir: Path,
+    *,
+    rank_with_llm: bool = True,
+    llm_model: str = LLM_MODEL,
+    llm_top_k: int = DEFAULT_LLM_TOP_K,
+    kegg_features_file: Optional[str] = None,
+) -> pd.DataFrame:
+    """Run ``annotate_model``, optionally LLM-re-rank candidates, return recommendations.
 
-    The species table is written to a CSV in ``work_dir`` so the call matches
-    the ``pd.read_csv``-based contract described in the task. ``annotate_model``
-    itself writes ``<modelname>_recommendations.csv`` in the current working
-    directory; we work in ``work_dir`` to keep those artifacts out of the repo
-    root.
+    ``annotate_model`` writes ``<model_basename>_recommendations.csv`` under
+    ``work_dir`` (cwd is switched there during the call).
+
+    When ``rank_with_llm`` is True, ``rank_kegg_annotations_with_llm`` reads that
+    CSV (enriched with definitions), queries the LLM per reaction, and writes
+    ``<same_stem>_llm_ranked.csv`` next to it — evaluation uses the ranked table.
     """
     species_csv = work_dir / f"{model_file.stem}__species.csv"
     species_df.to_csv(species_csv, index=False)
 
     # Round-trip through read_csv to satisfy the CSV-compatible contract.
-    reloaded = pd.read_csv(species_csv)
+    # utf-8-sig strips a UTF-8 BOM so the first column stays ``id``, not ``\ufeffid``.
+    reloaded = pd.read_csv(species_csv, encoding="utf-8-sig")
+
+    recommendations_csv = work_dir / f"{model_file.name}_recommendations.csv"
 
     cwd = Path.cwd()
     try:
@@ -175,7 +230,7 @@ def run_annotation(
         os.chdir(work_dir)
         result = annotate_model(
             model_file=str(model_file),
-            llm_model=LLM_MODEL,
+            llm_model=llm_model,
             method="rulebased",
             entity_type="reaction",
             database="kegg",
@@ -192,6 +247,29 @@ def run_annotation(
     df, _metrics = result
     if df is None or df.empty:
         return pd.DataFrame(columns=["id", "annotation"])
+
+    kff = kegg_features_file or DEFAULT_KEGG_FEATURES_FILE
+
+    if rank_with_llm:
+        try:
+            df = rank_kegg_annotations_with_llm(
+                model_file=str(model_file),
+                recommendations_df=df,
+                llm_model=llm_model,
+                kegg_features_file=kff,
+                top_k=llm_top_k,
+                csv_path=str(recommendations_csv),
+            )
+            ranked_path = recommendations_csv.with_name(
+                recommendations_csv.stem + "_llm_ranked.csv"
+            )
+            logger.info("LLM-ranked table: %s", ranked_path)
+        except Exception as exc:
+            logger.warning(
+                "LLM ranking failed (%s); evaluating with rule-based candidate order.",
+                exc,
+            )
+
     return df
 
 
@@ -266,6 +344,39 @@ def normalize_ranks_by_brite(
     return {c: ranks[find(c)] for c in ranks}
 
 
+def build_normalized_rank_rows(
+    model_id: str,
+    reaction_id: str,
+    ordered_candidates: List[str],
+    features: Dict[str, Dict],
+) -> List[Dict[str, object]]:
+    """Per-candidate raw vs BRITE-normalized ranks for one reaction."""
+    normalized = normalize_ranks_by_brite(ordered_candidates, features)
+    # normalized only includes first-seen candidates (deduped).
+    rows: List[Dict[str, object]] = []
+    for cand, norm_rank in normalized.items():
+        # raw rank is the first-seen rank in ordered_candidates (1-indexed)
+        raw_rank = None
+        for i, c in enumerate(ordered_candidates, start=1):
+            if c == cand:
+                raw_rank = i
+                break
+        k_numbers = sorted(_k_numbers_for(cand, features))
+        rows.append(
+            {
+                "model_id": model_id,
+                "reaction_id": reaction_id,
+                "candidate_kegg": cand,
+                "raw_rank": int(raw_rank) if raw_rank is not None else None,
+                "normalized_rank": int(norm_rank),
+                "k_numbers": ";".join(k_numbers),
+            }
+        )
+    # Stable output ordering by raw rank then candidate id.
+    rows.sort(key=lambda r: ((r.get("raw_rank") or 10**9), str(r.get("candidate_kegg") or "")))
+    return rows
+
+
 # ---------------------------------------------------------------------------
 # 6. Per-reaction scoring
 # ---------------------------------------------------------------------------
@@ -276,7 +387,7 @@ def evaluate_model(
     recommendations_df: pd.DataFrame,
     features: Dict[str, Dict],
     species_source: str,
-) -> List[Dict]:
+) -> Tuple[List[Dict], List[Dict]]:
     """Produce one evaluation row per ground-truth reaction.
 
     ``species_source == "none"`` means the model had no usable species
@@ -286,16 +397,35 @@ def evaluate_model(
     """
     model_id = model_file.stem
     by_reaction: Dict[str, List[str]] = {}
+    has_brite_col = (
+        not recommendations_df.empty
+        and "brite_group_members" in recommendations_df.columns
+    )
     if not recommendations_df.empty and {"id", "annotation"}.issubset(recommendations_df.columns):
         for rxn_id, group in recommendations_df.groupby("id", sort=False):
             cands: List[str] = []
-            for ann in group["annotation"].tolist():
-                bare = _strip_kegg_prefix(ann)
+            for _, row in group.iterrows():
+                bare = _strip_kegg_prefix(row.get("annotation", ""))
                 if bare and bare not in cands:
                     cands.append(bare)
+                # Pre-LLM filtering shows the LLM only the BRITE-orthology
+                # representative; the file lists co-members in
+                # `brite_group_members`. Expand them here at the same rank slot
+                # so a ground-truth that is a non-representative member is still
+                # counted as found (normalize_ranks_by_brite below collapses
+                # them anyway, but this also handles candidates whose K-numbers
+                # are absent from the loaded features).
+                if has_brite_col:
+                    raw = row.get("brite_group_members", "")
+                    if isinstance(raw, str) and raw.strip():
+                        for m in raw.split(";"):
+                            m = m.strip()
+                            if m and m not in cands:
+                                cands.append(m)
             by_reaction[str(rxn_id)] = cands
 
     rows: List[Dict] = []
+    rank_rows: List[Dict] = []
     for rxn_id, truth in ground_truth.items():
         cands = by_reaction.get(rxn_id, [])
         num_candidates = len(cands)
@@ -306,6 +436,9 @@ def evaluate_model(
             failure_reason = "no_candidates"
         else:
             failure_reason = ""
+
+        if num_candidates:
+            rank_rows.extend(build_normalized_rank_rows(model_id, rxn_id, cands, features))
 
         if num_candidates and truth in cands:
             normalized = normalize_ranks_by_brite(cands, features)
@@ -330,7 +463,7 @@ def evaluate_model(
                 "failure_reason": failure_reason if not found else "",
             }
         )
-    return rows
+    return rows, rank_rows
 
 
 # ---------------------------------------------------------------------------
@@ -361,7 +494,13 @@ def summarize(per_reaction: pd.DataFrame) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 
 def process_model(
-    model_file: Path, features: Dict[str, Dict], work_dir: Path
+    model_file: Path,
+    features: Dict[str, Dict],
+    work_dir: Path,
+    *,
+    rank_with_llm: bool = True,
+    llm_top_k: int = DEFAULT_LLM_TOP_K,
+    kegg_features_file: Optional[str] = None,
 ) -> List[Dict]:
     if not model_file.exists():
         logger.warning("Model not found, skipping: %s", model_file)
@@ -378,19 +517,31 @@ def process_model(
     species_df, source = build_species_recommendations_df(model_file)
     if species_df is None:
         logger.warning("  no species annotations; all reactions -> mapping failure")
-        return evaluate_model(model_file, ground_truth, pd.DataFrame(), features, "none")
+        rxn_rows, rank_rows = evaluate_model(model_file, ground_truth, pd.DataFrame(), features, "none")
+        process_model._last_rank_rows = rank_rows  # type: ignore[attr-defined]
+        return rxn_rows
     logger.info("  species annotations: %d rows (source=%s)", len(species_df), source)
 
     try:
-        rec_df = run_annotation(model_file, species_df, work_dir)
+        rec_df = run_annotation(
+            model_file,
+            species_df,
+            work_dir,
+            rank_with_llm=rank_with_llm,
+            llm_top_k=llm_top_k,
+            kegg_features_file=kegg_features_file,
+        )
     except Exception as exc:  # pragma: no cover — pipeline failures surface here
         logger.exception("  annotate_model failed: %s", exc)
         rec_df = pd.DataFrame(columns=["id", "annotation"])
 
-    return evaluate_model(model_file, ground_truth, rec_df, features, source)
+    rxn_rows, rank_rows = evaluate_model(model_file, ground_truth, rec_df, features, source)
+    process_model._last_rank_rows = rank_rows  # type: ignore[attr-defined]
+    return rxn_rows
 
 
 def main() -> int:
+    wall_start = time.time()
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument(
         "--model-list", type=Path, default=DEFAULT_MODEL_LIST,
@@ -427,19 +578,61 @@ def main() -> int:
             "<run_dir>/_work."
         ),
     )
+    parser.add_argument(
+        "--skip-llm-ranking",
+        action="store_true",
+        help=(
+            "Do not call rank_kegg_annotations_with_llm; evaluate using only the "
+            "rule-based <model>_recommendations.csv order (faster, no LLM API)."
+        ),
+    )
+    parser.add_argument(
+        "--llm-top-k",
+        type=int,
+        default=DEFAULT_LLM_TOP_K,
+        help="Max KEGG reaction ids to keep per reaction from the LLM (default: 10).",
+    )
+    parser.add_argument(
+        "--kegg-features-file",
+        type=str,
+        default=None,
+        help=(
+            "Path or filename for kegg_reaction_features.lzma (default: "
+            f"{DEFAULT_KEGG_FEATURES_FILE}, resolved under data/kegg/)."
+        ),
+    )
     args = parser.parse_args()
+
+    def _safe_slug(s: str) -> str:
+        # Windows-safe-ish: avoid characters that break paths.
+        return (
+            str(s)
+            .strip()
+            .replace(" ", "_")
+            .replace("/", "-")
+            .replace("\\", "-")
+            .replace(":", "-")
+            .replace("|", "-")
+            .replace("*", "-")
+            .replace("?", "")
+            .replace("\"", "")
+            .replace("<", "(")
+            .replace(">", ")")
+        )
 
     model_paths = load_model_paths(args.model_list)
     if args.limit is not None:
         model_paths = model_paths[: args.limit]
     logger.info("Evaluating %d models", len(model_paths))
 
-    run_id = args.run_id or time.strftime("%Y%m%d_%H%M%S")
+    timestamp = time.strftime("%Y%m%d_%H%M%S")
+    run_id = args.run_id or f"{_safe_slug(LLM_MODEL)}-{timestamp}"
     run_dir = args.results_dir / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
 
     per_reaction_out = run_dir / "per_reaction_results.csv"
     summary_out = run_dir / "results_summary.csv"
+    normalized_ranks_out = run_dir / "normalized_candidate_ranks.csv"
 
     work_dir = args.work_dir or (run_dir / "_work")
     work_dir.mkdir(parents=True, exist_ok=True)
@@ -449,15 +642,29 @@ def main() -> int:
     logger.info("Loading KEGG reaction features (for BRITE/orthology grouping)...")
     features = load_kegg_reaction_features_dict()
 
+    rank_with_llm = not bool(args.skip_llm_ranking)
+    if not rank_with_llm:
+        logger.info("LLM re-ranking disabled (--skip-llm-ranking).")
+
     all_rows: List[Dict] = []
+    all_rank_rows: List[Dict] = []
     for i, model_file in enumerate(model_paths, start=1):
         t0 = time.time()
         try:
-            rows = process_model(model_file, features, work_dir)
+            rows = process_model(
+                model_file,
+                features,
+                work_dir,
+                rank_with_llm=rank_with_llm,
+                llm_top_k=int(args.llm_top_k),
+                kegg_features_file=args.kegg_features_file,
+            )
         except Exception as exc:  # pragma: no cover
             logger.exception("  model %s failed: %s", model_file, exc)
             rows = []
         all_rows.extend(rows)
+        # Collected inside process_model via evaluate_model.
+        all_rank_rows.extend(getattr(process_model, "_last_rank_rows", []) or [])
         # Incremental checkpoint so long runs don't lose progress.
         pd.DataFrame(all_rows).to_csv(per_reaction_out, index=False)
         logger.info(
@@ -470,6 +677,14 @@ def main() -> int:
     logger.info("Per-reaction results written to %s (%d rows)",
                 per_reaction_out, len(per_reaction_df))
 
+    rank_df = pd.DataFrame(all_rank_rows)
+    rank_df.to_csv(normalized_ranks_out, index=False)
+    logger.info(
+        "Normalized candidate ranks written to %s (%d rows)",
+        normalized_ranks_out,
+        len(rank_df),
+    )
+
     summary_df = summarize(per_reaction_df)
     summary_df.to_csv(summary_out, index=False)
     logger.info("Summary written to %s", summary_out)
@@ -478,6 +693,9 @@ def main() -> int:
     print("=== Aggregate reaction-annotation evaluation ===")
     if len(per_reaction_df) == 0:
         print("No reactions evaluated.")
+        total_s = time.time() - wall_start
+        print(f"\nTotal runtime: {total_s:.1f}s")
+        logger.info("Total runtime: %.1fs", total_s)
         return 0
     s = summary_df.iloc[0]
     print(f"Total reactions evaluated : {int(s['total_reactions'])}")
@@ -492,6 +710,10 @@ def main() -> int:
         print("\nFailure reasons:")
         for reason, count in reason_counts.items():
             print(f"  {reason}: {count}")
+
+    total_s = time.time() - wall_start
+    print(f"\nTotal runtime: {total_s:.1f}s")
+    logger.info("Total runtime: %.1fs", total_s)
 
     return 0
 

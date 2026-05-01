@@ -2,7 +2,7 @@ import logging
 import time
 from collections import Counter
 from pathlib import Path
-from typing import Any, Dict, List, NamedTuple, Optional, Tuple, Union
+from typing import Any, Dict, FrozenSet, List, NamedTuple, Optional, Tuple, Union
 
 import pandas as pd
 
@@ -221,13 +221,22 @@ def _strip_kegg_prefix(raw) -> str:
     return s
 
 
-def _build_reaction_annotation_choices(sub_df: pd.DataFrame) -> str:
-    """Build a newline-separated string of ``R#####: <definition>`` for an LLM prompt."""
+def _build_reaction_annotation_choices(
+    sub_df: pd.DataFrame,
+    allowed_kegg_ids: Optional[set] = None,
+) -> str:
+    """Build a newline-separated string of ``R#####: <definition>`` for an LLM prompt.
+
+    If *allowed_kegg_ids* is given, only candidates whose KEGG id is in that set
+    are emitted (used to restrict the prompt to BRITE-orthology representatives).
+    """
     lines: list[str] = []
     seen: set[tuple[str, str]] = set()
     for _, row in sub_df.iterrows():
         rid = _strip_kegg_prefix(row.get("annotation", ""))
         if not rid:
+            continue
+        if allowed_kegg_ids is not None and rid not in allowed_kegg_ids:
             continue
         definition = row.get("reaction_definition", "")
         if definition is None or (isinstance(definition, float) and definition != definition):
@@ -242,6 +251,87 @@ def _build_reaction_annotation_choices(sub_df: pd.DataFrame) -> str:
     return "\n".join(lines)
 
 
+def _group_candidates_by_orthology(
+    ordered_kegg_ids: List[str],
+    kegg_features: "KEGGReactionFeatures",
+) -> Tuple[Dict[str, List[str]], List[Tuple[str, List[str]]]]:
+    """Cluster KEGG reaction candidates that share any KEGG-Orthology K-number.
+
+    The clustering is the transitive closure over shared K-numbers (union-find),
+    so e.g. R00299, R01600 and R01786 — which all share K00844/K00845 — collapse
+    into one group even if individual pairs only share a subset of K-numbers.
+
+    Within each group the **representative** is the candidate with the *fewest*
+    K-numbers (i.e. the most specific KEGG entry — substrate/stereo-specific
+    variants typically list fewer enzyme variants than the umbrella entry).
+    Ties are broken by first-seen order, which reflects the rule-based pipeline's
+    own ranking.
+
+    Args:
+        ordered_kegg_ids: Bare KEGG reaction ids (e.g. ``["R00299", "R01600"]``)
+            in display order. Order matters for tie-breaking.
+        kegg_features: Loaded :class:`KEGGReactionFeatures` instance.
+
+    Returns:
+        ``(kid_to_members, representatives_in_order)`` where:
+            * ``kid_to_members[kid]`` is the ordered member list of *kid*'s group.
+            * ``representatives_in_order`` is a list of
+              ``(representative_kid, member_list)`` tuples, ordered by the first
+              appearance of each representative in the input.
+    """
+    if not ordered_kegg_ids:
+        return {}, []
+
+    kid_to_k_numbers: Dict[str, FrozenSet[str]] = {
+        kid: kegg_features.get_orthology_k_numbers(f"KEGG:{kid}")
+        for kid in ordered_kegg_ids
+    }
+
+    parent: Dict[str, str] = {c: c for c in ordered_kegg_ids}
+
+    def _find(x: str) -> str:
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    def _union(a: str, b: str) -> None:
+        ra, rb = _find(a), _find(b)
+        if ra != rb:
+            parent[rb] = ra
+
+    k_to_candidates: Dict[str, List[str]] = {}
+    for cand in ordered_kegg_ids:
+        for k in kid_to_k_numbers[cand]:
+            k_to_candidates.setdefault(k, []).append(cand)
+    for cands_in_k in k_to_candidates.values():
+        for other in cands_in_k[1:]:
+            _union(cands_in_k[0], other)
+
+    group_to_members: Dict[str, List[str]] = {}
+    for c in ordered_kegg_ids:
+        root = _find(c)
+        group_to_members.setdefault(root, []).append(c)
+
+    kid_to_members: Dict[str, List[str]] = {}
+    rep_to_members: Dict[str, List[str]] = {}
+    rep_first_idx: Dict[str, int] = {}
+    first_idx = {kid: i for i, kid in enumerate(ordered_kegg_ids)}
+
+    for members in group_to_members.values():
+        # Most specific = fewest K-numbers; tie-break by first-seen order.
+        rep = min(members, key=lambda m: (len(kid_to_k_numbers[m]), first_idx[m]))
+        for m in members:
+            kid_to_members[m] = members
+        rep_to_members[rep] = members
+        rep_first_idx[rep] = first_idx[rep]
+
+    representatives_in_order = sorted(
+        rep_to_members.items(), key=lambda kv: rep_first_idx[kv[0]]
+    )
+    return kid_to_members, representatives_in_order
+
+
 def rank_kegg_annotations_with_llm(
     model_file: str,
     recommendations_df: pd.DataFrame,
@@ -249,6 +339,7 @@ def rank_kegg_annotations_with_llm(
     kegg_features_file: str = REF_KEGG_REACTION_FEATURES,
     top_k: int = 10,
     csv_path: Optional[str] = None,
+    only_rank_meaningful = True,
 ) -> pd.DataFrame:
     """Re-rank KEGG reaction candidates using an LLM and return a filtered DataFrame.
 
@@ -293,13 +384,78 @@ def rank_kegg_annotations_with_llm(
 
     result_df["reaction_definition"] = result_df["annotation"].map(kegg_features.get_definition)
 
+    # Cluster candidates by shared KEGG-Orthology K-numbers, per reaction.
+    # Each row gets a `brite_group_members` column listing every KEGG id in its
+    # cluster (semicolon-separated). Only the cluster representative — the most
+    # specific entry (fewest K-numbers, tie-broken by rule-based rank) — will be
+    # shown to the LLM.
+    brite_kid_to_members: Dict[str, Dict[str, List[str]]] = {}
+    brite_representatives: Dict[str, List[str]] = {}
+    for reaction_id, sub in result_df.groupby("id", sort=False):
+        ordered: List[str] = []
+        seen_kids: set = set()
+        for ann in sub["annotation"].tolist():
+            kid = _strip_kegg_prefix(ann)
+            if kid and kid not in seen_kids:
+                ordered.append(kid)
+                seen_kids.add(kid)
+        kid_to_members, reps_in_order = _group_candidates_by_orthology(
+            ordered, kegg_features
+        )
+        brite_kid_to_members[str(reaction_id)] = kid_to_members
+        brite_representatives[str(reaction_id)] = [rep for rep, _ in reps_in_order]
+
+    def _members_for_row(row: pd.Series) -> str:
+        rxn_id = str(row.get("id", ""))
+        kid = _strip_kegg_prefix(row.get("annotation", ""))
+        if not kid:
+            return ""
+        members = brite_kid_to_members.get(rxn_id, {}).get(kid, [kid])
+        return ";".join(members)
+
+    result_df["brite_group_members"] = result_df.apply(_members_for_row, axis=1)
+
     if csv_path is not None:
         result_df.to_csv(csv_path, index=False)
-        logger.info("%s updated with KEGG DEFINITIONs", csv_path)
+        logger.info(
+            "%s updated with KEGG DEFINITIONs and BRITE orthology groups",
+            csv_path,
+        )
 
     reaction_ids = get_all_reaction_ids(model_file)
     id_to_equation = map_reaction_ids_to_stoichiometry_strings(model_file)
     model_context = "\n".join(id_to_equation.get(rid, str(rid)) for rid in reaction_ids)
+
+    if only_rank_meaningful:
+        prompt = f"""
+        You are evaluating whether a biochemical reaction network uses biologically meaningful reaction and species names.
+
+Criteria for YES:
+
+* At least some species names correspond to recognizable biochemical entities, metabolites, macromolecules, or chemical abbreviations (e.g. ATP, ADP, IMP, DNA, PRPP, glucose).
+* Reactions resemble plausible biochemical transformations or transport/degradation processes.
+* The model appears interpretable by a human familiar with biochemistry.
+
+Criteria for NO:
+
+* Species and reactions are anonymous placeholders or opaque IDs (e.g. s1, c03493, x103, R13842, etc.) with no biochemical meaning.
+* Reactions cannot be interpreted biologically from the names alone.
+* The network appears synthetically generated or unlabeled.
+
+Return ONLY:
+TRUE
+or
+FALSE
+
+Model:
+{model_context}
+
+        """
+        response_text = query_llm(prompt, model=llm_model, entity_type=EntityType.REACTION)
+        logger.info("LLM meaningful evaluation: %s", response_text)
+        meaningful = response_text.strip().lower() == "true"
+    else:
+        meaningful = False
 
     ranked_reaction_ids: list[str] = []
     ranked_responses: list[list[str]] = []
@@ -309,15 +465,31 @@ def rank_kegg_annotations_with_llm(
         logger.info("Ranking candidates for %s", model_reaction)
 
         sub = result_df[result_df["id"] == reaction_id]
-        reaction_annotation_choices = _build_reaction_annotation_choices(sub)
+        # Only show the LLM the BRITE-orthology representatives. Non-representative
+        # members are kept out of the prompt to shrink the candidate set, but are
+        # still recorded per row in `brite_group_members` for the final output.
+        rep_ids = set(brite_representatives.get(str(reaction_id), []))
+        reaction_annotation_choices = _build_reaction_annotation_choices(
+            sub, allowed_kegg_ids=rep_ids if rep_ids else None
+        )
         if not reaction_annotation_choices.strip():
             continue
 
-        prompt = REACTION_ANNOTATION_RANKING_PROMPT.format(
-            model_context=model_context,
-            model_reaction=model_reaction,
-            reaction_annotation_choices=reaction_annotation_choices,
-        )
+        if meaningful:
+            logger.info("Model is meaningful")
+            prompt = REACTION_ANNOTATION_RANKING_PROMPT.format(
+                model_context=model_context,
+                model_reaction=model_reaction,
+                reaction_annotation_choices=reaction_annotation_choices,
+            )
+        else:
+            logger.info("Model is NOT meaningful")
+            prompt = REACTION_ANNOTATION_RANKING_PROMPT.format(
+                model_context="",
+                model_reaction=model_reaction,
+                reaction_annotation_choices=reaction_annotation_choices,
+            )
+
 
         response_text = query_llm(prompt, model=llm_model, entity_type=EntityType.REACTION)
         response_lines = [ln.strip() for ln in (response_text or "").splitlines() if ln.strip()]
