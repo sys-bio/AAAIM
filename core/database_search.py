@@ -40,6 +40,7 @@ from utils.constants import (
     REF_KEGG_PARSED_REACTIONS
     ) # from utils.constants import SYNONYM_WORDS_TO_REMOVE
 from core.data_types import Recommendation, ReactionRecommendation
+from core.model_info import reaction_stoichiometry_lhs_rhs_species
 from core.reaction.hierarchy_relaxation import (
     expand_chebi_with_metadata,
     iter_chebi_for_species,
@@ -963,35 +964,6 @@ def _get_kegg_recommendations_rulebased(
             }
         return out
 
-    def _species_ids_from_equation_side(side_str: str) -> set:
-        out = set()
-        side = str(side_str or "").strip()
-        if not side:
-            return out
-        for term in side.split("+"):
-            parts = term.strip().split()
-            if not parts:
-                continue
-            if len(parts) == 1:
-                met = parts[0]
-            else:
-                try:
-                    float(parts[0])
-                except ValueError:
-                    met = term.strip()
-                else:
-                    met = parts[-1]
-            met = met.lstrip("$").strip()
-            if met:
-                out.add(met)
-        return out
-
-    def _reaction_species_ids(reaction_equation: str) -> Tuple[set, set]:
-        if "=>" in reaction_equation or "->" in reaction_equation:
-            lhs, rhs = re.split(r"=>|->", reaction_equation, maxsplit=1)
-            return _species_ids_from_equation_side(lhs), _species_ids_from_equation_side(rhs)
-        return set(), set()
-
     def _expand_one_species(chebi_id: str, depth: int) -> List[Dict[str, Any]]:
         if not chebi_id or parent_map is None or chebi_to_kegg is None:
             return []
@@ -1105,7 +1077,7 @@ def _get_kegg_recommendations_rulebased(
 
             # --- Stage 1A: species-level relaxation (independent trigger) ---
             # Trigger: species has no KEGG candidates (including dropped/unmapped species).
-            lhs_species, rhs_species = _reaction_species_ids(reaction_str)
+            lhs_species, rhs_species = reaction_stoichiometry_lhs_rhs_species(reaction_str)
 
             reaction_class = "exchange" if (not lhs_species or not rhs_species) else "internal"
             if reaction_class == "exchange" and not include_exchange_reactions:

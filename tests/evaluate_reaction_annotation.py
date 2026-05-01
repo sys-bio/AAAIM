@@ -48,6 +48,7 @@ from core import annotate_model  # noqa: E402
 from core.database_search import load_kegg_reaction_features_dict  # noqa: E402
 from core.reaction.annotation_workflow import rank_kegg_annotations_with_llm  # noqa: E402
 from core.model_info import (  # noqa: E402
+    exchange_constraint_skipped_reaction_ids,
     find_reactions_with_kegg_annotations,
     find_species_with_annotations_and_qualifiers,
     find_species_with_chebi_annotations,
@@ -387,6 +388,7 @@ def evaluate_model(
     recommendations_df: pd.DataFrame,
     features: Dict[str, Dict],
     species_source: str,
+    ssx_reaction_ids: Optional[Set[str]] = None,
 ) -> Tuple[List[Dict], List[Dict]]:
     """Produce one evaluation row per ground-truth reaction.
 
@@ -394,6 +396,16 @@ def evaluate_model(
     annotations, so every reaction is scored as a mapping failure (no
     candidates). Otherwise reactions missing from ``recommendations_df`` are
     counted as having zero candidates.
+
+    ``failure_reason`` when ``found`` is False (empty when ``found`` is True):
+
+    - ``no_species_annotations`` — no usable species annotations for the model.
+    - ``SSX`` — source/sink/exchange-style stoichiometry (empty LHS or RHS) while
+      ``INCLUDE_EXCHANGE_REACTIONS`` is False; no rule-based candidates and not
+      sent to the LLM ranker, same as the annotation pipeline.
+    - ``no_candidates`` — zero candidates for other reasons (e.g. no KEGG match).
+    - ``""`` — candidates existed but the ground-truth KEGG id was not among them
+      (aggregate reporting labels these as ``not_in_candidates``).
     """
     model_id = model_file.stem
     by_reaction: Dict[str, List[str]] = {}
@@ -424,6 +436,8 @@ def evaluate_model(
                                 cands.append(m)
             by_reaction[str(rxn_id)] = cands
 
+    ssx_ids = ssx_reaction_ids or set()
+
     rows: List[Dict] = []
     rank_rows: List[Dict] = []
     for rxn_id, truth in ground_truth.items():
@@ -432,6 +446,8 @@ def evaluate_model(
 
         if species_source == "none":
             failure_reason = "no_species_annotations"
+        elif num_candidates == 0 and rxn_id in ssx_ids:
+            failure_reason = "SSX"
         elif num_candidates == 0:
             failure_reason = "no_candidates"
         else:
@@ -514,10 +530,19 @@ def process_model(
         return []
     logger.info("  %d ground-truth reactions", len(ground_truth))
 
+    ssx_ids: Set[str] = set()
+    if not INCLUDE_EXCHANGE_REACTIONS:
+        try:
+            ssx_ids = exchange_constraint_skipped_reaction_ids(str(model_file))
+        except Exception as exc:  # pragma: no cover — antimony / SBML edge cases
+            logger.warning("  could not classify SSX reactions: %s", exc)
+
     species_df, source = build_species_recommendations_df(model_file)
     if species_df is None:
         logger.warning("  no species annotations; all reactions -> mapping failure")
-        rxn_rows, rank_rows = evaluate_model(model_file, ground_truth, pd.DataFrame(), features, "none")
+        rxn_rows, rank_rows = evaluate_model(
+            model_file, ground_truth, pd.DataFrame(), features, "none", ssx_ids
+        )
         process_model._last_rank_rows = rank_rows  # type: ignore[attr-defined]
         return rxn_rows
     logger.info("  species annotations: %d rows (source=%s)", len(species_df), source)
@@ -535,7 +560,9 @@ def process_model(
         logger.exception("  annotate_model failed: %s", exc)
         rec_df = pd.DataFrame(columns=["id", "annotation"])
 
-    rxn_rows, rank_rows = evaluate_model(model_file, ground_truth, rec_df, features, source)
+    rxn_rows, rank_rows = evaluate_model(
+        model_file, ground_truth, rec_df, features, source, ssx_ids
+    )
     process_model._last_rank_rows = rank_rows  # type: ignore[attr-defined]
     return rxn_rows
 

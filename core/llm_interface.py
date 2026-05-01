@@ -29,6 +29,71 @@ SYSTEM_PROMPT = SYSTEM_PROMPT_AUTO
 
 logger = logging.getLogger(__name__)
 
+def _extract_llama_completion_message_text(response: Any) -> str:
+    """Extract text from the Llama API client response shape used in this project.
+
+    Historically, the Llama API path returned a response with a ``completion_message``
+    dict containing ``{\"content\": {\"text\": \"...\"}}``.
+    """
+    if response is None or not hasattr(response, "completion_message"):
+        return ""
+    try:
+        cm = response.completion_message
+        if isinstance(cm, dict):
+            content = cm.get("content") or {}
+            if isinstance(content, dict):
+                text = content.get("text")
+                return text if isinstance(text, str) else ""
+    except Exception:
+        return ""
+    return ""
+
+def _extract_chat_text(response: Any) -> str:
+    """Best-effort extraction of assistant text from an OpenAI chat completion response.
+
+    Supports:
+    - OpenAI python client: response.choices[0].message.content (string or list of parts)
+    - Fallbacks for dict-like responses (rare in this codebase)
+    """
+    if response is None:
+        return ""
+
+    # OpenAI python client objects
+    if hasattr(response, "choices") and getattr(response, "choices"):
+        choice0 = response.choices[0]
+        msg = getattr(choice0, "message", None)
+        content = getattr(msg, "content", None) if msg is not None else None
+        if content is None:
+            return ""
+        if isinstance(content, str):
+            return content
+        # Some clients return a list of content parts; join text-like fields.
+        if isinstance(content, list):
+            parts: list[str] = []
+            for p in content:
+                if isinstance(p, str):
+                    parts.append(p)
+                elif isinstance(p, dict):
+                    # Common shape: {"type":"text","text":"..."}
+                    t = p.get("text")
+                    if isinstance(t, str):
+                        parts.append(t)
+            return "\n".join(x for x in parts if x.strip())
+        return str(content)
+
+    # Dict-like fallback
+    if isinstance(response, dict):
+        try:
+            choices = response.get("choices") or []
+            if choices:
+                msg = choices[0].get("message") or {}
+                content = msg.get("content")
+                return content if isinstance(content, str) else str(content or "")
+        except Exception:
+            return ""
+
+    return ""
+
 
 def get_system_prompt(entity_type: str | EntityType = EntityType.CHEMICAL) -> str:
     """
@@ -200,11 +265,28 @@ def query_llm(prompt: str, developer_prompt: str = None, model=GPT_MINI_MODEL, e
     else:
         raise ValueError(f"Model {model} not supported")
     
-    if response is not None and hasattr(response, "completion_message") and "content" in response.completion_message and "text" in response.completion_message["content"]:
-        return response.completion_message["content"]["text"]
+    # Keep legacy Llama response extraction, but use the standard OpenAI structure
+    # for non-Llama models.
+    if str(model).startswith("Llama"):
+        text = _extract_llama_completion_message_text(response) or _extract_chat_text(response)
     else:
+        text = _extract_chat_text(response)
+    if text and str(text).strip():
+        return str(text)
+
+    # Empty content: log minimal response metadata for debugging.
+    try:
+        finish_reason = None
+        if response is not None and hasattr(response, "choices") and response.choices:
+            finish_reason = getattr(response.choices[0], "finish_reason", None)
+        logger.warning(
+            "No response or empty response from LLM (model=%s, finish_reason=%s).",
+            model,
+            finish_reason,
+        )
+    except Exception:
         print("No response or empty response from LLM.")
-        return ""
+    return ""
 
 def query_llm_with_history(messages: list, model: str = GPT_MINI_MODEL,
                            max_retries: int = DEFAULT_MAX_RETRIES,
@@ -254,11 +336,14 @@ def query_llm_with_history(messages: list, model: str = GPT_MINI_MODEL,
     else:
         raise ValueError(f"Model {model} not supported")
 
-    if response is not None and hasattr(response, "choices") and response.choices:        
-        return response.choices[0].message.content
+    if str(model).startswith("Llama"):
+        text = _extract_llama_completion_message_text(response) or _extract_chat_text(response)
     else:
-        print("No response or empty response from LLM. L379")
-        return ""
+        text = _extract_chat_text(response)
+    if text and str(text).strip():
+        return str(text)
+    logger.warning("No response or empty response from LLM (model=%s).", model)
+    return ""
 
 
 def parse_llm_response(

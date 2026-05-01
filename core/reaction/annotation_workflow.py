@@ -227,8 +227,9 @@ def _build_reaction_annotation_choices(
 ) -> str:
     """Build a newline-separated string of ``R#####: <definition>`` for an LLM prompt.
 
-    If *allowed_kegg_ids* is given, only candidates whose KEGG id is in that set
-    are emitted (used to restrict the prompt to BRITE-orthology representatives).
+    If *allowed_kegg_ids* is given, only candidates whose KEGG id is in that
+    set are emitted (used to restrict the prompt to the IUBMB-leaf
+    representatives selected by :func:`_group_candidates_by_iubmb`).
     """
     lines: list[str] = []
     seen: set[tuple[str, str]] = set()
@@ -251,40 +252,62 @@ def _build_reaction_annotation_choices(
     return "\n".join(lines)
 
 
-def _group_candidates_by_orthology(
+def _group_candidates_by_iubmb(
     ordered_kegg_ids: List[str],
     kegg_features: "KEGGReactionFeatures",
-) -> Tuple[Dict[str, List[str]], List[Tuple[str, List[str]]]]:
-    """Cluster KEGG reaction candidates that share any KEGG-Orthology K-number.
+) -> Tuple[Dict[str, List[str]], Dict[str, str], List[str]]:
+    """Cluster KEGG reaction candidates by their IUBMB BRITE hierarchy.
 
-    The clustering is the transitive closure over shared K-numbers (union-find),
-    so e.g. R00299, R01600 and R01786 — which all share K00844/K00845 — collapse
-    into one group even if individual pairs only share a subset of K-numbers.
+    Uses the per-reaction IUBMB hierarchy block (``[BR:br08202]``) to figure
+    out which candidates collapse together. Two candidates land in the same
+    group when their (ancestors ∪ {self}) sets overlap — a transitive closure
+    that connects e.g. ``R00299`` and ``R01786`` because both list ``R02848``
+    as their IUBMB parent under EC 2.7.1.1.
 
-    Within each group the **representative** is the candidate with the *fewest*
-    K-numbers (i.e. the most specific KEGG entry — substrate/stereo-specific
-    variants typically list fewer enzyme variants than the umbrella entry).
-    Ties are broken by first-seen order, which reflects the rule-based pipeline's
-    own ranking.
+    For each group we report:
+        * ``brite_group_members`` — every candidate that ended up in the group,
+          in input order. Members are the only candidates that share an IUBMB
+          subtree; reactions that lack a ``br08202`` block (e.g. ``R10049``)
+          stay in their own singleton group and are never collapsed with
+          biochemically distinct neighbors.
+        * ``brite_iubmb_parent`` — the topmost element of the group's
+          ancestor closure. This is whichever R-number sits above every other
+          chain element when we read each candidate's IUBMB subblock as a
+          root-to-self chain. The parent may itself be a candidate
+          (e.g. ``R01068`` for the aldolase pair) or a non-candidate
+          (e.g. ``R02848`` for the hexokinase pair when only ``R00299``
+          and ``R01786`` are in the input).
+        * Leaves — candidates that no other candidate has as an ancestor.
+          These are the "most specific" entries in the candidate set and are
+          the ones we hand to the LLM.
 
     Args:
         ordered_kegg_ids: Bare KEGG reaction ids (e.g. ``["R00299", "R01600"]``)
-            in display order. Order matters for tie-breaking.
+            in display order. Order matters for stable output ordering only.
         kegg_features: Loaded :class:`KEGGReactionFeatures` instance.
 
     Returns:
-        ``(kid_to_members, representatives_in_order)`` where:
-            * ``kid_to_members[kid]`` is the ordered member list of *kid*'s group.
-            * ``representatives_in_order`` is a list of
-              ``(representative_kid, member_list)`` tuples, ordered by the first
-              appearance of each representative in the input.
+        ``(kid_to_members, kid_to_iubmb_parent, leaves_in_order)``:
+            * ``kid_to_members[kid]`` — ordered member list of *kid*'s group.
+            * ``kid_to_iubmb_parent[kid]`` — IUBMB parent R-number for *kid*'s
+              group (empty string if neither *kid* nor any group-mate has a
+              ``br08202`` block).
+            * ``leaves_in_order`` — group leaves across all groups, in input
+              order. These are the candidates the LLM should rank.
     """
     if not ordered_kegg_ids:
-        return {}, []
+        return {}, {}, []
 
-    kid_to_k_numbers: Dict[str, FrozenSet[str]] = {
-        kid: kegg_features.get_orthology_k_numbers(f"KEGG:{kid}")
+    cand_to_chains: Dict[str, Tuple[Tuple[str, ...], ...]] = {
+        kid: kegg_features.get_iubmb_chains(f"KEGG:{kid}")
         for kid in ordered_kegg_ids
+    }
+    cand_to_ancestors: Dict[str, FrozenSet[str]] = {
+        kid: kegg_features.get_iubmb_ancestors(f"KEGG:{kid}")
+        for kid in ordered_kegg_ids
+    }
+    cand_to_chain_set: Dict[str, set] = {
+        kid: set(cand_to_ancestors[kid]) | {kid} for kid in ordered_kegg_ids
     }
 
     parent: Dict[str, str] = {c: c for c in ordered_kegg_ids}
@@ -300,13 +323,14 @@ def _group_candidates_by_orthology(
         if ra != rb:
             parent[rb] = ra
 
-    k_to_candidates: Dict[str, List[str]] = {}
-    for cand in ordered_kegg_ids:
-        for k in kid_to_k_numbers[cand]:
-            k_to_candidates.setdefault(k, []).append(cand)
-    for cands_in_k in k_to_candidates.values():
-        for other in cands_in_k[1:]:
-            _union(cands_in_k[0], other)
+    elem_to_candidates: Dict[str, List[str]] = {}
+    for kid in ordered_kegg_ids:
+        for elem in cand_to_chain_set[kid]:
+            elem_to_candidates.setdefault(elem, []).append(kid)
+    for cands_sharing in elem_to_candidates.values():
+        first = cands_sharing[0]
+        for other in cands_sharing[1:]:
+            _union(first, other)
 
     group_to_members: Dict[str, List[str]] = {}
     for c in ordered_kegg_ids:
@@ -314,22 +338,53 @@ def _group_candidates_by_orthology(
         group_to_members.setdefault(root, []).append(c)
 
     kid_to_members: Dict[str, List[str]] = {}
-    rep_to_members: Dict[str, List[str]] = {}
-    rep_first_idx: Dict[str, int] = {}
+    kid_to_iubmb_parent: Dict[str, str] = {}
+    is_leaf: Dict[str, bool] = {c: True for c in ordered_kegg_ids}
+
     first_idx = {kid: i for i, kid in enumerate(ordered_kegg_ids)}
 
     for members in group_to_members.values():
-        # Most specific = fewest K-numbers; tie-break by first-seen order.
-        rep = min(members, key=lambda m: (len(kid_to_k_numbers[m]), first_idx[m]))
+        # Build the closure of every chain element seen across this group's
+        # candidates and an `ancestor_of` relation (a, b) meaning "a appears
+        # before b in some candidate's IUBMB chain".
+        closure: set = set()
+        ancestor_of: set = set()
+        elem_first_seen: Dict[str, int] = {}
         for m in members:
-            kid_to_members[m] = members
-        rep_to_members[rep] = members
-        rep_first_idx[rep] = first_idx[rep]
+            for chain_idx, chain in enumerate(cand_to_chains[m]):
+                for pos, node in enumerate(chain):
+                    if node not in elem_first_seen:
+                        elem_first_seen[node] = (
+                            first_idx[m] * 10000 + chain_idx * 100 + pos
+                        )
+                    closure.add(node)
+                    for descendant in chain[pos + 1 :]:
+                        ancestor_of.add((node, descendant))
+            closure.add(m)
 
-    representatives_in_order = sorted(
-        rep_to_members.items(), key=lambda kv: rep_first_idx[kv[0]]
-    )
-    return kid_to_members, representatives_in_order
+        # IUBMB parent: a closure element with no element above it in the
+        # closure. Tie-break by earliest appearance across all chains.
+        topmost = [
+            e for e in closure
+            if not any((other, e) in ancestor_of for other in closure if other != e)
+        ]
+        if topmost:
+            iubmb_parent = min(topmost, key=lambda e: elem_first_seen.get(e, 10**9))
+        else:
+            iubmb_parent = ""
+
+        # Leaves: candidates that no other candidate has as an ancestor.
+        ancestor_union: set = set()
+        for m in members:
+            ancestor_union |= cand_to_ancestors[m]
+        for m in members:
+            if m in ancestor_union:
+                is_leaf[m] = False
+            kid_to_members[m] = members
+            kid_to_iubmb_parent[m] = iubmb_parent
+
+    leaves_in_order = [c for c in ordered_kegg_ids if is_leaf.get(c, True)]
+    return kid_to_members, kid_to_iubmb_parent, leaves_in_order
 
 
 def rank_kegg_annotations_with_llm(
@@ -344,9 +399,13 @@ def rank_kegg_annotations_with_llm(
     """Re-rank KEGG reaction candidates using an LLM and return a filtered DataFrame.
 
     For each reaction in *model_file* that has candidate annotations in
-    *recommendations_df*, build a ranking prompt with the KEGG DEFINITION text
-    and ask the LLM to select the best-matching KEGG ids.  The returned
-    DataFrame contains only the LLM-selected rows, in order of appearance.
+    *recommendations_df*, candidates are first collapsed by their IUBMB
+    BRITE hierarchy: variants like ``R00299`` (D-Glucose hexokinase) and
+    ``R01786`` (alpha-D-Glucose hexokinase) — both children of IUBMB parent
+    ``R02848`` — are grouped together and only the leaves of each group
+    (the most-specific entries in the candidate set) are sent to the LLM.
+    The LLM is asked to select the best-matching KEGG ids, and the returned
+    DataFrame contains the LLM-selected rows in ranked order.
 
     Args:
         model_file: Path to the SBML model file.
@@ -356,14 +415,18 @@ def rank_kegg_annotations_with_llm(
         kegg_features_file: Path to the KEGG reaction features lzma file.
         top_k: Maximum number of KEGG ids to keep per reaction from the LLM
             response.
-        csv_path: If given, the enriched recommendations table (with the
-            ``reaction_definition`` column) is saved to this path before
-            ranking begins.
+        csv_path: If given, the enriched recommendations table — augmented
+            with ``reaction_definition``, ``brite_group_members`` (every
+            candidate folded into the same IUBMB group, semicolon-joined)
+            and ``brite_iubmb_parent`` (the topmost IUBMB ancestor of the
+            group) — is saved to this path before ranking begins.
 
     Returns:
         A DataFrame filtered to the LLM-selected KEGG ids, in ranked order.
-        A copy is also saved to ``<csv_stem>_llm_ranked.csv`` next to
-        *csv_path* (or next to *model_file* if *csv_path* is not provided).
+        Carries the ``reaction_definition``, ``brite_group_members`` and
+        ``brite_iubmb_parent`` columns. A copy is also saved to
+        ``<csv_stem>_llm_ranked.csv`` next to *csv_path* (or next to
+        *model_file* if *csv_path* is not provided).
     """
     from utils.constants import REACTION_ANNOTATION_RANKING_PROMPT
 
@@ -384,13 +447,19 @@ def rank_kegg_annotations_with_llm(
 
     result_df["reaction_definition"] = result_df["annotation"].map(kegg_features.get_definition)
 
-    # Cluster candidates by shared KEGG-Orthology K-numbers, per reaction.
-    # Each row gets a `brite_group_members` column listing every KEGG id in its
-    # cluster (semicolon-separated). Only the cluster representative — the most
-    # specific entry (fewest K-numbers, tie-broken by rule-based rank) — will be
-    # shown to the LLM.
+    # Cluster candidates by their IUBMB BRITE hierarchy (``[BR:br08202]``),
+    # per reaction. Each row gets:
+    #   * ``brite_group_members`` — semicolon-joined list of every candidate
+    #     in the IUBMB group (so the user can see which KEGG entries we
+    #     collapsed away before LLM ranking).
+    #   * ``brite_iubmb_parent`` — the topmost IUBMB ancestor of the group
+    #     (e.g. ``R02848`` for hexokinase variants, ``R01068`` for the
+    #     aldolase pair). Empty if no group member has a ``br08202`` block.
+    # Only the leaves of each IUBMB group — the most-specific entries the
+    # rule-based pipeline produced — are forwarded to the LLM.
     brite_kid_to_members: Dict[str, Dict[str, List[str]]] = {}
-    brite_representatives: Dict[str, List[str]] = {}
+    brite_kid_to_parent: Dict[str, Dict[str, str]] = {}
+    brite_leaves: Dict[str, List[str]] = {}
     for reaction_id, sub in result_df.groupby("id", sort=False):
         ordered: List[str] = []
         seen_kids: set = set()
@@ -399,11 +468,12 @@ def rank_kegg_annotations_with_llm(
             if kid and kid not in seen_kids:
                 ordered.append(kid)
                 seen_kids.add(kid)
-        kid_to_members, reps_in_order = _group_candidates_by_orthology(
+        kid_to_members, kid_to_parent, leaves = _group_candidates_by_iubmb(
             ordered, kegg_features
         )
         brite_kid_to_members[str(reaction_id)] = kid_to_members
-        brite_representatives[str(reaction_id)] = [rep for rep, _ in reps_in_order]
+        brite_kid_to_parent[str(reaction_id)] = kid_to_parent
+        brite_leaves[str(reaction_id)] = leaves
 
     def _members_for_row(row: pd.Series) -> str:
         rxn_id = str(row.get("id", ""))
@@ -413,12 +483,20 @@ def rank_kegg_annotations_with_llm(
         members = brite_kid_to_members.get(rxn_id, {}).get(kid, [kid])
         return ";".join(members)
 
+    def _parent_for_row(row: pd.Series) -> str:
+        rxn_id = str(row.get("id", ""))
+        kid = _strip_kegg_prefix(row.get("annotation", ""))
+        if not kid:
+            return ""
+        return brite_kid_to_parent.get(rxn_id, {}).get(kid, "")
+
     result_df["brite_group_members"] = result_df.apply(_members_for_row, axis=1)
+    result_df["brite_iubmb_parent"] = result_df.apply(_parent_for_row, axis=1)
 
     if csv_path is not None:
         result_df.to_csv(csv_path, index=False)
         logger.info(
-            "%s updated with KEGG DEFINITIONs and BRITE orthology groups",
+            "%s updated with KEGG DEFINITIONs and BRITE IUBMB hierarchy columns",
             csv_path,
         )
 
@@ -465,12 +543,13 @@ Model:
         logger.info("Ranking candidates for %s", model_reaction)
 
         sub = result_df[result_df["id"] == reaction_id]
-        # Only show the LLM the BRITE-orthology representatives. Non-representative
-        # members are kept out of the prompt to shrink the candidate set, but are
-        # still recorded per row in `brite_group_members` for the final output.
-        rep_ids = set(brite_representatives.get(str(reaction_id), []))
+        # Show the LLM only the IUBMB-leaf candidates — the most-specific
+        # entries within each BRITE group. Non-leaf members (e.g. R00299 when
+        # R01786 is also a candidate) are still recorded per row in
+        # `brite_group_members` for the final output.
+        leaf_ids = set(brite_leaves.get(str(reaction_id), []))
         reaction_annotation_choices = _build_reaction_annotation_choices(
-            sub, allowed_kegg_ids=rep_ids if rep_ids else None
+            sub, allowed_kegg_ids=leaf_ids if leaf_ids else None
         )
         if not reaction_annotation_choices.strip():
             continue
