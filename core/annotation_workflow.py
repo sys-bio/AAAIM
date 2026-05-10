@@ -58,6 +58,7 @@ def annotate_single_model(
     species_recommendations_df = None,
     evaluate_candidates: bool = False,
     include_exchange_reactions: bool = False,
+    cofactor_config=None,
 ) -> Tuple[pd.DataFrame, Dict[str, Any]]:
     """
     Annotate a single model that has no or limited existing annotations.
@@ -81,6 +82,11 @@ def annotate_single_model(
         include_exchange_reactions: Only used for ``method="rulebased"``.
             If True, generate reaction candidates for exchange reactions (empty LHS or RHS).
             If False (default), exchange reactions are retained but returned with no candidates.
+        cofactor_config: Only used for ``method="rulebased"``. Instance of
+            ``CofactorConfig`` controlling which metabolites are ignored during
+            reaction matching. Pass ``CofactorConfig(cofactors_dict={})`` to
+            disable cofactor removal entirely. ``None`` uses the default set
+            (H2O, H+, ATP, NAD+, etc.).
         
     Returns:
         Tuple of (recommendations_df, metrics_dict)
@@ -185,6 +191,7 @@ def annotate_single_model(
             existing_annotations=existing_annotations,
             evaluate_candidates=bool(evaluate_candidates),
             include_exchange_reactions=bool(include_exchange_reactions),
+            cofactor_config=cofactor_config,
         )
 
 

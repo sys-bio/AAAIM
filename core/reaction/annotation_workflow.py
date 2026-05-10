@@ -555,14 +555,12 @@ Model:
             continue
 
         if meaningful:
-            logger.info("Model is meaningful")
             prompt = REACTION_ANNOTATION_RANKING_PROMPT.format(
                 model_context=model_context,
                 model_reaction=model_reaction,
                 reaction_annotation_choices=reaction_annotation_choices,
             )
         else:
-            logger.info("Model is NOT meaningful")
             prompt = REACTION_ANNOTATION_RANKING_PROMPT.format(
                 model_context="",
                 model_reaction=model_reaction,
