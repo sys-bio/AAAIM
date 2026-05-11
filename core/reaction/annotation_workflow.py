@@ -405,9 +405,7 @@ def rank_kegg_annotations_with_llm(
     ``R02848`` — are grouped together and only the leaves of each group
     (the most-specific entries in the candidate set) are sent to the LLM.
     The LLM is asked to select the best-matching KEGG ids, and the returned
-    DataFrame contains the LLM-selected rows in ranked order. If only one
-    IUBMB-leaf candidate remains for a reaction, that id is kept without an
-    LLM call.
+    DataFrame contains the LLM-selected rows in ranked order.
 
     Args:
         model_file: Path to the SBML model file.
@@ -426,11 +424,9 @@ def rank_kegg_annotations_with_llm(
     Returns:
         A DataFrame filtered to the LLM-selected KEGG ids, in ranked order.
         Carries the ``reaction_definition``, ``brite_group_members`` and
-        ``brite_iubmb_parent`` columns, plus ``llm_ranking_note`` (empty when
-        the row came from an LLM ranking call; ``"single candidate--not ranked"``
-        when the sole IUBMB-leaf candidate was kept without calling the LLM).
-        A copy is also saved to ``<csv_stem>_llm_ranked.csv`` next to *csv_path*
-        (or next to *model_file* if *csv_path* is not provided).
+        ``brite_iubmb_parent`` columns. A copy is also saved to
+        ``<csv_stem>_llm_ranked.csv`` next to *csv_path* (or next to
+        *model_file* if *csv_path* is not provided).
     """
     from utils.constants import REACTION_ANNOTATION_RANKING_PROMPT
 
@@ -445,11 +441,9 @@ def rank_kegg_annotations_with_llm(
 
         base = Path(csv_path) if csv_path else Path(f"{Path(model_file).name}_recommendations")
         ranked_out_path = base.with_name(base.stem + "_llm_ranked.csv")
-        early_ranked = result_df.iloc[0:0].copy()
-        early_ranked["llm_ranking_note"] = pd.Series(dtype="object")
-        early_ranked.to_csv(ranked_out_path, index=False)
+        result_df.iloc[0:0].copy().to_csv(ranked_out_path, index=False)
         logger.info("LLM-ranked recommendations saved to %s", ranked_out_path)
-        return early_ranked
+        return result_df.iloc[0:0].copy()
 
     result_df["reaction_definition"] = result_df["annotation"].map(kegg_features.get_definition)
 
@@ -543,7 +537,6 @@ Model:
 
     ranked_reaction_ids: list[str] = []
     ranked_responses: list[list[str]] = []
-    ranked_llm_notes: list[str] = []
 
     for reaction_id in reaction_ids:
         model_reaction = id_to_equation.get(reaction_id, reaction_id)
@@ -561,23 +554,6 @@ Model:
         if not reaction_annotation_choices.strip():
             continue
 
-        choice_lines = [
-            ln.strip() for ln in reaction_annotation_choices.splitlines() if ln.strip()
-        ]
-        if len(choice_lines) == 1:
-            kegg_only = choice_lines[0].split(":", 1)[0].strip()
-            if not kegg_only or kegg_only.upper() == "UNK":
-                continue
-            ranked_reaction_ids.append(reaction_id)
-            ranked_responses.append([kegg_only][:top_k])
-            ranked_llm_notes.append("single candidate--not ranked")
-            logger.info(
-                "Skipping LLM ranking for %s: single candidate %s",
-                reaction_id,
-                kegg_only,
-            )
-            continue
-
         if meaningful:
             prompt = REACTION_ANNOTATION_RANKING_PROMPT.format(
                 model_context=model_context,
@@ -591,6 +567,7 @@ Model:
                 reaction_annotation_choices=reaction_annotation_choices,
             )
 
+
         response_text = query_llm(prompt, model=llm_model, entity_type=EntityType.REACTION)
         response_lines = [ln.strip() for ln in (response_text or "").splitlines() if ln.strip()]
 
@@ -601,14 +578,11 @@ Model:
 
         ranked_reaction_ids.append(reaction_id)
         ranked_responses.append(response_lines[:top_k])
-        ranked_llm_notes.append("")
 
     logger.info("Collected LLM rankings for %d reactions", len(ranked_responses))
 
     ranked_rows: list[pd.DataFrame] = []
-    for reaction_id, kegg_ids, llm_note in zip(
-        ranked_reaction_ids, ranked_responses, ranked_llm_notes
-    ):
+    for reaction_id, kegg_ids in zip(ranked_reaction_ids, ranked_responses):
         for kegg_id in kegg_ids:
             if not kegg_id:
                 continue
@@ -619,13 +593,9 @@ Model:
             rows = result_df[mask]
             if rows.empty:
                 continue
-            one = rows.iloc[[0]].copy()
-            one["llm_ranking_note"] = llm_note
-            ranked_rows.append(one)
+            ranked_rows.append(rows.iloc[[0]])
 
     ranked_df = pd.concat(ranked_rows, ignore_index=True) if ranked_rows else result_df.iloc[0:0].copy()
-    if "llm_ranking_note" not in ranked_df.columns:
-        ranked_df["llm_ranking_note"] = ""
 
     base = Path(csv_path) if csv_path else Path(f"{Path(model_file).name}_recommendations")
     ranked_out_path = base.with_name(base.stem + "_llm_ranked.csv")
