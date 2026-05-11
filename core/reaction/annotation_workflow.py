@@ -537,6 +537,7 @@ Model:
 
     ranked_reaction_ids: list[str] = []
     ranked_responses: list[list[str]] = []
+    ranked_llm_notes: list[str] = []
 
     for reaction_id in reaction_ids:
         model_reaction = id_to_equation.get(reaction_id, reaction_id)
@@ -568,21 +569,39 @@ Model:
             )
 
 
+        # If there's only one candidate, still ask the LLM; if it rejects (UNK),
+        # keep the single candidate anyway with a note.
+        choice_lines = [
+            ln.strip() for ln in reaction_annotation_choices.splitlines() if ln.strip()
+        ]
+        single_candidate_kegg: str = ""
+        if len(choice_lines) == 1:
+            single_candidate_kegg = choice_lines[0].split(":", 1)[0].strip()
+
         response_text = query_llm(prompt, model=llm_model, entity_type=EntityType.REACTION)
-        response_lines = [ln.strip() for ln in (response_text or "").splitlines() if ln.strip()]
+        response_lines = [
+            ln.strip() for ln in (response_text or "").splitlines() if ln.strip()
+        ]
 
         logger.info("%s -> %s", reaction_id, response_lines)
 
         if len(response_lines) == 1 and response_lines[0] == "UNK":
+            if single_candidate_kegg and single_candidate_kegg.upper() != "UNK":
+                ranked_reaction_ids.append(reaction_id)
+                ranked_responses.append([single_candidate_kegg][:top_k])
+                ranked_llm_notes.append("LLM does not approve of this annotation")
             continue
 
         ranked_reaction_ids.append(reaction_id)
         ranked_responses.append(response_lines[:top_k])
+        ranked_llm_notes.append("")
 
     logger.info("Collected LLM rankings for %d reactions", len(ranked_responses))
 
     ranked_rows: list[pd.DataFrame] = []
-    for reaction_id, kegg_ids in zip(ranked_reaction_ids, ranked_responses):
+    for reaction_id, kegg_ids, llm_note in zip(
+        ranked_reaction_ids, ranked_responses, ranked_llm_notes
+    ):
         for kegg_id in kegg_ids:
             if not kegg_id:
                 continue
@@ -593,9 +612,13 @@ Model:
             rows = result_df[mask]
             if rows.empty:
                 continue
-            ranked_rows.append(rows.iloc[[0]])
+            one = rows.iloc[[0]].copy()
+            one["llm_ranking_note"] = llm_note
+            ranked_rows.append(one)
 
     ranked_df = pd.concat(ranked_rows, ignore_index=True) if ranked_rows else result_df.iloc[0:0].copy()
+    if "llm_ranking_note" not in ranked_df.columns:
+        ranked_df["llm_ranking_note"] = ""
 
     base = Path(csv_path) if csv_path else Path(f"{Path(model_file).name}_recommendations")
     ranked_out_path = base.with_name(base.stem + "_llm_ranked.csv")
