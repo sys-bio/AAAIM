@@ -5,23 +5,42 @@ Handles database searches for annotation candidates.
 Currently supports ChEBI, extensible to other databases.
 """
 
+from pathlib import Path
+import sys
+
+# Make repo root importable when this module is executed directly (e.g. via debugger)
+# or when the working directory is not the repository root.
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+
 import os
 import re
 import lzma
 import pickle
 from typing import Any, Dict, List, Mapping, Optional, Set, Tuple
-from pathlib import Path
 from dataclasses import dataclass
 import logging
 from collections import Counter, defaultdict
 from itertools import product
-import sys
 import chromadb
 from chromadb.utils import embedding_functions
-from utils.constants import REF_CHEBI2LABEL, REF_NAMES2CHEBI, REF_NCBIGENE2LABEL, REF_NAMES2NCBIGENE, REF_UNIPROT2LABEL, REF_NAMES2UNIPROT
-from utils.constants import REF_CHEBI2KEGG_COMPOUND, REF_KEGG_REACTION2NAME, REF_KEGG2EC, REF_KEGG_REACTION_FEATURES, REF_KEGG_PARSED_REACTIONS
-# from utils.constants import SYNONYM_WORDS_TO_REMOVE
+from utils.constants import (
+    REF_CHEBI2LABEL, 
+    REF_NAMES2CHEBI, 
+    REF_NCBIGENE2LABEL, 
+    REF_NAMES2NCBIGENE, 
+    REF_UNIPROT2LABEL, 
+    REF_NAMES2UNIPROT,
+    REF_CHEBI2KEGG_COMPOUND, 
+    REF_KEGG_REACTION2NAME, 
+    REF_KEGG2EC, 
+    REF_KEGG_REACTION_FEATURES, 
+    REF_KEGG_PARSED_REACTIONS
+    ) # from utils.constants import SYNONYM_WORDS_TO_REMOVE
 from core.data_types import Recommendation, ReactionRecommendation
+from core.model_info import reaction_stoichiometry_lhs_rhs_species
 from core.reaction.hierarchy_relaxation import (
     expand_chebi_with_metadata,
     iter_chebi_for_species,
@@ -29,7 +48,8 @@ from core.reaction.hierarchy_relaxation import (
     merge_chebi_to_kegg_mapping,
 )
 from core.reaction.scoring import unified_reaction_objective
-from core.reaction.classification import classify_reaction
+# Reaction classification (mappable/non_mappable) was used historically to gate scoring/coverage.
+# The current pipeline generates candidates for all reactions without dropping any.
 from core.reaction.kegg_definition import extract_classifications
 
 
@@ -766,6 +786,8 @@ def _get_kegg_recommendations_rulebased(
     top_k: int = None,
     spectators: bool = False,
     *,
+    evaluate_candidates: bool = False,
+    include_exchange_reactions: bool = False,
     relaxation_levels_by_entity: Optional[Mapping[str, int]] = None,
     penalty_lam: float = 0.0,
     max_relax_level: int = 1,
@@ -785,6 +807,12 @@ def _get_kegg_recommendations_rulebased(
         species_ids: List of reaction IDs to evaluate
         cofactors_to_ignore: Set of KEGG IDs of cofactors to ignore
         top_k: Number of top candidates to return per reaction
+        evaluate_candidates: If True, compute similarity scores / objective ranking.
+            If False (default), run only candidate generation/filtering and return
+            ``match_score=[]``.
+        include_exchange_reactions: If True, attempt candidate generation for
+            exchange reactions (empty LHS or RHS). If False (default), exchange
+            reactions are retained but returned with no candidates.
         
     Returns:
         List of Recommendation objects with candidates and match scores
@@ -936,35 +964,6 @@ def _get_kegg_recommendations_rulebased(
             }
         return out
 
-    def _species_ids_from_equation_side(side_str: str) -> set:
-        out = set()
-        side = str(side_str or "").strip()
-        if not side:
-            return out
-        for term in side.split("+"):
-            parts = term.strip().split()
-            if not parts:
-                continue
-            if len(parts) == 1:
-                met = parts[0]
-            else:
-                try:
-                    float(parts[0])
-                except ValueError:
-                    met = term.strip()
-                else:
-                    met = parts[-1]
-            met = met.lstrip("$").strip()
-            if met:
-                out.add(met)
-        return out
-
-    def _reaction_species_ids(reaction_equation: str) -> Tuple[set, set]:
-        if "=>" in reaction_equation or "->" in reaction_equation:
-            lhs, rhs = re.split(r"=>|->", reaction_equation, maxsplit=1)
-            return _species_ids_from_equation_side(lhs), _species_ids_from_equation_side(rhs)
-        return set(), set()
-
     def _expand_one_species(chebi_id: str, depth: int) -> List[Dict[str, Any]]:
         if not chebi_id or parent_map is None or chebi_to_kegg is None:
             return []
@@ -1025,9 +1024,12 @@ def _get_kegg_recommendations_rulebased(
     try:
         logger.info(f"Loading KEGG reaction data...")
         # Load KEGG reaction data
-        kegg_parsed_reactions_dict = load_kegg_parsed_reactions_dict()
+        kegg_parsed_reactions_dict = None
+        if evaluate_candidates:
+            kegg_parsed_reactions_dict = load_kegg_parsed_reactions_dict()
         kegg_reaction_features_dict = load_kegg_reaction_features_dict()
-        logger.info(f"Loaded {len(kegg_parsed_reactions_dict)} parsed KEGG reactions")
+        if evaluate_candidates and kegg_parsed_reactions_dict is not None:
+            logger.info(f"Loaded {len(kegg_parsed_reactions_dict)} parsed KEGG reactions")
         logger.info(f"Loaded {len(kegg_reaction_features_dict)} KEGG reaction features")
         
         recommendations = []
@@ -1075,7 +1077,28 @@ def _get_kegg_recommendations_rulebased(
 
             # --- Stage 1A: species-level relaxation (independent trigger) ---
             # Trigger: species has no KEGG candidates (including dropped/unmapped species).
-            lhs_species, rhs_species = _reaction_species_ids(reaction_str)
+            lhs_species, rhs_species = reaction_stoichiometry_lhs_rhs_species(reaction_str)
+
+            reaction_class = "exchange" if (not lhs_species or not rhs_species) else "internal"
+            if reaction_class == "exchange" and not include_exchange_reactions:
+                # Keep one record so the reaction remains visible downstream, but skip
+                # candidate generation/scoring for exchange reactions unless requested.
+                recommendation = ReactionRecommendation(
+                    id=reaction_label,
+                    synonyms=[],
+                    equation=reaction_str,
+                    substrates=dict(model_subs),
+                    products=dict(model_prods),
+                    candidates=[],
+                    candidate_names=[],
+                    match_score=[],
+                    metadata={
+                        "reaction_class": reaction_class,
+                        "exchange_skipped": True,
+                    },
+                )
+                recommendations.append(recommendation)
+                continue
 
             if species_to_chebi is not None and parent_map is not None and chebi_to_kegg is not None:
                 _recover_species_kegg_candidates(
@@ -1143,15 +1166,42 @@ def _get_kegg_recommendations_rulebased(
             # not penalized for hierarchy hops (multiple relaxed candidates may coexist).
             reaction_penalty = 0.0
 
-            # Keep selected mapping (strict or relaxed) on recommendation payload.
-            model_subs = active_subs
-            model_prods = active_prods
-            reaction_type = classify_reaction(
-                reaction_str,
-                filtered_species=filtered_species,
-                candidates=filtered_reaction_list,
-            )
             matches = []
+
+            # Optional short-circuit: return generated candidates only (no scoring / ranking).
+            if not evaluate_candidates:
+                candidate_ids = sorted(filtered_reaction_list) if filtered_reaction_list else []
+                if top_k:
+                    candidate_ids = candidate_ids[:top_k]
+
+                candidate_names = []
+                for kegg_id in candidate_ids:
+                    orthology = kegg_reaction_features_dict.get(kegg_id, kegg_id).get("ORTHOLOGY", "")
+                    candidate_names.append(extract_classifications(orthology, 'orthology'))
+
+                recommendation = ReactionRecommendation(
+                    id=reaction_label,
+                    synonyms=[],
+                    equation=reaction_str,
+                    substrates=active_subs,
+                    products=active_prods,
+                    candidates=candidate_ids,
+                    candidate_names=candidate_names,
+                    match_score=[],
+                    metadata={
+                        "reaction_class": reaction_class,
+                        "filtered_species_count": int(len(filtered_species)),
+                        "candidate_count": int(len(filtered_reaction_list)),
+                        "participant_relaxation": sorted(
+                            participant_relaxation.values(),
+                            key=lambda x: (x.get("species_id", ""), x.get("kegg_id", "")),
+                        ),
+                        "reaction_penalty": reaction_penalty,
+                        "scoring_skipped": True,
+                    },
+                )
+                recommendations.append(recommendation)
+                continue
 
             # Create a (substrates, products) pair in Counter form for similarity scoring
             cartesian_products = [(sub_counter, prod_counter)]
@@ -1210,13 +1260,13 @@ def _get_kegg_recommendations_rulebased(
                 id=reaction_label,
                 synonyms=[],
                 equation=reaction_str, 
-                substrates=model_subs,
-                products=model_prods,
+                substrates=active_subs,
+                products=active_prods,
                 candidates=candidates,
                 candidate_names=candidate_names,
                 match_score=match_scores,
                 metadata={
-                    "reaction_type": reaction_type,
+                    "reaction_class": reaction_class,
                     "filtered_species_count": int(len(filtered_species)),
                     "candidate_count": int(len(filtered_reaction_list)),
                     "participant_relaxation": sorted(
@@ -1224,16 +1274,10 @@ def _get_kegg_recommendations_rulebased(
                         key=lambda x: (x.get("species_id", ""), x.get("kegg_id", "")),
                     ),
                     "reaction_penalty": reaction_penalty,
-                    "failed_default_score": 0.0,
                 },
             )
-            if reaction_type == "failed_mapping":
-                # Keep one record so downstream aggregation can score failed-but-eligible reactions.
-                recommendation.match_score = [0.0]
-                recommendations.append(recommendation)
-            elif reaction_type == "non_mappable":
-                # Keep one record for coverage tracking; excluded by aggregator from scoring.
-                recommendation.match_score = []
+            if not candidates:
+                # Keep one record so the reaction remains visible downstream.
                 recommendations.append(recommendation)
             else:
                 recommendations.extend(split_recommendation(recommendation))

@@ -49,7 +49,6 @@ def _per_reaction_best_scores(match_results: List[Any]) -> Dict[str, Optional[fl
     best_by_rxn: Dict[str, float] = {}
     classification_by_rxn: Dict[str, str] = {}
     ambiguous_default_by_rxn: Dict[str, float] = {}
-    failed_default_by_rxn: Dict[str, float] = {}
     for rec in match_results:
         rid = rec.id
         meta = getattr(rec, "metadata", None) or {}
@@ -57,8 +56,6 @@ def _per_reaction_best_scores(match_results: List[Any]) -> Dict[str, Optional[fl
         classification_by_rxn[rid] = rtype
         if rtype == "ambiguous_mapping":
             ambiguous_default_by_rxn[rid] = float(meta.get("ambiguous_default_score", 0.0))
-        if rtype == "failed_mapping":
-            failed_default_by_rxn[rid] = float(meta.get("failed_default_score", 0.0))
         if rtype != "mappable":
             continue
         if not rec.match_score:
@@ -75,9 +72,6 @@ def _per_reaction_best_scores(match_results: List[Any]) -> Dict[str, Optional[fl
             continue
         if rtype == "ambiguous_mapping":
             out[rid] = float(ambiguous_default_by_rxn.get(rid, 0.0))
-            continue
-        if rtype == "failed_mapping":
-            out[rid] = float(failed_default_by_rxn.get(rid, 0.0))
             continue
         if rid in best_by_rxn:
             out[rid] = float(best_by_rxn[rid])
@@ -386,6 +380,8 @@ def map_reactions_to_kegg_with_relaxation(
     top_k: Optional[int] = None,
     penalty_lam: float = 0.1,
     run_matching: bool = True,
+    evaluate_candidates: bool = True,
+    include_exchange_reactions: bool = False,
 ) -> Tuple[List[Dict[str, Any]], List[Any], Dict[str, int]]:
     """
     Single iterative loop: normalize -> penalized KEGG matching -> relax targets -> converge.
@@ -422,6 +418,13 @@ def map_reactions_to_kegg_with_relaxation(
             score per reaction changes by less than this vs the previous iteration.
         run_matching: If False, performs a single mapping pass and returns an empty
             match list (no refinement).
+        evaluate_candidates: If False, run only candidate generation/filtering in
+            ``_get_kegg_recommendations_rulebased`` (no similarity scoring / objective
+            ranking). This disables relaxation iterations; the function returns after
+            one normalized mapping pass.
+        include_exchange_reactions: If True, attempt candidate generation for exchange
+            reactions (empty LHS or RHS). If False, exchange reactions are retained but
+            returned with no candidates.
 
     Returns:
         (normalized_reactions, kegg_match_results, species_relax_level_by_id)
@@ -491,6 +494,8 @@ def map_reactions_to_kegg_with_relaxation(
             cofactors_to_ignore=cofactors,
             top_k=top_k,
             spectators=spectators,
+            evaluate_candidates=True,
+            include_exchange_reactions=include_exchange_reactions,
             relaxation_levels_by_entity=levels,
             penalty_lam=penalty_lam,
             max_relax_level=max_relax_level,
@@ -567,12 +572,14 @@ def map_reactions_to_kegg_with_relaxation(
             match_results = []
             break
 
-        # --- Step 2: KEGG matching (raw similarity inside matcher; ranking = penalized only) ---
+        # --- Step 2: KEGG matching ---
         match_results = _get_kegg_recommendations_rulebased(
             normalized_reactions,
             cofactors_to_ignore=cofactors,
             top_k=top_k,
             spectators=spectators,
+            evaluate_candidates=evaluate_candidates,
+            include_exchange_reactions=include_exchange_reactions,
             relaxation_levels_by_entity=relax_level,
             penalty_lam=penalty_lam,
             max_relax_level=max_relax_level,
@@ -583,6 +590,9 @@ def map_reactions_to_kegg_with_relaxation(
             max_ancestor_depth=max_ancestor_depth,
             max_descendant_depth=down_depth,
         )
+        if not evaluate_candidates:
+            # Generation-only mode: do not score, do not relax, return after first pass.
+            break
         score = _aggregate_best_penalized_scores(match_results)
         coverage = _reaction_coverage_stats(match_results)
         logger.info(f"Reaction coverage: {coverage}")

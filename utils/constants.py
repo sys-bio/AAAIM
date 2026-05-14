@@ -147,12 +147,14 @@ UNIPROT_URI_PATTERNS = [
 ]
 
 KEGG_REACTION_URI_PATTERNS = [
-    r'https?://identifiers\.org/kegg\.reaction:(R\d+)',
+    # identifiers.org supports both `prefix:ID` and `prefix/ID` forms
+    r'https?://identifiers\.org/kegg\.reaction[:/](R\d+)',
     r'urn:miriam:kegg\.reaction:(R\d+)'
 ]
 
 KEGG_COMPOUND_URI_PATTERNS = [
-    r'https?://identifiers\.org/kegg\.compound:(C\d+)',
+    # identifiers.org supports both `prefix:ID` and `prefix/ID` forms
+    r'https?://identifiers\.org/kegg\.compound[:/](C\d+)',
     r'urn:miriam:kegg\.compound:(C\d+)'
 ]
 
@@ -298,19 +300,13 @@ Reason: these reactions match the reactions found in the TCA cycle """
 
 
 REACTION_ANNOTATION_RANKING_PROMPT = """Task: Select the best matching KEGG reaction ID(s).
-
-Model reaction:
-{model_reaction}
-
-Candidate KEGG reactions:
-{reaction_annotation_choices}
-
 Instructions:
 - Choose only from the provided KEGG IDs.
 - Return the ID(s) only. Do NOT explain your reasoning. Do NOT include any other text.
 - Order multiple IDs from best to worst match.
 - If none match, return: UNK
-- If multiple candidates differ only in specificity, rank the most general reaction highest (e.g., fructose > D-fructose > beta-D-fructose).
+- Interpret the reaction within the full model context (all other reactions). Prefer KEGG reactions that are biochemically consistent with the network (shared metabolites, cofactors, and plausible pathway context).
+- If multiple candidates differ only in specificity, rank the most specific reaction highest (e.g., beta-D-fructose > D-fructose > fructose).
 - Consider biochemical equivalence (e.g., isomers, implicit conversions like DHAP ↔ G3P).
 
 Output format:
@@ -326,6 +322,19 @@ R10049: Methylglyoxal + D-Fructose 1,6-bisphosphate <=> D-Glyceraldehyde 3-phosp
 R01070: beta-D-Fructose 1,6-bisphosphate <=> Glycerone phosphate + D-Glyceraldehyde 3-phosphate
 
 Output:
-R01068
 R01070
+R01068
+
+Now you try: 
+
+Model context:
+{model_context}
+
+Model reaction:
+{model_reaction}
+
+Candidate KEGG reactions:
+{reaction_annotation_choices}
+
+Again, return the ID(s) ONLY. Do NOT explain your reasoning. Do NOT include any other text.
 """

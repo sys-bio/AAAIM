@@ -41,13 +41,19 @@ llm_model = "Llama-3.3-70B-Instruct"
 recommendations_df = pd.read_csv("./examples/glycolysis_part1-recommendations.csv")
 TOP_K = 10
 
+# If False (default), run generation-only (no scoring / participant updates).
+# If True, run the full evaluation workflow (scoring + EM-like participant updates).
+RUN_EVALUATION = False
 
-def main() -> None:
+# If True, attempt candidate generation for exchange reactions (empty LHS or RHS).
+# If False (default), exchange reactions are retained but returned with no candidates.
+INCLUDE_EXCHANGE_REACTIONS = False
 
+
+def main() -> pd.DataFrame:
     logger.info("AAAIM KEGG Reaction Annotation Example")
     logger.info("=" * 50)
 
-    # ── Example 1: Rule-based KEGG annotation workflow ──────────────────────────────
     _annotation_result, _metrics = annotate_model(
         model_file=model_file,
         llm_model=llm_model,
@@ -56,6 +62,8 @@ def main() -> None:
         database="kegg",
         top_k=TOP_K,
         species_recommendations_df=recommendations_df,
+        evaluate_candidates=RUN_EVALUATION,
+        include_exchange_reactions=INCLUDE_EXCHANGE_REACTIONS,
     )
 
     csv_path = Path(f"{Path(model_file).name}_recommendations.csv")

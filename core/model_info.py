@@ -18,6 +18,7 @@ from utils.constants import (
     ModelType,
     CHEBI_URI_PATTERNS,
     KEGG_REACTION_URI_PATTERNS,
+    KEGG_COMPOUND_URI_PATTERNS,
     NCBIGENE_URI_PATTERNS,
     UNIPROT_URI_PATTERNS,
 )
@@ -299,7 +300,8 @@ def find_species_with_annotations_and_qualifiers(model_file: str, database: str,
 
     Args:
         model_file: Path to the SBML model file
-        database: Database to search ("chebi", "ncbigene", "uniprot")
+        database: Database to search ("chebi", "ncbigene", "uniprot", "kegg").
+            For species, "kegg" means KEGG compound IDs (C#####).
         bqbiol_qualifiers: List of bqbiol qualifiers to extract (e.g. ['is', 'isVersionOf', 'hasPart'])
 
     Returns:
@@ -328,6 +330,8 @@ def find_species_with_annotations_and_qualifiers(model_file: str, database: str,
         uri_patterns = NCBIGENE_URI_PATTERNS
     elif database == DatabaseID.UNIPROT.value:
         uri_patterns = UNIPROT_URI_PATTERNS
+    elif database == DatabaseID.KEGG.value:
+        uri_patterns = KEGG_COMPOUND_URI_PATTERNS
     else:
         logger.warning(f"Database {database} not supported")
         return {}, {}
@@ -453,6 +457,7 @@ def find_species_with_uniprot_annotations(model_file: str, bqbiol_qualifiers: li
         )
 
     return uniprot_annotations
+
 
 def find_reactions_with_kegg_annotations(model_file: str, bqbiol_qualifiers: list = None) -> Dict[str, List[str]]:
     """
@@ -789,6 +794,64 @@ def build_antimony_reaction_index(model_file: str) -> List[Tuple[str, str, Set[s
         )
         index.append((reaction_id, reaction_str, all_ids_in_reaction))
     return index
+
+
+def _species_ids_from_stoichiometry_side(side_str: str) -> Set[str]:
+    """Metabolite/species tokens on one side of a reaction equation.
+
+    Canonical parsing for the AAAIM pipeline; reused via
+    :func:`reaction_stoichiometry_lhs_rhs_species` from
+    :func:`core.database_search._get_kegg_recommendations_rulebased` so that
+    "exchange-style" reactions (empty LHS or RHS) are detected consistently.
+    """
+    out: Set[str] = set()
+    side = str(side_str or "").strip()
+    if not side:
+        return out
+    for term in side.split("+"):
+        parts = term.strip().split()
+        if not parts:
+            continue
+        if len(parts) == 1:
+            met = parts[0]
+        else:
+            try:
+                float(parts[0])
+            except ValueError:
+                met = term.strip()
+            else:
+                met = parts[-1]
+        met = met.lstrip("$").strip()
+        if met:
+            out.add(met)
+    return out
+
+
+def reaction_stoichiometry_lhs_rhs_species(reaction_str: str) -> Tuple[Set[str], Set[str]]:
+    """Return ``(lhs_species_ids, rhs_species_ids)`` parsed from a reaction string."""
+    s = str(reaction_str or "")
+    if "=>" in s or "->" in s:
+        lhs, rhs = re.split(r"=>|->", s, maxsplit=1)
+        return (
+            _species_ids_from_stoichiometry_side(lhs),
+            _species_ids_from_stoichiometry_side(rhs),
+        )
+    return set(), set()
+
+
+def exchange_constraint_skipped_reaction_ids(model_file: str) -> Set[str]:
+    """SBML reaction ids with an empty LHS or RHS (source/sink/exchange-style).
+
+    When ``include_exchange_reactions`` is False in the rule-based KEGG matcher,
+    these reactions get no candidates and are omitted from LLM re-ranking
+    (see ``exchange_skipped`` metadata in ``_get_kegg_recommendations_rulebased``).
+    """
+    out: Set[str] = set()
+    for reaction_id, reaction_str, _ in build_antimony_reaction_index(model_file):
+        lhs, rhs = reaction_stoichiometry_lhs_rhs_species(reaction_str)
+        if not lhs or not rhs:
+            out.add(str(reaction_id))
+    return out
 
 
 def filter_reactions_from_antimony_index(

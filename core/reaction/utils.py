@@ -13,6 +13,7 @@ from .hierarchy_relaxation import (
     chebi_best_kegg_ids_with_ontology_fallback,
     load_chebi_parent_map,
 )
+from .kegg_compound_ids import parse_kegg_compound_id
 from .kegg_definition import extract_classifications
 
 logger = logging.getLogger(__name__)
@@ -55,10 +56,11 @@ def map_chebi_to_kegg(
     max_descendant_depth: int = 1,
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
-    Map ChEBI IDs in recommendation rows to KEGG compound IDs via
-    ``load_chebi2kegg_dict`` with an ontology walk fallback when no direct
-    KEGG mapping exists for a given ChEBI term.
-    
+    Map species ``annotation`` values to KEGG compound IDs via
+    ``load_chebi2kegg_dict`` when those values are ChEBI terms, or treat bare
+    KEGG compound ids (``C#####``) as identity mappings when species were
+    annotated with KEGG compounds instead of ChEBI.
+
     Duplicate rows are emitted when one ChEBI maps to multiple KEGG compounds.
     For reaction matching with optional upward relaxation along ChEBI ``is_a``,
     use ``hierarchy_relaxation.normalize_chebi`` / ``normalize_reaction`` instead.
@@ -111,6 +113,14 @@ def map_chebi_to_kegg(
     if not recommendations_df.empty and 'annotation' in recommendations_df.columns:
         for _, row in recommendations_df.iterrows():
             chebi_id = row['annotation']
+
+            direct_kegg = parse_kegg_compound_id(chebi_id)
+            if direct_kegg:
+                row_copy = row.copy()
+                row_copy["KEGG_ID"] = direct_kegg
+                expanded_rows.append(row_copy)
+                continue
+
             kegg_ids = _kegg_ids_for_chebi(chebi_id)
 
             if not kegg_ids:
@@ -133,14 +143,16 @@ def map_chebi_to_kegg(
         
         if expanded_df.empty:
             recommendations_df['KEGG_ID'] = ""
-            return recommendations_df, pd.DataFrame()
+            empty_cols = list(recommendations_df.columns)
+            return recommendations_df, pd.DataFrame(columns=empty_cols)
         
         combined_df = pd.concat([recommendations_df, expanded_df]).drop_duplicates(
             subset=dedup_cols
         )
     else:
         recommendations_df['KEGG_ID'] = ""
-        return recommendations_df, pd.DataFrame()
+        empty_cols = list(recommendations_df.columns)
+        return recommendations_df, pd.DataFrame(columns=empty_cols)
     
     filtered_df = combined_df[
         combined_df['KEGG_ID'].notna() &
@@ -152,7 +164,7 @@ def map_chebi_to_kegg(
             filtered_df['match_score'] == filtered_df.groupby('id')['match_score'].transform('max')
         ].reset_index(drop=True)
     else:
-        high_score_recommendations = pd.DataFrame()
+        high_score_recommendations = pd.DataFrame(columns=list(combined_df.columns))
     
     logger.info(f"Expanded {len(recommendations_df)} ChEBI entries to {len(expanded_df)} KEGG mappings")
     logger.info(f"Found {len(filtered_df)} valid KEGG mappings")
