@@ -57,8 +57,14 @@ def run_kegg_annotation_workflow_rulebased(
     matching_config: Optional[MatchingConfig] = None,
     evaluate_candidates: bool = False,
     include_exchange_reactions: bool = False,
+    disable_ontology_relaxation: bool = False,
 ) -> Optional[KeggAnnotationWorkflowResult]:
     """Run the complete KEGG annotation workflow.
+
+    Args:
+        disable_ontology_relaxation: If True, skips ChEBI ontology relaxation
+            entirely (equivalent to ``max_relax_level=0``). Species are only
+            matched at their exact ChEBI level; no ancestor traversal is attempted.
 
     Returns:
         KeggAnnotationWorkflowResult with four DataFrames, or ``None`` if the
@@ -123,6 +129,7 @@ def run_kegg_annotation_workflow_rulebased(
             top_k=None,
             evaluate_candidates=bool(evaluate_candidates),
             include_exchange_reactions=bool(include_exchange_reactions),
+            max_relax_level=0 if disable_ontology_relaxation else 2,
         )
 
     kegg_recommendations_df = _generate_recommendation_table(

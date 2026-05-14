@@ -17,10 +17,17 @@ For every model listed in ``tests/kegg_annotated_files.txt`` this script:
    that share at least one K-number are collapsed to the best (lowest) rank
    in their group.
 5. Scores each reaction (found?, rank, top1/3/5) and writes per-reaction
-   results + aggregate summary to ``tests/``.
+   results + aggregate summary under the run directory.
+6. Records per-model wall time and ``wall_seconds / num_evaluated_reactions`` in
+   ``per_model_timing.csv`` (same run folder as ``per_reaction_results.csv``).
 
 Run: ``python tests/evaluate_reaction_annotation.py``
 (or ``conda run -n aaaim python tests/evaluate_reaction_annotation.py``).
+
+python tests/evaluate_reaction_annotation.py --skip-cofactor-removal
+python tests/evaluate_reaction_annotation.py --skip-brite-normalization
+
+
 """
 
 from __future__ import annotations
@@ -46,6 +53,7 @@ load_dotenv(REPO_ROOT / ".env")
 
 from core import annotate_model  # noqa: E402
 from core.database_search import load_kegg_reaction_features_dict  # noqa: E402
+from core.reaction.amendment_config import CofactorConfig  # noqa: E402
 from core.reaction.annotation_workflow import rank_kegg_annotations_with_llm  # noqa: E402
 from core.model_info import (  # noqa: E402
     exchange_constraint_skipped_reaction_ids,
@@ -68,9 +76,9 @@ DEFAULT_RESULTS_DIR = (
 # Rule-based generation-only is fast; set True for the slower scored/EM pipeline.
 EVALUATE_CANDIDATES = False
 INCLUDE_EXCHANGE_REACTIONS = False
-LLM_MODEL = "Llama-3.3-70B-Instruct"
+# LLM_MODEL = "Llama-3.3-70B-Instruct"
 # LLM_MODEL = "Llama-4-Maverick-17B-128E-Instruct-FP8"
-# LLM_MODEL = "gpt-5-mini-2025-08-07"
+LLM_MODEL = "gpt-5-mini-2025-08-07"
 DEFAULT_LLM_TOP_K = 10
 # Default ``kegg_reaction_features.lzma`` is resolved under ``data/kegg/`` by the loader.
 DEFAULT_KEGG_FEATURES_FILE = "kegg_reaction_features.lzma"
@@ -202,6 +210,8 @@ def run_annotation(
     work_dir: Path,
     *,
     rank_with_llm: bool = True,
+    disable_cofactors: bool = False,
+    disable_ontology_relaxation: bool = False,
     llm_model: str = LLM_MODEL,
     llm_top_k: int = DEFAULT_LLM_TOP_K,
     kegg_features_file: Optional[str] = None,
@@ -214,6 +224,12 @@ def run_annotation(
     When ``rank_with_llm`` is True, ``rank_kegg_annotations_with_llm`` reads that
     CSV (enriched with definitions), queries the LLM per reaction, and writes
     ``<same_stem>_llm_ranked.csv`` next to it — evaluation uses the ranked table.
+
+    When ``disable_cofactors`` is True, an empty ``CofactorConfig`` is passed so
+    H2O, ATP, NAD+, etc. are **not** excluded from reaction matching.
+
+    When ``disable_ontology_relaxation`` is True, ChEBI ancestor traversal is
+    skipped entirely (``max_relax_level=0``).
     """
     species_csv = work_dir / f"{model_file.stem}__species.csv"
     species_df.to_csv(species_csv, index=False)
@@ -223,6 +239,8 @@ def run_annotation(
     reloaded = pd.read_csv(species_csv, encoding="utf-8-sig")
 
     recommendations_csv = work_dir / f"{model_file.name}_recommendations.csv"
+
+    cofactor_cfg = CofactorConfig(cofactors_dict={}) if disable_cofactors else None
 
     cwd = Path.cwd()
     try:
@@ -238,6 +256,8 @@ def run_annotation(
             species_recommendations_df=reloaded,
             evaluate_candidates=EVALUATE_CANDIDATES,
             include_exchange_reactions=INCLUDE_EXCHANGE_REACTIONS,
+            cofactor_config=cofactor_cfg,
+            disable_ontology_relaxation=disable_ontology_relaxation,
         )
     finally:
         import os
@@ -389,6 +409,8 @@ def evaluate_model(
     features: Dict[str, Dict],
     species_source: str,
     ssx_reaction_ids: Optional[Set[str]] = None,
+    *,
+    normalize_brite: bool = True,
 ) -> Tuple[List[Dict], List[Dict]]:
     """Produce one evaluation row per ground-truth reaction.
 
@@ -406,6 +428,9 @@ def evaluate_model(
     - ``no_candidates`` — zero candidates for other reasons (e.g. no KEGG match).
     - ``""`` — candidates existed but the ground-truth KEGG id was not among them
       (aggregate reporting labels these as ``not_in_candidates``).
+
+    When ``normalize_brite`` is False, candidate ranks are used as-is (raw list
+    order) without collapsing KEGG-Orthology co-members into one group.
     """
     model_id = model_file.stem
     by_reaction: Dict[str, List[str]] = {}
@@ -457,9 +482,12 @@ def evaluate_model(
             rank_rows.extend(build_normalized_rank_rows(model_id, rxn_id, cands, features))
 
         if num_candidates and truth in cands:
-            normalized = normalize_ranks_by_brite(cands, features)
-            rank = normalized.get(truth)
-            found = rank is not None
+            if normalize_brite:
+                normalized = normalize_ranks_by_brite(cands, features)
+                rank = normalized.get(truth)
+            else:
+                rank = cands.index(truth) + 1
+            found = True
         else:
             rank = None
             found = False
@@ -515,6 +543,9 @@ def process_model(
     work_dir: Path,
     *,
     rank_with_llm: bool = True,
+    disable_cofactors: bool = False,
+    disable_ontology_relaxation: bool = False,
+    normalize_brite: bool = True,
     llm_top_k: int = DEFAULT_LLM_TOP_K,
     kegg_features_file: Optional[str] = None,
 ) -> List[Dict]:
@@ -541,7 +572,8 @@ def process_model(
     if species_df is None:
         logger.warning("  no species annotations; all reactions -> mapping failure")
         rxn_rows, rank_rows = evaluate_model(
-            model_file, ground_truth, pd.DataFrame(), features, "none", ssx_ids
+            model_file, ground_truth, pd.DataFrame(), features, "none", ssx_ids,
+            normalize_brite=normalize_brite,
         )
         process_model._last_rank_rows = rank_rows  # type: ignore[attr-defined]
         return rxn_rows
@@ -553,6 +585,8 @@ def process_model(
             species_df,
             work_dir,
             rank_with_llm=rank_with_llm,
+            disable_cofactors=disable_cofactors,
+            disable_ontology_relaxation=disable_ontology_relaxation,
             llm_top_k=llm_top_k,
             kegg_features_file=kegg_features_file,
         )
@@ -561,7 +595,8 @@ def process_model(
         rec_df = pd.DataFrame(columns=["id", "annotation"])
 
     rxn_rows, rank_rows = evaluate_model(
-        model_file, ground_truth, rec_df, features, source, ssx_ids
+        model_file, ground_truth, rec_df, features, source, ssx_ids,
+        normalize_brite=normalize_brite,
     )
     process_model._last_rank_rows = rank_rows  # type: ignore[attr-defined]
     return rxn_rows
@@ -614,6 +649,32 @@ def main() -> int:
         ),
     )
     parser.add_argument(
+        "--skip-cofactor-removal",
+        action="store_true",
+        help=(
+            "Disable cofactor filtering during reaction matching (H2O, H+, ATP, "
+            "NAD+, etc. are included as regular participants). By default cofactors "
+            "are removed before candidate scoring."
+        ),
+    )
+    parser.add_argument(
+        "--skip-brite-normalization",
+        action="store_true",
+        help=(
+            "Use raw candidate list order for scoring instead of collapsing "
+            "KEGG-Orthology co-members (BRITE groups) to their best shared rank."
+        ),
+    )
+    parser.add_argument(
+        "--skip-ontology-relaxation",
+        action="store_true",
+        help=(
+            "Disable ChEBI ontology relaxation during reaction matching. Species "
+            "are matched only at their exact annotated ChEBI level; no ancestor "
+            "traversal is attempted."
+        ),
+    )
+    parser.add_argument(
         "--llm-top-k",
         type=int,
         default=DEFAULT_LLM_TOP_K,
@@ -652,14 +713,25 @@ def main() -> int:
         model_paths = model_paths[: args.limit]
     logger.info("Evaluating %d models", len(model_paths))
 
+    rank_with_llm = not bool(args.skip_llm_ranking)
+    disable_cofactors = bool(args.skip_cofactor_removal)
+    disable_ontology_relaxation = bool(args.skip_ontology_relaxation)
+    normalize_brite = not bool(args.skip_brite_normalization)
+
     timestamp = time.strftime("%Y%m%d_%H%M%S")
-    run_id = args.run_id or f"{_safe_slug(LLM_MODEL)}-{timestamp}"
+    _run_suffixes = (
+        ("-no-cofactors" if disable_cofactors else "")
+        + ("-no-relaxation" if disable_ontology_relaxation else "")
+        + ("-no-brite" if not normalize_brite else "")
+    )
+    run_id = args.run_id or f"{_safe_slug(LLM_MODEL)}-{timestamp}{_run_suffixes}"
     run_dir = args.results_dir / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
 
     per_reaction_out = run_dir / "per_reaction_results.csv"
     summary_out = run_dir / "results_summary.csv"
     normalized_ranks_out = run_dir / "normalized_candidate_ranks.csv"
+    per_model_timing_out = run_dir / "per_model_timing.csv"
 
     work_dir = args.work_dir or (run_dir / "_work")
     work_dir.mkdir(parents=True, exist_ok=True)
@@ -668,13 +740,18 @@ def main() -> int:
 
     logger.info("Loading KEGG reaction features (for BRITE/orthology grouping)...")
     features = load_kegg_reaction_features_dict()
-
-    rank_with_llm = not bool(args.skip_llm_ranking)
     if not rank_with_llm:
         logger.info("LLM re-ranking disabled (--skip-llm-ranking).")
+    if disable_cofactors:
+        logger.info("Cofactor removal disabled (--skip-cofactor-removal).")
+    if disable_ontology_relaxation:
+        logger.info("Ontology relaxation disabled (--skip-ontology-relaxation).")
+    if not normalize_brite:
+        logger.info("BRITE normalization disabled (--skip-brite-normalization).")
 
     all_rows: List[Dict] = []
     all_rank_rows: List[Dict] = []
+    timing_rows: List[Dict[str, object]] = []
     for i, model_file in enumerate(model_paths, start=1):
         t0 = time.time()
         try:
@@ -683,26 +760,47 @@ def main() -> int:
                 features,
                 work_dir,
                 rank_with_llm=rank_with_llm,
+                disable_cofactors=disable_cofactors,
+                disable_ontology_relaxation=disable_ontology_relaxation,
+                normalize_brite=normalize_brite,
                 llm_top_k=int(args.llm_top_k),
                 kegg_features_file=args.kegg_features_file,
             )
         except Exception as exc:  # pragma: no cover
             logger.exception("  model %s failed: %s", model_file, exc)
             rows = []
+        elapsed = time.time() - t0
+        n_eval = len(rows)
+        spd = (elapsed / n_eval) if n_eval else float("nan")
+        timing_rows.append(
+            {
+                "model_id": model_file.stem,
+                "model_path": str(model_file),
+                "wall_seconds": round(elapsed, 3),
+                "num_evaluated_reactions": int(n_eval),
+                "seconds_per_reaction": spd if n_eval else float("nan"),
+            }
+        )
+        pd.DataFrame(timing_rows).to_csv(per_model_timing_out, index=False)
         all_rows.extend(rows)
         # Collected inside process_model via evaluate_model.
         all_rank_rows.extend(getattr(process_model, "_last_rank_rows", []) or [])
         # Incremental checkpoint so long runs don't lose progress.
         pd.DataFrame(all_rows).to_csv(per_reaction_out, index=False)
+        spd_msg = f"{spd:.3f}s/rxn" if n_eval else "n/a"
         logger.info(
-            "  [%d/%d] %s -> %d rows (%.1fs)",
-            i, len(model_paths), model_file.name, len(rows), time.time() - t0,
+            "  [%d/%d] %s -> %d rows (%.1fs, %s)",
+            i, len(model_paths), model_file.name, len(rows), elapsed, spd_msg,
         )
 
     per_reaction_df = pd.DataFrame(all_rows)
     per_reaction_df.to_csv(per_reaction_out, index=False)
     logger.info("Per-reaction results written to %s (%d rows)",
                 per_reaction_out, len(per_reaction_df))
+
+    timing_df = pd.DataFrame(timing_rows)
+    timing_df.to_csv(per_model_timing_out, index=False)
+    logger.info("Per-model timing written to %s (%d models)", per_model_timing_out, len(timing_df))
 
     rank_df = pd.DataFrame(all_rank_rows)
     rank_df.to_csv(normalized_ranks_out, index=False)
@@ -716,30 +814,7 @@ def main() -> int:
     summary_df.to_csv(summary_out, index=False)
     logger.info("Summary written to %s", summary_out)
 
-    print()
-    print("=== Aggregate reaction-annotation evaluation ===")
-    if len(per_reaction_df) == 0:
-        print("No reactions evaluated.")
-        total_s = time.time() - wall_start
-        print(f"\nTotal runtime: {total_s:.1f}s")
-        logger.info("Total runtime: %.1fs", total_s)
-        return 0
-    s = summary_df.iloc[0]
-    print(f"Total reactions evaluated : {int(s['total_reactions'])}")
-    print(f"Coverage (found)          : {s['coverage']:.1%}")
-    print(f"Top-1 accuracy            : {s['top1']:.1%}")
-    print(f"Top-3 accuracy            : {s['top3']:.1%}")
-    print(f"Top-5 accuracy            : {s['top5']:.1%}")
-
-    failures = per_reaction_df[~per_reaction_df["found"]]
-    if not failures.empty:
-        reason_counts = failures["failure_reason"].replace("", "not_in_candidates").value_counts()
-        print("\nFailure reasons:")
-        for reason, count in reason_counts.items():
-            print(f"  {reason}: {count}")
-
     total_s = time.time() - wall_start
-    print(f"\nTotal runtime: {total_s:.1f}s")
     logger.info("Total runtime: %.1fs", total_s)
 
     return 0

@@ -59,6 +59,7 @@ def annotate_single_model(
     evaluate_candidates: bool = False,
     include_exchange_reactions: bool = False,
     cofactor_config=None,
+    disable_ontology_relaxation: bool = False,
 ) -> Tuple[pd.DataFrame, Dict[str, Any]]:
     """
     Annotate a single model that has no or limited existing annotations.
@@ -87,6 +88,9 @@ def annotate_single_model(
             reaction matching. Pass ``CofactorConfig(cofactors_dict={})`` to
             disable cofactor removal entirely. ``None`` uses the default set
             (H2O, H+, ATP, NAD+, etc.).
+        disable_ontology_relaxation: Only used for ``method="rulebased"``. If
+            True, skips ChEBI ontology relaxation entirely — species are matched
+            only at their exact annotated ChEBI level with no ancestor traversal.
         
     Returns:
         Tuple of (recommendations_df, metrics_dict)
@@ -192,6 +196,7 @@ def annotate_single_model(
             evaluate_candidates=bool(evaluate_candidates),
             include_exchange_reactions=bool(include_exchange_reactions),
             cofactor_config=cofactor_config,
+            disable_ontology_relaxation=bool(disable_ontology_relaxation),
         )
 
 
