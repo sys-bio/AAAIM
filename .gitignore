@@ -36,4 +36,6 @@ analysis/**
 benchmark/models/
 # Transient build scratch and logs (leading underscore = not a frozen artifact).
 benchmark/data/_*
+# Release archives are build artifacts; their digests are recorded in benchmark/dist/*.md.
+benchmark/dist/*.zip
 **/BioModels_251106

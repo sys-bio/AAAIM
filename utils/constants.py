@@ -199,12 +199,14 @@ KEGG_REACTION_URI_PATTERNS = [
 ]
 
 KEGG_COMPOUND_URI_PATTERNS = [
-    r'https?://identifiers\.org/kegg\.compound:(C\d+)',
+    # identifiers.org supports both `prefix:ID` and `prefix/ID` forms; BioModels
+    # overwhelmingly uses the slash form.
+    r'https?://identifiers\.org/kegg\.compound[:/](C\d+)',
     r'urn:miriam:kegg\.compound:(C\d+)'
 ]
 
 KEGG_PATHWAY_URI_PATTERNS = [
-    r'https?://identifiers\.org/kegg\.pathway:(map\d+)',
+    r'https?://identifiers\.org/kegg\.pathway[:/](map\d+)',
     r'urn:miriam:kegg\.pathway:(map\d+)'
 ]
 
