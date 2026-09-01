@@ -488,26 +488,6 @@ def test_complete_assembly_is_final(cache_env):
     assert summary["models_missing_cache"] == []
 
 
-def test_limited_run_exits_successfully(cache_env, monkeypatch):
-    """--limit must not report a successful smoke test as a failed full run."""
-    gc = cache_env
-    monkeypatch.setattr(sys, "argv", [
-        "generate_candidates.py", "--limit", "0", "--workers", "1", "--assemble-only",
-    ])
-    # --assemble-only skips generation; --limit still marks the output partial.
-    monkeypatch.setattr(gc.pd, "read_csv", _fake_reactions_reader(gc.pd.read_csv))
-    assert gc.main() == 0
-
-
-def test_full_run_exits_nonzero_when_caches_missing(cache_env, monkeypatch):
-    gc = cache_env
-    monkeypatch.setattr(sys, "argv", [
-        "generate_candidates.py", "--assemble-only", "--workers", "1",
-    ])
-    monkeypatch.setattr(gc.pd, "read_csv", _fake_reactions_reader(gc.pd.read_csv))
-    assert gc.main() == 1
-
-
 def _fake_reactions_reader(real_read_csv):
     """Serve a tiny reactions table so main() does not need the real benchmark."""
     import benchmark.scripts.generate_candidates as gc
@@ -524,6 +504,126 @@ def _fake_reactions_reader(real_read_csv):
         return real_read_csv(path, *args, **kwargs)
 
     return reader
+
+
+def _run_main(gc, monkeypatch, argv, worker_calls=None):
+    """Invoke main() against the fake reactions table, recording _worker calls."""
+    monkeypatch.setattr(sys, "argv", ["generate_candidates.py", *argv])
+    monkeypatch.setattr(gc.pd, "read_csv", _fake_reactions_reader(gc.pd.read_csv))
+
+    if worker_calls is not None:
+        def fake_worker(model_id, scope):
+            worker_calls.append(model_id)
+            gc.write_json({
+                "model_id": model_id,
+                "config_id": gc.config_id(),
+                "candidates": [],
+                "status": [gc._status_row(model_id, "R1", gc.STATUS_OK, gc.config_id())],
+                "failures": [],
+                "elapsed_s": 0.0,
+            }, gc._cache_path(model_id))
+            return model_id
+
+        monkeypatch.setattr(gc, "_worker", fake_worker)
+    return gc.main()
+
+
+def _write_cache(gc, model_id, *, failures=()):
+    gc.write_json({
+        "model_id": model_id,
+        "config_id": gc.config_id(),
+        "candidates": [],
+        "status": [gc._status_row(model_id, "R1", gc.STATUS_OK, gc.config_id())],
+        "failures": list(failures),
+        "elapsed_s": 0.0,
+    }, gc._cache_path(model_id))
+
+
+GENUINE_FAILURE = {
+    "model_id": "M1",
+    "reaction_id": "R1",
+    "scope": "reaction",
+    "failure_type": "absent_from_generator_output",
+    "message": "reaction present in frozen table but not returned by generator",
+    "traceback_tail": "",
+}
+
+
+# --- exit codes ---------------------------------------------------------------------
+
+
+def test_partial_run_with_pending_and_no_failures_exits_zero(cache_env, monkeypatch):
+    gc = cache_env
+    assert _run_main(gc, monkeypatch, ["--limit", "0", "--workers", "1"]) == 0
+
+
+def test_partial_run_with_pipeline_failure_exits_nonzero(cache_env, monkeypatch):
+    """A genuine failure must not hide behind an intentionally partial run."""
+    gc = cache_env
+    _write_cache(gc, "M1", failures=[GENUINE_FAILURE])
+    assert _run_main(gc, monkeypatch, ["--limit", "0", "--workers", "1"]) != 0
+
+
+def test_complete_coverage_with_pipeline_failure_exits_nonzero(cache_env, monkeypatch):
+    gc = cache_env
+    _write_cache(gc, "M1", failures=[GENUINE_FAILURE])
+    _write_cache(gc, "M2")
+    _write_cache(gc, "M3")
+    assert _run_main(gc, monkeypatch, ["--assemble-only", "--workers", "1"]) != 0
+
+
+def test_complete_coverage_without_failures_exits_zero(cache_env, monkeypatch):
+    gc = cache_env
+    _write_cache(gc, "M2")
+    _write_cache(gc, "M3")
+    assert _run_main(gc, monkeypatch, ["--assemble-only", "--workers", "1"]) == 0
+
+
+def test_full_run_exits_nonzero_when_caches_missing(cache_env, monkeypatch):
+    gc = cache_env
+    assert _run_main(gc, monkeypatch, ["--assemble-only", "--workers", "1"]) == 1
+
+
+def test_failed_complete_run_is_not_reported_as_final(cache_env, monkeypatch, caplog):
+    gc = cache_env
+    _write_cache(gc, "M1", failures=[GENUINE_FAILURE])
+    _write_cache(gc, "M2")
+    _write_cache(gc, "M3")
+    with caplog.at_level("INFO"):
+        assert _run_main(gc, monkeypatch, ["--assemble-only", "--workers", "1"]) != 0
+    assert "final artifacts written" not in caplog.text
+
+
+# --- generation selection -----------------------------------------------------------
+
+
+def test_limit_zero_generates_nothing(cache_env, monkeypatch):
+    """--limit 0 must not fall through to the full multi-day pass."""
+    gc = cache_env
+    calls: list = []
+    assert _run_main(gc, monkeypatch, ["--limit", "0", "--workers", "1"], calls) == 0
+    assert calls == []
+
+
+def test_limit_one_generates_exactly_one_model(cache_env, monkeypatch):
+    gc = cache_env
+    calls: list = []
+    assert _run_main(gc, monkeypatch, ["--limit", "1", "--workers", "1"], calls) == 0
+    assert len(calls) == 1
+
+
+def test_negative_limit_is_rejected(cache_env, monkeypatch):
+    gc = cache_env
+    calls: list = []
+    assert _run_main(gc, monkeypatch, ["--limit", "-1", "--workers", "1"], calls) == 2
+    assert calls == []
+
+
+def test_no_limit_selects_every_pending_model(cache_env, monkeypatch):
+    gc = cache_env  # M1 is already cached; M2 and M3 are pending.
+    calls: list = []
+    assert _run_main(gc, monkeypatch, ["--workers", "1"], calls) == 0
+    assert sorted(calls) == ["M2", "M3"]
 
 
 # ----------------------------------------------------------------------------------

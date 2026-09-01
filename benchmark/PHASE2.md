@@ -60,6 +60,12 @@ Notes on the long step:
   compatible caches exist, marks the summary `partial_run: true` / `is_final: false`, lists
   the pending models, and exits 0. A full run or `--assemble-only` intended to freeze the
   final artifacts still requires complete cache coverage and exits 1 if any is missing.
+* **Exit codes.** Pending models in a partial run are intentional and are not errors, but
+  `pipeline_failures > 0` exits 1 in *every* mode, so a smoke test cannot hide a genuine
+  `generation_failed` or `absent_from_generator_output` behind a zero exit code. An
+  assembly with failures is never logged as final. Bad arguments exit 2.
+* **`--limit 0` generates nothing** rather than falling through to the full pass; a
+  negative `--limit` is rejected.
 * **Workers**: memory, not CPU, is the constraint (~350 MB–1.1 GB per worker for the ChEBI
   and KEGG reference maps). On a 16 GB machine 4 workers is comfortable.
 * **`--scope`** controls how much work is done. `evaluable` (default) generates only for
@@ -274,10 +280,11 @@ the retrieval-vs-reranking split.
 python -m pytest tests/test_phase2_candidates.py tests/test_benchmark_build.py -q
 ```
 
-59 tests, ~2 s. The Phase 2 tests pin all four bugs above plus deterministic tie-breaking,
+67 tests, ~2 s. The Phase 2 tests pin all four bugs above plus deterministic tie-breaking,
 multiple ground-truth ids, equivalence-group parsing, the three averaging modes, the
-reaction-aware missing-output classification, partial vs final assembly, and cache-schema
-invalidation.
+reaction-aware missing-output classification, partial vs final assembly, cache-schema
+invalidation, the exit code for every combination of pending models and pipeline failures,
+and generation selection under `--limit 0`, `--limit 1`, a negative limit, and no limit.
 
 ## Phase 1 housekeeping completed here
 

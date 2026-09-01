@@ -663,6 +663,10 @@ def main() -> int:
         logger.error("Unknown model ids: %s", unknown)
         return 2
 
+    if args.limit is not None and args.limit < 0:
+        logger.error("--limit must be zero or positive, got %d", args.limit)
+        return 2
+
     if not args.assemble_only:
         todo = [m for m in model_ids if args.force or _load_cached(m) is None]
         logger.info(
@@ -671,7 +675,9 @@ def main() -> int:
         )
         if todo:
             sizes = reactions_df.groupby("model_id").size()
-            if args.limit:
+            # `is not None`, not truthiness: `--limit 0` means "generate nothing", and
+            # treating it as unlimited would launch the entire multi-day pass.
+            if args.limit is not None:
                 # Smallest first, so a smoke test finishes quickly.
                 todo.sort(key=lambda m: int(sizes.get(m, 0)))
                 todo = todo[: args.limit]
@@ -682,6 +688,7 @@ def main() -> int:
                 "scope=%s | pending reactions in scope: %d",
                 args.scope, int(sum(int(sizes.get(m, 0)) for m in todo)),
             )
+        if todo:
             CACHE_DIR.mkdir(parents=True, exist_ok=True)
             done = 0
             if args.workers <= 1:
@@ -723,16 +730,25 @@ def main() -> int:
     logger.info("Pipeline failures: %s %s", summary["pipeline_failures"], summary["failure_types"])
 
     if summary["partial_run"]:
+        pending = summary["models_pending_list"]
         logger.info(
             "PARTIAL run: assembled %d/%d models, %d pending. Outputs are a snapshot, "
             "not the frozen Phase 2 artifacts.",
             summary["models_assembled"], summary["models_requested"],
             summary["models_pending"],
         )
-        pending = summary["models_pending_list"]
         logger.info("Pending models: %s%s",
                     ", ".join(pending[:5]), " ..." if len(pending) > 5 else "")
-        return 0
+
+    # Pending models in a partial run are intentional; pipeline failures never are.
+    # Checked in every mode so a smoke test cannot hide a genuine failure behind a
+    # zero exit code.
+    failed = summary["pipeline_failures"] > 0
+    if failed:
+        logger.error(
+            "%d pipeline failure(s) recorded: %s. See %s.",
+            summary["pipeline_failures"], summary["failure_types"], FAILURES_CSV.name,
+        )
 
     if summary["models_missing_cache"]:
         logger.error(
@@ -741,6 +757,12 @@ def main() -> int:
             len(summary["models_missing_cache"]), summary["models_missing_cache"][:5],
         )
         return 1
+
+    if failed:
+        return 1
+
+    if summary["partial_run"]:
+        return 0
 
     logger.info("Complete assembly: %d models, final artifacts written.",
                 summary["models_assembled"])
