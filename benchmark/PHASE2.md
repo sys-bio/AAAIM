@@ -33,6 +33,8 @@ python benchmark/scripts/build_reaction_strata.py
 python benchmark/scripts/build_reaction_text.py
 
 # Smoke test first: the 3 smallest pending models, one worker.
+# A limited run is a partial snapshot: ungenerated models are reported as pending and
+# it exits 0 if nothing genuinely failed.
 python benchmark/scripts/generate_candidates.py --limit 3 --workers 1
 
 # Full pass. Resumable: each model is cached under benchmark/data/_candidates_cache/
@@ -51,7 +53,13 @@ python benchmark/scripts/rank_baselines.py --rankers heuristic lexical embedding
 Notes on the long step:
 
 * **Resume** is automatic and keyed on `config_id`, a hash of `GENERATION_CONFIG`. Changing
-  any generation parameter invalidates every cached model on purpose.
+  any generation parameter invalidates every cached model on purpose. `cache_schema_version`
+  is part of that hash, so a fix to cached payload semantics deterministically retires stale
+  caches without deleting anyone's files.
+* **Partial vs final assembly.** `--limit` (or `--allow-partial`) assembles whatever
+  compatible caches exist, marks the summary `partial_run: true` / `is_final: false`, lists
+  the pending models, and exits 0. A full run or `--assemble-only` intended to freeze the
+  final artifacts still requires complete cache coverage and exits 1 if any is missing.
 * **Workers**: memory, not CPU, is the constraint (~350 MB–1.1 GB per worker for the ChEBI
   and KEGG reference maps). On a 16 GB machine 4 workers is comfortable.
 * **`--scope`** controls how much work is done. `evaluable` (default) generates only for
@@ -94,13 +102,43 @@ separate scientific limitations from pipeline failures:
 | `no_species_evidence` | No usable species annotations, generator could not run | retrieval failure |
 | `exchange_skipped` | SSX exchange reaction, excluded in Phase 1 | excluded |
 | `generation_failed` | An exception was raised | **pipeline failure** |
-| `absent_from_generator_output` | Reaction in the frozen table but not returned | **pipeline failure** |
+| `absent_from_generator_output` | Reaction had mapped constraints but vanished, unexplained | **pipeline failure** |
 
 Only the last two appear in `candidate_generation_failures.csv`. A candidate-generation
 exception is never silently converted into an empty candidate list:
 `_get_kegg_recommendations_rulebased` is called with `strict_errors=True` so it raises, and
 if a model raises the harness retries it reaction by reaction to attribute the failure
 precisely rather than losing the whole model.
+
+When the generator returns no entry for an evaluable reaction, `classify_missing_reaction`
+decides which of the above applies, in this order:
+
+```text
+SSX reaction                        -> exchange_skipped
+model has no usable evidence        -> no_species_evidence
+reaction has no mapped participants -> unconstrained_candidate_set
+otherwise                           -> absent_from_generator_output
+```
+
+The third branch matters because a model can carry annotations while a *particular*
+reaction carries none. `BIOMD0000000122/R1` and `BIOMD0000000123/R1` are the same reaction
+in two closely related models:
+
+```text
+Calcineurin-dependent NFAT dephosphorylation
+NFAT_Pi_Nuc + Act_C_Nuc <=> Act_C_Nuc + NFAT_Nuc      (ground truth R00164)
+```
+
+The only annotated species in those models are `Ca_Cyt`/`Ca_Nuc` (CHEBI:29108 / C00076);
+none of NFAT, phosphorylated NFAT or calcineurin is annotated. The generator's species
+filter drops the reaction, so it can never constrain the KEGG candidate set. Deciding this
+from the model-level evidence flag alone reported it as `absent_from_generator_output`, a
+pipeline failure, when it is a legitimate retrieval failure and a future open-set or
+tool-assisted recovery example. The constrained-reaction set is now taken from the
+generator's own filtering pass, so the diagnostic cannot disagree with the generator.
+
+`absent_from_generator_output` is retained for reactions that *did* have mapped
+constraints and still disappeared without explanation — a genuine software fault.
 
 ## Bugs found while building Phase 2
 
@@ -236,8 +274,10 @@ the retrieval-vs-reranking split.
 python -m pytest tests/test_phase2_candidates.py tests/test_benchmark_build.py -q
 ```
 
-48 tests, ~3 s. The Phase 2 tests pin all four bugs above plus deterministic tie-breaking,
-multiple ground-truth ids, equivalence-group parsing, and the three averaging modes.
+59 tests, ~2 s. The Phase 2 tests pin all four bugs above plus deterministic tie-breaking,
+multiple ground-truth ids, equivalence-group parsing, the three averaging modes, the
+reaction-aware missing-output classification, partial vs final assembly, and cache-schema
+invalidation.
 
 ## Phase 1 housekeeping completed here
 

@@ -62,6 +62,10 @@ CONFIG_JSON = DATA_DIR / "candidate_generation_config.json"
 # Generation configuration. Any change here changes ``config_id`` and therefore
 # invalidates cached per-model results.
 GENERATION_CONFIG: Dict[str, Any] = {
+    # Bump when cached payload semantics change, so stale caches cannot survive a fix.
+    # v2: missing-output classification is reaction-aware; reactions with zero mapped
+    #     participants are `unconstrained_candidate_set`, not pipeline failures.
+    "cache_schema_version": 2,
     "generator": "aaaim_rulebased_kegg",
     "evaluate_candidates": True,
     "include_exchange_reactions": False,
@@ -188,12 +192,20 @@ def _run_generator(
     recs: pd.DataFrame,
     reaction_ids: List[str],
     restrict_to: Optional[Set[str]] = None,
-) -> Tuple[List[Any], bool]:
+) -> Tuple[List[Any], bool, Set[str]]:
     """Invoke the rule-based generator in strict mode.
 
-    Returns ``(match_results, had_species_evidence)``. An empty result with
-    ``had_species_evidence=False`` means the generator could not run for lack of
-    usable species evidence, which is a retrieval limitation rather than a crash.
+    Returns ``(match_results, had_species_evidence, constrained_reaction_ids)``.
+
+    An empty result with ``had_species_evidence=False`` means the generator could not
+    run for lack of usable species evidence, which is a retrieval limitation rather
+    than a crash.
+
+    ``constrained_reaction_ids`` are the reactions the generator's own species filter
+    kept, i.e. those mentioning at least one mapped species. A reaction outside this
+    set has zero mapped participants, so it cannot constrain the KEGG candidate set;
+    reporting it as a missing generator output would be wrong. Deriving the set from
+    the same filtering pass keeps the diagnostic from disagreeing with the generator.
 
     ``restrict_to`` limits generation to specific reaction ids, used to isolate which
     reaction caused a batch failure.
@@ -205,7 +217,7 @@ def _run_generator(
 
     _, high_score = map_chebi_to_kegg(recs)
     if high_score.empty or "id" not in high_score.columns:
-        return [], False
+        return [], False, set()
 
     mapped_species_ids = list(high_score["id"].astype(str).unique())
     # Reactions mentioning none of the mapped species are filtered out, so the ids must
@@ -214,6 +226,9 @@ def _run_generator(
     aligned_ids, reactions, _ = extract_reactions_with_ids_from_sbml(
         str(model_file), mapped_species_ids
     )
+    # Captured before --scope/isolation narrowing, so it reflects only the species
+    # filter and not which reactions we chose to generate for.
+    constrained_ids = {rid for rid in aligned_ids if rid}
     if restrict_to is not None:
         keep = [i for i, rid in enumerate(aligned_ids) if rid in restrict_to]
         aligned_ids = [aligned_ids[i] for i in keep]
@@ -234,7 +249,7 @@ def _run_generator(
         penalty_lam=float(GENERATION_CONFIG["penalty_lam"]),
         strict_errors=True,
     )
-    return match_results, True
+    return match_results, True, constrained_ids
 
 
 def _collapse_match_results(match_results: List[Any]) -> Dict[str, Dict[str, Any]]:
@@ -259,6 +274,30 @@ def _collapse_match_results(match_results: List[Any]) -> Dict[str, Dict[str, Any
             if prev is None or (score is not None and score > prev):
                 entry["scores"][str(cand)] = score
     return grouped
+
+
+def classify_missing_reaction(
+    reaction_id: str,
+    *,
+    is_ssx: bool,
+    had_evidence: bool,
+    constrained_ids: Set[str],
+) -> str:
+    """Status for an evaluable reaction the generator returned no entry for.
+
+    Only the last branch is a software fault. A reaction whose participants carry no
+    ChEBI or KEGG-compound annotation is dropped by the generator's species filter and
+    can never constrain the candidate set, even when *other* species in the same model
+    are annotated; that is a retrieval failure and a future open-set recovery example.
+    Deciding this on the model-level evidence flag alone would misreport it.
+    """
+    if is_ssx:
+        return STATUS_EXCHANGE_SKIPPED
+    if not had_evidence:
+        return STATUS_NO_SPECIES_EVIDENCE
+    if reaction_id not in constrained_ids:
+        return STATUS_UNCONSTRAINED
+    return STATUS_ABSENT
 
 
 def process_model(model_id: str, scope: Optional[str] = None) -> Dict[str, Any]:
@@ -311,11 +350,12 @@ def process_model(model_id: str, scope: Optional[str] = None) -> Dict[str, Any]:
     grouped: Dict[str, Dict[str, Any]] = {}
     isolated_failures: Dict[str, str] = {}
     had_evidence = True
+    constrained_ids: Set[str] = set()
     scope = str(GENERATION_CONFIG.get("reaction_scope", "evaluable"))
     restrict = set(target_ids) if scope == "evaluable" else None
 
     try:
-        match_results, had_evidence = _run_generator(
+        match_results, had_evidence, constrained_ids = _run_generator(
             model_file, recs, reaction_ids, restrict_to=restrict
         )
         grouped = _collapse_match_results(match_results)
@@ -330,7 +370,7 @@ def process_model(model_id: str, scope: Optional[str] = None) -> Dict[str, Any]:
         })
         # Isolate: retry one reaction at a time so a single bad reaction does not
         # discard the whole model's candidates.
-        grouped, isolated_failures = _isolate_per_reaction(
+        grouped, isolated_failures, constrained_ids = _isolate_per_reaction(
             model_file, recs, reaction_ids, sorted(restrict) if restrict else reaction_ids
         )
         for rid, msg in isolated_failures.items():
@@ -349,13 +389,12 @@ def process_model(model_id: str, scope: Optional[str] = None) -> Dict[str, Any]:
             outcome.status.append(_status_row(model_id, rid, STATUS_FAILED, cid))
             continue
         if entry is None:
-            if rid in ssx_ids:
-                status = STATUS_EXCHANGE_SKIPPED
-            elif not had_evidence:
-                # The generator never ran for this model: no usable species evidence.
-                status = STATUS_NO_SPECIES_EVIDENCE
-            else:
-                status = STATUS_ABSENT
+            status = classify_missing_reaction(
+                rid,
+                is_ssx=rid in ssx_ids,
+                had_evidence=had_evidence,
+                constrained_ids=constrained_ids,
+            )
             if status == STATUS_ABSENT:
                 outcome.failures.append({
                     "model_id": model_id,
@@ -456,17 +495,21 @@ def _isolate_per_reaction(
     recs: pd.DataFrame,
     reaction_ids: List[str],
     targets: Optional[List[str]] = None,
-) -> Tuple[Dict[str, Dict[str, Any]], Dict[str, str]]:
+) -> Tuple[Dict[str, Dict[str, Any]], Dict[str, str], Set[str]]:
     """Re-run generation one reaction at a time to attribute a batch failure."""
     grouped: Dict[str, Dict[str, Any]] = {}
     failures: Dict[str, str] = {}
+    constrained: Set[str] = set()
     for rid in (targets if targets is not None else reaction_ids):
         try:
-            results, _ = _run_generator(model_file, recs, reaction_ids, restrict_to={rid})
+            results, _, constrained_ids = _run_generator(
+                model_file, recs, reaction_ids, restrict_to={rid}
+            )
+            constrained |= constrained_ids
             grouped.update(_collapse_match_results(results))
         except Exception as exc:  # noqa: BLE001
             failures[rid] = f"{type(exc).__name__}: {exc}"
-    return grouped, failures
+    return grouped, failures, constrained
 
 
 def _cache_path(model_id: str) -> Path:
@@ -494,8 +537,13 @@ def _worker(model_id: str, scope: str) -> str:
     return model_id
 
 
-def assemble(model_ids: List[str]) -> Dict[str, Any]:
-    """Collect per-model caches into the frozen Phase 2 candidate artifacts."""
+def assemble(model_ids: List[str], partial_ok: bool = False) -> Dict[str, Any]:
+    """Collect per-model caches into the Phase 2 candidate artifacts.
+
+    ``partial_ok`` marks the output as an intentionally incomplete snapshot (e.g. a
+    ``--limit`` smoke test). Models without a compatible cache are then reported as
+    pending rather than missing, and are never counted as pipeline failures.
+    """
     cand_rows: List[Dict[str, Any]] = []
     status_rows: List[Dict[str, Any]] = []
     failure_rows: List[Dict[str, Any]] = []
@@ -543,9 +591,13 @@ def assemble(model_ids: List[str]) -> Dict[str, Any]:
     summary = {
         "config_id": config_id(),
         "generation_config": GENERATION_CONFIG,
+        "partial_run": bool(partial_ok and missing),
+        "is_final": not missing,
         "models_requested": len(model_ids),
         "models_assembled": len(model_ids) - len(missing),
-        "models_missing_cache": missing,
+        "models_pending": len(missing) if partial_ok else 0,
+        "models_pending_list": missing if partial_ok else [],
+        "models_missing_cache": [] if partial_ok else missing,
         "reactions_with_status": int(len(status_df)),
         "status_counts": (
             status_df["status"].value_counts().sort_index().to_dict() if not status_df.empty else {}
@@ -589,7 +641,13 @@ def main() -> int:
     )
     parser.add_argument(
         "--limit", type=int, default=None,
-        help="Process only the N smallest pending models (smoke test)",
+        help="Process only the N smallest pending models (smoke test). Implies a "
+             "partial, non-final assembly.",
+    )
+    parser.add_argument(
+        "--allow-partial", action="store_true",
+        help="Assemble whatever compatible caches exist and report the rest as pending "
+             "instead of failing. Implied by --limit.",
     )
     args = parser.parse_args()
 
@@ -654,13 +712,38 @@ def main() -> int:
                         except Exception as exc:  # noqa: BLE001
                             logger.error("[%d/%d] %s WORKER CRASH: %s", done, len(todo), m, exc)
 
-    summary = assemble(model_ids)
+    # A limited run deliberately leaves models ungenerated, so absent caches are
+    # expected. A full run or a freeze via --assemble-only still demands complete
+    # coverage.
+    partial_ok = args.limit is not None or args.allow_partial
+
+    summary = assemble(model_ids, partial_ok=partial_ok)
     logger.info("Status counts: %s", summary["status_counts"])
     logger.info("Candidate rows: %s", summary["candidate_rows"])
     logger.info("Pipeline failures: %s %s", summary["pipeline_failures"], summary["failure_types"])
+
+    if summary["partial_run"]:
+        logger.info(
+            "PARTIAL run: assembled %d/%d models, %d pending. Outputs are a snapshot, "
+            "not the frozen Phase 2 artifacts.",
+            summary["models_assembled"], summary["models_requested"],
+            summary["models_pending"],
+        )
+        pending = summary["models_pending_list"]
+        logger.info("Pending models: %s%s",
+                    ", ".join(pending[:5]), " ..." if len(pending) > 5 else "")
+        return 0
+
     if summary["models_missing_cache"]:
-        logger.error("Missing caches: %s", summary["models_missing_cache"])
+        logger.error(
+            "Missing caches for %d models: %s. Re-run generation, or pass "
+            "--allow-partial to accept an incomplete snapshot.",
+            len(summary["models_missing_cache"]), summary["models_missing_cache"][:5],
+        )
         return 1
+
+    logger.info("Complete assembly: %d models, final artifacts written.",
+                summary["models_assembled"])
     return 0
 
 

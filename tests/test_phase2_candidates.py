@@ -342,6 +342,216 @@ def test_retrieval_and_reranking_failures_are_mutually_exclusive():
         assert not (retrieval_failure and reranking_failure)
 
 
+# ----------------------------------------------------------------------------------
+# Missing-output classification must be reaction-aware.
+#
+# BIOMD0000000122/R1 and BIOMD0000000123/R1 are the same reaction:
+#   NFAT_Pi_Nuc + Act_C_Nuc <=> Act_C_Nuc + NFAT_Nuc   (ground truth R00164)
+# The only annotated species in those models are Ca_Cyt/Ca_Nuc (CHEBI:29108 / C00076),
+# so the model *has* evidence while this reaction has none of it. The generator's
+# species filter drops the reaction, which is a retrieval failure, not a fault.
+
+
+def test_unannotated_reaction_in_annotated_model_is_unconstrained():
+    from benchmark.scripts.generate_candidates import (
+        STATUS_UNCONSTRAINED, classify_missing_reaction,
+    )
+
+    # "R2" is constrained (mentions the annotated calcium species); "R1" is not.
+    status = classify_missing_reaction(
+        "R1", is_ssx=False, had_evidence=True, constrained_ids={"R2"},
+    )
+    assert status == STATUS_UNCONSTRAINED
+
+
+def test_reaction_with_constraints_that_vanishes_is_a_pipeline_failure():
+    from benchmark.scripts.generate_candidates import (
+        STATUS_ABSENT, classify_missing_reaction,
+    )
+
+    status = classify_missing_reaction(
+        "R1", is_ssx=False, had_evidence=True, constrained_ids={"R1", "R2"},
+    )
+    assert status == STATUS_ABSENT
+
+
+def test_missing_classification_precedence():
+    from benchmark.scripts.generate_candidates import (
+        STATUS_EXCHANGE_SKIPPED, STATUS_NO_SPECIES_EVIDENCE, classify_missing_reaction,
+    )
+
+    # SSX wins over everything else.
+    assert classify_missing_reaction(
+        "R1", is_ssx=True, had_evidence=True, constrained_ids={"R1"},
+    ) == STATUS_EXCHANGE_SKIPPED
+    # A model with no usable evidence at all is reported as such, not as unconstrained.
+    assert classify_missing_reaction(
+        "R1", is_ssx=False, had_evidence=False, constrained_ids=set(),
+    ) == STATUS_NO_SPECIES_EVIDENCE
+
+
+def test_unconstrained_reactions_are_not_pipeline_failures(monkeypatch, tmp_path):
+    """End-to-end through assemble(): status recorded, failures table stays empty."""
+    import benchmark.scripts.generate_candidates as gc
+
+    cache = tmp_path / "cache"
+    cache.mkdir()
+    monkeypatch.setattr(gc, "CACHE_DIR", cache)
+    monkeypatch.setattr(gc, "_cache_path", lambda m: cache / f"{m}.json")
+    for name in ("CANDIDATES_CSV", "STATUS_CSV", "FAILURES_CSV", "CONFIG_JSON"):
+        monkeypatch.setattr(gc, name, tmp_path / getattr(gc, name).name)
+
+    for model_id in ("BIOMD0000000122", "BIOMD0000000123"):
+        gc.write_json({
+            "model_id": model_id,
+            "config_id": gc.config_id(),
+            "candidates": [],
+            "status": [gc._status_row(
+                model_id, "R1", gc.STATUS_UNCONSTRAINED, gc.config_id(),
+            )],
+            "failures": [],
+            "elapsed_s": 1.0,
+        }, cache / f"{model_id}.json")
+
+    summary = gc.assemble(["BIOMD0000000122", "BIOMD0000000123"])
+
+    assert summary["pipeline_failures"] == 0
+    assert summary["status_counts"] == {gc.STATUS_UNCONSTRAINED: 2}
+
+    status = pd.read_csv(gc.STATUS_CSV)
+    assert set(status.status) == {gc.STATUS_UNCONSTRAINED}
+    assert (status.filtered_species_count == 0).all()
+    assert (status.num_candidates == 0).all()
+    assert pd.read_csv(gc.CANDIDATES_CSV).empty
+    assert pd.read_csv(gc.FAILURES_CSV).empty
+
+
+# ----------------------------------------------------------------------------------
+# Partial vs final assembly
+
+
+@pytest.fixture
+def cache_env(monkeypatch, tmp_path):
+    """Isolate cache and output paths, seeded with one cached model."""
+    import benchmark.scripts.generate_candidates as gc
+
+    cache = tmp_path / "cache"
+    cache.mkdir()
+    monkeypatch.setattr(gc, "CACHE_DIR", cache)
+    monkeypatch.setattr(gc, "_cache_path", lambda m: cache / f"{m}.json")
+    for name in ("CANDIDATES_CSV", "STATUS_CSV", "FAILURES_CSV", "CONFIG_JSON"):
+        monkeypatch.setattr(gc, name, tmp_path / getattr(gc, name).name)
+
+    gc.write_json({
+        "model_id": "M1",
+        "config_id": gc.config_id(),
+        "candidates": [],
+        "status": [gc._status_row("M1", "R1", gc.STATUS_OK, gc.config_id(),
+                                  num_candidates=0)],
+        "failures": [],
+        "elapsed_s": 1.0,
+    }, cache / "M1.json")
+    return gc
+
+
+def test_partial_assembly_reports_pending_not_missing(cache_env):
+    gc = cache_env
+    summary = gc.assemble(["M1", "M2", "M3"], partial_ok=True)
+
+    assert summary["partial_run"] is True
+    assert summary["is_final"] is False
+    assert summary["models_requested"] == 3
+    assert summary["models_assembled"] == 1
+    assert summary["models_pending"] == 2
+    assert summary["models_pending_list"] == ["M2", "M3"]
+    # Pending models must not masquerade as missing caches or failures.
+    assert summary["models_missing_cache"] == []
+    assert summary["pipeline_failures"] == 0
+
+
+def test_final_assembly_treats_missing_caches_as_failure(cache_env):
+    gc = cache_env
+    summary = gc.assemble(["M1", "M2", "M3"], partial_ok=False)
+
+    assert summary["partial_run"] is False
+    assert summary["is_final"] is False
+    assert summary["models_missing_cache"] == ["M2", "M3"]
+    assert summary["models_pending"] == 0
+
+
+def test_complete_assembly_is_final(cache_env):
+    gc = cache_env
+    summary = gc.assemble(["M1"], partial_ok=False)
+
+    assert summary["is_final"] is True
+    assert summary["partial_run"] is False
+    assert summary["models_missing_cache"] == []
+
+
+def test_limited_run_exits_successfully(cache_env, monkeypatch):
+    """--limit must not report a successful smoke test as a failed full run."""
+    gc = cache_env
+    monkeypatch.setattr(sys, "argv", [
+        "generate_candidates.py", "--limit", "0", "--workers", "1", "--assemble-only",
+    ])
+    # --assemble-only skips generation; --limit still marks the output partial.
+    monkeypatch.setattr(gc.pd, "read_csv", _fake_reactions_reader(gc.pd.read_csv))
+    assert gc.main() == 0
+
+
+def test_full_run_exits_nonzero_when_caches_missing(cache_env, monkeypatch):
+    gc = cache_env
+    monkeypatch.setattr(sys, "argv", [
+        "generate_candidates.py", "--assemble-only", "--workers", "1",
+    ])
+    monkeypatch.setattr(gc.pd, "read_csv", _fake_reactions_reader(gc.pd.read_csv))
+    assert gc.main() == 1
+
+
+def _fake_reactions_reader(real_read_csv):
+    """Serve a tiny reactions table so main() does not need the real benchmark."""
+    import benchmark.scripts.generate_candidates as gc
+
+    def reader(path, *args, **kwargs):
+        if Path(path) == Path(gc.REACTIONS_CSV):
+            return pd.DataFrame({
+                "model_id": ["M1", "M2", "M3"],
+                "reaction_id": ["R1", "R1", "R1"],
+                "included_in_eval": [True, True, True],
+                "is_exchange_ssx": [False, False, False],
+                "ground_truth_kegg_all": ["R00164"] * 3,
+            })
+        return real_read_csv(path, *args, **kwargs)
+
+    return reader
+
+
+# ----------------------------------------------------------------------------------
+# Cache schema invalidation
+
+
+def test_cache_schema_bump_invalidates_old_payloads(cache_env, monkeypatch):
+    gc = cache_env
+    assert gc._load_cached("M1") is not None
+
+    # A payload written under an earlier schema must not be reused.
+    monkeypatch.setitem(gc.GENERATION_CONFIG, "cache_schema_version", 1)
+    assert gc._load_cached("M1") is None
+
+
+def test_cache_schema_version_is_in_config_id():
+    from benchmark.scripts import generate_candidates as gc
+
+    before = gc.config_id()
+    original = gc.GENERATION_CONFIG["cache_schema_version"]
+    try:
+        gc.GENERATION_CONFIG["cache_schema_version"] = original + 1
+        assert gc.config_id() != before
+    finally:
+        gc.GENERATION_CONFIG["cache_schema_version"] = original
+    assert gc.config_id() == before
+
+
 def test_config_id_changes_with_configuration():
     from benchmark.scripts import generate_candidates as gc
 
