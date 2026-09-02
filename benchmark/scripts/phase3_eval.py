@@ -72,16 +72,22 @@ def _pred_id_class(p: Prediction) -> str:
 
 
 def _evidence_outcome(result: ModeResult, exact_top1: bool) -> str:
+    """Label using support of the evaluated (top-1) prediction only.
+
+    Lower-ranked support must not promote top-1 to evidence-backed.
+    """
     has_retrieval = bool(evidence_identifier_list(result.evidence))
-    supported = any(p.prediction_supported_by_evidence for p in result.predictions)
+    top1_supported = bool(
+        result.predictions and result.predictions[0].prediction_supported_by_evidence
+    )
     answered = (not result.abstain) and bool(result.predictions)
     if result.abstain and has_retrieval:
         return "abstained_after_retrieval"
-    if exact_top1 and supported:
+    if exact_top1 and top1_supported:
         return "correct_and_evidence_supported"
-    if exact_top1 and not supported:
+    if exact_top1 and not top1_supported:
         return "correct_but_unsupported"
-    if answered and (not exact_top1) and supported:
+    if answered and (not exact_top1) and top1_supported:
         return "incorrect_despite_evidence"
     if answered:
         return "incorrect_unsupported"
@@ -121,7 +127,14 @@ def score_one(
         "invalid_kegg_ids": invalid,
         "malformed_ids": malformed,
         "absent_from_catalog_ids": absent,
-        "evidence_backed": result.evidence_backed,
+        "evidence_backed": (
+            (not result.abstain)
+            and bool(preds)
+            and bool(preds[0].prediction_supported_by_evidence)
+        ),
+        "top1_supported_by_evidence": (
+            bool(preds) and bool(preds[0].prediction_supported_by_evidence)
+        ),
         "prediction_supported_by_evidence": [
             p.prediction_supported_by_evidence for p in preds
         ],
