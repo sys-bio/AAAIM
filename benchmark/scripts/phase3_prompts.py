@@ -13,6 +13,7 @@ Usage::
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import sys
 from pathlib import Path
@@ -33,8 +34,11 @@ from benchmark.scripts.phase3_common import (
     TOKENIZER_SCAFFOLD,
     assert_no_kegg_leakage,
     estimate_tokens,
+    extract_kegg_reaction_ids,
     load_evaluable_corpus,
+    parse_kegg_ids,
     parse_participant_ids,
+    redact_kegg_in_obj,
     redact_kegg_reaction_ids,
     write_jsonl,
 )
@@ -51,6 +55,28 @@ OPEN_SET_INSTRUCTIONS = (
     "Identify the KEGG reaction that this SBML reaction most likely represents. "
     "You may propose up to three KEGG reaction identifiers (R followed by five digits), "
     "ordered from most to least confident, or abstain if the evidence is insufficient. "
+    "Do not invent identifiers that you cannot support. Return JSON only."
+)
+
+SYSTEM_DIRECT = (
+    "You are annotating a metabolic reaction from an SBML model against the KEGG "
+    "reaction catalog. Use the supplied reaction context and your internal knowledge. "
+    "Do not use external tools, database queries, or a supplied candidate list. "
+    "If you cannot identify the reaction reliably, abstain."
+)
+
+SYSTEM_TOOL_ASSISTED = (
+    "You are annotating a metabolic reaction from an SBML model against the KEGG "
+    "reaction catalog. Use the supplied reaction context together with recorded "
+    "tool or search evidence. Do not use a supplied candidate list. If the recorded "
+    "evidence is insufficient to identify the reaction reliably, abstain."
+)
+
+TOOL_USER_INSTRUCTIONS = (
+    "Identify the KEGG reaction that this SBML reaction most likely represents. "
+    "Prefer identifiers that appear in the recorded tool evidence. You may propose "
+    "up to three KEGG reaction identifiers (R followed by five digits), ordered from "
+    "most to least confident, or abstain if the evidence is insufficient. "
     "Do not invent identifiers that you cannot support. Return JSON only."
 )
 
@@ -125,8 +151,8 @@ def _participant_block(
     for sid in ids:
         ev = evidence_idx.get(sid, {"chebi": [], "kegg_compound": []})
         blocks.append({
-            "species_id": sid,
-            "name": name_lookup.get((model_id, sid), sid),
+            "species_id": redact_kegg_reaction_ids(sid),
+            "name": redact_kegg_reaction_ids(name_lookup.get((model_id, sid), sid)),
             "chebi": list(ev["chebi"]),
             "kegg_compound": list(ev["kegg_compound"]),
         })
@@ -198,7 +224,7 @@ def build_context(
         "template_version": PROMPT_TEMPLATE_VERSION,
         "model_id": str(row.model_id),
         "reaction_id": redact_kegg_reaction_ids(str(row.reaction_id)),
-        "equation": str(row.reaction_equation or ""),
+        "equation": redact_kegg_reaction_ids(str(row.reaction_equation or "")),
         "reaction_name": redact_kegg_reaction_ids(str(row.reaction_name or "")),
         "direction": _direction(str(row.reaction_equation or "")),
         "participants": _participant_block(
@@ -217,19 +243,29 @@ def build_context(
         context["neighborhood_k"] = int(neighborhood_k)
         context["neighbors"] = _neighbors(row, model_rows, k=neighborhood_k)
 
+    context = redact_kegg_in_obj(context)
     assert_no_kegg_leakage(context, where=f"{row.model_id}/{row.reaction_id}/{variant}")
     return context
 
 
-def render_prompt(context: Dict[str, Any]) -> Dict[str, Any]:
-    """Turn a context dict into a provider-independent chat payload."""
-    system = (
-        "You are annotating a metabolic reaction from an SBML model against the KEGG "
-        "reaction catalog. Use only the supplied reaction-local context. The catalog is "
-        "open: no candidate list is provided. If the evidence is insufficient, abstain."
-    )
+def render_prompt(
+    context: Dict[str, Any],
+    *,
+    mode: str = "direct_open_set",
+) -> Dict[str, Any]:
+    """Turn a context dict into a provider-independent chat payload.
+
+    Direct open-set and tool-assisted modes share the reaction context but use
+    distinct system (and user preamble) instructions.
+    """
+    if mode == "tool_assisted":
+        system = SYSTEM_TOOL_ASSISTED
+        preamble = TOOL_USER_INSTRUCTIONS
+    else:
+        system = SYSTEM_DIRECT
+        preamble = OPEN_SET_INSTRUCTIONS
     user_lines = [
-        OPEN_SET_INSTRUCTIONS,
+        preamble,
         "",
         f"SBML reaction id: {context['reaction_id']}",
         f"Equation: {context['equation']}",
@@ -267,16 +303,22 @@ def render_prompt(context: Dict[str, Any]) -> Dict[str, Any]:
         "\"rationale\": string, \"basis\": \"recalled_knowledge\"|\"supplied_evidence\"|\"mixed\"}."
     )
     user = "\n".join(user_lines)
+    user = redact_kegg_reaction_ids(user)
+    system = redact_kegg_reaction_ids(system)
     payload = {
         "template_version": PROMPT_TEMPLATE_VERSION,
         "variant": context["variant"],
+        "mode": mode,
         "messages": [
             {"role": "system", "content": system},
             {"role": "user", "content": user},
         ],
+        "system_direct": SYSTEM_DIRECT,
+        "system_tool_assisted": SYSTEM_TOOL_ASSISTED,
         "response_schema": STRUCTURED_OUTPUT_SCHEMA,
         "max_output_tokens": 400,
     }
+    payload = redact_kegg_in_obj(payload)
     assert_no_kegg_leakage(payload, where=f"prompt:{context['model_id']}/{context['reaction_id']}")
     payload["n_input_tokens_est"] = estimate_tokens(system) + estimate_tokens(user)
     payload["token_estimate_method"] = TOKENIZER_SCAFFOLD
@@ -306,7 +348,7 @@ def build_pilot_prompts(
                 corpus_row, variant=variant, corpus=corpus, evidence=evidence,
                 neighborhood_k=neighborhood_k, species_names=name_lookup,
             )
-            prompt = render_prompt(context)
+            prompt = render_prompt(context, mode="direct_open_set")
             record = {
                 "sample_id": rec.sample_id,
                 "model_id": rec.model_id,
@@ -326,7 +368,64 @@ def build_pilot_prompts(
             # model-visible prompt is required to be free of R##### tokens.
             assert_no_kegg_leakage(prompt, where=f"prompt:{rec.sample_id}/{variant}")
             rows.append(record)
+    audit = audit_prompts_against_answer_key(rows, key)
+    if audit["n_ground_truth_leaks"] or audit["n_any_kegg_id_leaks"]:
+        raise ValueError(
+            "KEGG leakage in open-set prompts: "
+            f"ground_truth={audit['n_ground_truth_leaks']} "
+            f"any_id={audit['n_any_kegg_id_leaks']}"
+        )
+    logger.info(
+        "answer-key audit: %d prompts, %d samples, ground-truth leaks=%d, any R#####=%d",
+        audit["n_prompts_checked"], audit["n_samples_checked"],
+        audit["n_ground_truth_leaks"], audit["n_any_kegg_id_leaks"],
+    )
     return rows
+
+
+def audit_prompts_against_answer_key(
+    rows: Sequence[Dict[str, Any]],
+    key: pd.DataFrame,
+) -> Dict[str, Any]:
+    """Fail if any model-visible prompt contains a ground-truth or any R##### id.
+
+    Open-set prompts must not contain KEGG reaction identifiers at all. The
+    ground-truth intersection is the answer-key-aware check; the any-id check
+    is the broader policy. Join keys on the jsonl record are excluded.
+    """
+    key_map: Dict[Tuple[str, str], List[str]] = {}
+    for rec in key.itertuples(index=False):
+        key_map[(str(rec.model_id), str(rec.reaction_id))] = parse_kegg_ids(
+            rec.ground_truth_kegg_all)
+    n_prompts = 0
+    samples = set()
+    gt_leaks = 0
+    any_leaks = 0
+    gt_examples: List[str] = []
+    for row in rows:
+        n_prompts += 1
+        sample_key = (str(row["model_id"]), str(row["reaction_id"]))
+        samples.add(sample_key)
+        found = set(extract_kegg_reaction_ids(json.dumps(row["prompt"], default=str)))
+        truth = set(key_map.get(sample_key, []))
+        if found & truth:
+            gt_leaks += 1
+            if len(gt_examples) < 5:
+                gt_examples.append(
+                    f"{row['sample_id']}/{row['variant']}:{sorted(found & truth)}")
+        if found:
+            any_leaks += 1
+    return {
+        "n_prompts_checked": n_prompts,
+        "n_samples_checked": len(samples),
+        "n_ground_truth_leaks": gt_leaks,
+        "n_any_kegg_id_leaks": any_leaks,
+        "ground_truth_examples": gt_examples,
+        "policy": (
+            "No KEGG reaction id may appear in the model-visible open-set prompt. "
+            "Join keys may be KEGG-shaped SBML ids and are not shown to the model."
+        ),
+    }
 
 
 def main() -> int:
