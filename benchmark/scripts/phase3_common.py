@@ -74,10 +74,16 @@ FIT_SPLITS_TRAIN_VAL = ("train", "validation")
 SPLIT_SEED = 20260902
 SPLIT_ALGORITHM = "cluster_greedy_v1"
 PILOT_SEED = 20260902
-PROMPT_TEMPLATE_VERSION = "phase3-open-set-v2"
+PROMPT_TEMPLATE_VERSION = "phase3-open-set-v3"
 
-KEGG_REACTION_RE = re.compile(r"\bR\d{5}\b")
-KEGG_REACTION_URI_RE = re.compile(r"kegg\.reaction[/:]R\d{5}", re.IGNORECASE)
+# Word-boundary detector (legacy). Underscores and letters are word characters,
+# so it misses R##### embedded in SBML ids such as R_R06861_C3_cytop and R00678_Tdo.
+KEGG_REACTION_LEGACY_WORD_BOUNDARY_RE = re.compile(r"\bR\d{5}\b")
+# R followed by exactly five digits, bounded by non-digits (or string edges).
+# Matches R00024, R_R06861_C3_cytop, R00678_Tdo, prefixR00024_suffix.
+# Rejects R000240 (six or more digits).
+KEGG_REACTION_RE = re.compile(r"(?<!\d)(R\d{5})(?!\d)")
+KEGG_REACTION_URI_RE = re.compile(r"kegg\.reaction[/:]R\d{5}(?!\d)", re.IGNORECASE)
 KEGG_ID_STRICT = re.compile(r"^R\d{5}$")
 ID_MALFORMED = "malformed"
 ID_ABSENT = "absent_from_catalog"
@@ -228,18 +234,35 @@ def load_evaluable_corpus() -> pd.DataFrame:
 
 
 def redact_kegg_reaction_ids(text: str) -> str:
+    """Replace every embedded R##### (and kegg.reaction URIs) in a string."""
     if not text:
         return ""
     text = KEGG_REACTION_URI_RE.sub("[REDACTED_KEGG_REACTION]", text)
     return KEGG_REACTION_RE.sub("[REDACTED_KEGG_REACTION]", text)
 
 
+def redact_kegg_in_obj(obj: Any) -> Any:
+    """Redact KEGG reaction ids in every string inside a JSON-able object."""
+    if isinstance(obj, str):
+        return redact_kegg_reaction_ids(obj)
+    if isinstance(obj, list):
+        return [redact_kegg_in_obj(item) for item in obj]
+    if isinstance(obj, dict):
+        return {key: redact_kegg_in_obj(value) for key, value in obj.items()}
+    return obj
+
+
+def extract_kegg_reaction_ids(text: str) -> List[str]:
+    """All R##### substrings using digit boundaries, not word boundaries."""
+    if not text:
+        return []
+    return KEGG_REACTION_RE.findall(text)
+
+
 def find_kegg_leakage(payload: Any) -> List[str]:
-    """Return unique KEGG reaction ids / URIs found anywhere in a JSON-able payload."""
+    """Return unique KEGG reaction ids found anywhere in a JSON-able payload."""
     blob = json.dumps(payload, default=str)
-    found = set(KEGG_REACTION_RE.findall(blob))
-    found.update(KEGG_REACTION_URI_RE.findall(blob))
-    return sorted(found)
+    return sorted(set(extract_kegg_reaction_ids(blob)))
 
 
 def assert_no_kegg_leakage(payload: Any, *, where: str) -> None:
