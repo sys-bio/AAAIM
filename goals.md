@@ -130,11 +130,11 @@ The new documentation is a useful foundation and correctly exposes the combined 
 - Document failure behavior, required reference files, output filenames, and the exact provenance accepted for species annotations.
 - Correct small source/documentation hygiene issues found during review, including duplicated argument/assignment lines, while avoiding unrelated refactors.
 
-## Retrieval modernization for species annotation
+## Retrieval modernization across annotation types
 
-The current method named `rag` is a dense vector-retrieval pipeline built with ChromaDB. ChEBI, NCBI Gene, and UniProt index entries are mostly individual names/synonyms embedded with `all-MiniLM-L6-v2`; an older optional path uses `text-embedding-ada-002`. This is functional, but it should not be treated as the only modern retrieval baseline.
+The current method named `rag` is a dense vector-retrieval pipeline built with ChromaDB. ChEBI, NCBI Gene, and UniProt index entries are mostly individual names/synonyms embedded with `all-MiniLM-L6-v2`; an older optional path uses `text-embedding-ada-002`. This is functional, but it should not be treated as the only modern retrieval baseline. Retrieval modernization applies to species annotations across ChEBI, NCBI Gene, and UniProt and to full-catalog KEGG reaction retrieval, although each database must be evaluated separately.
 
-LunaStarr's “BM26” comment almost certainly refers to **BM25**, a lexical ranking method. BM25 is especially plausible for ontology entity linking because exact names, abbreviations, identifiers, and rare tokens can be more informative than generic semantic similarity.
+LunaStarr confirmed that she meant **BM25**, a lexical ranking method, and that her concern applies to all supported annotation types. BM25 is especially plausible for ontology entity linking because exact names, abbreviations, identifiers, and rare tokens can be more informative than generic semantic similarity. The particular paper or implementation she had in mind can be collected later; it is not a prerequisite for implementing the standard baseline.
 
 ### Feasible retrieval experiment
 
@@ -143,9 +143,11 @@ Do not replace the existing dense RAG path immediately. Implement a common retri
 1. Current direct dictionary/synonym matching.
 2. BM25 lexical retrieval over canonical names plus synonyms.
 3. Current dense embedding retrieval.
-4. A simple hybrid candidate union or rank fusion of BM25 and dense retrieval.
+4. A simple hybrid of BM25 and dense retrieval using reciprocal rank fusion (RRF), with candidate union retained as an auditable intermediate.
 
-Evaluate candidate Recall@1/3/10, latency, index size, and downstream LLM-selection accuracy separately for ChEBI, NCBI Gene, and UniProt. Use the same frozen inputs and ground truth for all methods. Only promote a new default after the comparison. Updating the dense encoder is a later option, not a prerequisite for the BM25 baseline.
+Evaluate candidate Recall@1/3/10, latency, index size, and downstream LLM-selection accuracy separately for ChEBI, NCBI Gene, UniProt, and KEGG reactions wherever labeled evaluation data are available. Use the same frozen inputs and ground truth for all methods. Only promote a new default after the comparison. Updating the dense encoder is a later option, not a prerequisite for the BM25 baseline.
+
+BM25 remains a strong, interpretable baseline rather than an obsolete method. More elaborate retrievers such as SPLADE or ColBERT are out of the immediate scope unless BM25, dense retrieval, and their hybrid expose a clear failure that justifies the additional complexity.
 
 ## Expectation-maximization decision
 
@@ -194,11 +196,11 @@ The cluster-separated split and validation-only pilot have been created on `benc
 
 Ground-truth leakage from KEGG-shaped SBML reaction IDs was detected and fixed. The current `phase3-open-set-v3` prompts contain zero KEGG reaction IDs under the embedded-ID detector. Direct mode explicitly permits internal model knowledge while prohibiting external tools and candidate lists. Tool evidence is linked per prediction, and evidence outcomes evaluate top-1 support.
 
-Next live step: implement and inspect a capped OpenAI runner, then run a nine-call operational smoke test using three validation reactions and all three context variants. The smoke test validates authentication, structured output, caching, token accounting, restart behavior, and budget enforcement; it is not an accuracy estimate. The current starting model is `gpt-5.6-terra`, subject to exact-version availability at run time.
+Next live step: implement and inspect a capped OpenAI runner, then run a nine-call operational smoke test using three validation reactions and all three context variants. The smoke test validates authentication, structured output, caching, token accounting, restart behavior, and budget enforcement; it is not an accuracy estimate. The current starting model is `gpt-5.6-terra`, subject to exact-version availability at run time. The PhD advisor has approved $20 in OpenAI credits; execution is waiting for the finance contact to add those credits to the account. The runner must still enforce a hard dollar limit and cache every response.
 
-### Phase 3B: Train a learned full-database retriever — important but schedule-dependent
+### Phase 3B: Train a learned full-database bi-encoder — committed deliverable
 
-Train a small scientific text encoder or bi-encoder to retrieve from the complete KEGG reaction database, rather than only reorder candidates generated by the existing chemical rules.
+Train a small scientific text bi-encoder to retrieve from the complete frozen catalog of approximately 12,312 KEGG reactions, rather than only reorder candidates generated by the existing chemical rules. This is now a definite project deliverable, while its completion must not delay the October manuscript start.
 
 Each query may combine:
 
@@ -211,7 +213,9 @@ Candidate documents may combine the KEGG equation, definition, enzyme/orthology 
 
 Use model-cluster-separated train/validation/test splits. Use chemically or textually similar KEGG reactions as hard negatives. Evaluate Recall@1/3/5/10, MRR, calibration, and results by evidence/failure stratum.
 
-This learned retriever satisfies the goal of training a modern neural model while targeting the failure mode that Phase 2 actually revealed. It remains valuable for the career/research artifact, but it must not block the October manuscript start. If integration, EM, and retrieval validation consume September, specify the experiment and begin it in parallel with manuscript drafting rather than delaying writing.
+Compare the trained bi-encoder against the existing chemical rules, BM25, an off-the-shelf dense encoder, and BM25+dense RRF. Also evaluate a union or fusion of rule-based and learned candidates. This creates a clean progression from deterministic retrieval through untrained lexical/semantic retrieval to a model trained specifically for AAAIM.
+
+This learned retriever satisfies the goal of training a modern neural model while targeting the failure mode that Phase 2 actually revealed. Initial training should use the local RTX 3070 with mixed precision, conservative batch sizes, and gradient accumulation; rented compute is optional unless profiling demonstrates a real need. If integration, EM, and retrieval validation consume September, finalize the protocol and begin training in parallel with manuscript drafting rather than delaying writing.
 
 ### Phase 3C: Limited reranking study
 
@@ -300,19 +304,21 @@ Assuming focused work begins now and LunaStarr can review asynchronously:
 | Window | Deliverable |
 |---|---|
 | Sep 3–9 | Reconcile branches; review commit `1611464`; build and run combined-workflow integration tests; identify documentation corrections |
-| Sep 10–16 | Run EM subset ablation; choose default; implement BM25 baseline behind a common interface |
-| Sep 17–23 | Compare direct/BM25/dense/hybrid retrieval; run the capped OpenAI operational smoke test and validation pilot if approved |
-| Sep 24–30 | Run initial uncurated-model case studies; freeze September results; generate core tables/figures; agree on manuscript outline |
-| October | Begin writing immediately; run learned-retriever, cross-provider, and final frozen evaluations in parallel only where they strengthen the agreed paper story |
+| Sep 10–16 | Run EM subset ablation; choose default; implement BM25 and RRF behind a common retriever interface |
+| Sep 17–23 | Compare direct/BM25/dense/RRF retrieval; run the capped OpenAI operational smoke test and validation pilot once credits arrive |
+| Sep 24–30 | Run initial uncurated-model case studies; finalize the KEGG bi-encoder protocol; freeze September results; generate core tables/figures; agree on manuscript outline |
+| October | Begin writing immediately; train/evaluate the KEGG bi-encoder and run selected final evaluations in parallel where they strengthen the agreed paper story |
 
 This is feasible for an October **writing start**, not necessarily an October submission. A realistic first complete draft is late October to November if collaboration and compute are available. A polished submission is more plausibly November to December. The schedule should be revisited after the integration tests and EM subset ablation, because those are the largest near-term uncertainty reducers.
 
 ## Immediate next actions
 
-1. Ask LunaStarr for the exact uncurated BioModels accession list, her expected outputs, and what she meant by BM25/hybrid retrieval.
+1. Ask LunaStarr for the exact uncurated BioModels accession list and her expected outputs. Request the BM25 paper or implementation she had in mind when convenient; this does not block the standard BM25 baseline.
 2. Create a short-lived integration branch from current upstream `main`; do not merge the benchmark branch blindly.
 3. Turn the species→reaction handoff requirements into the end-to-end test matrix above.
 4. Review documentation against observed behavior and open narrowly scoped fixes.
 5. Design the EM subset and decision threshold before running it.
-6. Keep the Phase 3 test split sealed while integration work proceeds.
-7. Start a manuscript outline no later than the final week of September, even if some experiments remain pending.
+6. Implement the OpenAI runner's hard budget guard while waiting for the approved $20 credit allocation.
+7. Specify the KEGG bi-encoder query/document formats, training pairs, negative-sampling policy, and evaluation metrics before training.
+8. Keep the Phase 3 test split sealed while integration and method-selection work proceeds.
+9. Start a manuscript outline no later than the final week of September, even if some experiments remain pending.
