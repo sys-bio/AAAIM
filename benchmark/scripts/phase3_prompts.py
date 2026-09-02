@@ -28,7 +28,9 @@ from benchmark.scripts.phase3_common import (
     EVIDENCE_CSV,
     OUT_PILOT,
     OUT_PROMPTS,
+    OUT_SPECIES_NAMES,
     PROMPT_TEMPLATE_VERSION,
+    TOKENIZER_SCAFFOLD,
     assert_no_kegg_leakage,
     estimate_tokens,
     load_evaluable_corpus,
@@ -97,17 +99,34 @@ def _species_index(model_id: str, evidence: pd.DataFrame) -> Dict[str, Dict[str,
     return out
 
 
+def load_species_name_lookup(
+    frame: pd.DataFrame | None = None,
+) -> Dict[Tuple[str, str], str]:
+    """``(model_id, species_id) -> species_name`` from the Phase 3 SBML table."""
+    if frame is None:
+        if not OUT_SPECIES_NAMES.exists():
+            return {}
+        frame = pd.read_csv(OUT_SPECIES_NAMES)
+    lookup: Dict[Tuple[str, str], str] = {}
+    for rec in frame.itertuples(index=False):
+        lookup[(str(rec.model_id), str(rec.species_id))] = str(rec.species_name)
+    return lookup
+
+
 def _participant_block(
-    equation: str, names: Sequence[str], evidence_idx: Dict[str, Dict[str, List[str]]],
+    equation: str,
+    model_id: str,
+    name_lookup: Dict[Tuple[str, str], str],
+    evidence_idx: Dict[str, Dict[str, List[str]]],
 ) -> List[Dict[str, Any]]:
+    """Join participant names by species id. Never zip unique ids with name lists."""
     ids = parse_participant_ids(equation)
-    name_list = [n for n in names if n]
     blocks = []
-    for i, sid in enumerate(ids):
+    for sid in ids:
         ev = evidence_idx.get(sid, {"chebi": [], "kegg_compound": []})
         blocks.append({
             "species_id": sid,
-            "name": name_list[i] if i < len(name_list) else sid,
+            "name": name_lookup.get((model_id, sid), sid),
             "chebi": list(ev["chebi"]),
             "kegg_compound": list(ev["kegg_compound"]),
         })
@@ -148,7 +167,7 @@ def _neighbors(
     out = []
     for n_shared, rid, rec in scored[:k]:
         out.append({
-            "reaction_id": rid,
+            "reaction_id": redact_kegg_reaction_ids(rid),
             "shared_participants": n_shared,
             "equation": _truncate(str(rec.reaction_equation), MAX_NEIGHBOR_EQ_CHARS),
             "name": redact_kegg_reaction_ids(str(rec.reaction_name or "")),
@@ -163,26 +182,28 @@ def build_context(
     corpus: pd.DataFrame,
     evidence: pd.DataFrame,
     neighborhood_k: int = DEFAULT_NEIGHBORHOOD,
+    species_names: pd.DataFrame | Dict[Tuple[str, str], str] | None = None,
 ) -> Dict[str, Any]:
     if variant not in CONTEXT_VARIANTS:
         raise ValueError(f"unknown context variant {variant}")
 
     evidence_idx = _species_index(str(row.model_id), evidence)
-    names = []
-    for field in ("substrate_names", "product_names"):
-        raw = row.get(field, "")
-        names.extend([p for p in str(raw).split(";") if p] if pd.notna(raw) else [])
+    if isinstance(species_names, dict):
+        name_lookup = species_names
+    else:
+        name_lookup = load_species_name_lookup(species_names)
 
     context: Dict[str, Any] = {
         "variant": variant,
         "template_version": PROMPT_TEMPLATE_VERSION,
         "model_id": str(row.model_id),
-        "reaction_id": str(row.reaction_id),
+        "reaction_id": redact_kegg_reaction_ids(str(row.reaction_id)),
         "equation": str(row.reaction_equation or ""),
         "reaction_name": redact_kegg_reaction_ids(str(row.reaction_name or "")),
         "direction": _direction(str(row.reaction_equation or "")),
         "participants": _participant_block(
-            str(row.reaction_equation or ""), names, evidence_idx),
+            str(row.reaction_equation or ""), str(row.model_id),
+            name_lookup, evidence_idx),
     }
 
     if variant in ("target_plus_model", "target_plus_neighborhood"):
@@ -258,6 +279,7 @@ def render_prompt(context: Dict[str, Any]) -> Dict[str, Any]:
     }
     assert_no_kegg_leakage(payload, where=f"prompt:{context['model_id']}/{context['reaction_id']}")
     payload["n_input_tokens_est"] = estimate_tokens(system) + estimate_tokens(user)
+    payload["token_estimate_method"] = TOKENIZER_SCAFFOLD
     return payload
 
 
@@ -271,6 +293,7 @@ def build_pilot_prompts(
     evidence = pd.read_csv(EVIDENCE_CSV)
     evidence["model_id"] = evidence.model_id.astype(str)
     evidence["species_id"] = evidence.species_id.astype(str)
+    name_lookup = load_species_name_lookup()
 
     key_index = {(r.model_id, r.reaction_id) for r in key.itertuples(index=False)}
     rows = []
@@ -281,7 +304,7 @@ def build_pilot_prompts(
         for variant in variants:
             context = build_context(
                 corpus_row, variant=variant, corpus=corpus, evidence=evidence,
-                neighborhood_k=neighborhood_k,
+                neighborhood_k=neighborhood_k, species_names=name_lookup,
             )
             prompt = render_prompt(context)
             record = {
@@ -294,11 +317,14 @@ def build_pilot_prompts(
                 "template_version": PROMPT_TEMPLATE_VERSION,
                 "neighborhood_k": neighborhood_k if variant == "target_plus_neighborhood" else 0,
                 "n_input_tokens_est": prompt["n_input_tokens_est"],
+                "token_estimate_method": TOKENIZER_SCAFFOLD,
                 "max_output_tokens": prompt["max_output_tokens"],
                 "prompt": prompt,
             }
             assert (rec.model_id, rec.reaction_id) in key_index
-            assert_no_kegg_leakage(record, where=f"record:{rec.sample_id}/{variant}")
+            # Join keys may themselves be KEGG-shaped SBML ids; only the
+            # model-visible prompt is required to be free of R##### tokens.
+            assert_no_kegg_leakage(prompt, where=f"prompt:{rec.sample_id}/{variant}")
             rows.append(record)
     return rows
 

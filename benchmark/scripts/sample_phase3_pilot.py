@@ -1,14 +1,23 @@
-"""Seeded open-set pilot sample drawn only from the held-out test split.
+"""Seeded open-set pilot sample drawn only from the validation split.
 
-Default quotas (200 reactions) unless a stratum has too few eligible test reactions,
-in which case every eligible reaction is taken and the shortfall is recorded. Sampling
-never borrows from train or validation.
+The exploratory LLM pilot chooses context variant, prompt, provider/model,
+abstention behavior, and tool strategy. Those choices must not use test
+reactions. Sequence:
 
-Within a stratum, clusters are visited round-robin so a few genome-scale models cannot
-dominate. The within-cluster order is a seeded shuffle.
+    Train: fit the learned retriever.
+    Validation: run the exploratory LLM pilot and choose the method.
+    Test: run the final frozen method once.
 
-The sample CSV that would be sent to a model contains no ground-truth KEGG ids. Those
-live only in ``pilot_answer_key.csv``.
+Default quotas (200 reactions) unless a stratum has too few eligible validation
+reactions, in which case every eligible reaction is taken and the shortfall is
+recorded. Sampling never borrows from train or test, and the cluster split is
+not rewritten to reach 200.
+
+Within a stratum, clusters are visited round-robin so a few genome-scale models
+cannot dominate. The within-cluster order is a seeded shuffle.
+
+The sample CSV that would be sent to a model contains no ground-truth KEGG ids.
+Those live only in ``pilot_answer_key.csv``.
 
 Usage::
 
@@ -38,13 +47,13 @@ from benchmark.scripts.phase3_common import (
     PHASE2_COMMIT,
     PHASE2_TAG,
     PILOT_SEED,
+    PILOT_SPLIT,
     STRATA,
     STRATUM_ABSENT,
     STRATUM_EMPTY,
     STRATUM_RERANK,
     STRATUM_TOP1,
     STRATUM_UNCONSTRAINED,
-    load_evaluable_corpus,
     write_csv,
     write_json,
 )
@@ -75,6 +84,7 @@ KEY_COLUMNS = [
 
 def sample_stratum(
     eligible: pd.DataFrame, quota: int, *, seed: int, stratum: str,
+    source_split: str = PILOT_SPLIT,
 ) -> pd.DataFrame:
     """Round-robin across clusters; seeded shuffle within each cluster."""
     if eligible.empty:
@@ -82,7 +92,7 @@ def sample_stratum(
     if len(eligible) <= quota:
         out = eligible.copy()
         out["selection_rule"] = (
-            f"all_eligible_test:{stratum}:n={len(eligible)}<=quota={quota}"
+            f"all_eligible_{source_split}:{stratum}:n={len(eligible)}<=quota={quota}"
         )
         return out
 
@@ -114,29 +124,39 @@ def build_pilot(
     *,
     seed: int = PILOT_SEED,
     quotas: Mapping[str, int] | None = None,
+    source_split: str = PILOT_SPLIT,
 ):
     quotas = dict(quotas or DEFAULT_QUOTAS)
     if corpus is None:
         _, _, _, frame = build_splits()
     else:
         frame = corpus
-    test = frame[frame.split == "test"].copy()
-    if test.empty:
-        raise RuntimeError("test split is empty; run build_phase3_splits.py first")
+    pool = frame[frame.split == source_split].copy()
+    if pool.empty:
+        raise RuntimeError(
+            f"{source_split} split is empty; run build_phase3_splits.py first"
+        )
+    other = {"train", "validation", "test"} - {source_split}
 
     parts: List[pd.DataFrame] = []
     shortfalls: Dict[str, Any] = {}
     for stratum in STRATA:
-        eligible = test[test.stratum == stratum]
+        eligible = pool[pool.stratum == stratum]
         quota = int(quotas.get(stratum, 0))
-        picked = sample_stratum(eligible, quota, seed=seed + STRATA.index(stratum), stratum=stratum)
+        picked = sample_stratum(
+            eligible, quota, seed=seed + STRATA.index(stratum), stratum=stratum,
+            source_split=source_split,
+        )
         if len(picked) < quota:
             shortfalls[stratum] = {
                 "quota": quota,
-                "eligible_in_test": int(len(eligible)),
+                "eligible_in_source": int(len(eligible)),
                 "selected": int(len(picked)),
                 "shortfall": quota - int(len(picked)),
-                "action": "included every eligible test reaction; did not borrow from train/val",
+                "action": (
+                    f"included every eligible {source_split} reaction; "
+                    f"did not borrow from {'/'.join(sorted(other))}"
+                ),
             }
         parts.append(picked)
 
@@ -145,6 +165,8 @@ def build_pilot(
     sample.insert(0, "sample_id", [f"P3P{i:04d}" for i in range(1, len(sample) + 1)])
     if sample.duplicated(["model_id", "reaction_id"]).any():
         raise RuntimeError("pilot sample contains duplicate reactions")
+    if (sample.split != source_split).any():
+        raise RuntimeError("pilot sample leaked a reaction from another split")
 
     public = sample[SAMPLE_COLUMNS].copy()
     key = sample[KEY_COLUMNS].copy()
@@ -158,7 +180,7 @@ def build_pilot(
         "phase2_commit": PHASE2_COMMIT,
         "config_id": CONFIG_ID,
         "seed": seed,
-        "source_split": "test",
+        "source_split": source_split,
         "quotas": quotas,
         "n_selected": int(len(public)),
         "counts_by_stratum": public.stratum.value_counts().reindex(STRATA).fillna(0).astype(int).to_dict(),
@@ -167,11 +189,14 @@ def build_pilot(
         "n_genome_scale": int(public.is_genome_scale.sum()),
         "shortfalls": shortfalls,
         "selection": (
-            "Only the held-out test split is eligible. Within each stratum, clusters are "
-            "visited round-robin after a seeded within-cluster shuffle so large models "
-            "cannot exhaust the quota. If a stratum has fewer eligible test reactions "
-            "than its quota, every eligible reaction is taken and the shortfall is "
-            "recorded; train/validation are never used as a backfill."
+            f"Only the {source_split} split is eligible. The exploratory pilot chooses "
+            "method details here; test is reserved for one frozen-method run. Within "
+            "each stratum, clusters are visited round-robin after a seeded "
+            "within-cluster shuffle so large models cannot exhaust the quota. If a "
+            f"stratum has fewer eligible {source_split} reactions than its quota, "
+            "every eligible reaction is taken and the shortfall is recorded; "
+            f"{'/'.join(sorted(other))} are never used as a backfill. The cluster "
+            "split is not rewritten to reach the nominal 200."
         ),
         "answer_key": str(OUT_PILOT_KEY.name),
         "public_sample": str(OUT_PILOT.name),

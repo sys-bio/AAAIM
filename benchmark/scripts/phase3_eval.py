@@ -16,8 +16,15 @@ import random
 from collections import defaultdict
 from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 
-from benchmark.scripts.phase3_common import KEGG_ID_STRICT, STRATA, parse_kegg_ids
-from benchmark.scripts.phase3_modes import ModeResult, Prediction
+from benchmark.scripts.phase3_common import (
+    ID_ABSENT,
+    ID_IN_CATALOG,
+    ID_MALFORMED,
+    KEGG_ID_STRICT,
+    STRATA,
+    parse_kegg_ids,
+)
+from benchmark.scripts.phase3_modes import ModeResult, Prediction, evidence_identifier_list
 
 
 def _default_equiv(candidate: str, truth_ids: Iterable[str], kind: str) -> bool:
@@ -54,6 +61,33 @@ def _reciprocal_rank(
     return 0.0
 
 
+def _pred_id_class(p: Prediction) -> str:
+    if p.in_catalog or p.valid_kegg_id:
+        return ID_IN_CATALOG
+    if p.id_class == ID_ABSENT or p.well_formed:
+        return ID_ABSENT
+    if p.kegg_id and KEGG_ID_STRICT.match(p.kegg_id):
+        return ID_ABSENT
+    return ID_MALFORMED
+
+
+def _evidence_outcome(result: ModeResult, exact_top1: bool) -> str:
+    has_retrieval = bool(evidence_identifier_list(result.evidence))
+    supported = any(p.prediction_supported_by_evidence for p in result.predictions)
+    answered = (not result.abstain) and bool(result.predictions)
+    if result.abstain and has_retrieval:
+        return "abstained_after_retrieval"
+    if exact_top1 and supported:
+        return "correct_and_evidence_supported"
+    if exact_top1 and not supported:
+        return "correct_but_unsupported"
+    if answered and (not exact_top1) and supported:
+        return "incorrect_despite_evidence"
+    if answered:
+        return "incorrect_unsupported"
+    return "unanswered"
+
+
 def score_one(
     result: ModeResult,
     truth_ids: Sequence[str],
@@ -61,9 +95,13 @@ def score_one(
     equiv: EquivFn = _default_equiv,
 ) -> Dict[str, Any]:
     preds = result.predictions
-    invalid = [p.kegg_id for p in preds if p.kegg_id and not p.valid_kegg_id]
-    valid = [p for p in preds if p.valid_kegg_id]
+    malformed = [p.kegg_id for p in preds if _pred_id_class(p) == ID_MALFORMED]
+    absent = [p.kegg_id for p in preds if _pred_id_class(p) == ID_ABSENT]
+    in_catalog = [p for p in preds if _pred_id_class(p) == ID_IN_CATALOG]
+    invalid = malformed + absent
     answered = (not result.abstain) and bool(preds)
+    exact_top1 = False if result.abstain else _topk_hit(
+        preds, truth_ids, 1, kind="exact", equiv=equiv)
     row: Dict[str, Any] = {
         "sample_id": result.sample_id,
         "model_id": result.model_id,
@@ -75,18 +113,29 @@ def score_one(
         "abstain": result.abstain,
         "answered": answered,
         "n_predictions": len(preds),
-        "n_valid_kegg_ids": len(valid),
+        "n_valid_kegg_ids": len(in_catalog),
         "n_invalid_kegg_ids": len(invalid),
+        "n_malformed_ids": len(malformed),
+        "n_absent_from_catalog_ids": len(absent),
+        "n_in_catalog_ids": len(in_catalog),
         "invalid_kegg_ids": invalid,
+        "malformed_ids": malformed,
+        "absent_from_catalog_ids": absent,
         "evidence_backed": result.evidence_backed,
+        "prediction_supported_by_evidence": [
+            p.prediction_supported_by_evidence for p in preds
+        ],
+        "supporting_evidence_ids": [list(p.supporting_evidence_ids) for p in preds],
         "parse_error": result.parse_error,
-        "exact_top1": False if result.abstain else _topk_hit(preds, truth_ids, 1, kind="exact", equiv=equiv),
-        "exact_top3": False if result.abstain else _topk_hit(preds, truth_ids, 3, kind="exact", equiv=equiv),
+        "exact_top1": exact_top1,
+        "exact_top3": False if result.abstain else _topk_hit(
+            preds, truth_ids, 3, kind="exact", equiv=equiv),
         "brite_top1": False if result.abstain else _topk_hit(
             preds, truth_ids, 1, kind="brite_orthology", equiv=equiv),
         "brite_top3": False if result.abstain else _topk_hit(
             preds, truth_ids, 3, kind="brite_orthology", equiv=equiv),
-        "mrr_exact": 0.0 if result.abstain else _reciprocal_rank(preds, truth_ids, kind="exact", equiv=equiv),
+        "mrr_exact": 0.0 if result.abstain else _reciprocal_rank(
+            preds, truth_ids, kind="exact", equiv=equiv),
         "recall_at_1_exact": False if result.abstain else _topk_hit(
             preds, truth_ids, 1, kind="exact", equiv=equiv),
         "recall_at_3_exact": False if result.abstain else _topk_hit(
@@ -95,6 +144,7 @@ def score_one(
             preds, truth_ids, 5, kind="exact", equiv=equiv),
         "recall_at_10_exact": False if result.abstain else _topk_hit(
             preds, truth_ids, 10, kind="exact", equiv=equiv),
+        "evidence_outcome": _evidence_outcome(result, exact_top1),
     }
     return row
 
@@ -166,18 +216,21 @@ def _subset_metrics(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
     n = len(rows)
     n_abstain = sum(1 for r in rows if r["abstain"])
     n_answered = sum(1 for r in rows if r["answered"])
-    n_invalid = sum(r["n_invalid_kegg_ids"] for r in rows)
-    n_valid = sum(r["n_valid_kegg_ids"] for r in rows)
+    n_malformed = sum(r["n_malformed_ids"] for r in rows)
+    n_absent = sum(r["n_absent_from_catalog_ids"] for r in rows)
+    n_in_catalog = sum(r["n_in_catalog_ids"] for r in rows)
+    n_id = n_malformed + n_absent + n_in_catalog
     n_evidence = sum(1 for r in rows if r["evidence_backed"])
     answered = [r for r in rows if r["answered"]]
+    outcomes = [r.get("evidence_outcome") for r in rows]
     return {
         "n": n,
         "abstention_rate": _mean([1.0 if r["abstain"] else 0.0 for r in rows]),
         "answered_rate": _mean([1.0 if r["answered"] else 0.0 for r in rows]),
-        "valid_kegg_id_rate": None if (n_valid + n_invalid) == 0 else round(
-            n_valid / (n_valid + n_invalid), 4),
-        "unsupported_or_nonexistent_id_rate": None if (n_valid + n_invalid) == 0 else round(
-            n_invalid / (n_valid + n_invalid), 4),
+        "valid_kegg_id_rate": None if n_id == 0 else round(n_in_catalog / n_id, 4),
+        "malformed_id_rate": None if n_id == 0 else round(n_malformed / n_id, 4),
+        "absent_from_catalog_id_rate": None if n_id == 0 else round(n_absent / n_id, 4),
+        "in_catalog_id_rate": None if n_id == 0 else round(n_in_catalog / n_id, 4),
         "exact_top1": _mean([r["exact_top1"] for r in rows]),
         "exact_top3": _mean([r["exact_top3"] for r in rows]),
         "brite_top1": _mean([r["brite_top1"] for r in rows]),
@@ -192,6 +245,14 @@ def _subset_metrics(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
         "evidence_backed_rate": _mean([1.0 if r["evidence_backed"] else 0.0 for r in rows]),
         "evidence_backed_exact_top1": _mean(
             [r["exact_top1"] for r in rows if r["evidence_backed"]]),
+        "correct_and_evidence_supported_rate": _mean(
+            [1.0 if o == "correct_and_evidence_supported" else 0.0 for o in outcomes]),
+        "correct_but_unsupported_rate": _mean(
+            [1.0 if o == "correct_but_unsupported" else 0.0 for o in outcomes]),
+        "incorrect_despite_evidence_rate": _mean(
+            [1.0 if o == "incorrect_despite_evidence" else 0.0 for o in outcomes]),
+        "abstained_after_retrieval_rate": _mean(
+            [1.0 if o == "abstained_after_retrieval" else 0.0 for o in outcomes]),
         "n_abstain": n_abstain,
         "n_answered": n_answered,
         "n_evidence_backed": n_evidence,
@@ -226,14 +287,24 @@ def score_results(
     answer_key: Mapping[Tuple[str, str], Sequence[str]],
     *,
     seen_targets: Optional[set] = None,
+    seen_definition: Optional[str] = None,
     equiv: EquivFn = _default_equiv,
 ) -> Dict[str, Any]:
+    """Score mode results.
+
+    ``seen_targets`` must be the KEGG ids present in the data actually used to
+    *fit* the model. Pass ``seen_definition="train"`` for a retriever trained on
+    train only, or ``"train+validation"`` if the final retriever is refit after
+    method selection. Do not treat a raw id set as "train" without saying so.
+    """
+    if seen_targets is not None and not seen_definition:
+        seen_definition = "caller_supplied"
     rows: List[Dict[str, Any]] = []
     for result in results:
         truth = list(answer_key.get((result.model_id, result.reaction_id), []))
         row = score_one(result, truth, equiv=equiv)
         if seen_targets is not None:
-            row["target_seen_in_train"] = any(t in seen_targets for t in truth)
+            row["target_seen_in_fit"] = any(t in seen_targets for t in truth)
         if result.predictions:
             row["confidence"] = result.predictions[0].confidence
         rows.append(row)
@@ -253,8 +324,8 @@ def score_results(
     seen_metrics = None
     unseen_metrics = None
     if seen_targets is not None:
-        seen_metrics = _subset_metrics([r for r in rows if r.get("target_seen_in_train")])
-        unseen_metrics = _subset_metrics([r for r in rows if not r.get("target_seen_in_train")])
+        seen_metrics = _subset_metrics([r for r in rows if r.get("target_seen_in_fit")])
+        unseen_metrics = _subset_metrics([r for r in rows if not r.get("target_seen_in_fit")])
 
     return {
         "n": len(rows),
@@ -262,8 +333,9 @@ def score_results(
         "by_stratum": by_stratum,
         "by_variant": by_variant,
         "by_mode": by_mode,
-        "seen_train_target": seen_metrics,
-        "unseen_train_target": unseen_metrics,
+        "seen_target_definition": seen_definition,
+        "seen_fit_target": seen_metrics,
+        "unseen_fit_target": unseen_metrics,
         "coverage_curve": coverage_curve(rows),
         "rows": rows,
     }

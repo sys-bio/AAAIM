@@ -26,13 +26,19 @@ import re
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterable, List, Optional, Protocol, Sequence
+from typing import AbstractSet, Any, Callable, Dict, Iterable, List, Optional, Protocol, Sequence
 
 from benchmark.scripts.phase3_common import (
+    ID_ABSENT,
+    ID_IN_CATALOG,
+    ID_MALFORMED,
     KEGG_ID_STRICT,
     PHASE3_DIR,
     PROMPT_TEMPLATE_VERSION,
+    TOKENIZER_SCAFFOLD,
+    classify_kegg_id,
     estimate_tokens,
+    load_kegg_catalog_ids,
 )
 
 logger = logging.getLogger("phase3_modes")
@@ -56,7 +62,65 @@ class LiveCallBlocked(RuntimeError):
 class Prediction:
     kegg_id: str
     confidence: Optional[float] = None
-    valid_kegg_id: bool = False
+    valid_kegg_id: bool = False  # in the frozen KEGG catalog, not merely well-formed
+    well_formed: bool = False
+    in_catalog: bool = False
+    id_class: str = ID_MALFORMED
+    duplicate: bool = False
+    prediction_supported_by_evidence: bool = False
+    supporting_evidence_ids: List[str] = field(default_factory=list)
+
+
+def make_prediction(
+    kegg_id: str,
+    confidence: Optional[float],
+    catalog: AbstractSet[str],
+    *,
+    duplicate: bool = False,
+) -> Prediction:
+    id_class = classify_kegg_id(kegg_id, catalog)
+    well_formed = id_class != ID_MALFORMED
+    in_catalog = id_class == ID_IN_CATALOG
+    return Prediction(
+        kegg_id=kegg_id,
+        confidence=confidence,
+        valid_kegg_id=in_catalog,
+        well_formed=well_formed,
+        in_catalog=in_catalog,
+        id_class=id_class,
+        duplicate=duplicate,
+    )
+
+
+def evidence_identifier_list(evidence: Sequence["ToolEvidence"]) -> List[str]:
+    ids: List[str] = []
+    for ev in evidence:
+        ids.extend(str(x) for x in (ev.identifiers or []) if x)
+    return ids
+
+
+def link_predictions_to_evidence(
+    predictions: Sequence[Prediction],
+    evidence_ids: Sequence[str],
+) -> None:
+    """Mark each prediction if its identifier appears in recorded evidence ids."""
+    id_set = set(evidence_ids)
+    for pred in predictions:
+        supporting = [i for i in evidence_ids if i == pred.kegg_id]
+        pred.supporting_evidence_ids = supporting
+        pred.prediction_supported_by_evidence = pred.kegg_id in id_set
+
+
+def apply_tool_evidence(result: "ModeResult", evidence: Sequence["ToolEvidence"]) -> "ModeResult":
+    result.evidence = list(evidence)
+    link_predictions_to_evidence(result.predictions, evidence_identifier_list(result.evidence))
+    result.evidence_backed = (
+        (not result.abstain)
+        and any(p.prediction_supported_by_evidence for p in result.predictions)
+    )
+    if result.evidence_backed:
+        result.basis = "supplied_evidence"
+    return result
 
 
 @dataclass
@@ -146,40 +210,60 @@ class FileCache(ResponseCache):
         path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
-def parse_structured_output(raw: str) -> Dict[str, Any]:
+def parse_structured_output(
+    raw: str,
+    *,
+    catalog: Optional[AbstractSet[str]] = None,
+) -> Dict[str, Any]:
     """Parse a model response into abstain/predictions/rationale/basis.
 
-    Malformed JSON, missing fields, and non-R##### identifiers are recorded rather
-    than coerced into a fake answer. An explicit abstention is never turned into an id.
+    Malformed JSON, missing fields, confidence outside [0, 1], duplicate ids,
+    and identifiers absent from the frozen KEGG catalog are recorded rather than
+    coerced into a fake answer. An explicit abstention is never turned into an id.
+    ``abstain=false`` with no predictions is a compliance error, not a silent abstention.
     """
+    catalog_ids: AbstractSet[str] = (
+        catalog if catalog is not None else load_kegg_catalog_ids()
+    )
+    empty = {
+        "abstain": True, "predictions": [], "rationale": "",
+        "basis": "recalled_knowledge", "parse_error": None,
+    }
     text = (raw or "").strip()
     if not text:
-        return {"abstain": True, "predictions": [], "rationale": "", "basis": "recalled_knowledge",
-                "parse_error": "empty_response"}
+        empty["parse_error"] = "empty_response"
+        return empty
     try:
         payload = json.loads(text)
     except json.JSONDecodeError:
         match = re.search(r"\{.*\}", text, re.DOTALL)
         if not match:
-            return {"abstain": True, "predictions": [], "rationale": text[:500],
-                    "basis": "recalled_knowledge", "parse_error": "unparseable"}
+            empty["rationale"] = text[:500]
+            empty["parse_error"] = "unparseable"
+            return empty
         try:
             payload = json.loads(match.group(0))
         except json.JSONDecodeError:
-            return {"abstain": True, "predictions": [], "rationale": text[:500],
-                    "basis": "recalled_knowledge", "parse_error": "unparseable"}
+            empty["rationale"] = text[:500]
+            empty["parse_error"] = "unparseable"
+            return empty
 
     if not isinstance(payload, dict):
-        return {"abstain": True, "predictions": [], "rationale": "",
-                "basis": "recalled_knowledge", "parse_error": "not_an_object"}
+        empty["parse_error"] = "not_an_object"
+        return empty
 
+    errors: List[str] = []
     abstain = bool(payload.get("abstain", False))
     preds_in = payload.get("predictions") or []
     preds: List[Prediction] = []
     if not abstain:
         if not isinstance(preds_in, list):
             preds_in = []
-        for item in preds_in[:3]:
+            errors.append("predictions_not_a_list")
+        seen_ids: set = set()
+        for item in preds_in:
+            if len(preds) >= 3:
+                break
             if isinstance(item, str):
                 kid = item.strip()
                 conf = None
@@ -190,22 +274,33 @@ def parse_structured_output(raw: str) -> Dict[str, Any]:
                     conf = float(conf) if conf is not None else None
                 except (TypeError, ValueError):
                     conf = None
+                    errors.append("confidence_unparseable")
             else:
                 continue
-            preds.append(Prediction(
-                kegg_id=kid,
-                confidence=conf,
-                valid_kegg_id=bool(KEGG_ID_STRICT.match(kid)),
-            ))
+            if not kid:
+                errors.append("empty_kegg_id")
+                continue
+            if conf is not None and not (0.0 <= conf <= 1.0):
+                errors.append("confidence_out_of_range")
+                conf = None
+            duplicate = kid in seen_ids
+            if duplicate:
+                errors.append("duplicate_predicted_ids")
+                continue
+            seen_ids.add(kid)
+            preds.append(make_prediction(kid, conf, catalog_ids, duplicate=False))
+        if not preds:
+            errors.append("abstain_false_without_predictions")
     basis = payload.get("basis") or "recalled_knowledge"
     if basis not in BASIS_VALUES:
         basis = "recalled_knowledge"
+    parse_error = ";".join(dict.fromkeys(errors)) if errors else None
     return {
-        "abstain": abstain or not preds,
+        "abstain": abstain,
         "predictions": [] if abstain else preds,
         "rationale": str(payload.get("rationale") or ""),
         "basis": basis,
-        "parse_error": None,
+        "parse_error": parse_error,
     }
 
 
@@ -275,11 +370,7 @@ def run_tool_assisted(
     variant: str,
 ) -> ModeResult:
     result = _run("tool_assisted", sample, prompt, provider, cache=cache, variant=variant)
-    result.evidence = list(evidence or [])
-    result.evidence_backed = bool(result.evidence) and not result.abstain
-    if result.evidence_backed:
-        result.basis = "supplied_evidence"
-    return result
+    return apply_tool_evidence(result, evidence or [])
 
 
 def run_closed_set(
@@ -289,10 +380,13 @@ def run_closed_set(
     variant: str = "phase2_candidates",
     abstain: bool = False,
 ) -> ModeResult:
+    catalog = load_kegg_catalog_ids()
     preds = [
-        Prediction(kegg_id=k, confidence=None, valid_kegg_id=bool(KEGG_ID_STRICT.match(k)))
+        make_prediction(k, None, catalog)
         for k in list(ranked_kegg_ids)[:3]
     ]
+    link_predictions_to_evidence(preds, list(ranked_kegg_ids))
+    abstain_flag = abstain or not preds
     return ModeResult(
         sample_id=sample["sample_id"],
         model_id=sample["model_id"],
@@ -302,11 +396,12 @@ def run_closed_set(
         mode="closed_set",
         variant=variant,
         template_version="phase2-frozen-candidates",
-        abstain=abstain or not preds,
+        abstain=abstain_flag,
         predictions=[] if abstain else preds,
         rationale="Frozen Phase 2 candidate order (heuristic).",
         basis="supplied_evidence",
-        evidence_backed=not abstain and bool(preds),
+        evidence_backed=(not abstain_flag) and any(
+            p.prediction_supported_by_evidence for p in preds),
         provider="phase2",
         model_name="heuristic",
     )
@@ -318,10 +413,12 @@ def run_learned_retriever(
     *,
     variant: str = "biencoder_full_kegg",
 ) -> ModeResult:
+    catalog = load_kegg_catalog_ids()
     preds = [
-        Prediction(kegg_id=k, valid_kegg_id=bool(KEGG_ID_STRICT.match(k)))
+        make_prediction(k, None, catalog)
         for k in list(ranked_kegg_ids)[:10]
     ]
+    link_predictions_to_evidence(preds, list(ranked_kegg_ids))
     return ModeResult(
         sample_id=sample["sample_id"],
         model_id=sample["model_id"],
@@ -335,7 +432,7 @@ def run_learned_retriever(
         predictions=preds,
         rationale="Full-catalog retrieval (not yet trained; schema only).",
         basis="supplied_evidence",
-        evidence_backed=bool(preds),
+        evidence_backed=any(p.prediction_supported_by_evidence for p in preds),
         provider="untrained",
         model_name="pending",
     )
@@ -382,6 +479,8 @@ def _run(
     n_in = int(prompt.get("n_input_tokens_est") or estimate_tokens(
         " ".join(m.get("content", "") for m in prompt.get("messages") or [])))
     n_out = estimate_tokens(raw)
+    if prompt.get("token_estimate_method") not in (None, TOKENIZER_SCAFFOLD):
+        n_in = int(prompt.get("n_input_tokens_est") or n_in)
     if cache is not None:
         cache.put(key, {
             "raw_text": raw,

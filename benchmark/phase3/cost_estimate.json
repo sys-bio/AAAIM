@@ -1,84 +1,84 @@
 {
   "bounded_vs_whole_model": {
-    "bounded_input_tokens": 221941,
+    "bounded_input_tokens": 179789,
     "note": "Bounded variants do not repeat the full reaction chain for each target.",
-    "ratio_whole_over_bounded": 13.99,
-    "whole_model_input_tokens": 3105179
+    "ratio_whole_over_bounded": 5.05,
+    "whole_model_input_tokens": 907270
   },
   "by_stratum": {
     "empty_constrained": {
-      "max": 705,
-      "mean": 385.6,
-      "min": 233,
+      "max": 752,
+      "mean": 376.1,
+      "min": 240,
       "n": 150,
-      "p50": 366,
-      "p90": 526,
-      "total": 57841
+      "p50": 370,
+      "p90": 476,
+      "total": 56413
     },
     "nonempty_answer_absent": {
-      "max": 819,
-      "mean": 477.4,
-      "min": 267,
-      "n": 150,
-      "p50": 447,
-      "p90": 639,
-      "total": 71612
+      "max": 543,
+      "mean": 323.3,
+      "min": 225,
+      "n": 66,
+      "p50": 331,
+      "p90": 382,
+      "total": 21338
     },
     "retrievable_rerank_failure": {
-      "max": 665,
-      "mean": 385.7,
-      "min": 234,
-      "n": 66,
-      "p50": 359,
-      "p90": 558,
-      "total": 25458
+      "max": 756,
+      "mean": 355.4,
+      "min": 249,
+      "n": 48,
+      "p50": 337,
+      "p90": 465,
+      "total": 17057
     },
     "retrievable_top1_success": {
-      "max": 576,
-      "mean": 342.5,
-      "min": 233,
+      "max": 586,
+      "mean": 353.0,
+      "min": 223,
       "n": 75,
-      "p50": 334,
-      "p90": 428,
-      "total": 25691
+      "p50": 347,
+      "p90": 435,
+      "total": 26476
     },
     "unconstrained": {
-      "max": 662,
-      "mean": 382.8,
-      "min": 233,
-      "n": 108,
-      "p50": 357,
-      "p90": 531,
-      "total": 41339
+      "max": 647,
+      "mean": 390.0,
+      "min": 230,
+      "n": 150,
+      "p50": 354,
+      "p90": 533,
+      "total": 58505
     }
   },
   "by_variant": {
     "target_only": {
-      "max": 495,
-      "mean": 308.4,
-      "min": 233,
-      "n": 183,
-      "p50": 301,
-      "p90": 384,
-      "total": 56433
+      "max": 531,
+      "mean": 287.7,
+      "min": 223,
+      "n": 163,
+      "p50": 279,
+      "p90": 333,
+      "total": 46894
     },
     "target_plus_model": {
-      "max": 534,
-      "mean": 397.3,
-      "min": 296,
-      "n": 183,
-      "p50": 395,
-      "p90": 477,
-      "total": 72697
+      "max": 628,
+      "mean": 359.1,
+      "min": 301,
+      "n": 163,
+      "p50": 351,
+      "p90": 381,
+      "total": 58533
     },
     "target_plus_neighborhood": {
-      "max": 819,
-      "mean": 507.2,
-      "min": 327,
-      "n": 183,
-      "p50": 514,
-      "p90": 649,
-      "total": 92811
+      "max": 756,
+      "mean": 456.2,
+      "min": 334,
+      "n": 163,
+      "p50": 435,
+      "p90": 553,
+      "total": 74362
     }
   },
   "currency": "USD",
@@ -92,39 +92,44 @@
     ],
     "leakage_tests_required": true,
     "live_calls_blocked_until_approval": true,
-    "sample_frozen": true
+    "sample_frozen": true,
+    "tokenizer": {
+      "live_run_blocked_with_this_method": true,
+      "method": "chars_div_4_scaffold",
+      "required_before_live": "chosen model tokenizer or a conservative provider-specific bound"
+    }
   },
   "models": {
     "example-large-chat": {
-      "expected_usd": 19.7991,
+      "expected_usd": 17.3668,
       "input_per_million": 15.0,
       "output_per_million": 75.0,
-      "worst_case_usd": 36.2691
+      "worst_case_usd": 32.0368
     },
     "example-mid-chat": {
-      "expected_usd": 3.9598,
+      "expected_usd": 3.4734,
       "input_per_million": 3.0,
       "output_per_million": 15.0,
-      "worst_case_usd": 7.2538
+      "worst_case_usd": 6.4074
     },
     "example-small-chat": {
-      "expected_usd": 0.1651,
+      "expected_usd": 0.1443,
       "input_per_million": 0.15,
       "output_per_million": 0.6,
-      "worst_case_usd": 0.2968
+      "worst_case_usd": 0.2617
     }
   },
-  "n_calls": 549,
-  "n_input_tokens_est": 221941,
-  "n_reactions": 183,
+  "n_calls": 489,
+  "n_input_tokens_est": 179789,
+  "n_reactions": 163,
   "n_variants": 3,
   "planned_max_output_tokens_per_call": 400,
-  "planned_max_output_tokens_total": 219600,
+  "planned_max_output_tokens_total": 195600,
   "pricing_date": "2026-09-02",
   "pricing_source": "EXAMPLE ONLY \u2014 illustrative public list prices, not a quote and not guaranteed. Replace this file with the provider page you actually intend to use before any paid run, and record that page's date.",
   "whole_model_context_counterfactual": {
-    "n_calls": 183,
-    "n_input_tokens_est": 3105179,
+    "n_calls": 163,
+    "n_input_tokens_est": 907270,
     "note": "Every target would receive every reaction string from its model. Cost grows with (reactions in model) per call, i.e. roughly quadratically in model size across a full evaluation."
   }
 }

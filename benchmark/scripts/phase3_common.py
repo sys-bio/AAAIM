@@ -10,7 +10,7 @@ import hashlib
 import json
 import re
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Sequence
+from typing import AbstractSet, Any, Dict, FrozenSet, Iterable, List, Optional, Sequence, Tuple
 
 import pandas as pd
 
@@ -39,6 +39,8 @@ OUT_PILOT_KEY = PHASE3_DIR / "pilot_answer_key.csv"
 OUT_PILOT_SUMMARY = PHASE3_DIR / "pilot_summary.json"
 OUT_PROMPTS = PHASE3_DIR / "pilot_prompts.jsonl"
 OUT_COST = PHASE3_DIR / "cost_estimate.json"
+OUT_SPECIES_NAMES = PHASE3_DIR / "species_names.csv"
+OUT_KEGG_CATALOG_IDS = PHASE3_DIR / "kegg_catalog_ids.json"
 PRICING_EXAMPLE = PHASE3_DIR / "pricing.example.json"
 
 YEAST_CLUSTER = "CLU_BIOMD0000000042"
@@ -64,14 +66,29 @@ STATUS_NO_CANDIDATES = "no_candidates"
 STATUS_OK = "ok"
 
 SPLITS = ("train", "validation", "test")
+# Exploratory LLM choices (variant, prompt, provider, abstention, tools) use
+# validation only. Test is reserved for one frozen-method run.
+PILOT_SPLIT = "validation"
+FIT_SPLITS_TRAIN = ("train",)
+FIT_SPLITS_TRAIN_VAL = ("train", "validation")
 SPLIT_SEED = 20260902
 SPLIT_ALGORITHM = "cluster_greedy_v1"
 PILOT_SEED = 20260902
-PROMPT_TEMPLATE_VERSION = "phase3-open-set-v1"
+PROMPT_TEMPLATE_VERSION = "phase3-open-set-v2"
 
 KEGG_REACTION_RE = re.compile(r"\bR\d{5}\b")
 KEGG_REACTION_URI_RE = re.compile(r"kegg\.reaction[/:]R\d{5}", re.IGNORECASE)
 KEGG_ID_STRICT = re.compile(r"^R\d{5}$")
+ID_MALFORMED = "malformed"
+ID_ABSENT = "absent_from_catalog"
+ID_IN_CATALOG = "in_catalog"
+
+# Scaffolding only. Live runs must use the chosen model's tokenizer.
+TOKENIZER_SCAFFOLD = "chars_div_4_scaffold"
+LIVE_TOKENIZER_REQUIRED = (
+    "Live runs must use the chosen model's tokenizer or a conservative "
+    "provider-specific bound; chars/4 is scaffolding only and must not gate spend."
+)
 
 # Tokens that look like KEGG reaction ids must never appear in a prompt payload.
 LEAKAGE_PATTERNS = (KEGG_REACTION_RE, KEGG_REACTION_URI_RE)
@@ -231,8 +248,70 @@ def assert_no_kegg_leakage(payload: Any, *, where: str) -> None:
         raise ValueError(f"KEGG reaction-id leakage in {where}: {leaked[:10]}")
 
 
+def classify_kegg_id(kegg_id: str, catalog: AbstractSet[str]) -> str:
+    """Classify an identifier against syntax and the frozen KEGG catalog.
+
+    ``R#####`` matching is well-formed syntax only. Existence is catalog membership.
+    """
+    if not kegg_id or not KEGG_ID_STRICT.match(kegg_id):
+        return ID_MALFORMED
+    if kegg_id not in catalog:
+        return ID_ABSENT
+    return ID_IN_CATALOG
+
+
+def load_kegg_catalog_ids(path: Path | None = None) -> FrozenSet[str]:
+    """Frozen Phase 2 KEGG reaction-id set (Phase 3 snapshot, not a live download)."""
+    path = path or OUT_KEGG_CATALOG_IDS
+    if not path.exists():
+        return frozenset()
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    ids = payload.get("ids") if isinstance(payload, dict) else payload
+    return frozenset(str(x) for x in ids)
+
+
+def seen_targets_from_corpus(
+    corpus: pd.DataFrame,
+    *,
+    fit_splits: Sequence[str],
+) -> set:
+    """Target KEGG ids appearing in the splits used to *fit* the model.
+
+    Use ``fit_splits=("train",)`` when the retriever is trained on train only
+    (method selection happens on validation). Use ``("train", "validation")``
+    when the final retriever is refit on train+validation before the test run.
+    """
+    allowed = set(fit_splits)
+    unknown = allowed - set(SPLITS)
+    if unknown:
+        raise ValueError(f"unknown fit splits: {sorted(unknown)}")
+    if "split" not in corpus.columns:
+        raise ValueError("corpus must include a split column")
+    subset = corpus[corpus.split.isin(allowed)]
+    ids: set = set()
+    values = subset["ground_truth_ids"] if "ground_truth_ids" in subset.columns else []
+    for value in values:
+        if isinstance(value, (list, tuple, set)):
+            ids.update(value)
+        else:
+            ids.update(parse_kegg_ids(value))
+    if not ids and "ground_truth_kegg_all" in subset.columns:
+        for value in subset["ground_truth_kegg_all"]:
+            ids.update(parse_kegg_ids(value))
+    return ids
+
+
 def estimate_tokens(text: str) -> int:
-    """Tokenizer-free token estimate: ~4 characters per token, minimum 1 if nonempty."""
+    """Scaffolding token estimate: ~4 characters per token.
+
+    Not valid for live spend. Call ``require_live_tokenizer`` before a paid run.
+    """
     if not text:
         return 0
     return max(1, (len(text) + 3) // 4)
+
+
+def require_live_tokenizer(method: str | None) -> None:
+    """Refuse a live run that still uses the chars/4 scaffolding estimate."""
+    if method is None or method == TOKENIZER_SCAFFOLD:
+        raise RuntimeError(LIVE_TOKENIZER_REQUIRED)

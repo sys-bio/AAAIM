@@ -18,22 +18,29 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from benchmark.scripts.phase3_common import (
+    ID_ABSENT,
+    ID_IN_CATALOG,
+    ID_MALFORMED,
     KEGG_ID_STRICT,
     PHASE3_DIR,
+    PILOT_SPLIT,
     STRATA,
     STRATUM_ABSENT,
     STRATUM_EMPTY,
     STRATUM_RERANK,
     STRATUM_TOP1,
     STRATUM_UNCONSTRAINED,
+    TOKENIZER_SCAFFOLD,
     YEAST_CLUSTER,
     assign_stratum,
     assert_no_kegg_leakage,
+    classify_kegg_id,
     estimate_tokens,
     find_kegg_leakage,
     parse_kegg_ids,
     parse_participant_ids,
     redact_kegg_reaction_ids,
+    require_live_tokenizer,
 )
 from benchmark.scripts.phase3_eval import score_one, score_results
 from benchmark.scripts.phase3_modes import (
@@ -154,7 +161,7 @@ def test_short_stratum_takes_all_eligible():
     })
     out = sample_stratum(eligible, 25, seed=1, stratum=STRATUM_RERANK)
     assert len(out) == 1
-    assert "all_eligible_test" in out.iloc[0].selection_rule
+    assert "all_eligible_validation" in out.iloc[0].selection_rule
 
 
 def _toy_row(**overrides):
@@ -178,8 +185,13 @@ def test_prompt_redacts_notes_and_rejects_kegg_reaction_ids():
         "annotation": ["CHEBI:1", "C00010"],
         "annotation_type": ["chebi", "kegg_compound"],
     })
+    names = pd.DataFrame({
+        "model_id": ["M1", "M1", "M1"],
+        "species_id": ["A_c", "B_c", "C_c"],
+        "species_name": ["alpha", "beta", "gamma"],
+    })
     ctx = build_context(_toy_row(), variant="target_plus_model",
-                        corpus=corpus, evidence=evidence)
+                        corpus=corpus, evidence=evidence, species_names=names)
     assert "R00024" not in json.dumps(ctx)
     prompt = render_prompt(ctx)
     blob = json.dumps(prompt)
@@ -187,7 +199,47 @@ def test_prompt_redacts_notes_and_rejects_kegg_reaction_ids():
     assert "R00164" not in blob
     with pytest.raises(ValueError):
         build_context(_toy_row(reaction_equation="A_c => R00024"),
-                      variant="target_only", corpus=corpus, evidence=evidence)
+                      variant="target_only", corpus=corpus, evidence=evidence,
+                      species_names=names)
+
+
+def test_participant_names_join_by_species_id_not_position():
+    """Species on both sides, or names containing ';', must not be zipped positionally."""
+    row = _toy_row(
+        model_id="BIOMD0000000122",
+        reaction_id="R1",
+        reaction_equation="NFAT_Pi_Nuc + Act_C_Nuc <=> Act_C_Nuc + NFAT_Nuc",
+        substrate_names="Phosphorylated NFAT in Nucleus; Active Calcineurin in Nucleus",
+        product_names="Active Calcineurin in Nucleus; NFAT",
+    )
+    names = pd.DataFrame({
+        "model_id": ["BIOMD0000000122"] * 4,
+        "species_id": ["NFAT_Pi_Nuc", "Act_C_Nuc", "NFAT_Nuc", "weird"],
+        "species_name": [
+            "Phosphorylated NFAT in Nucleus",
+            "Active Calcineurin in Nucleus",
+            "NFAT",
+            "foo; bar",
+        ],
+    })
+    evidence = pd.DataFrame(columns=["model_id", "species_id", "annotation", "annotation_type"])
+    ctx = build_context(
+        row, variant="target_only", corpus=pd.DataFrame([row]),
+        evidence=evidence, species_names=names,
+    )
+    by_id = {p["species_id"]: p["name"] for p in ctx["participants"]}
+    assert by_id["NFAT_Nuc"] == "NFAT"
+    assert by_id["Act_C_Nuc"] == "Active Calcineurin in Nucleus"
+    assert "Calcineurin" not in by_id["NFAT_Nuc"]
+    semicolon_row = _toy_row(
+        reaction_equation="weird => C_c",
+        model_id="BIOMD0000000122",
+    )
+    ctx2 = build_context(
+        semicolon_row, variant="target_only",
+        corpus=pd.DataFrame([semicolon_row]), evidence=evidence, species_names=names,
+    )
+    assert ctx2["participants"][0]["name"] == "foo; bar"
 
 
 def test_neighborhood_is_bounded_and_deterministic():
@@ -208,22 +260,25 @@ def test_neighborhood_is_bounded_and_deterministic():
 
 
 def test_structured_output_parser_handles_abstain_malformed_and_invalid_ids():
+    catalog = {"R00024", "R00025"}
     ok = parse_structured_output(json.dumps({
         "abstain": False,
         "predictions": [{"kegg_id": "R00024", "confidence": 0.9}],
         "rationale": "match", "basis": "supplied_evidence",
-    }))
+    }), catalog=catalog)
     assert ok["abstain"] is False
     assert ok["predictions"][0].valid_kegg_id is True
+    assert ok["predictions"][0].in_catalog is True
+    assert ok["predictions"][0].id_class == ID_IN_CATALOG
 
     abstain = parse_structured_output(json.dumps({
         "abstain": True, "predictions": [{"kegg_id": "R00024", "confidence": 1}],
         "rationale": "not enough", "basis": "recalled_knowledge",
-    }))
+    }), catalog=catalog)
     assert abstain["abstain"] is True
     assert abstain["predictions"] == []
 
-    bad = parse_structured_output("not json at all")
+    bad = parse_structured_output("not json at all", catalog=catalog)
     assert bad["abstain"] is True
     assert bad["parse_error"] == "unparseable"
 
@@ -231,8 +286,46 @@ def test_structured_output_parser_handles_abstain_malformed_and_invalid_ids():
         "abstain": False,
         "predictions": [{"kegg_id": "R1", "confidence": 0.2}],
         "rationale": "guess", "basis": "recalled_knowledge",
-    }))
+    }), catalog=catalog)
     assert invalid["predictions"][0].valid_kegg_id is False
+    assert invalid["predictions"][0].id_class == ID_MALFORMED
+    assert invalid["predictions"][0].well_formed is False
+
+    absent = parse_structured_output(json.dumps({
+        "abstain": False,
+        "predictions": [{"kegg_id": "R99999", "confidence": 0.5}],
+        "rationale": "syntax only", "basis": "recalled_knowledge",
+    }), catalog=catalog)
+    assert absent["predictions"][0].well_formed is True
+    assert absent["predictions"][0].in_catalog is False
+    assert absent["predictions"][0].id_class == ID_ABSENT
+
+    conf = parse_structured_output(json.dumps({
+        "abstain": False,
+        "predictions": [{"kegg_id": "R00024", "confidence": 1.5}],
+        "rationale": "bad conf", "basis": "recalled_knowledge",
+    }), catalog=catalog)
+    assert "confidence_out_of_range" in conf["parse_error"]
+    assert conf["predictions"][0].confidence is None
+
+    dups = parse_structured_output(json.dumps({
+        "abstain": False,
+        "predictions": [
+            {"kegg_id": "R00024", "confidence": 0.9},
+            {"kegg_id": "R00024", "confidence": 0.1},
+        ],
+        "rationale": "dup", "basis": "recalled_knowledge",
+    }), catalog=catalog)
+    assert dups["parse_error"] == "duplicate_predicted_ids"
+    assert len(dups["predictions"]) == 1
+
+    empty = parse_structured_output(json.dumps({
+        "abstain": False, "predictions": [],
+        "rationale": "forgot ids", "basis": "recalled_knowledge",
+    }), catalog=catalog)
+    assert empty["abstain"] is False
+    assert empty["predictions"] == []
+    assert empty["parse_error"] == "abstain_false_without_predictions"
 
 
 def test_abstention_is_not_scored_as_a_hallucinated_id():
@@ -275,6 +368,8 @@ def test_mocked_direct_and_tool_and_closed_set_and_cache():
     )
     assert tool.evidence_backed is True
     assert tool.mode == "tool_assisted"
+    assert tool.predictions[0].prediction_supported_by_evidence is True
+    assert tool.predictions[0].supporting_evidence_ids == ["R00024"]
 
     closed = run_closed_set(sample, ["R00024", "R00025"], abstain=False)
     assert closed.mode == "closed_set"
@@ -282,6 +377,23 @@ def test_mocked_direct_and_tool_and_closed_set_and_cache():
 
     empty_closed = run_closed_set(sample, [], abstain=False)
     assert empty_closed.abstain is True
+
+    mismatch_raw = json.dumps({
+        "abstain": False,
+        "predictions": [{"kegg_id": "R99999", "confidence": 0.8}],
+        "rationale": "guess", "basis": "supplied_evidence",
+    })
+    mismatch = run_tool_assisted(
+        sample, prompt, MockProvider(responses={"rxnA": mismatch_raw}),
+        variant="target_only",
+        evidence=[ToolEvidence(source="kegg", query="A + B", n_hits=1,
+                               identifiers=["R00024"])],
+    )
+    assert mismatch.evidence_backed is False
+    assert mismatch.predictions[0].prediction_supported_by_evidence is False
+    assert mismatch.predictions[0].supporting_evidence_ids == []
+    row = score_one(mismatch, ["R00024"], equiv=lambda c, t, k: c in set(t))
+    assert row["evidence_outcome"] == "incorrect_unsupported"
 
 
 def test_live_provider_is_blocked():
@@ -311,6 +423,7 @@ def test_eval_separates_exact_and_equivalence_and_modes():
         [a, b],
         {("M1", "R1"): ["R00024"], ("M2", "R2"): ["R00024"]},
         seen_targets={"R00024"},
+        seen_definition="train",
         equiv=equiv,
     )
     rows = {r["sample_id"]: r for r in summary["rows"]}
@@ -318,6 +431,9 @@ def test_eval_separates_exact_and_equivalence_and_modes():
     assert rows["1"]["brite_top1"] is True
     assert summary["by_mode"]["direct_open_set"]["n"] == 1
     assert summary["by_mode"]["tool_assisted"]["evidence_backed_exact_top1"] == 1.0
+    assert summary["seen_target_definition"] == "train"
+    assert summary["seen_fit_target"]["n"] == 2
+    assert summary["unseen_fit_target"]["n"] == 0
 
 
 def test_cost_estimator_uses_supplied_pricing_and_counts_calls():
@@ -332,6 +448,8 @@ def test_cost_estimator_uses_supplied_pricing_and_counts_calls():
     assert out["n_calls"] == 2
     assert out["n_input_tokens_est"] == 250
     assert out["gate"]["live_calls_blocked_until_approval"] is True
+    assert out["gate"]["tokenizer"]["method"] == TOKENIZER_SCAFFOLD
+    assert out["gate"]["tokenizer"]["live_run_blocked_with_this_method"] is True
     assert "example-small-chat" in out["models"]
     assert "EXAMPLE ONLY" in out["pricing_source"]
 
@@ -340,6 +458,21 @@ def test_token_estimate_is_positive_for_nonempty_text():
     assert estimate_tokens("") == 0
     assert estimate_tokens("abcd") == 1
     assert estimate_tokens("a" * 8) == 2
+    with pytest.raises(RuntimeError, match="tokenizer"):
+        require_live_tokenizer(TOKENIZER_SCAFFOLD)
+
+
+def test_classify_kegg_id_separates_syntax_from_catalog():
+    catalog = {"R00024"}
+    assert classify_kegg_id("R1", catalog) == ID_MALFORMED
+    assert classify_kegg_id("R99999", catalog) == ID_ABSENT
+    assert classify_kegg_id("R00024", catalog) == ID_IN_CATALOG
+
+
+def test_gitignore_has_single_trailing_newline():
+    raw = (REPO_ROOT / ".gitignore").read_bytes()
+    assert raw.endswith(b"\n")
+    assert not raw.endswith(b"\n\n")
 
 
 @live_only
@@ -383,21 +516,34 @@ def test_live_split_rebuild_is_byte_identical():
 
 
 @live_only
-def test_live_pilot_is_test_only_without_ground_truth():
+def test_live_pilot_is_validation_only_without_ground_truth():
     sample = pd.read_csv(PHASE3_DIR / "pilot_sample.csv")
     key = pd.read_csv(PHASE3_DIR / "pilot_answer_key.csv")
     splits = pd.read_csv(PHASE3_DIR / "splits.csv")
+    val_keys = set(zip(
+        splits.loc[splits.split == "validation", "model_id"].astype(str),
+        splits.loc[splits.split == "validation", "reaction_id"].astype(str),
+    ))
     test_keys = set(zip(
         splits.loc[splits.split == "test", "model_id"].astype(str),
         splits.loc[splits.split == "test", "reaction_id"].astype(str),
     ))
     for rec in sample.itertuples(index=False):
-        assert rec.split == "test"
-        assert (rec.model_id, rec.reaction_id) in test_keys
+        assert rec.split == PILOT_SPLIT == "validation"
+        assert (rec.model_id, rec.reaction_id) in val_keys
+        assert (rec.model_id, rec.reaction_id) not in test_keys
     assert "ground_truth_kegg_all" not in sample.columns
     assert "ground_truth_kegg_all" in key.columns
     assert sample.duplicated(["model_id", "reaction_id"]).sum() == 0
-    assert len(sample) == len(key) == 183
+    assert len(sample) == len(key) == 163
+    counts = sample.stratum.value_counts().to_dict()
+    assert counts[STRATUM_UNCONSTRAINED] == 50
+    assert counts[STRATUM_EMPTY] == 50
+    assert counts[STRATUM_ABSENT] == 22
+    assert counts[STRATUM_RERANK] == 16
+    assert counts[STRATUM_TOP1] == 25
+    summary = json.loads((PHASE3_DIR / "pilot_summary.json").read_text(encoding="utf-8"))
+    assert summary["source_split"] == "validation"
 
 
 @live_only
@@ -409,20 +555,46 @@ def test_live_prompts_have_no_kegg_reaction_leakage():
         row = json.loads(line)
         n += 1
         variants.add(row["variant"])
-        leaked = find_kegg_leakage(row)
+        leaked = find_kegg_leakage(row["prompt"])
         assert leaked == [], leaked
         if row["variant"] == "target_plus_neighborhood":
             assert row["neighborhood_k"] <= 4
             neighbors = row["prompt"]["messages"][1]["content"].count("neighboring")
             assert neighbors >= 0
-    assert n == 549
+    assert n == 489
     assert variants == set(CONTEXT_VARIANTS)
 
 
 @live_only
 def test_live_cost_file_records_example_pricing_and_gate():
     cost = json.loads((PHASE3_DIR / "cost_estimate.json").read_text(encoding="utf-8"))
-    assert cost["n_calls"] == 549
+    assert cost["n_calls"] == 489
+    assert cost["n_reactions"] == 163
     assert cost["gate"]["live_calls_blocked_until_approval"] is True
+    assert cost["gate"]["tokenizer"]["live_run_blocked_with_this_method"] is True
     assert "EXAMPLE ONLY" in cost["pricing_source"]
     assert cost["bounded_vs_whole_model"]["ratio_whole_over_bounded"] > 1
+
+
+@live_only
+def test_live_species_names_join_nfat_by_id():
+    names = pd.read_csv(PHASE3_DIR / "species_names.csv")
+    nfat = names[(names.model_id == "BIOMD0000000122") & (names.species_id == "NFAT_Nuc")]
+    calc = names[(names.model_id == "BIOMD0000000122") & (names.species_id == "Act_C_Nuc")]
+    assert len(nfat) == 1
+    assert str(nfat.iloc[0].species_name) == "NFAT_nuc"
+    assert "Calcineurin" in str(calc.iloc[0].species_name)
+    assert "Calcineurin" not in str(nfat.iloc[0].species_name)
+    assert not names.duplicated(["model_id", "species_id"]).any()
+
+
+@live_only
+def test_live_kegg_catalog_separates_syntax_from_existence():
+    from benchmark.scripts.phase3_common import load_kegg_catalog_ids
+    catalog = load_kegg_catalog_ids()
+    assert "R00024" in catalog
+    assert "R99999" not in catalog
+    assert classify_kegg_id("R99999", catalog) == ID_ABSENT
+    assert classify_kegg_id("R00024", catalog) == ID_IN_CATALOG
+    payload = json.loads((PHASE3_DIR / "kegg_catalog_ids.json").read_text(encoding="utf-8"))
+    assert payload["n"] == len(catalog) == len(payload["ids"])

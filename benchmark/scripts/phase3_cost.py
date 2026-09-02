@@ -32,6 +32,7 @@ from benchmark.scripts.phase3_common import (
     OUT_COST,
     PRICING_EXAMPLE,
     STRATA,
+    TOKENIZER_SCAFFOLD,
     estimate_tokens,
     load_evaluable_corpus,
     write_json,
@@ -126,6 +127,13 @@ def estimate_cost(
             "explicit_approval_required": [
                 "provider", "model", "sample_size", "budget",
             ],
+            "tokenizer": {
+                "method": TOKENIZER_SCAFFOLD,
+                "live_run_blocked_with_this_method": True,
+                "required_before_live": (
+                    "chosen model tokenizer or a conservative provider-specific bound"
+                ),
+            },
             "live_calls_blocked_until_approval": True,
         },
     }
