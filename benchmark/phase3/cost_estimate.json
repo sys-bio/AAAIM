@@ -1,84 +1,84 @@
 {
   "bounded_vs_whole_model": {
-    "bounded_input_tokens": 179789,
+    "bounded_input_tokens": 187062,
     "note": "Bounded variants do not repeat the full reaction chain for each target.",
-    "ratio_whole_over_bounded": 5.05,
+    "ratio_whole_over_bounded": 4.85,
     "whole_model_input_tokens": 907270
   },
   "by_stratum": {
     "empty_constrained": {
-      "max": 752,
-      "mean": 376.1,
-      "min": 240,
+      "max": 765,
+      "mean": 389.6,
+      "min": 253,
       "n": 150,
-      "p50": 370,
-      "p90": 476,
-      "total": 56413
+      "p50": 383,
+      "p90": 494,
+      "total": 58447
     },
     "nonempty_answer_absent": {
-      "max": 543,
-      "mean": 323.3,
-      "min": 225,
+      "max": 560,
+      "mean": 337.3,
+      "min": 238,
       "n": 66,
-      "p50": 331,
-      "p90": 382,
-      "total": 21338
+      "p50": 344,
+      "p90": 395,
+      "total": 22264
     },
     "retrievable_rerank_failure": {
-      "max": 756,
-      "mean": 355.4,
-      "min": 249,
+      "max": 769,
+      "mean": 369.5,
+      "min": 262,
       "n": 48,
-      "p50": 337,
-      "p90": 465,
-      "total": 17057
+      "p50": 355,
+      "p90": 478,
+      "total": 17736
     },
     "retrievable_top1_success": {
-      "max": 586,
-      "mean": 353.0,
-      "min": 223,
+      "max": 599,
+      "mean": 366.7,
+      "min": 236,
       "n": 75,
-      "p50": 347,
-      "p90": 435,
-      "total": 26476
+      "p50": 360,
+      "p90": 448,
+      "total": 27505
     },
     "unconstrained": {
-      "max": 647,
-      "mean": 390.0,
-      "min": 230,
+      "max": 665,
+      "mean": 407.4,
+      "min": 243,
       "n": 150,
-      "p50": 354,
-      "p90": 533,
-      "total": 58505
+      "p50": 371,
+      "p90": 550,
+      "total": 61110
     }
   },
   "by_variant": {
     "target_only": {
-      "max": 531,
-      "mean": 287.7,
-      "min": 223,
+      "max": 544,
+      "mean": 302.6,
+      "min": 236,
       "n": 163,
-      "p50": 279,
-      "p90": 333,
-      "total": 46894
+      "p50": 293,
+      "p90": 350,
+      "total": 49323
     },
     "target_plus_model": {
-      "max": 628,
-      "mean": 359.1,
-      "min": 301,
+      "max": 641,
+      "mean": 374.0,
+      "min": 314,
       "n": 163,
-      "p50": 351,
-      "p90": 381,
-      "total": 58533
+      "p50": 367,
+      "p90": 398,
+      "total": 60954
     },
     "target_plus_neighborhood": {
-      "max": 756,
-      "mean": 456.2,
-      "min": 334,
+      "max": 769,
+      "mean": 471.1,
+      "min": 347,
       "n": 163,
-      "p50": 435,
-      "p90": 553,
-      "total": 74362
+      "p50": 449,
+      "p90": 571,
+      "total": 76785
     }
   },
   "currency": "USD",
@@ -101,26 +101,26 @@
   },
   "models": {
     "example-large-chat": {
-      "expected_usd": 17.3668,
+      "expected_usd": 17.4759,
       "input_per_million": 15.0,
       "output_per_million": 75.0,
-      "worst_case_usd": 32.0368
+      "worst_case_usd": 32.1459
     },
     "example-mid-chat": {
-      "expected_usd": 3.4734,
+      "expected_usd": 3.4952,
       "input_per_million": 3.0,
       "output_per_million": 15.0,
-      "worst_case_usd": 6.4074
+      "worst_case_usd": 6.4292
     },
     "example-small-chat": {
-      "expected_usd": 0.1443,
+      "expected_usd": 0.1454,
       "input_per_million": 0.15,
       "output_per_million": 0.6,
-      "worst_case_usd": 0.2617
+      "worst_case_usd": 0.2628
     }
   },
   "n_calls": 489,
-  "n_input_tokens_est": 179789,
+  "n_input_tokens_est": 187062,
   "n_reactions": 163,
   "n_variants": 3,
   "planned_max_output_tokens_per_call": 400,
