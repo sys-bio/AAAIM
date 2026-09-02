@@ -8,6 +8,21 @@ retrieval failure
 reranking failure
     the correct answer is present but not placed first
 
+Denominators
+------------
+Only reactions with a nonempty candidate set can be ranked, so every per-ranker average
+in ``baseline_rankings.csv`` is conditional on that. Two different quantities are easy to
+confuse, and they differ by a factor of four here:
+
+``conditional_retrieval_failure_rate_nonempty``
+    nonempty candidate sets that omit the exact answer (~14%)
+``overall_retrieval_failure_rate``
+    all evaluable reactions with no exact answer reachable, counting the zero-candidate
+    reactions that dominate the corpus (~65%)
+
+``failure_decomposition`` in ``baseline_summary.json`` reports each rate with its own
+numerator, denominator and population name so the two cannot be conflated.
+
 Rankers
 -------
 ``heuristic``
@@ -486,6 +501,64 @@ def baseline_table(all_rankings: pd.DataFrame, ctx: RankContext) -> pd.DataFrame
     return pd.DataFrame(rows)
 
 
+def _rate(numerator: int, denominator: int, population: str) -> Dict[str, Any]:
+    """A rate that carries its own denominator, so it cannot be misread.
+
+    Every reported fraction in Phase 2 goes through this so the machine-readable output
+    always states what population it is over. Reading `rate` alone is never enough to
+    know whether it is over all evaluable reactions or only those with candidates.
+    """
+    return {
+        "rate": round(numerator / denominator, 4) if denominator else None,
+        "pct": round(100.0 * numerator / denominator, 2) if denominator else None,
+        "numerator": int(numerator),
+        "denominator": int(denominator),
+        "population": population,
+    }
+
+
+def failure_decomposition(sub: pd.DataFrame, n_evaluable: int,
+                          n_zero_candidate: int) -> Dict[str, Any]:
+    """Split failure into retrieval vs reranking with unambiguous denominators.
+
+    ``sub`` holds one row per reaction *that this ranker ranked*, i.e. only reactions
+    with a nonempty candidate set. The overall quantities therefore have to charge the
+    zero-candidate reactions explicitly rather than inheriting `sub`'s denominator --
+    that conflation is what made a 14.4% conditional miss rate look like the benchmark's
+    retrieval-failure rate when the true figure is about 65%.
+    """
+    n_scored = int(len(sub))
+    retrievable = int(sub.hit_any_exact.astype(bool).sum())
+    top1 = int(sub.hit_at_1_exact.astype(bool).sum())
+    missed_in_nonempty = n_scored - retrievable
+    rerank_failures = int(
+        (sub.hit_any_exact.astype(bool) & ~sub.hit_at_1_exact.astype(bool)).sum())
+
+    return {
+        # Retrieval, independent of any ranker.
+        "zero_candidate_rate": _rate(
+            n_zero_candidate, n_evaluable, "all evaluable reactions"),
+        "overall_retrieval_failure_rate": _rate(
+            n_evaluable - retrievable, n_evaluable,
+            "all evaluable reactions; failure = exact answer absent from candidate set "
+            "(includes every zero-candidate reaction)"),
+        "conditional_retrieval_failure_rate_nonempty": _rate(
+            missed_in_nonempty, n_scored,
+            "evaluable reactions with a nonempty candidate set"),
+        # Reranking, conditional on the answer being reachable at all.
+        "conditional_reranking_failure_rate_retrievable": _rate(
+            rerank_failures, retrievable,
+            "reactions whose candidate set contains the exact answer"),
+        # End-to-end.
+        "overall_top1_accuracy": _rate(
+            top1, n_evaluable, "all evaluable reactions"),
+        "overall_top1_failure_rate": _rate(
+            n_evaluable - top1, n_evaluable, "all evaluable reactions"),
+        "conditional_top1_accuracy_nonempty": _rate(
+            top1, n_scored, "evaluable reactions with a nonempty candidate set"),
+    }
+
+
 def failure_stratification(all_rankings: pd.DataFrame) -> pd.DataFrame:
     """Split failures by cause and stratum for each ranker."""
     rows: List[Dict[str, Any]] = []
@@ -497,17 +570,29 @@ def failure_stratification(all_rankings: pd.DataFrame) -> pd.DataFrame:
         for column in strata_cols:
             for value, grp in sub.groupby(column, dropna=False):
                 n = len(grp)
+                retrievable = int(grp["hit_any_exact"].astype(bool).sum())
+                rerank_failures = int(
+                    (grp["hit_any_exact"].astype(bool)
+                     & ~grp["hit_at_1_exact"].astype(bool)).sum())
+                # Every rate here is conditional on a nonempty candidate set, because
+                # only ranked reactions appear in `all_rankings`. The column names say
+                # so; do not compare them against corpus-wide rates.
                 rows.append({
                     "ranker": ranker,
                     "stratum": column,
                     "value": str(value),
-                    "n_reactions": int(n),
-                    "correct_at_1_pct": round(100.0 * float(grp["hit_at_1_exact"].mean()), 2),
-                    "retrieval_failure_pct": round(
+                    "n_reactions_nonempty": int(n),
+                    "conditional_top1_pct_nonempty": round(
+                        100.0 * float(grp["hit_at_1_exact"].mean()), 2),
+                    "conditional_retrieval_failure_pct_nonempty": round(
                         100.0 * float(grp["retrieval_failure"].mean()), 2),
-                    "reranking_failure_pct": round(
+                    "conditional_reranking_failure_pct_nonempty": round(
                         100.0 * float(grp["reranking_failure"].mean()), 2),
-                    "equivalence_only_gain_pct": round(100.0 * float(
+                    "n_retrievable": retrievable,
+                    "conditional_reranking_failure_pct_retrievable": (
+                        round(100.0 * rerank_failures / retrievable, 2)
+                        if retrievable else None),
+                    "equivalence_only_gain_pct_nonempty": round(100.0 * float(
                         (grp["hit_at_1_brite_orthology"] & ~grp["hit_at_1_exact"]).mean()
                     ), 2),
                     "mean_candidate_set_size": round(float(grp.candidate_set_size.mean()), 1),
@@ -573,6 +658,9 @@ def main() -> int:
     write_csv(table, OUT_TABLE)
     write_csv(failure_stratification(all_rankings), OUT_FAILURES)
 
+    n_evaluable = int(len(ctx.retrieval))
+    n_zero_candidate = int((~ctx.retrieval.has_candidates.astype(bool)).sum())
+
     summary = {
         "rankers_run": args.rankers,
         "ranker_notes": per_ranker_notes,
@@ -582,12 +670,30 @@ def main() -> int:
         "k_values": list(K_VALUES),
         "random_seed": RANDOM_SEED,
         "llm_top_n": LLM_TOP_N,
+        "populations": {
+            "all_evaluable": {
+                "n": n_evaluable,
+                "description": "every reaction with ground truth in the frozen Phase 1 table",
+            },
+            "nonempty_candidate_set": {
+                "n": n_evaluable - n_zero_candidate,
+                "description": "evaluable reactions for which generation stored >=1 candidate; "
+                               "the only reactions any ranker can score",
+            },
+            "zero_candidate": {
+                "n": n_zero_candidate,
+                "description": "evaluable reactions with no candidates; unreachable for every "
+                               "ranker and charged as retrieval failures in overall metrics",
+            },
+        },
         "headline": {
             ranker: {
-                "recall_at_1_exact": three_way(sub, "hit_at_1_exact"),
-                "recall_at_1_brite_orthology": three_way(sub, "hit_at_1_brite_orthology"),
-                "retrieval_failure_pct": round(100.0 * float(sub.retrieval_failure.mean()), 2),
-                "reranking_failure_pct": round(100.0 * float(sub.reranking_failure.mean()), 2),
+                # `_scored` suffixes mark averages over ranked (nonempty) reactions only.
+                "recall_at_1_exact_scored": three_way(sub, "hit_at_1_exact"),
+                "recall_at_1_brite_orthology_scored": three_way(
+                    sub, "hit_at_1_brite_orthology"),
+                "failure_decomposition": failure_decomposition(
+                    sub, n_evaluable, n_zero_candidate),
             }
             for ranker, sub in all_rankings.groupby("ranker")
         },
@@ -604,13 +710,35 @@ def main() -> int:
     }
     write_json(summary, OUT_JSON)
 
+    logger.info(
+        "populations: %d evaluable reactions; %d with candidates; %d with zero candidates "
+        "(zero_candidate_rate=%.1f%% of all evaluable)",
+        n_evaluable, n_evaluable - n_zero_candidate, n_zero_candidate,
+        100.0 * n_zero_candidate / n_evaluable if n_evaluable else 0.0,
+    )
     for ranker, head in sorted(summary["headline"].items()):
-        r1 = head["recall_at_1_exact"]
+        r1 = head["recall_at_1_exact_scored"]
+        d = head["failure_decomposition"]
+        # Spell out both denominators on every line. An unqualified "retrieval_fail"
+        # reads as a corpus-wide rate and it is not one.
         logger.info(
-            "%-10s recall@1 exact: micro=%.3f model_macro=%.3f cluster_macro=%.3f | "
-            "retrieval_fail=%.1f%% rerank_fail=%.1f%%",
+            "%-10s | conditional (n=%d, nonempty sets): top1=%.1f%% "
+            "retrieval_fail=%.1f%% | overall (n=%d, all evaluable): top1=%.1f%% "
+            "retrieval_fail=%.1f%% | rerank_fail=%.1f%% of the %d retrievable",
+            ranker,
+            d["conditional_top1_accuracy_nonempty"]["denominator"],
+            d["conditional_top1_accuracy_nonempty"]["pct"],
+            d["conditional_retrieval_failure_rate_nonempty"]["pct"],
+            d["overall_top1_accuracy"]["denominator"],
+            d["overall_top1_accuracy"]["pct"],
+            d["overall_retrieval_failure_rate"]["pct"],
+            d["conditional_reranking_failure_rate_retrievable"]["pct"],
+            d["conditional_reranking_failure_rate_retrievable"]["denominator"],
+        )
+        logger.info(
+            "%-10s | recall@1 exact over ranked reactions only: micro=%.3f "
+            "model_macro=%.3f cluster_macro=%.3f",
             ranker, r1["reaction_micro"], r1["model_macro"], r1["cluster_macro"],
-            head["retrieval_failure_pct"], head["reranking_failure_pct"],
         )
     return 0
 

@@ -9,9 +9,23 @@ Candidates are stored in their own tables, keyed by model, reaction and candidat
 
 ## Status
 
-The pipeline is written and unit-tested end to end. **The full generation pass has not
-been run**: it takes roughly three days of wall-clock time, so it is meant to be run
-locally rather than inside an agent session. Everything below is ready to execute.
+**Complete.** The full generation pass and the baseline runs have been executed:
+74/74 models, 5,816 evaluable reactions, 91,802 candidate rows, zero pipeline failures,
+`config_id = 86938b48ab88`. All 14 audit invariants pass and reassembly from the caches is
+byte-identical.
+
+Results, the retrieval-versus-reranking decomposition and the `BIOMD0000001063`
+candidate-explosion investigation are in **[`PHASE2_RESULTS.md`](PHASE2_RESULTS.md)**.
+The freeze manifest is **[`PHASE2_MANIFEST.json`](PHASE2_MANIFEST.json)** (proposed tag
+`benchmark-phase2-v1`).
+
+Headline: 59.44% of evaluable reactions get zero candidates, overall exact recall at any
+rank is 34.71%, and perfect reranking of the existing candidate sets would add only
+**+1.46 pp** to overall Top-1. Retrieval, not ranking, is the bottleneck.
+
+Outstanding and optional: the embedding baseline (MiniLM asset not cached locally) and the
+LLM baseline (paid API calls). Neither can change the conclusion, since both are bounded
+by the same oracle ceiling.
 
 ## Pipeline
 
@@ -22,7 +36,12 @@ locally rather than inside an agent session. Everything below is ready to execut
 | 2 | `build_reaction_text.py` | `reaction_text.csv` | ~10 s |
 | 3 | `generate_candidates.py` | `candidates.csv`, `candidate_status.csv`, `candidate_generation_failures.csv` | **~3 days** |
 | 4 | `analyze_retrieval.py` | `retrieval_ceiling.json`, `reaction_retrieval.csv`, `retrieval_ceiling_by_stratum.csv` | ~1 min |
-| 5 | `rank_baselines.py` | `baseline_table.csv`, `baseline_rankings.csv`, `failure_stratification.csv` | minutes (LLM: longer) |
+| 5 | `rank_baselines.py` | `baseline_table.csv`, `baseline_rankings.csv`, `failure_stratification.csv`, `baseline_summary.json` | ~7 s (LLM: longer) |
+| 6 | `candidate_diagnostics.py` | `candidate_diagnostics.json`, `candidate_size_by_stratum.csv`, `candidate_largest_sets.csv` | ~1 s |
+| 7 | `audit_phase2.py` | `phase2_audit.json` | ~2 s |
+| 8 | `freeze_phase2.py` | `PHASE2_MANIFEST.json` | ~1 s |
+
+Steps 4–8 are cheap, read-only over the caches, and byte-identical on re-run.
 
 ### Running it locally
 
@@ -47,7 +66,14 @@ python benchmark/scripts/generate_candidates.py --assemble-only
 
 # Steps 4-5.
 python benchmark/scripts/analyze_retrieval.py
-python benchmark/scripts/rank_baselines.py --rankers heuristic lexical embedding random oracle
+python benchmark/scripts/rank_baselines.py --rankers heuristic lexical random oracle
+
+# Steps 6-8: diagnostics, invariant audit, freeze manifest.
+python benchmark/scripts/candidate_diagnostics.py
+python benchmark/scripts/audit_phase2.py --expect-config-id 86938b48ab88 `
+    --expect-models 74 --expect-reactions 5816 --check-reassembly
+python benchmark/scripts/freeze_phase2.py
+python benchmark/scripts/freeze_phase2.py --verify
 ```
 
 Notes on the long step:
@@ -251,6 +277,31 @@ ceiling and splits every error into exactly one of:
 * **retrieval failure** — the answer is absent from the candidate set; no reranker can fix it
 * **reranking failure** — the answer is present but not placed first
 
+#### Denominators are always explicit
+
+Only reactions with a nonempty candidate set can be ranked, so every per-ranker average in
+`baseline_rankings.csv` is conditional on that. Two rates are easy to confuse and differ by
+a factor of four on this corpus, so `baseline_summary.json` reports each one as an object
+carrying `rate`, `pct`, `numerator`, `denominator` and `population`:
+
+| Key in `failure_decomposition` | Denominator | Heuristic |
+| --- | --- | --- |
+| `zero_candidate_rate` | all 5,816 evaluable | 59.44% |
+| `overall_retrieval_failure_rate` | all 5,816 evaluable | **65.29%** |
+| `conditional_retrieval_failure_rate_nonempty` | 2,359 nonempty sets | **14.41%** |
+| `conditional_reranking_failure_rate_retrievable` | 2,019 retrievable | 4.21% |
+| `overall_top1_accuracy` | all 5,816 evaluable | 33.25% |
+| `overall_top1_failure_rate` | all 5,816 evaluable | 66.75% |
+| `conditional_top1_accuracy_nonempty` | 2,359 nonempty sets | 81.98% |
+
+A top-level `populations` block defines all three populations and their sizes. Headline
+keys averaged over ranked reactions only carry a `_scored` suffix, and the columns of
+`failure_stratification.csv` name their denominator (`..._nonempty`, `..._retrievable`).
+
+Earlier runs logged a bare `retrieval_fail=14.4%`, which is the conditional rate and reads
+as though Phase 2 retrieval fails on 14% of the benchmark. It does not; the corpus figure
+is 65.29%. The ambiguous key names were removed rather than kept for compatibility.
+
 | Ranker | Method | Requirements |
 | --- | --- | --- |
 | `heuristic` | Existing AAAIM rule-based score (shipped behaviour) | none |
@@ -277,14 +328,27 @@ the retrieval-vs-reranking split.
 ## Testing
 
 ```powershell
-python -m pytest tests/test_phase2_candidates.py tests/test_benchmark_build.py -q
+python -m pytest tests/test_phase2_candidates.py tests/test_phase2_audit.py `
+    tests/test_benchmark_build.py -q
 ```
 
-67 tests, ~2 s. The Phase 2 tests pin all four bugs above plus deterministic tie-breaking,
-multiple ground-truth ids, equivalence-group parsing, the three averaging modes, the
-reaction-aware missing-output classification, partial vs final assembly, cache-schema
-invalidation, the exit code for every combination of pending models and pipeline failures,
-and generation selection under `--limit 0`, `--limit 1`, a negative limit, and no limit.
+109 tests, ~5 s. `test_phase2_candidates.py` pins all four bugs above plus deterministic
+tie-breaking, multiple ground-truth ids, equivalence-group parsing, the three averaging
+modes, the reaction-aware missing-output classification, partial vs final assembly,
+cache-schema invalidation, the exit code for every combination of pending models and
+pipeline failures, and generation selection under `--limit 0`, `--limit 1`, a negative
+limit, and no limit.
+
+`test_phase2_audit.py` covers the freeze. Every invariant is tested against a deliberately
+corrupted artifact set as well as a clean one, because an invariant that cannot fail is
+worthless: stale cache `config_id`s, duplicated and missing status rows, `ok` reactions
+with no candidates, `num_candidates` disagreeing with stored rows, candidate rows attached
+to `no_candidates` or `unconstrained_candidate_set`, non-consecutive and duplicated ranks,
+malformed KEGG ids, mismatched `config_id`s, pipeline-failure rows, and post-hoc artifact
+edits that break a recorded digest. It also pins the denominator semantics of every
+reported rate, and a `live_only` group asserts the frozen numbers (74 models, 5,816
+reactions, 91,802 rows, 14.41% vs 65.29%) whenever the real artifacts are present, skipping
+on a fresh clone.
 
 ## Phase 1 housekeeping completed here
 
@@ -297,9 +361,15 @@ and generation selection under `--limit 0`, `--limit 1`, a negative limit, and n
 
 ## Not yet done
 
-* Run the generation pass and populate the candidate tables (the 3-day step).
-* Freeze a Phase 2 version file with artifact digests, once real outputs exist.
+* Create the `benchmark-phase2-v1` tag and push. `PHASE2_MANIFEST.json` is written and
+  self-verifying, but tagging is left for review.
+* Embedding baseline: dependencies are installed and the MiniLM asset is SHA-256 pinned,
+  but it is not cached locally and was not downloaded. Optional, and bounded by the same
+  oracle ceiling as every other reranker.
 * LLM reranking (needs an API key).
 * Cluster sensitivity analysis (conservative functional vs provenance-based clusters),
   which you deferred; `CLU_BIOMD0000000042` remains grouped as a conservative
   pathway-family cluster for the primary split.
+* Phase 3, which `PHASE2_RESULTS.md` argues should target retrieval (open-set recovery and
+  learned full-database retrieval) rather than reranking, since perfect reranking of the
+  current candidate sets is worth only +1.46 pp overall.

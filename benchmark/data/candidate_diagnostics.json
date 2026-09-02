@@ -1,0 +1,584 @@
+{
+  "degeneracy": {
+    "normally_constrained": {
+      "candidate_rows": 5489,
+      "n_reactions": 2228,
+      "pct_retrievable_exact": 89.81,
+      "pct_top1_exact": 86.8
+    },
+    "weak_set_threshold": 100,
+    "weakly_constrained": {
+      "candidate_rows": 86313,
+      "n_reactions": 131,
+      "pct_retrievable_exact": 13.74,
+      "pct_top1_exact": 0.0,
+      "share_of_all_rows": 0.9402,
+      "share_of_ok_reactions": 0.0555
+    }
+  },
+  "focus_model": {
+    "candidate_rows": 77073,
+    "duplicate_candidate_rows": 0,
+    "evaluable_reactions": 874,
+    "largest_sets": [
+      {
+        "filtered_species_count": 1,
+        "hit_any_exact": false,
+        "num_candidates": 2353,
+        "num_participants": 4,
+        "reaction_id": "r_2027"
+      },
+      {
+        "filtered_species_count": 1,
+        "hit_any_exact": true,
+        "num_candidates": 2353,
+        "num_participants": 4,
+        "reaction_id": "r_0537"
+      },
+      {
+        "filtered_species_count": 1,
+        "hit_any_exact": false,
+        "num_candidates": 1991,
+        "num_participants": 3,
+        "reaction_id": "r_0570"
+      },
+      {
+        "filtered_species_count": 1,
+        "hit_any_exact": false,
+        "num_candidates": 1446,
+        "num_participants": 5,
+        "reaction_id": "r_4234"
+      },
+      {
+        "filtered_species_count": 1,
+        "hit_any_exact": false,
+        "num_candidates": 1446,
+        "num_participants": 5,
+        "reaction_id": "r_2026"
+      },
+      {
+        "filtered_species_count": 1,
+        "hit_any_exact": false,
+        "num_candidates": 1446,
+        "num_participants": 5,
+        "reaction_id": "r_4240"
+      },
+      {
+        "filtered_species_count": 1,
+        "hit_any_exact": false,
+        "num_candidates": 1446,
+        "num_participants": 5,
+        "reaction_id": "r_4311"
+      },
+      {
+        "filtered_species_count": 1,
+        "hit_any_exact": false,
+        "num_candidates": 1446,
+        "num_participants": 5,
+        "reaction_id": "r_4243"
+      },
+      {
+        "filtered_species_count": 1,
+        "hit_any_exact": false,
+        "num_candidates": 1446,
+        "num_participants": 5,
+        "reaction_id": "r_4242"
+      },
+      {
+        "filtered_species_count": 1,
+        "hit_any_exact": false,
+        "num_candidates": 1446,
+        "num_participants": 5,
+        "reaction_id": "r_4282"
+      }
+    ],
+    "metric_impact": {
+      "corpus_recall_any_exact_excluding_model": 0.3493,
+      "corpus_recall_any_exact_including_model": 0.3471,
+      "corpus_recall_at_1_exact_excluding_model": 0.3341,
+      "corpus_recall_at_1_exact_including_model": 0.3325,
+      "model_recall_any_exact": 0.3352,
+      "model_recall_at_1_exact": 0.3238
+    },
+    "model_id": "BIOMD0000001063",
+    "reactions_by_mapped_participants": {
+      "1": 56,
+      "2": 209,
+      "3": 74,
+      "4": 123,
+      "5": 3,
+      "6": 2
+    },
+    "relaxation_directions": {
+      "down+up": 14,
+      "exact": 75650,
+      "up": 1409
+    },
+    "relaxation_levels": {
+      "0": 75650,
+      "1": 1417,
+      "2": 6
+    },
+    "share_of_all_candidate_rows": 0.8396,
+    "status_counts": {
+      "no_candidates": 394,
+      "ok": 467,
+      "unconstrained_candidate_set": 13
+    },
+    "weakly_constrained_reactions": {
+      "candidate_rows": 75454,
+      "n": 87,
+      "pct_retrievable_exact": 6.9,
+      "share_of_all_rows": 0.8219,
+      "share_of_model_rows": 0.979
+    }
+  },
+  "inputs": {
+    "candidate_status_csv_sha256": "4e126ac26f232e717f62c37e6bb26bf07ea6a79a6f6c0e3ca385e57852ea63fa",
+    "candidates_csv_sha256": "0489930c87c7c5b7e0d20de277954354127b2e5cab9f56016ab483635a0206ce",
+    "reaction_retrieval_csv_sha256": "3111db3cc4a91c15bb0eac48b6dd4b1c3982aed4d2d4879a461617aac79623d7"
+  },
+  "largest_reaction_sets": [
+    {
+      "candidate_rows": 2353,
+      "filtered_species_count": 1,
+      "hit_any_exact": false,
+      "hit_at_1_exact": false,
+      "model_id": "BIOMD0000001063",
+      "num_participants": 4,
+      "reaction_id": "r_2027",
+      "relaxation_direction": "exact",
+      "relaxation_level": 0,
+      "status": "ok"
+    },
+    {
+      "candidate_rows": 2353,
+      "filtered_species_count": 1,
+      "hit_any_exact": true,
+      "hit_at_1_exact": false,
+      "model_id": "BIOMD0000001063",
+      "num_participants": 4,
+      "reaction_id": "r_0537",
+      "relaxation_direction": "exact",
+      "relaxation_level": 0,
+      "status": "ok"
+    },
+    {
+      "candidate_rows": 1991,
+      "filtered_species_count": 1,
+      "hit_any_exact": false,
+      "hit_at_1_exact": false,
+      "model_id": "BIOMD0000001063",
+      "num_participants": 3,
+      "reaction_id": "r_0570",
+      "relaxation_direction": "exact",
+      "relaxation_level": 0,
+      "status": "ok"
+    },
+    {
+      "candidate_rows": 1446,
+      "filtered_species_count": 1,
+      "hit_any_exact": false,
+      "hit_at_1_exact": false,
+      "model_id": "BIOMD0000001063",
+      "num_participants": 6,
+      "reaction_id": "r_0855",
+      "relaxation_direction": "exact",
+      "relaxation_level": 0,
+      "status": "ok"
+    },
+    {
+      "candidate_rows": 1446,
+      "filtered_species_count": 1,
+      "hit_any_exact": false,
+      "hit_at_1_exact": false,
+      "model_id": "BIOMD0000001063",
+      "num_participants": 5,
+      "reaction_id": "r_0572",
+      "relaxation_direction": "exact",
+      "relaxation_level": 0,
+      "status": "ok"
+    },
+    {
+      "candidate_rows": 1446,
+      "filtered_species_count": 1,
+      "hit_any_exact": false,
+      "hit_at_1_exact": false,
+      "model_id": "BIOMD0000001063",
+      "num_participants": 5,
+      "reaction_id": "r_0573",
+      "relaxation_direction": "exact",
+      "relaxation_level": 0,
+      "status": "ok"
+    },
+    {
+      "candidate_rows": 1446,
+      "filtered_species_count": 1,
+      "hit_any_exact": false,
+      "hit_at_1_exact": false,
+      "model_id": "BIOMD0000001063",
+      "num_participants": 5,
+      "reaction_id": "r_0571",
+      "relaxation_direction": "exact",
+      "relaxation_level": 0,
+      "status": "ok"
+    },
+    {
+      "candidate_rows": 1446,
+      "filtered_species_count": 1,
+      "hit_any_exact": false,
+      "hit_at_1_exact": false,
+      "model_id": "BIOMD0000001063",
+      "num_participants": 5,
+      "reaction_id": "r_0765",
+      "relaxation_direction": "exact",
+      "relaxation_level": 0,
+      "status": "ok"
+    },
+    {
+      "candidate_rows": 1446,
+      "filtered_species_count": 1,
+      "hit_any_exact": false,
+      "hit_at_1_exact": false,
+      "model_id": "BIOMD0000001063",
+      "num_participants": 5,
+      "reaction_id": "r_0887",
+      "relaxation_direction": "exact",
+      "relaxation_level": 0,
+      "status": "ok"
+    },
+    {
+      "candidate_rows": 1446,
+      "filtered_species_count": 1,
+      "hit_any_exact": false,
+      "hit_at_1_exact": false,
+      "model_id": "BIOMD0000001063",
+      "num_participants": 5,
+      "reaction_id": "r_1007",
+      "relaxation_direction": "exact",
+      "relaxation_level": 0,
+      "status": "ok"
+    },
+    {
+      "candidate_rows": 1446,
+      "filtered_species_count": 1,
+      "hit_any_exact": false,
+      "hit_at_1_exact": false,
+      "model_id": "BIOMD0000001063",
+      "num_participants": 5,
+      "reaction_id": "r_2026",
+      "relaxation_direction": "exact",
+      "relaxation_level": 0,
+      "status": "ok"
+    },
+    {
+      "candidate_rows": 1446,
+      "filtered_species_count": 1,
+      "hit_any_exact": false,
+      "hit_at_1_exact": false,
+      "model_id": "BIOMD0000001063",
+      "num_participants": 5,
+      "reaction_id": "r_0997",
+      "relaxation_direction": "exact",
+      "relaxation_level": 0,
+      "status": "ok"
+    },
+    {
+      "candidate_rows": 1446,
+      "filtered_species_count": 1,
+      "hit_any_exact": false,
+      "hit_at_1_exact": false,
+      "model_id": "BIOMD0000001063",
+      "num_participants": 5,
+      "reaction_id": "r_0965",
+      "relaxation_direction": "exact",
+      "relaxation_level": 0,
+      "status": "ok"
+    },
+    {
+      "candidate_rows": 1446,
+      "filtered_species_count": 1,
+      "hit_any_exact": false,
+      "hit_at_1_exact": false,
+      "model_id": "BIOMD0000001063",
+      "num_participants": 7,
+      "reaction_id": "r_0908",
+      "relaxation_direction": "exact",
+      "relaxation_level": 0,
+      "status": "ok"
+    },
+    {
+      "candidate_rows": 1446,
+      "filtered_species_count": 1,
+      "hit_any_exact": false,
+      "hit_at_1_exact": false,
+      "model_id": "BIOMD0000001063",
+      "num_participants": 5,
+      "reaction_id": "r_0966",
+      "relaxation_direction": "exact",
+      "relaxation_level": 0,
+      "status": "ok"
+    },
+    {
+      "candidate_rows": 1446,
+      "filtered_species_count": 1,
+      "hit_any_exact": false,
+      "hit_at_1_exact": false,
+      "model_id": "BIOMD0000001063",
+      "num_participants": 5,
+      "reaction_id": "r_0766",
+      "relaxation_direction": "exact",
+      "relaxation_level": 0,
+      "status": "ok"
+    },
+    {
+      "candidate_rows": 1446,
+      "filtered_species_count": 1,
+      "hit_any_exact": false,
+      "hit_at_1_exact": false,
+      "model_id": "BIOMD0000001063",
+      "num_participants": 5,
+      "reaction_id": "r_1736",
+      "relaxation_direction": "exact",
+      "relaxation_level": 0,
+      "status": "ok"
+    },
+    {
+      "candidate_rows": 1446,
+      "filtered_species_count": 1,
+      "hit_any_exact": false,
+      "hit_at_1_exact": false,
+      "model_id": "BIOMD0000001063",
+      "num_participants": 5,
+      "reaction_id": "r_0334",
+      "relaxation_direction": "exact",
+      "relaxation_level": 0,
+      "status": "ok"
+    },
+    {
+      "candidate_rows": 1446,
+      "filtered_species_count": 1,
+      "hit_any_exact": false,
+      "hit_at_1_exact": false,
+      "model_id": "BIOMD0000001063",
+      "num_participants": 5,
+      "reaction_id": "r_0154",
+      "relaxation_direction": "exact",
+      "relaxation_level": 0,
+      "status": "ok"
+    },
+    {
+      "candidate_rows": 1446,
+      "filtered_species_count": 1,
+      "hit_any_exact": false,
+      "hit_at_1_exact": false,
+      "model_id": "BIOMD0000001063",
+      "num_participants": 5,
+      "reaction_id": "r_0368",
+      "relaxation_direction": "exact",
+      "relaxation_level": 0,
+      "status": "ok"
+    }
+  ],
+  "model_concentration": {
+    "top_10_models": {
+      "candidate_rows": 89623,
+      "models": [
+        "BIOMD0000001063",
+        "BIOMD0000000473",
+        "BIOMD0000000471",
+        "BIOMD0000000472",
+        "BIOMD0000000691",
+        "BIOMD0000000231",
+        "BIOMD0000000674",
+        "BIOMD0000000450",
+        "BIOMD0000000268",
+        "BIOMD0000001090"
+      ],
+      "share_of_all_rows": 0.9763
+    },
+    "top_1_models": {
+      "candidate_rows": 77073,
+      "models": [
+        "BIOMD0000001063"
+      ],
+      "share_of_all_rows": 0.8396
+    },
+    "top_5_models": {
+      "candidate_rows": 87036,
+      "models": [
+        "BIOMD0000001063",
+        "BIOMD0000000473",
+        "BIOMD0000000471",
+        "BIOMD0000000472",
+        "BIOMD0000000691"
+      ],
+      "share_of_all_rows": 0.9481
+    }
+  },
+  "outputs": {
+    "candidate_largest_sets_csv_sha256": "154538489a014bdc082d1e840298558289e816b960dd047884e4e2722440878f",
+    "candidate_size_by_stratum_csv_sha256": "801ad306e9f988c98d0cc80f0242ed49285c6ae431ee235da5b781db4a24b510"
+  },
+  "reaction_concentration": {
+    "top_100_reactions": {
+      "candidate_rows": 82409,
+      "share_of_all_rows": 0.8977
+    },
+    "top_10_reactions": {
+      "candidate_rows": 16819,
+      "share_of_all_rows": 0.1832
+    },
+    "top_1_reactions": {
+      "candidate_rows": 2353,
+      "share_of_all_rows": 0.0256
+    }
+  },
+  "size_all_evaluable": {
+    "count_gt_100": 131,
+    "count_gt_1000": 45,
+    "count_gt_10000": 0,
+    "count_gt_15": 188,
+    "count_gt_50": 150,
+    "max": 2353,
+    "mean": 15.78,
+    "median": 0.0,
+    "min": 0,
+    "n": 5816,
+    "p50": 0.0,
+    "p75": 1.0,
+    "p90": 1.0,
+    "p95": 4.0,
+    "p99": 423.65,
+    "total_rows": 91802
+  },
+  "size_by_mapped_participant_count": [
+    {
+      "filtered_species_count": 1,
+      "max_size": 2353,
+      "mean_size": 549.14,
+      "median_size": 166.0,
+      "n_reactions": 129,
+      "pct_retrievable_exact": 10.08,
+      "pct_top1_exact": 5.43,
+      "total_candidate_rows": 70839
+    },
+    {
+      "filtered_species_count": 2,
+      "max_size": 1321,
+      "mean_size": 17.8,
+      "median_size": 1.0,
+      "n_reactions": 1037,
+      "pct_retrievable_exact": 86.11,
+      "pct_top1_exact": 80.71,
+      "total_candidate_rows": 18455
+    },
+    {
+      "filtered_species_count": 3,
+      "max_size": 155,
+      "mean_size": 2.44,
+      "median_size": 1.0,
+      "n_reactions": 492,
+      "pct_retrievable_exact": 93.29,
+      "pct_top1_exact": 89.43,
+      "total_candidate_rows": 1201
+    },
+    {
+      "filtered_species_count": 4,
+      "max_size": 31,
+      "mean_size": 1.62,
+      "median_size": 1.0,
+      "n_reactions": 528,
+      "pct_retrievable_exact": 93.56,
+      "pct_top1_exact": 93.18,
+      "total_candidate_rows": 854
+    },
+    {
+      "filtered_species_count": 5,
+      "max_size": 127,
+      "mean_size": 2.49,
+      "median_size": 1.0,
+      "n_reactions": 90,
+      "pct_retrievable_exact": 93.33,
+      "pct_top1_exact": 93.33,
+      "total_candidate_rows": 224
+    },
+    {
+      "filtered_species_count": 6,
+      "max_size": 4,
+      "mean_size": 1.21,
+      "median_size": 1.0,
+      "n_reactions": 14,
+      "pct_retrievable_exact": 85.71,
+      "pct_top1_exact": 85.71,
+      "total_candidate_rows": 17
+    },
+    {
+      "filtered_species_count": 7,
+      "max_size": 2,
+      "mean_size": 1.16,
+      "median_size": 1.0,
+      "n_reactions": 19,
+      "pct_retrievable_exact": 94.74,
+      "pct_top1_exact": 84.21,
+      "total_candidate_rows": 22
+    },
+    {
+      "filtered_species_count": 8,
+      "max_size": 2,
+      "mean_size": 1.15,
+      "median_size": 1.0,
+      "n_reactions": 34,
+      "pct_retrievable_exact": 97.06,
+      "pct_top1_exact": 97.06,
+      "total_candidate_rows": 39
+    },
+    {
+      "filtered_species_count": 9,
+      "max_size": 1,
+      "mean_size": 1.0,
+      "median_size": 1.0,
+      "n_reactions": 13,
+      "pct_retrievable_exact": 100.0,
+      "pct_top1_exact": 100.0,
+      "total_candidate_rows": 13
+    },
+    {
+      "filtered_species_count": 47,
+      "max_size": 46,
+      "mean_size": 46.0,
+      "median_size": 46.0,
+      "n_reactions": 3,
+      "pct_retrievable_exact": 0.0,
+      "pct_top1_exact": 0.0,
+      "total_candidate_rows": 138
+    }
+  ],
+  "size_nonempty_only": {
+    "count_gt_100": 131,
+    "count_gt_1000": 45,
+    "count_gt_10000": 0,
+    "count_gt_15": 188,
+    "count_gt_50": 150,
+    "max": 2353,
+    "mean": 38.92,
+    "median": 1.0,
+    "min": 1,
+    "n": 2359,
+    "p50": 1.0,
+    "p75": 1.0,
+    "p90": 7.0,
+    "p95": 115.0,
+    "p99": 1446.0,
+    "total_rows": 91802
+  },
+  "totals": {
+    "candidate_rows": 91802,
+    "distinct_candidate_kegg_ids": 7761,
+    "duplicate_candidate_rows": 0,
+    "evaluable_reactions": 5816,
+    "reactions_with_candidates": 2359,
+    "reactions_with_zero_candidates": 3457,
+    "zero_candidate_rate": 0.5944
+  }
+}

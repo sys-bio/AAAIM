@@ -3,5 +3,8 @@
 # checkout unchanged on every platform or the digests will not verify.
 benchmark/data/*.csv text eol=lf
 benchmark/data/*.json text eol=lf
+# The release manifests are regenerated and diffed byte-for-byte, so they need the same
+# treatment even though they live outside benchmark/data/.
+benchmark/*.json text eol=lf
 benchmark/manifest/*.txt text eol=lf
 benchmark/manifest/*.json text eol=lf
