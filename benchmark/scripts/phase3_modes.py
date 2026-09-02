@@ -349,6 +349,22 @@ class MockProvider:
         return self.default
 
 
+def prompt_for_mode(prompt: Dict[str, Any], mode: str) -> Dict[str, Any]:
+    """Copy a stored prompt and swap in the mode-specific system instruction."""
+    out = json.loads(json.dumps(prompt))
+    if mode == "tool_assisted":
+        system = out.get("system_tool_assisted")
+    else:
+        system = out.get("system_direct")
+    if system:
+        for msg in out.get("messages") or []:
+            if msg.get("role") == "system":
+                msg["content"] = system
+                break
+        out["mode"] = mode
+    return out
+
+
 def run_direct(
     sample: Dict[str, Any],
     prompt: Dict[str, Any],
@@ -357,7 +373,10 @@ def run_direct(
     cache: Optional[ResponseCache] = None,
     variant: str,
 ) -> ModeResult:
-    return _run("direct_open_set", sample, prompt, provider, cache=cache, variant=variant)
+    return _run(
+        "direct_open_set", sample, prompt_for_mode(prompt, "direct_open_set"),
+        provider, cache=cache, variant=variant,
+    )
 
 
 def run_tool_assisted(
@@ -369,7 +388,10 @@ def run_tool_assisted(
     cache: Optional[ResponseCache] = None,
     variant: str,
 ) -> ModeResult:
-    result = _run("tool_assisted", sample, prompt, provider, cache=cache, variant=variant)
+    result = _run(
+        "tool_assisted", sample, prompt_for_mode(prompt, "tool_assisted"),
+        provider, cache=cache, variant=variant,
+    )
     return apply_tool_evidence(result, evidence or [])
 
 
