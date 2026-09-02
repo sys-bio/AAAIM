@@ -189,7 +189,7 @@ their limits.
 
 ## Context variants
 
-Provider-independent payloads, template `phase3-open-set-v2`.
+Provider-independent payloads, template `phase3-open-set-v3`.
 
 | Variant | Contents | Bound |
 | --- | --- | --- |
@@ -205,24 +205,23 @@ appears on both sides (for example NFAT vs calcineurin in
 `BIOMD0000000122/R1`) or when a name itself contains a semicolon. Missing ids
 fall back to the species id, never to a shifted name list.
 
-| Variant | Contents | Bound |
-| --- | --- | --- |
-| `target_only` | Equation, participant names, ChEBI / KEGG *compound* ids, direction | no model chain |
-| `target_plus_model` | Plus title and a 280-character redacted description | no model chain |
-| `target_plus_neighborhood` | Plus up to **k=4** other reactions in the same model that share participants | k is configurable; selection is (−shared, reaction_id) |
-
 The entire model reaction list is never included. Neighbor order is deterministic.
-KEGG *reaction* ids are redacted from notes, from KEGG-shaped SBML reaction ids
-in the model-visible payload, and then forbidden anywhere in the prompt,
-including filenames and URLs. Join keys in `pilot_prompts.jsonl` may still be
-KEGG-shaped when a BioModels file uses the KEGG id as the SBML reaction id;
-those keys are not shown to the model. Compound ids (`C#####`, ChEBI) are
-allowed: they are species evidence, not the answer.
 
-The open-set instruction asks for JSON with up to three ordered `R#####` ids,
-confidence, explicit abstention, a short rationale, and a self-reported
-`basis` ∈ {`recalled_knowledge`, `supplied_evidence`, `mixed`}. Self-report is not
-treated as evidence.
+KEGG reaction-id detection uses **digit boundaries**, not word boundaries:
+`(?<!\d)(R\d{5})(?!\d)`. That finds `R#####` inside SBML identifiers such as
+`R_R06861_C3_cytop`, `R00678_Tdo`, and `prefixR00024_suffix`, and rejects
+six-or-more-digit sequences such as `R000240`. Every free-text and identifier
+field in the model-visible payload is redacted (target id/name/equation, neighbor
+ids/names/equations, model title/description, participant ids/names, rendered
+prompt). Join keys in `pilot_prompts.jsonl` may still be KEGG-shaped when a
+BioModels file uses the KEGG id as the SBML reaction id; those keys are not shown
+to the model. Compound ids (`C#####`, ChEBI) are allowed: they are species
+evidence, not the answer.
+
+Direct open-set system instruction: use the supplied reaction context **and
+internal knowledge**; no tools, database queries, or candidate list. Tool-assisted
+mode uses a distinct instruction that points at recorded tool/search evidence.
+Self-report `basis` is not treated as evidence.
 
 ## Experiment modes
 
@@ -231,11 +230,12 @@ until a budgeted run is explicitly approved.
 
 1. **Direct open-set LLM** — no candidates, no tools. Parametric identification.
 2. **Tool-assisted recovery** — queries, hits, source ids/URLs, and snippets are
-   recorded. A prediction is `evidence_backed` only when **that predicted
-   identifier** appears in the recorded evidence identifiers. Per prediction:
-   `prediction_supported_by_evidence`, `supporting_evidence_ids`. Outcomes:
-   correct and evidence-supported; correct but unsupported; incorrect despite
-   evidence; abstained after retrieval.
+   recorded. Outcomes use **top-1** support only: `correct_and_evidence_supported`
+   iff the correct top-1 prediction itself is in the recorded evidence ids;
+   `correct_but_unsupported` if top-1 is correct but unsupported (even when a
+   lower rank is supported); `incorrect_despite_evidence` if top-1 is wrong and
+   that top-1 id is in the evidence. Per-prediction
+   `prediction_supported_by_evidence` / `supporting_evidence_ids` are preserved.
 3. **Closed-set control** — frozen Phase 2 candidates only. Inapplicable when the
    set is empty. Not open-set recovery.
 4. **Learned full-database retrieval** — query against all KEGG reactions. Schema
@@ -275,13 +275,13 @@ provider-specific bound before any live call. Planned max output: 400 tokens/cal
 
 | Variant | Calls | Mean input tokens | Total input |
 | --- | ---: | ---: | ---: |
-| target_only | 163 | 288 | 46,894 |
-| target_plus_model | 163 | 359 | 58,533 |
-| target_plus_neighborhood | 163 | 456 | 74,362 |
-| **bounded total** | **489** | | **179,789** |
+| target_only | 163 | 303 | 49,323 |
+| target_plus_model | 163 | 374 | 60,954 |
+| target_plus_neighborhood | 163 | 471 | 76,785 |
+| **bounded total** | **489** | | **187,062** |
 | Whole-model-context counterfactual | 163 | | **907,270** |
 
-Repeating every reaction in the model for every target uses **5.05×** more input
+Repeating every reaction in the model for every target uses **4.85×** more input
 tokens on this sample. That is the quadratic anti-pattern this design avoids.
 
 Example prices from `pricing.example.json` (date 2026-09-02, **not a quote**,
@@ -289,9 +289,9 @@ replace before any paid run):
 
 | Placeholder band | Expected USD | Worst-case USD (2× output) |
 | --- | ---: | ---: |
-| small chat (~$0.15/$0.60 per 1M) | 0.14 | 0.26 |
-| mid chat (~$3/$15 per 1M) | 3.47 | 6.41 |
-| large chat (~$15/$75 per 1M) | 17.37 | 32.04 |
+| small chat (~$0.15/$0.60 per 1M) | 0.15 | 0.26 |
+| mid chat (~$3/$15 per 1M) | 3.50 | 6.43 |
+| large chat (~$15/$75 per 1M) | 17.48 | 32.15 |
 
 No live run proceeds until the sample is frozen, leakage tests pass, this estimate
 is printed, caching is on, a real tokenizer is wired, and the user approves
