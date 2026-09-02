@@ -22,8 +22,10 @@ from benchmark.scripts.phase3_common import (
     ID_IN_CATALOG,
     ID_MALFORMED,
     KEGG_ID_STRICT,
+    KEGG_REACTION_LEGACY_WORD_BOUNDARY_RE,
     PHASE3_DIR,
     PILOT_SPLIT,
+    PROMPT_TEMPLATE_VERSION,
     STRATA,
     STRATUM_ABSENT,
     STRATUM_EMPTY,
@@ -36,6 +38,7 @@ from benchmark.scripts.phase3_common import (
     assert_no_kegg_leakage,
     classify_kegg_id,
     estimate_tokens,
+    extract_kegg_reaction_ids,
     find_kegg_leakage,
     parse_kegg_ids,
     parse_participant_ids,
@@ -58,6 +61,9 @@ from benchmark.scripts.phase3_modes import (
 )
 from benchmark.scripts.phase3_prompts import (
     CONTEXT_VARIANTS,
+    SYSTEM_DIRECT,
+    SYSTEM_TOOL_ASSISTED,
+    audit_prompts_against_answer_key,
     build_context,
     render_prompt,
 )
@@ -99,6 +105,24 @@ def test_redaction_and_leakage_detection():
     assert find_kegg_leakage(payload) == []
     with pytest.raises(ValueError, match="leakage"):
         assert_no_kegg_leakage({"equation": "R00024 => B"}, where="test")
+
+
+def test_embedded_kegg_ids_missed_by_word_boundaries_and_caught_after_fix():
+    examples = {
+        "R_R06861_C3_cytop": "R06861",
+        "R00678_Tdo": "R00678",
+        "prefixR00024_suffix": "R00024",
+    }
+    for text, kid in examples.items():
+        assert KEGG_REACTION_LEGACY_WORD_BOUNDARY_RE.search(text) is None, text
+        assert extract_kegg_reaction_ids(text) == [kid], text
+        redacted = redact_kegg_reaction_ids(text)
+        assert kid not in redacted, redacted
+        assert extract_kegg_reaction_ids(redacted) == []
+    # Six-or-more digits is not a KEGG reaction id.
+    assert extract_kegg_reaction_ids("R000240") == []
+    assert extract_kegg_reaction_ids("R00024") == ["R00024"]
+    assert extract_kegg_reaction_ids("see kegg.reaction/R00024") == ["R00024"]
 
 
 def test_cluster_assignment_never_splits_a_cluster():
@@ -197,10 +221,34 @@ def test_prompt_redacts_notes_and_rejects_kegg_reaction_ids():
     blob = json.dumps(prompt)
     assert "R00024" not in blob
     assert "R00164" not in blob
-    with pytest.raises(ValueError):
-        build_context(_toy_row(reaction_equation="A_c => R00024"),
-                      variant="target_only", corpus=corpus, evidence=evidence,
-                      species_names=names)
+    leaked = build_context(_toy_row(reaction_equation="A_c => R00024"),
+                           variant="target_only", corpus=corpus, evidence=evidence,
+                           species_names=names)
+    assert "R00024" not in json.dumps(leaked)
+    assert "[REDACTED_KEGG_REACTION]" in leaked["equation"]
+    prompt = render_prompt(ctx)
+    assert "Use the supplied reaction context and your internal knowledge" in (
+        prompt["messages"][0]["content"])
+    assert "Use only the supplied reaction-local context" not in prompt["messages"][0]["content"]
+    assert prompt["system_direct"] == SYSTEM_DIRECT
+    assert prompt["system_tool_assisted"] == SYSTEM_TOOL_ASSISTED
+    tool = render_prompt(ctx, mode="tool_assisted")
+    assert tool["messages"][0]["content"] == SYSTEM_TOOL_ASSISTED
+    assert "internal knowledge" not in tool["messages"][0]["content"]
+    assert "recorded tool or search evidence" in tool["messages"][0]["content"]
+
+
+def test_context_redacts_embedded_sbml_reaction_ids():
+    row = _toy_row(reaction_id="R00678_Tdo", reaction_name="R_R06861_C3_cytop")
+    corpus = pd.DataFrame([row])
+    evidence = pd.DataFrame(columns=["model_id", "species_id", "annotation", "annotation_type"])
+    ctx = build_context(row, variant="target_only", corpus=corpus, evidence=evidence,
+                        species_names=pd.DataFrame(columns=["model_id", "species_id", "species_name"]))
+    blob = json.dumps(ctx)
+    assert "R00678" not in blob
+    assert "R06861" not in blob
+    assert "[REDACTED_KEGG_REACTION]" in ctx["reaction_id"]
+    assert "[REDACTED_KEGG_REACTION]" in ctx["reaction_name"]
 
 
 def test_participant_names_join_by_species_id_not_position():
@@ -413,11 +461,13 @@ def test_eval_separates_exact_and_equivalence_and_modes():
         template_version="t", abstain=False,
         predictions=[Prediction("R00999", 0.7, True)],
     )
+    b_pred = Prediction("R00024", 0.9, True)
+    b_pred.prediction_supported_by_evidence = True
     b = ModeResult(
         sample_id="2", model_id="M2", reaction_id="R2", cluster_id="C2",
         stratum=STRATUM_TOP1, mode="tool_assisted", variant="target_only",
         template_version="t", abstain=False, evidence_backed=True,
-        predictions=[Prediction("R00024", 0.9, True)],
+        predictions=[b_pred],
     )
     summary = score_results(
         [a, b],
@@ -434,6 +484,44 @@ def test_eval_separates_exact_and_equivalence_and_modes():
     assert summary["seen_target_definition"] == "train"
     assert summary["seen_fit_target"]["n"] == 2
     assert summary["unseen_fit_target"]["n"] == 0
+
+
+def test_evidence_outcome_uses_top1_support_only():
+    def pred(kid, supported):
+        item = Prediction(kid, 0.8, True)
+        item.prediction_supported_by_evidence = supported
+        item.supporting_evidence_ids = [kid] if supported else []
+        return item
+
+    def result(preds):
+        return ModeResult(
+            sample_id="1", model_id="M1", reaction_id="rxn", cluster_id="C1",
+            stratum=STRATUM_EMPTY, mode="tool_assisted", variant="target_only",
+            template_version="t", abstain=False, predictions=preds,
+            evidence=[ToolEvidence(source="kegg", query="q", identifiers=["R00024"])],
+        )
+
+    equiv = lambda c, t, k: c in set(t)
+    correct_rank2_supported = result([pred("R00024", False), pred("R00025", True)])
+    row = score_one(correct_rank2_supported, ["R00024"], equiv=equiv)
+    assert row["exact_top1"] is True
+    assert row["evidence_outcome"] == "correct_but_unsupported"
+    assert row["top1_supported_by_evidence"] is False
+    assert row["prediction_supported_by_evidence"] == [False, True]
+
+    incorrect_rank2_supported = result([pred("R00025", False), pred("R00024", True)])
+    row = score_one(incorrect_rank2_supported, ["R00024"], equiv=equiv)
+    assert row["exact_top1"] is False
+    assert row["evidence_outcome"] == "incorrect_unsupported"
+
+    supported_top1 = result([pred("R00024", True), pred("R00025", False)])
+    row = score_one(supported_top1, ["R00024"], equiv=equiv)
+    assert row["evidence_outcome"] == "correct_and_evidence_supported"
+    assert row["top1_supported_by_evidence"] is True
+
+    wrong_supported_top1 = result([pred("R00025", True)])
+    row = score_one(wrong_supported_top1, ["R00024"], equiv=equiv)
+    assert row["evidence_outcome"] == "incorrect_despite_evidence"
 
 
 def test_cost_estimator_uses_supplied_pricing_and_counts_calls():
@@ -557,12 +645,35 @@ def test_live_prompts_have_no_kegg_reaction_leakage():
         variants.add(row["variant"])
         leaked = find_kegg_leakage(row["prompt"])
         assert leaked == [], leaked
+        assert row["template_version"] == PROMPT_TEMPLATE_VERSION == "phase3-open-set-v3"
+        assert "Use only the supplied reaction-local context" not in json.dumps(row["prompt"])
         if row["variant"] == "target_plus_neighborhood":
             assert row["neighborhood_k"] <= 4
             neighbors = row["prompt"]["messages"][1]["content"].count("neighboring")
             assert neighbors >= 0
     assert n == 489
     assert variants == set(CONTEXT_VARIANTS)
+
+
+@live_only
+def test_live_prompts_answer_key_audit_and_rebuild_is_byte_identical():
+    from benchmark.scripts.phase3_prompts import build_pilot_prompts
+    path = PHASE3_DIR / "pilot_prompts.jsonl"
+    rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+    key = pd.read_csv(PHASE3_DIR / "pilot_answer_key.csv")
+    sample = pd.read_csv(PHASE3_DIR / "pilot_sample.csv")
+    assert set(zip(sample.model_id.astype(str), sample.reaction_id.astype(str))) == set(
+        zip(key.model_id.astype(str), key.reaction_id.astype(str)))
+    audit = audit_prompts_against_answer_key(rows, key)
+    assert audit["n_prompts_checked"] == 489
+    assert audit["n_samples_checked"] == 163
+    assert audit["n_ground_truth_leaks"] == 0
+    assert audit["n_any_kegg_id_leaks"] == 0
+    first = build_pilot_prompts()
+    second = build_pilot_prompts()
+    blob1 = json.dumps(first, sort_keys=True, separators=(",", ":"))
+    blob2 = json.dumps(second, sort_keys=True, separators=(",", ":"))
+    assert blob1 == blob2
 
 
 @live_only
