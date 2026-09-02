@@ -110,13 +110,28 @@
   },
   "benchmark_version": "phase2-v1",
   "builds_on": "benchmark-phase1-v1",
+  "cache_archive": {
+    "asset": "aaaim-benchmark-phase2-v1-candidate-caches.zip",
+    "bytes": 683535,
+    "config_id": "86938b48ab88",
+    "gitignored": true,
+    "n_files": 74,
+    "note": "Zip archives embed timestamps, so this digest identifies the uploaded asset; verify restored contents against the registry, not the zip bytes.",
+    "path": "benchmark/dist/aaaim-benchmark-phase2-v1-candidate-caches.zip",
+    "present": true,
+    "registry": "benchmark/manifest/candidate_cache_registry.json",
+    "release_notes": "benchmark/dist/RELEASE_phase2-v1.md",
+    "sha256": "84d9b87b29ade56096f3d4ab114ec1ad86e9783f9759403e46c14a95f9157e21",
+    "uncompressed_bytes": 26996311,
+    "verify_command": "python benchmark/scripts/freeze_phase2.py --verify-cache-archive"
+  },
   "commands": {
     "analysis": [
       "python benchmark/scripts/generate_candidates.py --assemble-only",
       "python benchmark/scripts/analyze_retrieval.py",
       "python benchmark/scripts/rank_baselines.py --rankers heuristic lexical random oracle",
       "python benchmark/scripts/candidate_diagnostics.py",
-      "python benchmark/scripts/audit_phase2.py --expect-config-id 86938b48ab88 --expect-models 74 --expect-reactions 5816 --check-reassembly"
+      "python benchmark/scripts/audit_phase2.py --expect-config-id 86938b48ab88 --expect-models 74 --expect-reactions 5816 --check-reassembly --write-report"
     ],
     "build_inputs": [
       "python benchmark/scripts/build_species_evidence.py",
@@ -124,16 +139,25 @@
       "python benchmark/scripts/build_reaction_text.py"
     ],
     "freeze": [
-      "python benchmark/scripts/freeze_phase2.py"
+      "python benchmark/scripts/freeze_phase2.py --pack-caches",
+      "python benchmark/scripts/freeze_phase2.py",
+      "python benchmark/scripts/freeze_phase2.py --verify",
+      "python benchmark/scripts/freeze_phase2.py --verify-cache-archive"
     ],
     "generation": [
       "# ~3 days wall clock, resumable; caches land in benchmark/data/_candidates_cache/",
       "python benchmark/scripts/generate_candidates.py --workers 4 --scope evaluable"
     ],
     "tests": [
-      "python -m pytest tests/test_phase2_candidates.py tests/test_phase2_audit.py tests/test_benchmark_build.py -q"
+      "python -m pytest tests -q"
     ]
   },
+  "commits": {
+    "analysis_and_artifacts": "b5065e042fe7cc31dcaad7d72f196f879bd39ce3",
+    "candidate_generation": "dbf15d6db3370a11f4c0889336af220705bf75b1",
+    "release_snapshot": "benchmark-phase2-v1"
+  },
+  "commits_note": "candidate_generation (dbf15d6) is the last change to generate_candidates.py before the full run. analysis_and_artifacts (b5065e0) added the frozen aggregate tables and analysis scripts. release_snapshot is the proposed tag; it is not created by this script. HEAD is not recorded: a freeze commit cannot name itself.",
   "config_id": "86938b48ab88",
   "counts": {
     "candidate_rows": 91802,
@@ -218,11 +242,11 @@
       "phase2_audit.json"
     ],
     "ignored": [
-      "benchmark/data/_candidates_cache/ (per-model resumability caches, 25.7 MB, regenerable only by the ~3-day pass)",
+      "benchmark/data/_candidates_cache/ (per-model resumability caches; archived as a release asset, see benchmark/dist/RELEASE_phase2-v1.md)",
       "benchmark/data/_*.log (transient run logs)",
       "benchmark/models/ (SBML inputs; see benchmark/dist/)"
     ],
-    "rationale": "Aggregate artifacts are the frozen deliverable and are small enough to version (9.5 MB total), matching the Phase 1 precedent of committing reactions.csv and species_annotations.csv. The underscore-prefixed caches are intermediates: assembly from them is verified byte-identical, so they add no information the committed artifacts lack."
+    "rationale": "Aggregate artifacts are the frozen deliverable and are small enough to version (9.5 MB total), matching the Phase 1 precedent of committing reactions.csv and species_annotations.csv. The underscore-prefixed caches are intermediates: assembly from them is verified byte-identical, so they add no information the committed artifacts lack. They are archived rather than committed because regenerating them costs a ~3-day pass, so resumability stays recoverable without putting 25.7 MB of intermediates in git history."
   },
   "known_limitations": [
     "Embedding baseline (MiniLM) not run: chromadb 1.0.11 and onnxruntime are installed and the model is SHA-256 pinned, but the ~80 MB asset is not in the local cache and was not downloaded. Explicitly outstanding and optional.",
@@ -231,7 +255,7 @@
     "BIOMD0000001063 alone contributes 83.96% of candidate rows. Diagnosed as sparse species annotation degenerating subset-containment retrieval, not a bookkeeping bug; effect on corpus metrics is about 0.2 pp.",
     "Only one generation configuration was run; no sensitivity sweep over max_relax_level, cofactor handling or top_k.",
     "Cluster-macro averages use the conservative Phase 1 clustering that keeps the seven yeast models together; the provenance-based sensitivity analysis is outstanding.",
-    "Per-model resumability caches (benchmark/data/_candidates_cache/) are git-ignored. The committed aggregate artifacts are the frozen deliverable, and reassembly from caches is verified byte-identical, but regenerating caches from scratch is a ~3-day pass."
+    "Per-model resumability caches (benchmark/data/_candidates_cache/) are git-ignored and archived as benchmark/dist/aaaim-benchmark-phase2-v1-candidate-caches.zip, verified file-by-file via benchmark/manifest/candidate_cache_registry.json. The zip is a release asset, not a git object; regenerating caches from scratch is a ~3-day pass."
   ],
   "phase1_inputs": {
     "VERSION.json": "33b52c7ee4f1f149c42f1eed79eb21bcc9bbc907b9876994bff7402a1609c47f",
@@ -245,7 +269,5 @@
     "species_evidence.csv": "10712febb6b46eb5625a0d944aac64e94ad7a040985c8c2e4d4f8dd2a8803933"
   },
   "proposed_tag": "benchmark-phase2-v1",
-  "source_branch": "benchmark/phase-2",
-  "source_commit": "777184f05c3ffd934ce9cd6044a1f11f2c117cd1",
-  "source_commit_note": "HEAD at freeze time, i.e. the code and caches that produced these artifacts. The commit that adds this manifest and the artifacts themselves is its child; tag that child."
+  "source_branch": "benchmark/phase-2"
 }

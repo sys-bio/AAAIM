@@ -1,8 +1,10 @@
 """Phase 2 audit: check the frozen candidate artifacts against explicit invariants.
 
 This is a read-only consistency check over the artifacts already produced by
-``generate_candidates.py``. It never regenerates candidates, so it is cheap to run
-before a freeze and safe to run repeatedly.
+``generate_candidates.py``. It never regenerates candidates, never overwrites the
+frozen tables, and by default does not rewrite ``phase2_audit.json`` either: a failed
+check in a clone without caches must leave the repository clean. Pass ``--write-report``
+to replace the frozen report, or ``--report PATH`` to write elsewhere.
 
 Each invariant is reported as an independent pass/fail record with the observed and
 expected values, so a failure names the specific violated property and a sample of the
@@ -13,6 +15,7 @@ Usage::
     python benchmark/scripts/audit_phase2.py
     python benchmark/scripts/audit_phase2.py --expect-config-id 86938b48ab88
     python benchmark/scripts/audit_phase2.py --check-reassembly
+    python benchmark/scripts/audit_phase2.py --write-report
 """
 
 from __future__ import annotations
@@ -22,6 +25,7 @@ import json
 import logging
 import re
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -311,25 +315,46 @@ def audit(
 def check_reassembly() -> Dict[str, Any]:
     """Re-run assembly from the existing caches and confirm byte-identical outputs.
 
-    Only reads the per-model caches; it never invokes the generator.
+    Writes into a temporary directory so a mismatch, or a clone with no caches, cannot
+    overwrite the committed aggregate artifacts. Never invokes the generator.
     """
-    from benchmark.scripts.generate_candidates import assemble
+    from benchmark.scripts import generate_candidates as gc
 
     targets = (CANDIDATES_CSV, STATUS_CSV, FAILURES_CSV)
-    before = {p.name: sha256_file(p) for p in targets}
+    before = {p.name: sha256_file(p) for p in targets if p.exists()}
+
+    redirected = ("CANDIDATES_CSV", "STATUS_CSV", "FAILURES_CSV", "CONFIG_JSON")
+    original = {name: getattr(gc, name) for name in redirected}
 
     reactions = pd.read_csv(REACTIONS_CSV)
     evaluable = reactions[reactions.included_in_eval.astype(bool)]
     model_ids = sorted(evaluable.model_id.astype(str).unique())
-    assemble(model_ids, partial_ok=False)
 
-    after = {p.name: sha256_file(p) for p in targets}
-    changed = [name for name in before if before[name] != after[name]]
+    with tempfile.TemporaryDirectory(prefix="aaaim-reassembly-") as tmp:
+        tmp_path = Path(tmp)
+        gc.CANDIDATES_CSV = tmp_path / "candidates.csv"
+        gc.STATUS_CSV = tmp_path / "candidate_status.csv"
+        gc.FAILURES_CSV = tmp_path / "candidate_generation_failures.csv"
+        gc.CONFIG_JSON = tmp_path / "candidate_generation_config.json"
+        try:
+            gc.assemble(model_ids, partial_ok=False)
+            assembled = {
+                name: sha256_file(tmp_path / name)
+                for name in before
+                if (tmp_path / name).exists()
+            }
+        finally:
+            for name, value in original.items():
+                setattr(gc, name, value)
+
+    after_committed = {p.name: sha256_file(p) for p in targets if p.exists()}
+    changed = [name for name in before if assembled.get(name) != before[name]]
     return {
-        "identical": not changed,
+        "identical": not changed and set(assembled) == set(before),
         "changed": changed,
         "before": before,
-        "after": after,
+        "after": assembled,
+        "committed_artifacts_untouched": after_committed == before,
     }
 
 
@@ -340,7 +365,12 @@ def main() -> int:
     parser.add_argument("--expect-models", type=int, default=None)
     parser.add_argument("--expect-reactions", type=int, default=None)
     parser.add_argument("--check-reassembly", action="store_true",
-                        help="Re-assemble from caches and require byte-identical outputs")
+                        help="Re-assemble from caches into a temp dir and require "
+                             "byte-identical outputs; never overwrites committed files")
+    parser.add_argument("--write-report", action="store_true",
+                        help="Replace the frozen phase2_audit.json with this run")
+    parser.add_argument("--report", type=Path, default=None,
+                        help="Write the report to this path instead of the frozen artifact")
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -354,7 +384,15 @@ def main() -> int:
     if args.check_reassembly:
         summary["reassembly"] = check_reassembly()
 
-    write_json(summary, OUT_JSON)
+    report_path = args.report
+    if report_path is None and args.write_report:
+        report_path = OUT_JSON
+    if report_path is not None:
+        write_json(summary, report_path)
+        logger.info("wrote report %s", report_path)
+    else:
+        logger.info("read-only: not writing %s (pass --write-report to freeze a new report)",
+                    OUT_JSON.name)
 
     for check in summary["checks"]:
         logger.info("[%s] %s (expected=%s observed=%s)",

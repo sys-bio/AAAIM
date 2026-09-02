@@ -38,10 +38,12 @@ by the same oracle ceiling.
 | 4 | `analyze_retrieval.py` | `retrieval_ceiling.json`, `reaction_retrieval.csv`, `retrieval_ceiling_by_stratum.csv` | ~1 min |
 | 5 | `rank_baselines.py` | `baseline_table.csv`, `baseline_rankings.csv`, `failure_stratification.csv`, `baseline_summary.json` | ~7 s (LLM: longer) |
 | 6 | `candidate_diagnostics.py` | `candidate_diagnostics.json`, `candidate_size_by_stratum.csv`, `candidate_largest_sets.csv` | ~1 s |
-| 7 | `audit_phase2.py` | `phase2_audit.json` | ~2 s |
-| 8 | `freeze_phase2.py` | `PHASE2_MANIFEST.json` | ~1 s |
+| 7 | `audit_phase2.py` | `phase2_audit.json` (only with `--write-report`) | ~2 s |
+| 8 | `freeze_phase2.py` | `PHASE2_MANIFEST.json`, cache zip + registry | ~1 s |
 
-Steps 4–8 are cheap, read-only over the caches, and byte-identical on re-run.
+Steps 4–6 and the default audit are cheap and read-only over the caches. `audit_phase2.py`
+does not rewrite `phase2_audit.json` unless `--write-report` is passed. `--assemble-only`
+is the command that rewrites the aggregate CSVs.
 
 ### Running it locally
 
@@ -72,8 +74,10 @@ python benchmark/scripts/rank_baselines.py --rankers heuristic lexical random or
 python benchmark/scripts/candidate_diagnostics.py
 python benchmark/scripts/audit_phase2.py --expect-config-id 86938b48ab88 `
     --expect-models 74 --expect-reactions 5816 --check-reassembly
+python benchmark/scripts/freeze_phase2.py --pack-caches
 python benchmark/scripts/freeze_phase2.py
 python benchmark/scripts/freeze_phase2.py --verify
+python benchmark/scripts/freeze_phase2.py --verify-cache-archive
 ```
 
 Notes on the long step:
@@ -92,6 +96,11 @@ Notes on the long step:
   assembly with failures is never logged as final. Bad arguments exit 2.
 * **`--limit 0` generates nothing** rather than falling through to the full pass; a
   negative `--limit` is rejected.
+* **Read-only audit.** `audit_phase2.py` never overwrites committed artifacts. A clone
+  without caches still reports missing caches and exits 1, but leaves `phase2_audit.json`
+  and the aggregate CSVs untouched. Pass `--write-report` only when freezing a new
+  report, or `--report PATH` to write elsewhere. `--check-reassembly` assembles into a
+  temporary directory.
 * **Workers**: memory, not CPU, is the constraint (~350 MB–1.1 GB per worker for the ChEBI
   and KEGG reference maps). On a 16 GB machine 4 workers is comfortable.
 * **`--scope`** controls how much work is done. `evaluable` (default) generates only for
@@ -328,11 +337,10 @@ the retrieval-vs-reranking split.
 ## Testing
 
 ```powershell
-python -m pytest tests/test_phase2_candidates.py tests/test_phase2_audit.py `
-    tests/test_benchmark_build.py -q
+python -m pytest tests -q
 ```
 
-109 tests, ~5 s. `test_phase2_candidates.py` pins all four bugs above plus deterministic
+127 tests, ~9 s. `test_phase2_candidates.py` pins all four bugs above plus deterministic
 tie-breaking, multiple ground-truth ids, equivalence-group parsing, the three averaging
 modes, the reaction-aware missing-output classification, partial vs final assembly,
 cache-schema invalidation, the exit code for every combination of pending models and
@@ -348,7 +356,8 @@ malformed KEGG ids, mismatched `config_id`s, pipeline-failure rows, and post-hoc
 edits that break a recorded digest. It also pins the denominator semantics of every
 reported rate, and a `live_only` group asserts the frozen numbers (74 models, 5,816
 reactions, 91,802 rows, 14.41% vs 65.29%) whenever the real artifacts are present, skipping
-on a fresh clone.
+on a fresh clone. Successful and failed verification are both required to leave every
+committed artifact byte-identical.
 
 ## Phase 1 housekeeping completed here
 
@@ -361,8 +370,9 @@ on a fresh clone.
 
 ## Not yet done
 
-* Create the `benchmark-phase2-v1` tag and push. `PHASE2_MANIFEST.json` is written and
-  self-verifying, but tagging is left for review.
+* Create the `benchmark-phase2-v1` tag and GitHub release. Upload
+  `aaaim-benchmark-phase2-v1-candidate-caches.zip` as a release asset (see
+  `benchmark/dist/RELEASE_phase2-v1.md`). Tagging is left for review.
 * Embedding baseline: dependencies are installed and the MiniLM asset is SHA-256 pinned,
   but it is not cached locally and was not downloaded. Optional, and bounded by the same
   oracle ceiling as every other reranker.

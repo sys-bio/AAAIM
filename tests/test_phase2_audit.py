@@ -301,6 +301,82 @@ def test_expected_counts_are_checked(artifacts):
 
 
 # ----------------------------------------------------------------------------------
+# Verification must not alter frozen artifacts
+
+
+def test_default_audit_does_not_write_report(artifacts, monkeypatch, tmp_path):
+    report = tmp_path / "phase2_audit.json"
+    monkeypatch.setattr(audit_phase2, "OUT_JSON", report)
+    monkeypatch.setattr(sys, "argv", ["audit_phase2.py"])
+    assert audit_phase2.main() == 0
+    assert not report.exists()
+
+
+def test_failed_audit_does_not_write_report(artifacts, monkeypatch, tmp_path):
+    report = tmp_path / "phase2_audit.json"
+    monkeypatch.setattr(audit_phase2, "OUT_JSON", report)
+    monkeypatch.setattr(audit_phase2, "CACHE_DIR", tmp_path / "no_caches")
+    monkeypatch.setattr(sys, "argv", ["audit_phase2.py"])
+    assert audit_phase2.main() == 1
+    assert not report.exists()
+
+
+def test_write_report_is_opt_in(artifacts, monkeypatch, tmp_path):
+    report = tmp_path / "phase2_audit.json"
+    monkeypatch.setattr(audit_phase2, "OUT_JSON", report)
+    monkeypatch.setattr(sys, "argv", ["audit_phase2.py", "--write-report"])
+    assert audit_phase2.main() == 0
+    assert report.exists()
+    payload = json.loads(report.read_text(encoding="utf-8"))
+    assert payload["all_passed"] is True
+
+
+def test_report_path_writes_elsewhere_not_frozen_location(artifacts, monkeypatch, tmp_path):
+    frozen = tmp_path / "phase2_audit.json"
+    custom = tmp_path / "elsewhere.json"
+    monkeypatch.setattr(audit_phase2, "OUT_JSON", frozen)
+    monkeypatch.setattr(sys, "argv", ["audit_phase2.py", "--report", str(custom)])
+    assert audit_phase2.main() == 0
+    assert custom.exists()
+    assert not frozen.exists()
+
+
+def test_check_reassembly_without_caches_does_not_wipe_tables(
+        artifacts, monkeypatch, tmp_path):
+    """A clone with no caches must not replace committed CSVs with empty tables."""
+    from benchmark.scripts import generate_candidates as gc
+
+    # Point the generator module at the fixture files so a broken redirect cannot
+    # reach the real frozen artifacts.
+    monkeypatch.setattr(gc, "CANDIDATES_CSV", artifacts["candidates"])
+    monkeypatch.setattr(gc, "STATUS_CSV", artifacts["status"])
+    monkeypatch.setattr(gc, "FAILURES_CSV", artifacts["failures"])
+    monkeypatch.setattr(gc, "CONFIG_JSON", artifacts["config"])
+    monkeypatch.setattr(gc, "CACHE_DIR", tmp_path / "no_caches")
+    monkeypatch.setattr(audit_phase2, "CACHE_DIR", tmp_path / "no_caches")
+
+    real_targets = [
+        DATA_DIR / "candidates.csv",
+        DATA_DIR / "candidate_status.csv",
+        DATA_DIR / "candidate_generation_failures.csv",
+        DATA_DIR / "candidate_generation_config.json",
+        DATA_DIR / "phase2_audit.json",
+        REPO_ROOT / "benchmark" / "PHASE2_MANIFEST.json",
+    ]
+    real_before = {p: p.read_bytes() for p in real_targets if p.exists()}
+    fixture_before = {k: artifacts[k].read_bytes()
+                      for k in ("candidates", "status", "failures", "config")}
+
+    result = audit_phase2.check_reassembly()
+    assert result["identical"] is False
+    assert result["committed_artifacts_untouched"] is True
+    for key, blob in fixture_before.items():
+        assert artifacts[key].read_bytes() == blob
+    for path, blob in real_before.items():
+        assert path.read_bytes() == blob, f"rewrote {path}"
+
+
+# ----------------------------------------------------------------------------------
 # Failure-rate reporting: denominators must be explicit and distinct
 
 
@@ -441,6 +517,58 @@ live_only = pytest.mark.skipif(
     reason="frozen Phase 2 artifacts not present; run generate_candidates.py first",
 )
 
+_CACHE_ZIP = REPO_ROOT / "benchmark" / "dist" / "aaaim-benchmark-phase2-v1-candidate-caches.zip"
+
+
+def _committed_phase2_paths() -> list:
+    from benchmark.scripts import freeze_phase2
+
+    paths = [DATA_DIR / spec["name"] for spec in freeze_phase2.ARTIFACTS]
+    paths.extend([
+        REPO_ROOT / "benchmark" / "PHASE2_MANIFEST.json",
+        REPO_ROOT / "benchmark" / "PHASE2_RESULTS.md",
+        freeze_phase2.CACHE_REGISTRY,
+    ])
+    return [p for p in paths if p.exists()]
+
+
+def _digests(paths) -> dict:
+    return {str(p): audit_phase2.sha256_file(p) for p in paths}
+
+
+@live_only
+def test_successful_verification_leaves_committed_artifacts_byte_identical(monkeypatch):
+    before = _digests(_committed_phase2_paths())
+    monkeypatch.setattr(sys, "argv", [
+        "audit_phase2.py",
+        "--expect-config-id", EXPECTED_CONFIG_ID,
+        "--expect-models", "74",
+        "--expect-reactions", "5816",
+        "--check-reassembly",
+    ])
+    assert audit_phase2.main() == 0
+    assert _digests(_committed_phase2_paths()) == before
+
+
+@live_only
+def test_failed_verification_leaves_committed_artifacts_byte_identical(
+        monkeypatch, tmp_path):
+    before = _digests(_committed_phase2_paths())
+    monkeypatch.setattr(audit_phase2, "CACHE_DIR", tmp_path / "no_caches")
+    monkeypatch.setattr(sys, "argv", ["audit_phase2.py"])
+    assert audit_phase2.main() != 0
+    assert _digests(_committed_phase2_paths()) == before
+
+
+@live_only
+def test_freeze_verify_leaves_committed_artifacts_byte_identical(monkeypatch):
+    from benchmark.scripts import freeze_phase2
+
+    before = _digests(_committed_phase2_paths())
+    monkeypatch.setattr(sys, "argv", ["freeze_phase2.py", "--verify"])
+    freeze_phase2.main()
+    assert _digests(_committed_phase2_paths()) == before
+
 
 @live_only
 def test_live_artifacts_pass_every_invariant():
@@ -521,6 +649,10 @@ def test_live_manifest_is_deterministic_and_verifies():
 
     assert first["config_id"] == EXPECTED_CONFIG_ID
     assert first["proposed_tag"] == "benchmark-phase2-v1"
+    assert first["commits"]["candidate_generation"].startswith("dbf15d6")
+    assert first["commits"]["analysis_and_artifacts"].startswith("b5065e0")
+    assert first["commits"]["release_snapshot"] == "benchmark-phase2-v1"
+    assert "source_commit" not in first
     assert first["counts"]["pipeline_failures"] == 0
     assert first["counts"]["candidate_rows"] == 91802
     assert first["audit"]["all_passed"] is True
@@ -566,3 +698,23 @@ def test_live_phase1_inputs_unchanged_by_phase2():
     # Guard against the check passing because it verified nothing.
     assert "reactions.csv" in checked
     assert len(checked) == len(recorded) >= 10
+
+
+@live_only
+@pytest.mark.skipif(not _CACHE_ZIP.exists(), reason="cache zip not packed yet")
+def test_live_cache_archive_restores_and_reassembles():
+    """Restoring the release zip must reproduce the committed aggregate tables."""
+    from benchmark.scripts import freeze_phase2
+
+    registry_path = freeze_phase2.CACHE_REGISTRY
+    assert registry_path.exists(), "cache registry must be committed with the zip notes"
+    registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    assert registry["n_files"] == 74
+    assert registry["config_id"] == EXPECTED_CONFIG_ID
+
+    before = _digests(_committed_phase2_paths())
+    result = freeze_phase2.restore_and_reassemble(_CACHE_ZIP, registry)
+    assert not result["registry_problems"], result["registry_problems"]
+    assert result["reassembly_identical"]
+    assert result["committed_artifacts_untouched"]
+    assert _digests(_committed_phase2_paths()) == before

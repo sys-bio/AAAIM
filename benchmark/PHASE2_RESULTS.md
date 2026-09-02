@@ -2,7 +2,7 @@
 
 Frozen candidate table, retrieval ceiling and baseline rankers over the Phase 1 corpus.
 
-- **Source commit**: see `benchmark/PHASE2_MANIFEST.json` (`source_commit`)
+- **Commits**: candidate generation `dbf15d6`; frozen artifacts `b5065e0`; proposed tag `benchmark-phase2-v1` (see `benchmark/PHASE2_MANIFEST.json` `commits`)
 - **Generation config**: `config_id = 86938b48ab88`
 - **Phase 1 input**: `benchmark-phase1-v1`, `reactions.csv` = `f11ebc6f…6004f1`
 - **Audit**: 14/14 invariants pass, zero pipeline failures (`benchmark/data/phase2_audit.json`)
@@ -34,7 +34,8 @@ with a perfect reranker would move overall Top-1 from 33.25% to 34.71%.
 | Models | 74 |
 | Clusters (Phase 1 conservative) | 54 |
 | Ground-truth reactions | 5,838 |
-| Excluded as exchange/sink/source (SSX) | 22 |
+| Excluded as exchange/sink/source (`exchange_ssx`) | 19 |
+| Excluded as malformed ground-truth ID (`invalid_ground_truth_id`) | 3 |
 | **Evaluable reactions** | **5,816** |
 | Candidate rows | 91,802 |
 | Distinct KEGG reaction ids proposed | 7,761 |
@@ -45,6 +46,10 @@ with a perfect reranker would move overall Top-1 from 33.25% to 34.71%.
 | `no_candidates` | 2,646 | 45.50% | 0 |
 | `unconstrained_candidate_set` | 811 | 13.94% | 0 |
 | `generation_failed` / `absent_from_generator_output` | 0 | 0% | — |
+
+All 22 excluded reactions also carry the structural SSX flag, but three of them
+(`BIOMD0000000268/0450/0674`, `gluconeogenesis_ser`) were excluded because the recorded
+ground-truth id `R0006565` failed `R#####` validation, not because they are exchanges.
 
 `unconstrained_candidate_set` marks reactions where no participant mapped to a KEGG
 compound. `filter_kegg_reactions` keeps a KEGG reaction when the model's mapped compound
@@ -259,7 +264,12 @@ per reaction for these 87 reactions, so subset containment degenerates. It is th
 `filtered_species_count = 1` pathology at scale, and it is a *retrieval-quality* problem
 in the generator's constraint construction, not a bookkeeping bug.
 
-**Effect on metrics.** Storage and runtime only, to three decimal places:
+**Effect on metrics.** Removing the model moves corpus micro recall/Top-1 by about 0.2 pp
+(table below); model-macro and cluster-macro already bound it to 1/74 and 1/54. The 131
+large candidate sets *do* lower Top-1: every one of them is a per-reaction failure. What
+they do not do is dominate that metric through their 86,313 rows. Each reaction
+contributes exactly once, so those 131 failures count the same as 131 one-candidate
+misses. The row explosion is a storage and runtime cost, not a weighting distortion.
 
 | | Including `BIOMD0000001063` | Excluding it |
 | --- | --- | --- |
@@ -268,8 +278,7 @@ in the generator's constraint construction, not a bookkeeping bug.
 
 Its own recall (0.3352 any rank, 0.3238 Top-1) is close to the corpus average, so removing
 it would move the headline by ~0.2 pp. Model-macro and cluster-macro averaging already
-bound its influence to 1/74 and 1/54 respectively. Per-reaction accuracy is unaffected:
-because these sets never rank the answer first, they neither inflate nor deflate Top-1.
+bound its influence to 1/74 and 1/54 respectively.
 
 **No action taken.** Nothing is capped or discarded. Capping large sets would change
 retrieval semantics and is a Phase 3 design decision requiring approval; the honest record
@@ -370,6 +379,7 @@ python benchmark/scripts/candidate_diagnostics.py
 python benchmark/scripts/audit_phase2.py \
     --expect-config-id 86938b48ab88 --expect-models 74 --expect-reactions 5816 \
     --check-reassembly
+# Pass --write-report only when intentionally replacing the frozen audit JSON.
 ```
 
 Full generation (~3 days wall clock, resumable) is documented in `benchmark/PHASE2.md`.

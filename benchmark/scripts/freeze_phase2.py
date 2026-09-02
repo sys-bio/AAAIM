@@ -12,6 +12,9 @@ Usage::
 
     python benchmark/scripts/freeze_phase2.py
     python benchmark/scripts/freeze_phase2.py --verify
+    python benchmark/scripts/freeze_phase2.py --pack-caches
+    python benchmark/scripts/freeze_phase2.py --verify-caches
+    python benchmark/scripts/freeze_phase2.py --verify-cache-archive
 """
 
 from __future__ import annotations
@@ -22,6 +25,8 @@ import logging
 import platform
 import subprocess
 import sys
+import tempfile
+import zipfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -41,9 +46,26 @@ from benchmark.scripts.generate_candidates import (
 
 OUT_JSON = REPO_ROOT / "benchmark" / "PHASE2_MANIFEST.json"
 
+CACHE_DIR = DATA_DIR / "_candidates_cache"
+# Per-file digests for the resumability caches. Committed so a restored archive can be
+# verified file-by-file; zip archives embed timestamps, so the zip's own digest is not
+# reproducible and the contents are what must be checked.
+CACHE_REGISTRY = REPO_ROOT / "benchmark" / "manifest" / "candidate_cache_registry.json"
+
 BENCHMARK_VERSION = "phase2-v1"
 PROPOSED_TAG = "benchmark-phase2-v1"
 PHASE1_TAG = "benchmark-phase1-v1"
+
+# The generation pass ran against dbf15d6. The aggregate artifacts and analysis scripts
+# landed in b5065e0. The release tag is the snapshot; it is not created here. These are
+# recorded as constants rather than `git rev-parse HEAD` so the manifest cannot point at
+# a parent that does not contain the files it describes.
+CANDIDATE_GENERATION_COMMIT = "dbf15d6db3370a11f4c0889336af220705bf75b1"
+ANALYSIS_ARTIFACT_COMMIT = "b5065e042fe7cc31dcaad7d72f196f879bd39ce3"
+
+CACHE_ARCHIVE_NAME = f"aaaim-benchmark-{BENCHMARK_VERSION}-candidate-caches.zip"
+CACHE_ARCHIVE = REPO_ROOT / "benchmark" / "dist" / CACHE_ARCHIVE_NAME
+CACHE_ARC_PREFIX = "benchmark/data/_candidates_cache"
 
 # Frozen Phase 2 artifacts, in dependency order. `optional` entries are recorded when
 # present and reported as outstanding when absent.
@@ -89,11 +111,15 @@ COMMANDS = {
         "--rankers heuristic lexical random oracle",
         "python benchmark/scripts/candidate_diagnostics.py",
         "python benchmark/scripts/audit_phase2.py --expect-config-id 86938b48ab88 "
-        "--expect-models 74 --expect-reactions 5816 --check-reassembly",
+        "--expect-models 74 --expect-reactions 5816 --check-reassembly --write-report",
     ],
-    "freeze": ["python benchmark/scripts/freeze_phase2.py"],
-    "tests": ["python -m pytest tests/test_phase2_candidates.py "
-              "tests/test_phase2_audit.py tests/test_benchmark_build.py -q"],
+    "freeze": [
+        "python benchmark/scripts/freeze_phase2.py --pack-caches",
+        "python benchmark/scripts/freeze_phase2.py",
+        "python benchmark/scripts/freeze_phase2.py --verify",
+        "python benchmark/scripts/freeze_phase2.py --verify-cache-archive",
+    ],
+    "tests": ["python -m pytest tests -q"],
 }
 
 KNOWN_LIMITATIONS = [
@@ -111,10 +137,11 @@ KNOWN_LIMITATIONS = [
     "max_relax_level, cofactor handling or top_k.",
     "Cluster-macro averages use the conservative Phase 1 clustering that keeps the seven "
     "yeast models together; the provenance-based sensitivity analysis is outstanding.",
-    "Per-model resumability caches (benchmark/data/_candidates_cache/) are git-ignored. "
-    "The committed aggregate artifacts are the frozen deliverable, and reassembly from "
-    "caches is verified byte-identical, but regenerating caches from scratch is a ~3-day "
-    "pass.",
+    "Per-model resumability caches (benchmark/data/_candidates_cache/) are git-ignored "
+    "and archived as benchmark/dist/aaaim-benchmark-phase2-v1-candidate-caches.zip, "
+    "verified file-by-file via benchmark/manifest/candidate_cache_registry.json. "
+    "The zip is a release asset, not a git object; regenerating caches from scratch "
+    "is a ~3-day pass.",
 ]
 
 
@@ -219,14 +246,49 @@ def build_manifest() -> Dict[str, Any]:
                 DATA_DIR / "candidate_generation_failures.csv"),
         }
 
+    registry = None
+    if CACHE_REGISTRY.exists():
+        registry = json.loads(CACHE_REGISTRY.read_text(encoding="utf-8"))
+
+    archive_info: Dict[str, Any] = {
+        "registry": str(CACHE_REGISTRY.relative_to(REPO_ROOT)).replace("\\", "/"),
+        "asset": CACHE_ARCHIVE_NAME,
+        "path": str(CACHE_ARCHIVE.relative_to(REPO_ROOT)).replace("\\", "/"),
+        "release_notes": "benchmark/dist/RELEASE_phase2-v1.md",
+        "verify_command": "python benchmark/scripts/freeze_phase2.py --verify-cache-archive",
+        "present": CACHE_ARCHIVE.exists(),
+        "gitignored": True,
+    }
+    if registry:
+        archive_info["n_files"] = registry.get("n_files")
+        archive_info["config_id"] = registry.get("config_id")
+        archive_info["uncompressed_bytes"] = registry.get("total_bytes")
+    elif CACHE_DIR.exists():
+        archive_info["n_files"] = len(list(CACHE_DIR.glob("*.json")))
+    if CACHE_ARCHIVE.exists():
+        archive_info["sha256"] = sha256_file(CACHE_ARCHIVE)
+        archive_info["bytes"] = CACHE_ARCHIVE.stat().st_size
+        archive_info["note"] = (
+            "Zip archives embed timestamps, so this digest identifies the uploaded "
+            "asset; verify restored contents against the registry, not the zip bytes."
+        )
+
     return {
         "benchmark_version": BENCHMARK_VERSION,
         "proposed_tag": PROPOSED_TAG,
         "builds_on": PHASE1_TAG,
-        "source_commit": _git("rev-parse", "HEAD"),
-        "source_commit_note": "HEAD at freeze time, i.e. the code and caches that produced "
-                              "these artifacts. The commit that adds this manifest and the "
-                              "artifacts themselves is its child; tag that child.",
+        "commits": {
+            "candidate_generation": CANDIDATE_GENERATION_COMMIT,
+            "analysis_and_artifacts": ANALYSIS_ARTIFACT_COMMIT,
+            "release_snapshot": PROPOSED_TAG,
+        },
+        "commits_note": (
+            "candidate_generation (dbf15d6) is the last change to generate_candidates.py "
+            "before the full run. analysis_and_artifacts (b5065e0) added the frozen "
+            "aggregate tables and analysis scripts. release_snapshot is the proposed tag; "
+            "it is not created by this script. HEAD is not recorded: a freeze commit "
+            "cannot name itself."
+        ),
         "source_branch": _git("rev-parse", "--abbrev-ref", "HEAD"),
         "config_id": config_id(),
         "generation_config": GENERATION_CONFIG,
@@ -263,7 +325,8 @@ def build_manifest() -> Dict[str, Any]:
         "git_tracking": {
             "committed": [a["name"] for a in artifacts],
             "ignored": ["benchmark/data/_candidates_cache/ (per-model resumability "
-                        "caches, 25.7 MB, regenerable only by the ~3-day pass)",
+                        "caches; archived as a release asset, see "
+                        "benchmark/dist/RELEASE_phase2-v1.md)",
                         "benchmark/data/_*.log (transient run logs)",
                         "benchmark/models/ (SBML inputs; see benchmark/dist/)"],
             "rationale": "Aggregate artifacts are the frozen deliverable and are small "
@@ -271,9 +334,147 @@ def build_manifest() -> Dict[str, Any]:
                          "precedent of committing reactions.csv and "
                          "species_annotations.csv. The underscore-prefixed caches are "
                          "intermediates: assembly from them is verified byte-identical, "
-                         "so they add no information the committed artifacts lack.",
+                         "so they add no information the committed artifacts lack. They "
+                         "are archived rather than committed because regenerating them "
+                         "costs a ~3-day pass, so resumability stays recoverable without "
+                         "putting 25.7 MB of intermediates in git history.",
         },
+        "cache_archive": archive_info,
         "known_limitations": KNOWN_LIMITATIONS,
+    }
+
+
+def build_cache_registry() -> Dict[str, Any]:
+    """Digest every per-model cache so an archived copy can be verified after restore."""
+    files: Dict[str, Any] = {}
+    for path in sorted(CACHE_DIR.glob("*.json")):
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        files[path.name] = {
+            "model_id": payload.get("model_id"),
+            "config_id": payload.get("config_id"),
+            "bytes": path.stat().st_size,
+            "sha256": sha256_file(path),
+            "candidate_rows": len(payload.get("candidates", [])),
+            "status_rows": len(payload.get("status", [])),
+            "failures": len(payload.get("failures", [])),
+            "elapsed_s": payload.get("elapsed_s"),
+        }
+    total_bytes = sum(f["bytes"] for f in files.values())
+    return {
+        "benchmark_version": BENCHMARK_VERSION,
+        "config_id": config_id(),
+        "purpose": "Per-model candidate-generation caches. Regenerating them costs a "
+                   "~3-day pass, so they are archived as a release asset rather than "
+                   "committed. Assembly from them into the committed aggregate artifacts "
+                   "is verified byte-identical by audit_phase2.py --check-reassembly.",
+        "n_files": len(files),
+        "total_bytes": total_bytes,
+        "total_generation_seconds": round(
+            sum(f["elapsed_s"] or 0.0 for f in files.values()), 1),
+        "files": files,
+    }
+
+
+def verify_caches(
+    registry: Dict[str, Any], cache_dir: Optional[Path] = None,
+) -> List[str]:
+    """Check a cache directory against the committed registry."""
+    cache_dir = cache_dir or CACHE_DIR
+    problems: List[str] = []
+    for name, entry in registry["files"].items():
+        path = cache_dir / name
+        if not path.exists():
+            problems.append(f"{name}: missing")
+            continue
+        actual = sha256_file(path)
+        if actual != entry["sha256"]:
+            problems.append(f"{name}: sha256 {actual} != {entry['sha256']}")
+    extra = sorted({p.name for p in cache_dir.glob("*.json")} - set(registry["files"]))
+    problems.extend(f"{name}: not in registry" for name in extra)
+    return problems
+
+
+def pack_caches(dest: Optional[Path] = None) -> Dict[str, Any]:
+    """Zip the per-model caches. The zip is a release asset, not a git object."""
+    dest = dest or CACHE_ARCHIVE
+    if not CACHE_DIR.exists():
+        raise FileNotFoundError(f"no cache directory at {CACHE_DIR}")
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    files = sorted(CACHE_DIR.glob("*.json"))
+    if not files:
+        raise FileNotFoundError(f"no cache files in {CACHE_DIR}")
+    with zipfile.ZipFile(dest, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
+        for path in files:
+            zf.write(path, f"{CACHE_ARC_PREFIX}/{path.name}")
+    return {
+        "path": str(dest.relative_to(REPO_ROOT)).replace("\\", "/"),
+        "n_files": len(files),
+        "bytes": dest.stat().st_size,
+        "sha256": sha256_file(dest),
+        "config_id": config_id(),
+    }
+
+
+def restore_and_reassemble(
+    archive: Path, registry: Dict[str, Any],
+) -> Dict[str, Any]:
+    """Extract the archive into a temp tree, verify files, reassemble, compare CSVs.
+
+    Never writes into the working copy's cache directory or aggregate artifacts.
+    """
+    from benchmark.scripts import generate_candidates as gc
+    from benchmark.scripts.generate_candidates import (
+        CANDIDATES_CSV, FAILURES_CSV, REACTIONS_CSV, STATUS_CSV,
+    )
+
+    committed = {
+        "candidates.csv": sha256_file(CANDIDATES_CSV),
+        "candidate_status.csv": sha256_file(STATUS_CSV),
+        "candidate_generation_failures.csv": sha256_file(FAILURES_CSV),
+    }
+    redirected = ("CACHE_DIR", "CANDIDATES_CSV", "STATUS_CSV", "FAILURES_CSV", "CONFIG_JSON")
+    original = {name: getattr(gc, name) for name in redirected}
+
+    with tempfile.TemporaryDirectory(prefix="aaaim-cache-restore-") as tmp:
+        tmp_path = Path(tmp)
+        with zipfile.ZipFile(archive) as zf:
+            zf.extractall(tmp_path)
+        restored_dir = tmp_path / "benchmark" / "data" / "_candidates_cache"
+        problems = verify_caches(registry, cache_dir=restored_dir)
+
+        out_dir = tmp_path / "assembled"
+        out_dir.mkdir()
+        gc.CACHE_DIR = restored_dir
+        gc.CANDIDATES_CSV = out_dir / "candidates.csv"
+        gc.STATUS_CSV = out_dir / "candidate_status.csv"
+        gc.FAILURES_CSV = out_dir / "candidate_generation_failures.csv"
+        gc.CONFIG_JSON = out_dir / "candidate_generation_config.json"
+        try:
+            reactions = pd.read_csv(REACTIONS_CSV)
+            evaluable = reactions[reactions.included_in_eval.astype(bool)]
+            model_ids = sorted(evaluable.model_id.astype(str).unique())
+            gc.assemble(model_ids, partial_ok=False)
+            assembled = {
+                name: sha256_file(out_dir / name) for name in committed
+            }
+        finally:
+            for name, value in original.items():
+                setattr(gc, name, value)
+
+    after_committed = {
+        "candidates.csv": sha256_file(CANDIDATES_CSV),
+        "candidate_status.csv": sha256_file(STATUS_CSV),
+        "candidate_generation_failures.csv": sha256_file(FAILURES_CSV),
+    }
+    mismatches = [name for name in committed if assembled.get(name) != committed[name]]
+    return {
+        "registry_problems": problems,
+        "reassembly_identical": not mismatches,
+        "mismatches": mismatches,
+        "committed": committed,
+        "assembled": assembled,
+        "committed_artifacts_untouched": after_committed == committed,
+        "n_files_restored": registry["n_files"],
     }
 
 
@@ -295,10 +496,54 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--verify", action="store_true",
                         help="Check the existing manifest against files on disk")
+    parser.add_argument("--verify-caches", action="store_true",
+                        help="Check the working-copy caches against the committed registry")
+    parser.add_argument("--pack-caches", action="store_true",
+                        help="Write the gitignored cache zip and the committed registry")
+    parser.add_argument("--verify-cache-archive", nargs="?", const="",
+                        metavar="ZIP",
+                        help="Restore the cache zip into a temp dir, verify files, and "
+                             "reassemble; never writes into the working copy")
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     logger = logging.getLogger("freeze_phase2")
+
+    if args.verify_caches:
+        if not CACHE_REGISTRY.exists():
+            logger.error("no cache registry at %s; run --pack-caches first",
+                         CACHE_REGISTRY)
+            return 1
+        registry = json.loads(CACHE_REGISTRY.read_text(encoding="utf-8"))
+        problems = verify_caches(registry)
+        for p in problems:
+            logger.error("MISMATCH %s", p)
+        logger.info("verified %d caches against %s; %d problems",
+                    registry["n_files"], CACHE_REGISTRY.name, len(problems))
+        return 1 if problems else 0
+
+    if args.verify_cache_archive is not None:
+        archive = Path(args.verify_cache_archive) if args.verify_cache_archive else CACHE_ARCHIVE
+        if not archive.exists():
+            logger.error("no cache archive at %s; run --pack-caches first", archive)
+            return 1
+        if not CACHE_REGISTRY.exists():
+            logger.error("no cache registry at %s", CACHE_REGISTRY)
+            return 1
+        registry = json.loads(CACHE_REGISTRY.read_text(encoding="utf-8"))
+        result = restore_and_reassemble(archive, registry)
+        for p in result["registry_problems"]:
+            logger.error("REGISTRY %s", p)
+        if result["reassembly_identical"] and not result["registry_problems"]:
+            logger.info(
+                "restored %d caches from %s; reassembly byte-identical; "
+                "committed artifacts untouched=%s",
+                result["n_files_restored"], archive.name,
+                result["committed_artifacts_untouched"],
+            )
+            return 0 if result["committed_artifacts_untouched"] else 1
+        logger.error("reassembly mismatches: %s", result["mismatches"])
+        return 1
 
     if args.verify:
         if not OUT_JSON.exists():
@@ -312,12 +557,28 @@ def main() -> int:
                     len(manifest["artifacts"]), len(problems))
         return 1 if problems else 0
 
+    if args.pack_caches:
+        registry = build_cache_registry()
+        write_json(registry, CACHE_REGISTRY)
+        packed = pack_caches()
+        logger.info("cache registry: %d files, %.1f MB uncompressed, %s",
+                    registry["n_files"], registry["total_bytes"] / 1e6,
+                    CACHE_REGISTRY.relative_to(REPO_ROOT))
+        logger.info("packed %s (%d files, %.1f MB, sha256=%s, config_id=%s)",
+                    packed["path"], packed["n_files"], packed["bytes"] / 1e6,
+                    packed["sha256"], packed["config_id"])
+        return 0
+
+    # Default: rewrite the manifest. The registry is written only by --pack-caches so
+    # a freeze without local caches cannot replace it with an empty one.
     manifest = build_manifest()
     write_json(manifest, OUT_JSON)
 
-    logger.info("%s: %d artifacts, config_id=%s, commit=%s",
+    logger.info("%s: %d artifacts, config_id=%s, generation=%s artifacts=%s",
                 manifest["benchmark_version"], len(manifest["artifacts"]),
-                manifest["config_id"], manifest["source_commit"])
+                manifest["config_id"],
+                manifest["commits"]["candidate_generation"][:7],
+                manifest["commits"]["analysis_and_artifacts"][:7])
     if manifest["artifacts_outstanding"]:
         logger.warning("outstanding artifacts: %s", manifest["artifacts_outstanding"])
     emb = manifest["embedding_baseline"]
