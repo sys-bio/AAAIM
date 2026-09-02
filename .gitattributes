@@ -8,4 +8,6 @@ benchmark/data/*.json text eol=lf
 benchmark/*.json text eol=lf
 benchmark/manifest/*.txt text eol=lf
 benchmark/manifest/*.json text eol=lf
-.gitignore text eol=lf
+benchmark/phase3/*.csv text eol=lf
+benchmark/phase3/*.json text eol=lf
+benchmark/phase3/*.jsonl text eol=lf

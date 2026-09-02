@@ -1,0 +1,44 @@
+{
+  "answer_key": "pilot_answer_key.csv",
+  "config_id": "86938b48ab88",
+  "counts_by_stratum": {
+    "empty_constrained": 50,
+    "nonempty_answer_absent": 50,
+    "retrievable_rerank_failure": 22,
+    "retrievable_top1_success": 25,
+    "unconstrained": 36
+  },
+  "n_clusters": 21,
+  "n_genome_scale": 95,
+  "n_models": 27,
+  "n_selected": 183,
+  "phase2_commit": "19580572a70c2c138290aa6da06697a7cef9d7f6",
+  "phase2_tag": "benchmark-phase2-v1",
+  "public_sample": "pilot_sample.csv",
+  "quotas": {
+    "empty_constrained": 50,
+    "nonempty_answer_absent": 50,
+    "retrievable_rerank_failure": 25,
+    "retrievable_top1_success": 25,
+    "unconstrained": 50
+  },
+  "seed": 20260902,
+  "selection": "Only the held-out test split is eligible. Within each stratum, clusters are visited round-robin after a seeded within-cluster shuffle so large models cannot exhaust the quota. If a stratum has fewer eligible test reactions than its quota, every eligible reaction is taken and the shortfall is recorded; train/validation are never used as a backfill.",
+  "shortfalls": {
+    "retrievable_rerank_failure": {
+      "action": "included every eligible test reaction; did not borrow from train/val",
+      "eligible_in_test": 22,
+      "quota": 25,
+      "selected": 22,
+      "shortfall": 3
+    },
+    "unconstrained": {
+      "action": "included every eligible test reaction; did not borrow from train/val",
+      "eligible_in_test": 36,
+      "quota": 50,
+      "selected": 36,
+      "shortfall": 14
+    }
+  },
+  "source_split": "test"
+}

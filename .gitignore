@@ -41,3 +41,6 @@ benchmark/data/_*
 # Release archives are build artifacts; their digests are recorded in benchmark/dist/*.md.
 benchmark/dist/*.zip
 **/BioModels_251106
+# Phase 3 live-response cache (never commit API payloads).
+benchmark/phase3/_*/
+
