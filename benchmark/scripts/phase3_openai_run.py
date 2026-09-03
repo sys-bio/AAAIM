@@ -15,6 +15,12 @@ Live spending is off unless ``--execute`` is passed. Profiles:
     Frozen 163-reaction × 3-variant pilot (489 planned rows), $5.00 default cap.
     Compatible smoke-test cache entries are reused; they are not repurchased.
 
+``rescue_schema_invalid``
+    The 26 original schema-invalid rows only, ``max_output_tokens=2048``,
+    $1.00 cap, at most 26 provider requests. Writes
+    ``benchmark/phase3/validation_rescue_2048/`` and never mutates the
+    original 489-row results.
+
 Usage::
 
     python benchmark/scripts/phase3_openai_run.py
@@ -22,6 +28,8 @@ Usage::
     python benchmark/scripts/phase3_openai_run.py --profile validation
     python benchmark/scripts/phase3_openai_run.py --profile validation --execute --max-cost-usd 5.00
     python benchmark/scripts/phase3_openai_run.py --profile validation --cache-only
+    python benchmark/scripts/phase3_openai_run.py --profile rescue_schema_invalid
+    python benchmark/scripts/phase3_openai_run.py --profile rescue_schema_invalid --execute --max-cost-usd 1.00
 """
 
 from __future__ import annotations
@@ -69,6 +77,14 @@ from benchmark.scripts.phase3_common import (
     VALIDATION_N_REACTIONS,
     VALIDATION_N_REQUESTS,
     VALIDATION_SELECTION_RULE,
+    ORIGINAL_VALIDATION_RESULTS_SHA256,
+    OUT_RESCUE_DIR,
+    RESCUE_MAX_COST_USD,
+    RESCUE_MAX_OUTPUT_TOKENS,
+    RESCUE_MAX_RETRIES,
+    RESCUE_N_REQUESTS,
+    RESCUE_SELECTION_RULE,
+    sha256_portable,
     assert_no_kegg_leakage,
     atomic_write_json,
     atomic_write_jsonl,
@@ -79,6 +95,7 @@ from benchmark.scripts.phase3_common import (
     redact_kegg_in_obj,
     redact_kegg_reaction_ids,
     require_live_tokenizer,
+    write_artifact_manifest,
 )
 from benchmark.scripts.phase3_cost import load_pricing
 from benchmark.scripts.phase3_eval import score_results
@@ -504,6 +521,50 @@ def attach_variants(
     return planned
 
 
+def load_result_rows(path: Path) -> List[Dict[str, Any]]:
+    rows: List[Dict[str, Any]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if line.strip():
+            rows.append(json.loads(line))
+    return rows
+
+
+def select_rescue_prompt_rows(
+    original_results: Sequence[Mapping[str, Any]],
+    prompt_rows: Sequence[Mapping[str, Any]],
+) -> List[Dict[str, Any]]:
+    """Select exactly the original schema-invalid (sample_id, variant) keys."""
+    keys: List[tuple] = []
+    seen = set()
+    succeeded_keys = {
+        (str(row["sample_id"]), str(row["variant"]))
+        for row in original_results if row.get("terminal_status") == "succeeded"
+    }
+    for row in original_results:
+        if row.get("terminal_status") != "schema_invalid":
+            continue
+        key = (str(row["sample_id"]), str(row["variant"]))
+        if key in seen:
+            raise ValueError(f"duplicate schema_invalid key {key}")
+        if key in succeeded_keys:
+            raise ValueError(f"schema_invalid key also succeeded: {key}")
+        seen.add(key)
+        keys.append(key)
+    if len(keys) != RESCUE_N_REQUESTS:
+        raise ValueError(
+            f"rescue must select {RESCUE_N_REQUESTS} schema_invalid rows, got {len(keys)}"
+        )
+    index = {
+        (str(row["sample_id"]), str(row["variant"])): dict(row) for row in prompt_rows
+    }
+    planned: List[Dict[str, Any]] = []
+    for key in keys:
+        if key not in index:
+            raise ValueError(f"missing prompt for rescue key {key}")
+        planned.append(index[key])
+    return planned
+
+
 def audit_planned_requests(
     plan: Mapping[str, Any],
     *,
@@ -531,6 +592,11 @@ def audit_planned_requests(
     dupes = int(frame.duplicated(["sample_id", "variant"]).sum())
     by_sample = frame.groupby("sample_id").variant.apply(lambda s: set(s)).to_dict()
     missing_ids = []
+    profile = str(plan.get("profile") or "smoke")
+    expected_max_output = (
+        RESCUE_MAX_OUTPUT_TOKENS if profile == "rescue_schema_invalid"
+        else DEFAULT_MAX_OUTPUT_TOKENS
+    )
     if require_all_sample_ids:
         missing_ids = sorted(set(sample_ids) - set(frame.sample_id))
     orphans = sorted(set(frame.sample_id) - set(sample_ids))
@@ -544,11 +610,15 @@ def audit_planned_requests(
         and frame.model.nunique() == 1
         and frame.output_schema_version.nunique() == 1
         and str(frame.template_version.iloc[0]) == PROMPT_TEMPLATE_VERSION
-        and int(frame.max_output_tokens.iloc[0]) == DEFAULT_MAX_OUTPUT_TOKENS
+        and int(frame.max_output_tokens.iloc[0]) == expected_max_output
         and str(frame.reasoning_effort.iloc[0]) == DEFAULT_REASONING_EFFORT
         and str(frame.model.iloc[0]) == DEFAULT_MODEL
         and str(frame.output_schema_version.iloc[0]) == OUTPUT_SCHEMA_VERSION
     )
+    n_requests_ok = True
+    if profile == "rescue_schema_invalid":
+        n_requests_ok = len(frame) == RESCUE_N_REQUESTS
+        incomplete = []
     return {
         "n_planned": len(frame),
         "n_reactions": int(frame.sample_id.nunique()),
@@ -556,7 +626,8 @@ def audit_planned_requests(
         "n_orphan_sample_ids": len(orphans),
         "n_missing_sample_ids": len(missing_ids),
         "n_incomplete_variant_sets": len(incomplete),
-        "settings_match_smoke": settings_ok,
+        "settings_match_smoke": settings_ok if profile != "rescue_schema_invalid" else False,
+        "settings_match_profile": settings_ok,
         "split": plan.get("split"),
         "answer_key_read": plan.get("answer_key_read"),
         "test_split_read": plan.get("test_split_read"),
@@ -566,6 +637,7 @@ def audit_planned_requests(
             and not missing_ids
             and not incomplete
             and settings_ok
+            and n_requests_ok
             and plan.get("split") == PILOT_SPLIT
             and plan.get("answer_key_read") is False
             and plan.get("test_split_read") is False
@@ -1060,11 +1132,14 @@ class RunConfig:
     seed: int = PILOT_SEED
     profile: str = "smoke"
     write_results_from_cache: bool = False
+    original_results_path: Path = OUT_VALIDATION_DIR / "results.jsonl"
 
 
 def live_request_ceiling(profile: str) -> int:
     if profile == "validation":
         return VALIDATION_LIVE_REQUEST_CEILING
+    if profile == "rescue_schema_invalid":
+        return RESCUE_N_REQUESTS
     return SMOKE_LIVE_REQUEST_CEILING
 
 
@@ -1072,15 +1147,55 @@ def plan_run(config: RunConfig) -> Dict[str, Any]:
     """Select, validate, and estimate without reading the answer key or test split."""
     require_live_tokenizer(TOKENIZER_CONSERVATIVE)
     profile = config.profile
-    if profile not in {"smoke", "validation"}:
+    if profile not in {"smoke", "validation", "rescue_schema_invalid"}:
         raise ValueError(f"unknown profile {profile}")
+    protected = {OUT_SMOKE_DIR.resolve(), OUT_VALIDATION_DIR.resolve()}
     if profile == "validation":
-        smoke_dir = OUT_SMOKE_DIR.resolve()
-        if config.out_dir.resolve() == smoke_dir:
+        if config.out_dir.resolve() == OUT_SMOKE_DIR.resolve():
             raise ValueError("validation output must not overwrite smoke-test artifacts")
+    if profile == "rescue_schema_invalid":
+        if config.out_dir.resolve() in protected:
+            raise ValueError("rescue output must not overwrite original validation or smoke artifacts")
+        if config.max_output_tokens != RESCUE_MAX_OUTPUT_TOKENS:
+            raise ValueError(
+                f"rescue must use max_output_tokens={RESCUE_MAX_OUTPUT_TOKENS}"
+            )
+        if config.max_retries != RESCUE_MAX_RETRIES:
+            raise ValueError(
+                "rescue max_retries must be 0 so total provider requests cannot exceed 26"
+            )
     sample = pd.read_csv(config.sample_path)
     prompts = load_prompt_rows(config.prompts_path)
-    if profile == "validation":
+    if profile == "rescue_schema_invalid":
+        digest = sha256_portable(config.original_results_path)
+        if digest != ORIGINAL_VALIDATION_RESULTS_SHA256:
+            raise ValueError(
+                f"original results.jsonl digest {digest} != {ORIGINAL_VALIDATION_RESULTS_SHA256}"
+            )
+        original = load_result_rows(config.original_results_path)
+        prompt_subset = select_rescue_prompt_rows(original, prompts)
+        selected_ids = {str(row["sample_id"]) for row in prompt_subset}
+        sample_ids = set(sample["sample_id"].astype(str))
+        extra_ids = sorted(selected_ids - sample_ids)
+        if extra_ids:
+            raise ValueError(f"rescue keys are not in the validation sample: {extra_ids[:10]}")
+        if "split" in sample.columns:
+            splits = set(sample.loc[sample.sample_id.astype(str).isin(selected_ids), "split"].astype(str))
+            if splits and splits != {PILOT_SPLIT}:
+                raise ValueError(f"rescue sample must be validation-only; found {sorted(splits)}")
+        selected = pd.DataFrame([
+            {
+                "sample_id": row["sample_id"],
+                "model_id": row["model_id"],
+                "reaction_id": row["reaction_id"],
+                "cluster_id": row.get("cluster_id"),
+                "stratum": row.get("stratum"),
+            }
+            for row in prompt_subset
+        ]).drop_duplicates(["sample_id"])
+        selection_rule = RESCUE_SELECTION_RULE
+        expected_n = RESCUE_N_REQUESTS
+    elif profile == "validation":
         selected = select_validation_reactions(sample)
         selection_rule = VALIDATION_SELECTION_RULE
         expected_n = config.n_reactions * len(CONTEXT_VARIANTS)
@@ -1094,7 +1209,8 @@ def plan_run(config: RunConfig) -> Dict[str, Any]:
                 f"validation pilot must have {VALIDATION_N_REACTIONS} reactions, got {len(selected)}"
             )
         expected_n = VALIDATION_N_REQUESTS
-    prompt_subset = attach_variants(selected, prompts)
+    if profile != "rescue_schema_invalid":
+        prompt_subset = attach_variants(selected, prompts)
     settings = InferenceSettings(
         model=config.model,
         max_output_tokens=config.max_output_tokens,
@@ -1120,8 +1236,15 @@ def plan_run(config: RunConfig) -> Dict[str, Any]:
     )
     assert_budget_gate(
         estimate, config.max_cost_usd,
-        require_worst_under_cap=(profile == "smoke"),
+        require_worst_under_cap=(profile in {"smoke", "rescue_schema_invalid"}),
     )
+    if profile == "rescue_schema_invalid":
+        conservative = float(estimate["expected_usd_no_retry_at_max_output"])
+        if conservative > config.max_cost_usd + 1e-12:
+            raise BudgetExceeded(
+                f"rescue conservative expected ${conservative:.6f} exceeds cap "
+                f"${config.max_cost_usd:.2f}"
+            )
     return {
         "profile": profile,
         "selection_rule": selection_rule,
@@ -1154,6 +1277,10 @@ def plan_run(config: RunConfig) -> Dict[str, Any]:
         },
         "cache_dir": str(config.cache_dir),
         "out_dir": str(config.out_dir),
+        "original_results_sha256": (
+            sha256_portable(config.original_results_path)
+            if profile == "rescue_schema_invalid" else None
+        ),
     }
 
 
@@ -1190,7 +1317,9 @@ def run_planned(
         if not (config.execute or force):
             return
         if config.execute:
-            atomic_write_jsonl(rows, config.out_dir / "results.jsonl")
+            dest = config.out_dir / "results.jsonl"
+            assert_original_results_immutable(dest)
+            atomic_write_jsonl(rows, dest)
             atomic_write_json(summarize_rows(rows), config.out_dir / "summary.json")
             return
         atomic_write_jsonl(rows, config.out_dir / "dry_run_results.jsonl")
@@ -1385,6 +1514,16 @@ def run_planned(
     return {"rows": rows, "summary": summary, "eval": eval_payload}
 
 
+ORIGINAL_VALIDATION_RESULTS = (OUT_VALIDATION_DIR / "results.jsonl").resolve()
+
+
+def assert_original_results_immutable(path: Path) -> None:
+    if path.resolve() == ORIGINAL_VALIDATION_RESULTS:
+        raise ValueError(
+            "original validation results.jsonl is immutable; refusing to rewrite it"
+        )
+
+
 def freeze_results_from_cache(
     plan: Mapping[str, Any],
     config: RunConfig,
@@ -1397,8 +1536,10 @@ def freeze_results_from_cache(
         if hit is None:
             raise RuntimeError(f"missing cache entry for {item.cache_key}")
         rows.append(dict(hit))
+    dest = config.out_dir / "results.jsonl"
+    assert_original_results_immutable(dest)
     config.out_dir.mkdir(parents=True, exist_ok=True)
-    atomic_write_jsonl(rows, config.out_dir / "results.jsonl")
+    atomic_write_jsonl(rows, dest)
     return rows
 
 
@@ -1488,7 +1629,7 @@ def write_plan_artifacts(plan: Mapping[str, Any], out_dir: Path) -> None:
 
 def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--profile", choices=("smoke", "validation"), default="smoke")
+    parser.add_argument("--profile", choices=("smoke", "validation", "rescue_schema_invalid"), default="smoke")
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--execute", action="store_true",
                         help="Contact OpenAI. Default is dry-run with zero API calls.")
@@ -1496,8 +1637,8 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
                         help="Replay from cache; fail if any request would need the API.")
     parser.add_argument("--max-cost-usd", type=float, default=None)
     parser.add_argument("--max-requests", type=int, default=None)
-    parser.add_argument("--max-output-tokens", type=int, default=DEFAULT_MAX_OUTPUT_TOKENS)
-    parser.add_argument("--max-retries", type=int, default=DEFAULT_MAX_RETRIES)
+    parser.add_argument("--max-output-tokens", type=int, default=None)
+    parser.add_argument("--max-retries", type=int, default=None)
     parser.add_argument("--reasoning-effort", default=DEFAULT_REASONING_EFFORT)
     parser.add_argument("--out-dir", type=Path, default=None)
     parser.add_argument("--cache-dir", type=Path, default=CACHE_DIR)
@@ -1520,12 +1661,24 @@ def config_from_args(args: argparse.Namespace) -> RunConfig:
         out_dir = OUT_VALIDATION_DIR if args.out_dir is None else args.out_dir
         n_reactions = VALIDATION_N_REACTIONS
         evaluate = False
+        max_output = DEFAULT_MAX_OUTPUT_TOKENS if args.max_output_tokens is None else int(args.max_output_tokens)
+        max_retries = DEFAULT_MAX_RETRIES if args.max_retries is None else int(args.max_retries)
+    elif profile == "rescue_schema_invalid":
+        max_cost = RESCUE_MAX_COST_USD if args.max_cost_usd is None else float(args.max_cost_usd)
+        max_requests = RESCUE_N_REQUESTS if args.max_requests is None else int(args.max_requests)
+        out_dir = OUT_RESCUE_DIR if args.out_dir is None else args.out_dir
+        n_reactions = RESCUE_N_REQUESTS
+        evaluate = False
+        max_output = RESCUE_MAX_OUTPUT_TOKENS if args.max_output_tokens is None else int(args.max_output_tokens)
+        max_retries = RESCUE_MAX_RETRIES if args.max_retries is None else int(args.max_retries)
     else:
         max_cost = DEFAULT_MAX_COST_USD if args.max_cost_usd is None else float(args.max_cost_usd)
         max_requests = SMOKE_N_REQUESTS if args.max_requests is None else int(args.max_requests)
         out_dir = OUT_SMOKE_DIR if args.out_dir is None else args.out_dir
         n_reactions = SMOKE_N_REACTIONS
         evaluate = not bool(args.skip_eval)
+        max_output = DEFAULT_MAX_OUTPUT_TOKENS if args.max_output_tokens is None else int(args.max_output_tokens)
+        max_retries = DEFAULT_MAX_RETRIES if args.max_retries is None else int(args.max_retries)
     return RunConfig(
         sample_path=args.sample,
         prompts_path=args.prompts,
@@ -1538,8 +1691,8 @@ def config_from_args(args: argparse.Namespace) -> RunConfig:
         cache_only=bool(args.cache_only),
         max_cost_usd=max_cost,
         max_requests=max_requests,
-        max_output_tokens=int(args.max_output_tokens),
-        max_retries=int(args.max_retries),
+        max_output_tokens=max_output,
+        max_retries=max_retries,
         reasoning_effort=str(args.reasoning_effort),
         evaluate=evaluate,
         load_env=not bool(args.no_dotenv),
@@ -1566,6 +1719,22 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     if not audit["ok"]:
         raise ValueError(f"plan audit failed: {audit}")
+    if config.profile == "rescue_schema_invalid":
+        original_digest = sha256_portable(config.original_results_path)
+        if original_digest != ORIGINAL_VALIDATION_RESULTS_SHA256:
+            raise ValueError("original results.jsonl digest changed; refusing rescue")
+        conservative = float(plan["estimate"]["expected_usd_no_retry_at_max_output"])
+        if plan["n_requests"] != RESCUE_N_REQUESTS:
+            raise ValueError(f"rescue must plan {RESCUE_N_REQUESTS} rows, got {plan['n_requests']}")
+        if conservative >= config.max_cost_usd:
+            raise BudgetExceeded(
+                f"rescue conservative expected ${conservative:.6f} is not below cap "
+                f"${config.max_cost_usd:.2f}"
+            )
+        if plan.get("answer_key_read"):
+            raise ValueError("rescue plan must not read the answer key")
+        if plan.get("test_split_read"):
+            raise ValueError("rescue plan must not read the test split")
     write_plan_artifacts(plan, config.out_dir)
     estimate = plan["estimate"]
     logger.info(
@@ -1600,6 +1769,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return 0
     outcome = run_planned(plan, config)
     summary = outcome["summary"]
+    if config.profile == "rescue_schema_invalid":
+        names = [
+            "plan.json", "preflight.json", "run_config.json", "requests.jsonl",
+            "results.jsonl", "summary.json", "dry_run_results.jsonl",
+            "dry_run_summary.json", "cache_verify.json", "execute_session.json",
+        ]
+        write_artifact_manifest(config.out_dir, [config.out_dir / name for name in names])
     logger.info(
         "done attempted=%s cached=%s succeeded=%s failed=%s refused=%s cost_usd=%s api_calls=%s",
         summary.get("n_attempted"), summary.get("n_cached"),

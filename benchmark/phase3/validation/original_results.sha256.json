@@ -1,0 +1,8 @@
+{
+  "n_rows": 489,
+  "n_schema_invalid": 26,
+  "n_succeeded": 463,
+  "newline_normalization": "crlf_to_lf",
+  "path": "benchmark/phase3/validation/results.jsonl",
+  "sha256_newline_normalized": "0bb9c892ec811e532133f2cd6e1fce5e1e1d249e41a263388979ae6d1a29fbdd"
+}

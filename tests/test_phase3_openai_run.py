@@ -694,3 +694,103 @@ def test_live_validation_plan_has_489_rows_and_reuses_smoke_cache():
     assert plan["template_version"] == PROMPT_TEMPLATE_VERSION
     assert plan["estimate"]["expected_usd_from_smoke_prior"] < 5.0
 
+
+def test_select_rescue_prompt_rows_rejects_succeeded_keys_and_requires_26():
+    from benchmark.scripts.phase3_openai_run import select_rescue_prompt_rows
+    original = []
+    prompts = []
+    for i in range(25):
+        original.append({"sample_id": f"s{i}", "variant": "target_only", "terminal_status": "schema_invalid"})
+        prompts.append(_prompt_row(f"s{i}", f"M{i}", f"rxn{i}", "target_only"))
+    original.append({"sample_id": "ok", "variant": "target_only", "terminal_status": "succeeded"})
+    prompts.append(_prompt_row("ok", "Mok", "rxnok", "target_only"))
+    with pytest.raises(ValueError, match="must select 26"):
+        select_rescue_prompt_rows(original, prompts)
+    original[-1] = {
+        "sample_id": "dup", "variant": "target_only", "terminal_status": "schema_invalid",
+    }
+    original.append({"sample_id": "dup", "variant": "target_only", "terminal_status": "succeeded"})
+    prompts.append(_prompt_row("dup", "Mdup", "rxndup", "target_only"))
+    with pytest.raises(ValueError, match="also succeeded"):
+        select_rescue_prompt_rows(original, prompts)
+
+
+def test_rescue_plan_refuses_to_overwrite_original_validation(tmp_path):
+    from benchmark.scripts.phase3_common import OUT_VALIDATION_DIR
+    from benchmark.scripts.phase3_openai_run import plan_run
+    paths = _workspace(tmp_path)
+    cfg = _config(
+        paths,
+        execute=False,
+        profile="rescue_schema_invalid",
+        n_reactions=26,
+        max_requests=26,
+        max_cost_usd=1.0,
+        max_output_tokens=2048,
+        max_retries=0,
+        out_dir=OUT_VALIDATION_DIR,
+    )
+    with pytest.raises(ValueError, match="must not overwrite original validation"):
+        plan_run(cfg)
+
+
+@live_only
+def test_live_rescue_plan_selects_only_original_schema_invalid_keys(tmp_path):
+    from benchmark.scripts.phase3_common import (
+        ORIGINAL_VALIDATION_RESULTS_SHA256,
+        OUT_VALIDATION_DIR,
+        RESCUE_N_REQUESTS,
+        sha256_portable,
+    )
+    from benchmark.scripts.phase3_modes import CACHE_DIR
+    from benchmark.scripts.phase3_openai_run import (
+        audit_planned_requests, load_result_rows, plan_run,
+    )
+    original_path = OUT_VALIDATION_DIR / "results.jsonl"
+    before = sha256_portable(original_path)
+    assert before == ORIGINAL_VALIDATION_RESULTS_SHA256
+    original = load_result_rows(original_path)
+    invalid_keys = {
+        (str(row["sample_id"]), str(row["variant"]))
+        for row in original if row.get("terminal_status") == "schema_invalid"
+    }
+    succeeded_keys = {
+        (str(row["sample_id"]), str(row["variant"]))
+        for row in original if row.get("terminal_status") == "succeeded"
+    }
+    sample = pd.read_csv(OUT_PILOT)
+    cfg = RunConfig(
+        sample_path=OUT_PILOT,
+        prompts_path=OUT_PROMPTS,
+        pricing_path=PRICING_OPENAI_TERRA,
+        out_dir=tmp_path / "rescue",
+        cache_dir=CACHE_DIR,
+        execute=False,
+        profile="rescue_schema_invalid",
+        n_reactions=26,
+        max_requests=26,
+        max_cost_usd=1.0,
+        max_output_tokens=2048,
+        max_retries=0,
+        evaluate=False,
+        load_env=False,
+    )
+    plan = plan_run(cfg)
+    audit = audit_planned_requests(plan, sample=sample, require_all_sample_ids=False)
+    assert audit["ok"] is True
+    assert plan["n_requests"] == RESCUE_N_REQUESTS
+    assert plan["inference"]["max_output_tokens"] == 2048
+    assert plan["inference"]["max_retries"] == 0
+    assert plan["answer_key_read"] is False
+    assert plan["test_split_read"] is False
+    keys = {(item.sample_id, item.variant) for item in plan["planned"]}
+    assert keys == invalid_keys
+    assert not (keys & succeeded_keys)
+    assert plan["estimate"]["expected_usd_no_retry_at_max_output"] < 1.0
+    assert all(item.settings.max_output_tokens == 2048 for item in plan["planned"])
+    assert sha256_portable(original_path) == before
+    if "split" in sample.columns:
+        selected_ids = {item.sample_id for item in plan["planned"]}
+        splits = set(sample.loc[sample.sample_id.astype(str).isin(selected_ids), "split"].astype(str))
+        assert splits == {PILOT_SPLIT}
+

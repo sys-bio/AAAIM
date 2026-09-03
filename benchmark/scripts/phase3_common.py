@@ -47,6 +47,7 @@ PRICING_EXAMPLE = PHASE3_DIR / "pricing.example.json"
 PRICING_OPENAI_TERRA = PHASE3_DIR / "pricing.openai.gpt-5.6-terra.json"
 OUT_SMOKE_DIR = PHASE3_DIR / "smoke"
 OUT_VALIDATION_DIR = PHASE3_DIR / "validation"
+OUT_RESCUE_DIR = PHASE3_DIR / "validation_rescue_2048"
 
 YEAST_CLUSTER = "CLU_BIOMD0000000042"
 PHASE2_TAG = "benchmark-phase2-v1"
@@ -108,11 +109,26 @@ VALIDATION_N_REACTIONS = 163
 VALIDATION_N_REQUESTS = 489
 VALIDATION_SELECTION_RULE = "frozen_validation_pilot_all_rows_v1"
 VALIDATION_MAX_COST_USD = 5.00
-RETRIEVAL_FAILURE_STRATA = (
+# True Phase 2 retrieval failures: the answer was never in a usable candidate set.
+TRUE_RETRIEVAL_FAILURE_STRATA = (
     STRATUM_UNCONSTRAINED,
     STRATUM_EMPTY,
     STRATUM_ABSENT,
-    STRATUM_RERANK,
+)
+# The answer was retrieved but ranked incorrectly. Not a retrieval failure.
+RERANK_FAILURE_STRATA = (STRATUM_RERANK,)
+# All strata other than the heuristic Top-1 control. Not a retrieval-failure set.
+NON_TOP1_STRATA = TRUE_RETRIEVAL_FAILURE_STRATA + RERANK_FAILURE_STRATA
+# Canonical alias. Previously this incorrectly included rerank failure.
+RETRIEVAL_FAILURE_STRATA = TRUE_RETRIEVAL_FAILURE_STRATA
+RESCUE_N_REQUESTS = 26
+RESCUE_MAX_COST_USD = 1.00
+RESCUE_MAX_OUTPUT_TOKENS = 2048
+RESCUE_MAX_RETRIES = 0
+RESCUE_SELECTION_RULE = "original_schema_invalid_keys_v1"
+# Newline-normalized SHA-256 of the frozen 489-row validation results.jsonl.
+ORIGINAL_VALIDATION_RESULTS_SHA256 = (
+    "0bb9c892ec811e532133f2cd6e1fce5e1e1d249e41a263388979ae6d1a29fbdd"
 )
 LIVE_TOKENIZER_REQUIRED = (
     "Live runs must use the chosen model's tokenizer or a conservative "
@@ -129,6 +145,70 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: fh.read(1 << 20), b""):
             h.update(chunk)
     return h.hexdigest()
+
+
+def sha256_portable(path: Path) -> str:
+    """SHA-256 that is stable across Windows CRLF and POSIX LF for text files."""
+    if path.suffix.lower() in {".json", ".jsonl", ".csv", ".md", ".txt"}:
+        text = path.read_text(encoding="utf-8")
+        blob = text.replace("\r\n", "\n").replace("\r", "\n").encode("utf-8")
+        return hashlib.sha256(blob).hexdigest()
+    return sha256_file(path)
+
+
+def portable_size(path: Path) -> int:
+    """Byte size of a text file after newline normalization."""
+    if path.suffix.lower() in {".json", ".jsonl", ".csv", ".md", ".txt"}:
+        text = path.read_text(encoding="utf-8")
+        return len(text.replace("\r\n", "\n").replace("\r", "\n").encode("utf-8"))
+    return path.stat().st_size
+
+
+def portable_n_lines(path: Path) -> int:
+    """Line count after newline normalization. Trailing newline does not add a row."""
+    text = path.read_text(encoding="utf-8")
+    normalized = text.replace("\r\n", "\n").replace("\r", "\n")
+    if not normalized:
+        return 0
+    return normalized.count("\n") if normalized.endswith("\n") else normalized.count("\n") + 1
+
+
+def repo_relative_posix(path: Path, repo_root: Path = REPO_ROOT) -> str:
+    resolved = path.resolve()
+    root = repo_root.resolve()
+    try:
+        return resolved.relative_to(root).as_posix()
+    except ValueError:
+        return Path(path).as_posix()
+
+
+def write_artifact_manifest(
+    out_dir: Path,
+    extra: Sequence[Path],
+    *,
+    root: Path = REPO_ROOT,
+    dest_name: str = "artifact_manifest.json",
+) -> Path:
+    """Write a unique POSIX-path manifest. Does not include the manifest file itself."""
+    files = []
+    seen = set()
+    for path in extra:
+        if not path.exists():
+            continue
+        rel = repo_relative_posix(path, root)
+        if rel in seen:
+            continue
+        seen.add(rel)
+        files.append({
+            "path": rel,
+            "sha256": sha256_portable(path),
+            "bytes": portable_size(path),
+            "n_lines": portable_n_lines(path) if path.suffix in {".jsonl", ".csv"} else None,
+        })
+    files.sort(key=lambda item: item["path"])
+    dest = out_dir / dest_name
+    atomic_write_json({"n_files": len(files), "files": files}, dest)
+    return dest
 
 
 def write_csv(df: pd.DataFrame, path: Path) -> None:

@@ -29,19 +29,30 @@ if str(REPO_ROOT) not in sys.path:
 import pandas as pd
 
 from benchmark.scripts.phase3_common import (
+    NON_TOP1_STRATA,
+    ORIGINAL_VALIDATION_RESULTS_SHA256,
     OUT_PILOT,
     OUT_PILOT_KEY,
     OUT_SPLITS,
     OUT_VALIDATION_DIR,
     PILOT_SPLIT,
     REACTIONS_CSV,
-    RETRIEVAL_FAILURE_STRATA,
+    RERANK_FAILURE_STRATA,
+    REPO_ROOT,
     STRATA,
+    STRATUM_RERANK,
     STRATUM_TOP1,
     TEXT_CSV,
+    TRUE_RETRIEVAL_FAILURE_STRATA,
+    VALIDATION_N_REACTIONS,
     atomic_write_json,
+    atomic_write_jsonl,
     parse_kegg_ids,
-    sha256_file,
+    portable_n_lines,
+    portable_size,
+    repo_relative_posix,
+    sha256_portable,
+    write_artifact_manifest,
 )
 from benchmark.scripts.phase3_eval import score_results
 from benchmark.scripts.phase3_modes import ModeResult, Prediction
@@ -49,6 +60,31 @@ from benchmark.scripts.phase3_openai_run import row_to_mode_result
 from benchmark.scripts.phase3_prompts import CONTEXT_VARIANTS
 
 logger = logging.getLogger("phase3_openai_eval")
+
+PILOT_ESTIMAND = {
+    "experimental_unit": "reaction",
+    "n_reactions": VALIDATION_N_REACTIONS,
+    "n_prompts": 489,
+    "n_context_variants": 3,
+    "sampling": (
+        "The 163-reaction validation pilot deliberately oversamples Phase 2 "
+        "failure strata. Documented quota shortfalls are part of the frozen sample."
+    ),
+    "overall_accuracy_scope": (
+        "Overall 30-31% exact Top-1 describes this constructed validation pilot "
+        "only. It is not an estimate of corpus-wide accuracy."
+    ),
+    "principal_interpretable_results": (
+        "Stratum-specific rates and paired comparisons across context variants "
+        "are the principal interpretable results. The 489 prompts are three "
+        "paired conditions on 163 reactions, not 489 independent biological examples."
+    ),
+    "true_retrieval_failure_strata": list(TRUE_RETRIEVAL_FAILURE_STRATA),
+    "rerank_failure_strata": list(RERANK_FAILURE_STRATA),
+    "non_top1_strata": list(NON_TOP1_STRATA),
+}
+
+IMMUTABLE_RESULT_FILES = ("results.jsonl",)
 
 NONCANONICAL_RE = re.compile(
     r"\b(bind|binding|complex|dissociat|transport|exchange|signaling|signalling|"
@@ -96,8 +132,15 @@ def answer_key_map(key: pd.DataFrame) -> Dict[Tuple[str, str], List[str]]:
 
 
 def _open_set_outcome(row: Mapping[str, Any]) -> str:
-    if row.get("parse_error"):
-        return "compliance_error"
+    status = str(row.get("terminal_status") or "")
+    if status == "schema_invalid" or row.get("parse_error") == "unparseable":
+        return "schema_invalid"
+    if status == "refused":
+        return "refused"
+    if status in {"api_error", "budget_stopped"}:
+        return "other_api_or_compliance_failure"
+    if row.get("parse_error") and status not in {"succeeded", ""}:
+        return "other_api_or_compliance_failure"
     if row.get("abstain"):
         return "abstain"
     if row.get("exact_top1"):
@@ -108,6 +151,8 @@ def _open_set_outcome(row: Mapping[str, Any]) -> str:
         return "incorrect_absent_from_catalog"
     if row.get("n_in_catalog_ids"):
         return "incorrect_in_catalog"
+    if row.get("parse_error"):
+        return "other_api_or_compliance_failure"
     return "incorrect_unanswered"
 
 
@@ -135,8 +180,9 @@ def _enrich_score_rows(
         truth = parse_kegg_ids(getattr(rec, "ground_truth_kegg_all", "")) if rec is not None else []
         n_gt = int(getattr(rec, "num_ground_truth_ids", 0) or len(truth))
         enriched = dict(row)
-        enriched["open_set_outcome"] = _open_set_outcome(row)
         enriched["terminal_status"] = raw.get("terminal_status")
+        enriched["api_error"] = raw.get("api_error")
+        enriched["open_set_outcome"] = _open_set_outcome(enriched)
         enriched["confidence"] = row.get("confidence")
         enriched["cost_usd"] = raw.get("cost_usd")
         enriched["n_input_tokens"] = raw.get("n_input_tokens")
@@ -193,10 +239,15 @@ def variant_metrics(rows: Sequence[Mapping[str, Any]]) -> Dict[str, Any]:
     )
     n_failure_abstain = sum(
         1 for r in rows
-        if r.get("abstain") and r.get("stratum") in RETRIEVAL_FAILURE_STRATA
+        if r.get("abstain") and r.get("stratum") in TRUE_RETRIEVAL_FAILURE_STRATA
+    )
+    n_other_api = sum(
+        1 for r in rows if r.get("open_set_outcome") == "other_api_or_compliance_failure"
     )
     return {
         "n_reactions": n,
+        "intention_to_treat_denominator": n,
+        "schema_invalid_counted_as_unsuccessful": True,
         "exact_top1": _rate(n_exact, n),
         "exact_top1_n": n_exact,
         "exact_top1_d": n,
@@ -214,50 +265,100 @@ def variant_metrics(rows: Sequence[Mapping[str, Any]]) -> Dict[str, Any]:
         "n_incorrect_in_catalog": n_incorrect_in_catalog,
         "malformed_id_rate": _rate(n_malformed, n),
         "absent_from_catalog_rate": _rate(n_absent, n),
+        "n_schema_invalid": n_schema,
         "schema_invalid_rate": _rate(n_schema, n),
-        "compliance_error_rate": _rate(n_compliance, n),
+        "n_refused": n_refused,
         "refusal_rate": _rate(n_refused, n),
+        "n_other_api_or_compliance_failure": n_other_api,
+        "compliance_error_rate": _rate(n_compliance, n),
         "n_incorrect_abstention_on_top1_control": n_control_abstain,
         "incorrect_abstention_on_top1_control_rate": _rate(
             n_control_abstain, sum(1 for r in rows if r.get("stratum") == STRATUM_TOP1)
         ),
+        "n_abstention_on_true_retrieval_failure": n_failure_abstain,
         "n_abstention_on_retrieval_failure": n_failure_abstain,
+        "outcome_classes": [
+            "correct_top1",
+            "incorrect_in_catalog",
+            "abstain",
+            "schema_invalid",
+            "refused",
+            "other_api_or_compliance_failure",
+        ],
         "note": (
-            "Abstention is not recovery. Incorrect-abstention on the top-1 control "
-            "is operational: the frozen heuristic already recovered an exact id."
+            "Intention-to-treat denominator includes schema-invalid rows as "
+            "unsuccessful. Schema-invalid is not an incorrect in-catalog "
+            "prediction. Abstention is not recovery. Incorrect-abstention on "
+            "the top-1 control is operational: the frozen heuristic already "
+            "recovered an exact id."
         ),
     }
 
 
 def recovery_block(rows: Sequence[Mapping[str, Any]]) -> Dict[str, Any]:
     out: Dict[str, Any] = {}
-    failure = [r for r in rows if r.get("stratum") in RETRIEVAL_FAILURE_STRATA]
+    if STRATUM_RERANK in TRUE_RETRIEVAL_FAILURE_STRATA:
+        raise AssertionError(
+            "retrievable_rerank_failure must not be a true retrieval-failure stratum"
+        )
+    failure = [r for r in rows if r.get("stratum") in TRUE_RETRIEVAL_FAILURE_STRATA]
+    if any(r.get("stratum") == STRATUM_RERANK for r in failure):
+        raise AssertionError("retrievable_rerank_failure leaked into true retrieval-failure denominator")
     n_fail = len(failure)
     n_correct = sum(1 for r in failure if r.get("exact_top1"))
-    out["all_retrieval_failure"] = {
+    true_block = {
         "numerator": n_correct,
         "denominator": n_fail,
         "recovery_rate": _rate(n_correct, n_fail),
         "definition": (
             "exact_top1 / reactions in unconstrained + empty_constrained + "
-            "nonempty_answer_absent + retrievable_rerank_failure. Abstention is not recovery."
+            "nonempty_answer_absent. retrievable_rerank_failure is excluded. "
+            "Abstention is not recovery. Schema-invalid rows remain in the "
+            "intention-to-treat denominator as unsuccessful."
         ),
         "n_abstain": sum(1 for r in failure if r.get("abstain")),
+        "n_schema_invalid": sum(
+            1 for r in failure if r.get("terminal_status") == "schema_invalid"
+        ),
         "n_incorrect_in_catalog": sum(
             1 for r in failure if r.get("open_set_outcome") == "incorrect_in_catalog"
+        ),
+    }
+    out["true_retrieval_failure"] = true_block
+    out["all_retrieval_failure"] = dict(true_block)
+    out["all_retrieval_failure"]["alias_of"] = "true_retrieval_failure"
+    non_top1 = [r for r in rows if r.get("stratum") in NON_TOP1_STRATA]
+    n_non = len(non_top1)
+    n_non_ok = sum(1 for r in non_top1 if r.get("exact_top1"))
+    out["all_non_top1"] = {
+        "numerator": n_non_ok,
+        "denominator": n_non,
+        "rate": _rate(n_non_ok, n_non),
+        "definition": (
+            "exact_top1 / reactions that are not retrievable_top1_success. "
+            "This is not a retrieval-failure rate; it mixes missing-answer "
+            "and reranking-failure strata."
         ),
     }
     for stratum in STRATA:
         sub = [r for r in rows if r.get("stratum") == stratum]
         n = len(sub)
         n_ok = sum(1 for r in sub if r.get("exact_top1"))
-        label = "control_exact_top1" if stratum == STRATUM_TOP1 else "recovery_rate"
+        if stratum == STRATUM_TOP1:
+            label = "control_exact_top1"
+        elif stratum == STRATUM_RERANK:
+            label = "rerank_failure_exact_top1"
+        else:
+            label = "recovery_rate"
         out[stratum] = {
             "numerator": n_ok,
             "denominator": n,
             label: _rate(n_ok, n),
             "abstention_rate": _rate(sum(1 for r in sub if r.get("abstain")), n),
             "coverage": _rate(sum(1 for r in sub if r.get("answered")), n),
+            "n_schema_invalid": sum(
+                1 for r in sub if r.get("terminal_status") == "schema_invalid"
+            ),
             "selective_exact_top1": _rate(
                 n_ok, sum(1 for r in sub if r.get("answered"))
             ),
@@ -518,7 +619,7 @@ def failure_taxonomy(rows_by_variant: Mapping[str, Sequence[Mapping[str, Any]]])
     cases: List[Dict[str, Any]] = []
     recovered = [
         r for r in baseline
-        if r.get("stratum") in RETRIEVAL_FAILURE_STRATA and r.get("exact_top1")
+        if r.get("stratum") in TRUE_RETRIEVAL_FAILURE_STRATA and r.get("exact_top1")
     ]
     recovered.sort(key=lambda r: float(r.get("confidence") or 0), reverse=True)
     if recovered:
@@ -534,7 +635,7 @@ def failure_taxonomy(rows_by_variant: Mapping[str, Sequence[Mapping[str, Any]]])
 
     abstain_fail = [
         r for r in baseline
-        if r.get("abstain") and r.get("stratum") in RETRIEVAL_FAILURE_STRATA
+        if r.get("abstain") and r.get("stratum") in TRUE_RETRIEVAL_FAILURE_STRATA
         and NONCANONICAL_RE.search((r.get("rationale") or "") + (text.get((r["model_id"], r["reaction_id"])) or ""))
     ]
     if abstain_fail:
@@ -611,27 +712,83 @@ def recommend(metrics_by_variant: Mapping[str, Mapping[str, Any]], paired: Mappi
             "Direct open-set value depends on recovery in retrieval-failure strata, not control-set accuracy alone.",
             "Held-out test evaluation is not part of this decision.",
             "Self-reported confidence is not treated as a calibrated probability.",
-            "A non-abstained valid in-catalog miss is an unsupported open-set prediction.",
+            "A non-abstained valid in-catalog miss is an incorrect in-catalog prediction.",
+            "Evidence-supported terminology is reserved for tool-assisted experiments.",
             "target_only is the working default because added context did not beat uncertainty and costs more.",
         ],
         "paired_accuracy_intervals": deltas,
     }
 
 
-def build_manifest(out_dir: Path, extra: Sequence[Path]) -> Dict[str, Any]:
+def build_manifest(
+    out_dir: Path,
+    extra: Sequence[Path],
+    *,
+    root: Path = REPO_ROOT,
+) -> Dict[str, Any]:
     files = []
+    seen = set()
     for path in extra:
         if not path.exists():
             continue
+        rel = repo_relative_posix(path, root)
+        if rel in seen:
+            continue
+        seen.add(rel)
         files.append({
-            "path": str(path.relative_to(REPO_ROOT)) if str(path).startswith(str(REPO_ROOT)) else str(path),
-            "sha256": sha256_file(path),
-            "bytes": path.stat().st_size,
-            "n_lines": (
-                sum(1 for _ in path.open(encoding="utf-8")) if path.suffix in {".jsonl", ".csv"} else None
-            ),
+            "path": rel,
+            "sha256": sha256_portable(path),
+            "bytes": portable_size(path),
+            "n_lines": portable_n_lines(path) if path.suffix in {".jsonl", ".csv"} else None,
         })
+    files.sort(key=lambda item: item["path"])
     return {"n_files": len(files), "files": files}
+
+
+def verify_manifest(
+    manifest_path: Path,
+    *,
+    root: Path = REPO_ROOT,
+    check_original_results: bool = True,
+) -> List[str]:
+    """Read-only check. Never rewrites committed artifacts."""
+    problems: List[str] = []
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    files = manifest.get("files") or []
+    paths = [str(entry.get("path") or "") for entry in files]
+    if len(paths) != len(set(paths)):
+        problems.append("manifest lists duplicate paths")
+    if int(manifest.get("n_files") or -1) != len(set(paths)):
+        problems.append(
+            f"n_files {manifest.get('n_files')} != unique listed files {len(set(paths))}"
+        )
+    for entry in files:
+        rel = str(entry.get("path") or "")
+        if "\\" in rel:
+            problems.append(f"{rel}: Windows backslash in repository-relative path")
+        path = (root / rel).resolve()
+        if not path.exists():
+            problems.append(f"{rel}: missing")
+            continue
+        actual_hash = sha256_portable(path)
+        if actual_hash != entry.get("sha256"):
+            problems.append(f"{rel}: sha256 {actual_hash} != {entry.get('sha256')}")
+        actual_bytes = portable_size(path)
+        if actual_bytes != entry.get("bytes"):
+            problems.append(f"{rel}: bytes {actual_bytes} != {entry.get('bytes')}")
+        if path.suffix in {".jsonl", ".csv"}:
+            n_lines = portable_n_lines(path)
+            if n_lines != entry.get("n_lines"):
+                problems.append(f"{rel}: n_lines {n_lines} != {entry.get('n_lines')}")
+    if check_original_results:
+        results = REPO_ROOT / "benchmark/phase3/validation/results.jsonl"
+        if results.exists():
+            digest = sha256_portable(results)
+            if digest != ORIGINAL_VALIDATION_RESULTS_SHA256:
+                problems.append(
+                    f"original results.jsonl digest {digest} != {ORIGINAL_VALIDATION_RESULTS_SHA256}"
+                )
+    return problems
 
 
 def evaluate_validation_dir(
@@ -641,6 +798,14 @@ def evaluate_validation_dir(
     sample_path: Path = OUT_PILOT,
 ) -> Dict[str, Any]:
     result_rows = load_jsonl(results_dir / "results.jsonl")
+    results_path = results_dir / "results.jsonl"
+    original_digest = sha256_portable(results_path)
+    if results_path.resolve() == (OUT_VALIDATION_DIR / "results.jsonl").resolve():
+        if original_digest != ORIGINAL_VALIDATION_RESULTS_SHA256:
+            raise ValueError(
+                f"refusing to score: original results.jsonl digest {original_digest} "
+                f"!= frozen {ORIGINAL_VALIDATION_RESULTS_SHA256}"
+            )
     sample = pd.read_csv(sample_path)
     if "split" in sample.columns:
         splits = set(sample["split"].astype(str))
@@ -697,6 +862,9 @@ def evaluate_validation_dir(
     taxonomy = failure_taxonomy(by_variant)
     recommendation = recommend(primary, paired)
     payload = {
+        "analysis_kind": "intention_to_treat",
+        "pilot_estimand": PILOT_ESTIMAND,
+        "original_results_sha256": original_digest,
         "n_result_rows": len(result_rows),
         "n_reactions": int(pd.Series([r["sample_id"] for r in result_rows]).nunique()),
         "experimental_unit": "reaction",
@@ -717,6 +885,20 @@ def evaluate_validation_dir(
 
 def write_eval_artifacts(payload: Mapping[str, Any], out_dir: Path) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
+    results_path = out_dir / "results.jsonl"
+    digest_before = sha256_portable(results_path) if results_path.exists() else None
+    if out_dir.resolve() == OUT_VALIDATION_DIR.resolve():
+        atomic_write_json(
+            {
+                "path": "benchmark/phase3/validation/results.jsonl",
+                "sha256_newline_normalized": ORIGINAL_VALIDATION_RESULTS_SHA256,
+                "n_rows": 489,
+                "n_succeeded": 463,
+                "n_schema_invalid": 26,
+                "newline_normalization": "crlf_to_lf",
+            },
+            out_dir / "original_results.sha256.json",
+        )
     atomic_write_json(
         {k: payload[k] for k in payload if k != "scored_rows"},
         out_dir / "eval.json",
@@ -729,18 +911,96 @@ def write_eval_artifacts(payload: Mapping[str, Any], out_dir: Path) -> None:
     atomic_write_json(payload["failure_taxonomy"], out_dir / "failure_taxonomy.json")
     atomic_write_json(payload["recommendation"], out_dir / "recommendation.json")
     atomic_write_json(payload["scored_rows"], out_dir / "scored_rows.json")
-    paths = [
-        out_dir / name for name in (
-            "plan.json", "preflight.json", "run_config.json", "requests.jsonl",
-            "results.jsonl", "summary.json", "execute_session.json",
-            "cache_verify.json", "eval.json", "metrics_by_variant.json",
-            "cache_verify.json", "eval.json", "metrics_by_variant.json",
-            "stratum_analysis.json", "context_comparison.json", "calibration.json",
-            "cost_report.json", "failure_taxonomy.json", "recommendation.json",
-            "scored_rows.json",
-        )
+    names = [
+        "plan.json", "preflight.json", "run_config.json", "requests.jsonl",
+        "results.jsonl", "summary.json", "execute_session.json",
+        "cache_verify.json", "original_results.sha256.json", "eval.json",
+        "metrics_by_variant.json", "stratum_analysis.json",
+        "context_comparison.json", "calibration.json", "cost_report.json",
+        "failure_taxonomy.json", "recommendation.json", "scored_rows.json",
+        "sensitivity_stats.json",
     ]
-    atomic_write_json(build_manifest(out_dir, paths), out_dir / "artifact_manifest.json")
+    write_artifact_manifest(out_dir, [out_dir / name for name in names])
+    if digest_before is not None:
+        digest_after = sha256_portable(results_path)
+        if digest_after != digest_before:
+            raise RuntimeError("offline analysis mutated results.jsonl")
+
+
+def compose_rescue_sensitivity(
+    original_rows: Sequence[Mapping[str, Any]],
+    rescue_rows: Sequence[Mapping[str, Any]],
+) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+    orig_invalid = {
+        (str(r["sample_id"]), str(r["variant"]))
+        for r in original_rows if r.get("terminal_status") == "schema_invalid"
+    }
+    rescue_by_key = {
+        (str(r["sample_id"]), str(r["variant"])): dict(r) for r in rescue_rows
+    }
+    composed: List[Dict[str, Any]] = []
+    n_rescued = 0
+    n_still_invalid = 0
+    n_length_truncated = 0
+    n_at_ceiling = 0
+    n_validation_error = 0
+    n_missing_usage = 0
+    n_zero_output = 0
+    for row in original_rows:
+        key = (str(row["sample_id"]), str(row["variant"]))
+        if key not in orig_invalid:
+            composed.append(dict(row))
+            continue
+        api_error = str(row.get("api_error") or "")
+        if api_error == "ValidationError":
+            n_validation_error += 1
+        if row.get("n_output_tokens") == 1024:
+            n_at_ceiling += 1
+        if row.get("n_output_tokens") == 0:
+            n_zero_output += 1
+        if row.get("n_output_tokens") is None:
+            n_missing_usage += 1
+        if api_error == "LengthFinishReasonError" or row.get("n_output_tokens") == 1024:
+            n_length_truncated += 1
+        sub = rescue_by_key.get(key)
+        if sub and sub.get("terminal_status") == "succeeded":
+            merged = dict(sub)
+            merged["sensitivity_source"] = "rescue_2048"
+            merged["original_terminal_status"] = "schema_invalid"
+            composed.append(merged)
+            n_rescued += 1
+        else:
+            composed.append(dict(row))
+            n_still_invalid += 1
+    original_cost = round(sum(float(r.get("cost_usd") or 0) for r in original_rows), 6)
+    rescue_cost = round(sum(float(r.get("cost_usd") or 0) for r in rescue_rows), 6)
+    stats = {
+        "n_original_schema_invalid": len(orig_invalid),
+        "n_rescued_successfully": n_rescued,
+        "n_still_schema_invalid": n_still_invalid,
+        "n_original_length_truncated": n_length_truncated,
+        "n_original_output_at_1024_ceiling": n_at_ceiling,
+        "n_original_validation_error": n_validation_error,
+        "n_original_missing_usage": n_missing_usage,
+        "n_original_zero_output_tokens": n_zero_output,
+        "original_calculated_cost_usd": original_cost,
+        "rescue_calculated_cost_usd": rescue_cost,
+        "total_calculated_cost_usd": round(original_cost + rescue_cost, 6),
+        "analysis_kind": "rescue_completed_sensitivity",
+        "truncation_note": (
+            "LengthFinishReasonError was not stored as api_error on the original "
+            "rows. Observable truncation signatures are n_output_tokens==1024 "
+            "(the original ceiling) and ValidationError with missing usage."
+        ),
+        "note": (
+            "Substitutes successfully parsed 2048-token rescue responses for "
+            "the original schema-invalid keys only. The other 463 rows are "
+            "the original 1024-token responses. Not an intention-to-treat result. "
+            "Original, rescue, and total calculated costs are reported separately; "
+            "do not use the mixed composed-file row-sum as a billing total."
+        ),
+    }
+    return composed, stats
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
@@ -748,8 +1008,46 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--results-dir", type=Path, default=OUT_VALIDATION_DIR)
     parser.add_argument("--answer-key", type=Path, default=OUT_PILOT_KEY)
     parser.add_argument("--sample", type=Path, default=OUT_PILOT)
+    parser.add_argument(
+        "--verify-manifest", nargs="?", const="default",
+        help="Read-only artifact-manifest check. Does not rewrite files.",
+    )
+    parser.add_argument("--rescue-dir", type=Path, default=None)
+    parser.add_argument("--sensitivity-out-dir", type=Path, default=None)
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    if args.verify_manifest is not None:
+        target = (
+            OUT_VALIDATION_DIR if args.verify_manifest == "default"
+            else Path(args.verify_manifest)
+        )
+        manifest = target / "artifact_manifest.json" if target.is_dir() else target
+        problems = verify_manifest(manifest)
+        for problem in problems:
+            logger.error("MISMATCH %s", problem)
+        logger.info("verified %s; %d problems", manifest, len(problems))
+        return 1 if problems else 0
+    if args.rescue_dir is not None:
+        original = load_jsonl(OUT_VALIDATION_DIR / "results.jsonl")
+        if sha256_portable(OUT_VALIDATION_DIR / "results.jsonl") != ORIGINAL_VALIDATION_RESULTS_SHA256:
+            raise ValueError("original results.jsonl digest changed; refusing sensitivity")
+        rescue = load_jsonl(args.rescue_dir / "results.jsonl")
+        composed, stats = compose_rescue_sensitivity(original, rescue)
+        out_dir = args.sensitivity_out_dir or (args.rescue_dir / "sensitivity")
+        out_dir.mkdir(parents=True, exist_ok=True)
+        atomic_write_jsonl(composed, out_dir / "results.jsonl")
+        atomic_write_json(stats, out_dir / "sensitivity_stats.json")
+        payload = evaluate_validation_dir(
+            out_dir, answer_key_path=args.answer_key, sample_path=args.sample,
+        )
+        payload["analysis_kind"] = "rescue_completed_sensitivity"
+        payload["sensitivity_stats"] = stats
+        write_eval_artifacts(payload, out_dir)
+        logger.info(
+            "sensitivity rescued=%s still_invalid=%s wrote %s",
+            stats["n_rescued_successfully"], stats["n_still_schema_invalid"], out_dir,
+        )
+        return 0
     payload = evaluate_validation_dir(
         args.results_dir, answer_key_path=args.answer_key, sample_path=args.sample,
     )

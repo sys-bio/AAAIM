@@ -1,125 +1,113 @@
 {
   "files": [
     {
+      "bytes": 677,
+      "n_lines": null,
+      "path": "benchmark/phase3/validation/cache_verify.json",
+      "sha256": "ffd7a812eb63b622ac65cbc736acba5b924bb32366738aedb0252fd2d982c755"
+    },
+    {
+      "bytes": 45532,
+      "n_lines": null,
+      "path": "benchmark/phase3/validation/calibration.json",
+      "sha256": "24dbdfa0ea6e2417591980415d4ed6621c87c5b329dd4ec393b6cfae433c2305"
+    },
+    {
+      "bytes": 1877,
+      "n_lines": null,
+      "path": "benchmark/phase3/validation/context_comparison.json",
+      "sha256": "6eb493590233f301aed6dc531b91dd42189f20b588dade751c60bb75b25de507"
+    },
+    {
+      "bytes": 1108,
+      "n_lines": null,
+      "path": "benchmark/phase3/validation/cost_report.json",
+      "sha256": "a826ba23f17ce612d6a1943efdbfef1fafea4e5fae019768eae9e38ce0fe0d3e"
+    },
+    {
+      "bytes": 298393,
+      "n_lines": null,
+      "path": "benchmark/phase3/validation/eval.json",
+      "sha256": "0f72e868f8d73052f37d90d2349a81f67738eb79e2a6aece83f00ec2c381eb57"
+    },
+    {
+      "bytes": 686,
+      "n_lines": null,
+      "path": "benchmark/phase3/validation/execute_session.json",
+      "sha256": "88f9275369c31461ee89c15ee4020f503e6c5b9e83df33236006bbf610fef58d"
+    },
+    {
+      "bytes": 7305,
+      "n_lines": null,
+      "path": "benchmark/phase3/validation/failure_taxonomy.json",
+      "sha256": "246e14c9b46158c1fa1edfcbd3dad171916e64ffd468223e53ecbc592a6de152"
+    },
+    {
+      "bytes": 4523,
+      "n_lines": null,
+      "path": "benchmark/phase3/validation/metrics_by_variant.json",
+      "sha256": "6f498e30e1e481f794519788efc9562c5f1a5fb1f1bc33e958a8cc9d344100bb"
+    },
+    {
+      "bytes": 263,
+      "n_lines": null,
+      "path": "benchmark/phase3/validation/original_results.sha256.json",
+      "sha256": "8ac56c5064055d28420277ba30e4eb39b4a0a65e1e6e988b77e71cf7258cd631"
+    },
+    {
       "bytes": 412898,
       "n_lines": null,
-      "path": "benchmark\\phase3\\validation\\plan.json",
+      "path": "benchmark/phase3/validation/plan.json",
       "sha256": "f7c990dd140bdb54f16d828825a172727307f9b95ded97093187ba668a1e382f"
     },
     {
       "bytes": 1177,
       "n_lines": null,
-      "path": "benchmark\\phase3\\validation\\preflight.json",
+      "path": "benchmark/phase3/validation/preflight.json",
       "sha256": "0a3118d46784cff824dfe21c15a049fc93127a1abdfb7e71467825ab61921334"
     },
     {
-      "bytes": 967,
+      "bytes": 1308,
       "n_lines": null,
-      "path": "benchmark\\phase3\\validation\\run_config.json",
-      "sha256": "3f277ed27488a2c7d6dba10dd7c8385c7833d85b4312ae4f8905dff2622323f8"
+      "path": "benchmark/phase3/validation/recommendation.json",
+      "sha256": "fb74de22da1caa946402558b7c53820cf8e6c7901a94fd6ffa02427d523e7960"
     },
     {
       "bytes": 279892,
       "n_lines": 489,
-      "path": "benchmark\\phase3\\validation\\requests.jsonl",
+      "path": "benchmark/phase3/validation/requests.jsonl",
       "sha256": "f7a6e613cb72c0a4d29a2fa122617dad457682b2e72ae873b4e91076d6e4a504"
     },
     {
       "bytes": 1001645,
       "n_lines": 489,
-      "path": "benchmark\\phase3\\validation\\results.jsonl",
+      "path": "benchmark/phase3/validation/results.jsonl",
       "sha256": "0bb9c892ec811e532133f2cd6e1fce5e1e1d249e41a263388979ae6d1a29fbdd"
+    },
+    {
+      "bytes": 967,
+      "n_lines": null,
+      "path": "benchmark/phase3/validation/run_config.json",
+      "sha256": "3f277ed27488a2c7d6dba10dd7c8385c7833d85b4312ae4f8905dff2622323f8"
+    },
+    {
+      "bytes": 929570,
+      "n_lines": null,
+      "path": "benchmark/phase3/validation/scored_rows.json",
+      "sha256": "f0c4b909321f470a05d30e66003515cb893ec82e25babeadf9b0fe9859847538"
+    },
+    {
+      "bytes": 7411,
+      "n_lines": null,
+      "path": "benchmark/phase3/validation/stratum_analysis.json",
+      "sha256": "7a38707900f3e1200f09b6457c93ff07b61e717b647062d60e1b4067d0ee2dc1"
     },
     {
       "bytes": 614,
       "n_lines": null,
-      "path": "benchmark\\phase3\\validation\\summary.json",
+      "path": "benchmark/phase3/validation/summary.json",
       "sha256": "2f7eea813c788fdb3054ee39b7b1da224fa2c1b3e854517315187810dd338d9e"
-    },
-    {
-      "bytes": 686,
-      "n_lines": null,
-      "path": "benchmark\\phase3\\validation\\execute_session.json",
-      "sha256": "88f9275369c31461ee89c15ee4020f503e6c5b9e83df33236006bbf610fef58d"
-    },
-    {
-      "bytes": 677,
-      "n_lines": null,
-      "path": "benchmark\\phase3\\validation\\cache_verify.json",
-      "sha256": "ffd7a812eb63b622ac65cbc736acba5b924bb32366738aedb0252fd2d982c755"
-    },
-    {
-      "bytes": 210337,
-      "n_lines": null,
-      "path": "benchmark\\phase3\\validation\\eval.json",
-      "sha256": "2281b6288e271805c1d084ea3f7441763f2b401eb6e47d7828bc037358cc197b"
-    },
-    {
-      "bytes": 2864,
-      "n_lines": null,
-      "path": "benchmark\\phase3\\validation\\metrics_by_variant.json",
-      "sha256": "9d26802012fd7807ec4bfa9a6f1499cfabb01140b56aca049fecd5e0299dfd1b"
-    },
-    {
-      "bytes": 677,
-      "n_lines": null,
-      "path": "benchmark\\phase3\\validation\\cache_verify.json",
-      "sha256": "ffd7a812eb63b622ac65cbc736acba5b924bb32366738aedb0252fd2d982c755"
-    },
-    {
-      "bytes": 210337,
-      "n_lines": null,
-      "path": "benchmark\\phase3\\validation\\eval.json",
-      "sha256": "2281b6288e271805c1d084ea3f7441763f2b401eb6e47d7828bc037358cc197b"
-    },
-    {
-      "bytes": 2864,
-      "n_lines": null,
-      "path": "benchmark\\phase3\\validation\\metrics_by_variant.json",
-      "sha256": "9d26802012fd7807ec4bfa9a6f1499cfabb01140b56aca049fecd5e0299dfd1b"
-    },
-    {
-      "bytes": 4219,
-      "n_lines": null,
-      "path": "benchmark\\phase3\\validation\\stratum_analysis.json",
-      "sha256": "8b60b972c66ad0eb3311ea1faf181476a79d143243103d4d93f8a16009a8a0c0"
-    },
-    {
-      "bytes": 1877,
-      "n_lines": null,
-      "path": "benchmark\\phase3\\validation\\context_comparison.json",
-      "sha256": "6eb493590233f301aed6dc531b91dd42189f20b588dade751c60bb75b25de507"
-    },
-    {
-      "bytes": 45532,
-      "n_lines": null,
-      "path": "benchmark\\phase3\\validation\\calibration.json",
-      "sha256": "24dbdfa0ea6e2417591980415d4ed6621c87c5b329dd4ec393b6cfae433c2305"
-    },
-    {
-      "bytes": 1108,
-      "n_lines": null,
-      "path": "benchmark\\phase3\\validation\\cost_report.json",
-      "sha256": "a826ba23f17ce612d6a1943efdbfef1fafea4e5fae019768eae9e38ce0fe0d3e"
-    },
-    {
-      "bytes": 7305,
-      "n_lines": null,
-      "path": "benchmark\\phase3\\validation\\failure_taxonomy.json",
-      "sha256": "246e14c9b46158c1fa1edfcbd3dad171916e64ffd468223e53ecbc592a6de152"
-    },
-    {
-      "bytes": 1227,
-      "n_lines": null,
-      "path": "benchmark\\phase3\\validation\\recommendation.json",
-      "sha256": "dbd7be3f841b13f49a4518b537b2f4145c2bf78f2bdc4c502bf442af2fd42d22"
-    },
-    {
-      "bytes": 918245,
-      "n_lines": null,
-      "path": "benchmark\\phase3\\validation\\scored_rows.json",
-      "sha256": "1645071f586e9d12c50175e41697b4b3e0a072a59769c8e56b405f63ff5b8523"
     }
   ],
-  "n_files": 20
+  "n_files": 18
 }

@@ -6,7 +6,8 @@
     "Direct open-set value depends on recovery in retrieval-failure strata, not control-set accuracy alone.",
     "Held-out test evaluation is not part of this decision.",
     "Self-reported confidence is not treated as a calibrated probability.",
-    "A non-abstained valid in-catalog miss is an unsupported open-set prediction.",
+    "A non-abstained valid in-catalog miss is an incorrect in-catalog prediction.",
+    "Evidence-supported terminology is reserved for tool-assisted experiments.",
     "target_only is the working default because added context did not beat uncertainty and costs more."
   ],
   "paired_accuracy_intervals": [
