@@ -22,6 +22,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import os
 import re
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
@@ -207,7 +208,9 @@ class FileCache(ResponseCache):
 
     def put(self, key: str, value: Dict[str, Any]) -> None:
         path = self._path(key)
-        path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        tmp = path.with_name(path.name + ".tmp")
+        tmp.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        os.replace(tmp, path)
 
 
 def parse_structured_output(

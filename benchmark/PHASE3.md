@@ -65,6 +65,7 @@ Artifacts live in `benchmark/phase3/`, not in the frozen `benchmark/data/` tree.
 | `phase3_cost.py` | `cost_estimate.json` |
 | `phase3_modes.py` | schemas, mocks, cache (library) |
 | `phase3_eval.py` | offline scoring (library) |
+| `phase3_openai_run.py` | nine-call OpenAI smoke runner (dry-run default) |
 
 ```powershell
 $env:PYTHONHASHSEED = "0"
@@ -74,6 +75,9 @@ python benchmark/scripts/build_phase3_lookups.py
 python benchmark/scripts/sample_phase3_pilot.py
 python benchmark/scripts/phase3_prompts.py --write
 python benchmark/scripts/phase3_cost.py
+python benchmark/scripts/phase3_openai_run.py
+python benchmark/scripts/phase3_openai_run.py --execute --max-cost-usd 1.00
+python benchmark/scripts/phase3_openai_run.py --cache-only
 ```
 
 `benchmark/phase3/_*/` is gitignored (live response cache). Pricing is read from a file;
@@ -225,8 +229,13 @@ Self-report `basis` is not treated as evidence.
 
 ## Experiment modes
 
-Common `ModeResult` schema in `phase3_modes.py`. Live HTTP is `LiveCallBlocked`
-until a budgeted run is explicitly approved.
+Common `ModeResult` schema in `phase3_modes.py`. The OpenAI runner in
+`phase3_openai_run.py` uses the Responses API with Structured Outputs
+(`openai==1.78.1`, `responses.parse` + the existing Phase 3 Pydantic schema).
+Live HTTP still defaults to dry-run; `--execute` is required, with a run-level
+`--max-cost-usd` cap enforced locally. This runner's live ceiling is **nine**
+calls (the operational smoke test). The 489-call validation pilot is not
+authorized by that ceiling.
 
 1. **Direct open-set LLM** — no candidates, no tools. Parametric identification.
 2. **Tool-assisted recovery** — queries, hits, source ids/URLs, and snippets are
@@ -384,18 +393,43 @@ A future gate, without access to ground truth at inference:
 Those proxies will be wrong sometimes; the evaluation of a router is end-to-end
 selective accuracy, not oracle routing.
 
+## Phase 3A operational smoke test
+
+Direct open-set only. Model default `gpt-5.6-terra` (CLI override allowed).
+Selection rule `seeded_round_robin_one_per_stratum_v1` with seed **20260902**
+picks three validation-pilot reactions, one per stratum in frozen stratum
+order, then emits all three bounded context variants (**nine** planned calls).
+The test split is not read. `pilot_answer_key.csv` is joined only after
+responses are persisted.
+
+Spend gate: conservative `chars_div_2_conservative` input bound, plus planned
+max output tokens, times retries. Pricing snapshot:
+`pricing.openai.gpt-5.6-terra.json` (OpenAI list prices, 2026-09-03). Live
+calls refuse to start if `.env` is tracked, if the preflight worst case exceeds
+`--max-cost-usd`, or if a request still contains a KEGG reaction id. Cache
+keys include sample join key, variant, template version, prompt hash, model,
+inference settings, and output-schema version.
+
+```powershell
+python benchmark/scripts/phase3_openai_run.py --out-dir benchmark/phase3/smoke
+python benchmark/scripts/phase3_openai_run.py --execute --max-cost-usd 1.00 --out-dir benchmark/phase3/smoke
+python benchmark/scripts/phase3_openai_run.py --cache-only --out-dir benchmark/phase3/smoke
+```
+
 ## Stop point
 
-This branch stops at tested offline scaffolding. Remaining decisions that need
-approval before any paid or GPU experiment:
+Phase 3A implements and (when authorized) executes only the nine-call smoke
+test. Remaining work before the full validation pilot:
 
-1. Provider and model for the 163-reaction × 3-variant open-set **validation**
-   pilot, a real tokenizer for that model, and a budget cap.
-2. Accept the validation shortfalls (answer-absent 22 vs 50, rerank-failure 16
+1. Review smoke-test artifacts; do not treat three reactions as a result.
+2. Confirm provider, model, tokenizer, and a budget cap for **489** validation
+   calls. Raise this runner's live ceiling only with that explicit approval.
+3. Accept the validation shortfalls (answer-absent 22 vs 50, rerank-failure 16
    vs 25). Do not restructure the cluster split to reach 200.
-3. Tool backend for mode 2 (local KEGG files vs a network API).
-4. Which encoder checkpoint to fine-tune, once downloading weights is allowed.
-5. Whether the final retriever is refit on train+validation; that choice defines
+4. Tool backend for mode 2 (local KEGG files vs a network API).
+5. Which encoder checkpoint to fine-tune, once downloading weights is allowed.
+6. Whether the final retriever is refit on train+validation; that choice defines
    “seen target” for the test evaluation.
 
-Do not start API calls or training until those are explicit.
+Do not start the 489-call pilot, tool-assisted mode, test-set evaluation, or
+training from this smoke-test authorization.

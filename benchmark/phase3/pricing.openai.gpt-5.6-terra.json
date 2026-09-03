@@ -1,0 +1,17 @@
+{
+  "currency": "USD",
+  "long_context_input_tokens": 272000,
+  "models": {
+    "gpt-5.6-terra": {
+      "cached_input_per_million": 0.2,
+      "input_per_million": 2.0,
+      "long_context_cached_input_per_million": 0.4,
+      "long_context_input_per_million": 4.0,
+      "long_context_output_per_million": 18.0,
+      "note": "Standard short-context rates apply below 272K input tokens. Output includes reasoning tokens. Smoke-test prompts are far below the long-context threshold.",
+      "output_per_million": 12.0
+    }
+  },
+  "pricing_date": "2026-09-03",
+  "source": "https://developers.openai.com/api/docs/pricing (Standard, short context). Snapshot recorded 2026-09-03 from the OpenAI API pricing page."
+}

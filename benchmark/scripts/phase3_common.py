@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 from pathlib import Path
 from typing import AbstractSet, Any, Dict, FrozenSet, Iterable, List, Optional, Sequence, Tuple
@@ -42,6 +43,8 @@ OUT_COST = PHASE3_DIR / "cost_estimate.json"
 OUT_SPECIES_NAMES = PHASE3_DIR / "species_names.csv"
 OUT_KEGG_CATALOG_IDS = PHASE3_DIR / "kegg_catalog_ids.json"
 PRICING_EXAMPLE = PHASE3_DIR / "pricing.example.json"
+PRICING_OPENAI_TERRA = PHASE3_DIR / "pricing.openai.gpt-5.6-terra.json"
+OUT_SMOKE_DIR = PHASE3_DIR / "smoke"
 
 YEAST_CLUSTER = "CLU_BIOMD0000000042"
 PHASE2_TAG = "benchmark-phase2-v1"
@@ -91,6 +94,14 @@ ID_IN_CATALOG = "in_catalog"
 
 # Scaffolding only. Live runs must use the chosen model's tokenizer.
 TOKENIZER_SCAFFOLD = "chars_div_4_scaffold"
+# Conservative spend gate: 2 characters ≈ 1 token. English/scientific text is
+# typically closer to 4 chars/token, so this overestimates input size.
+TOKENIZER_CONSERVATIVE = "chars_div_2_conservative"
+OUTPUT_SCHEMA_VERSION = "phase3-structured-v1"
+DEFAULT_MODEL = "gpt-5.6-terra"
+SMOKE_N_REACTIONS = 3
+SMOKE_N_REQUESTS = 9
+SMOKE_SELECTION_RULE = "seeded_round_robin_one_per_stratum_v1"
 LIVE_TOKENIZER_REQUIRED = (
     "Live runs must use the chosen model's tokenizer or a conservative "
     "provider-specific bound; chars/4 is scaffolding only and must not gate spend."
@@ -115,17 +126,29 @@ def write_csv(df: pd.DataFrame, path: Path) -> None:
 
 
 def write_json(obj: Any, path: Path) -> None:
+    atomic_write_json(obj, path)
+
+
+def atomic_write_json(obj: Any, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w", newline="\n", encoding="utf-8") as fh:
+    tmp = path.with_name(path.name + ".tmp")
+    with open(tmp, "w", newline="\n", encoding="utf-8") as fh:
         json.dump(obj, fh, indent=2, sort_keys=True)
         fh.write("\n")
+    os.replace(tmp, path)
+
+
+def atomic_write_jsonl(rows: Sequence[Dict[str, Any]], path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(path.name + ".tmp")
+    with open(tmp, "w", newline="\n", encoding="utf-8") as fh:
+        for row in rows:
+            fh.write(json.dumps(row, sort_keys=True, separators=(",", ":")) + "\n")
+    os.replace(tmp, path)
 
 
 def write_jsonl(rows: Sequence[Dict[str, Any]], path: Path) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w", newline="\n", encoding="utf-8") as fh:
-        for row in rows:
-            fh.write(json.dumps(row, sort_keys=True, separators=(",", ":")) + "\n")
+    atomic_write_jsonl(rows, path)
 
 
 def parse_kegg_ids(value: Any) -> List[str]:
@@ -332,6 +355,16 @@ def estimate_tokens(text: str) -> int:
     if not text:
         return 0
     return max(1, (len(text) + 3) // 4)
+
+
+def estimate_tokens_conservative(text: str) -> int:
+    """Conservative spend-gate estimate: 2 characters per token.
+
+    This is an upper bound for English and scientific prose, not a billing tokenizer.
+    """
+    if not text:
+        return 0
+    return max(1, (len(text) + 1) // 2)
 
 
 def require_live_tokenizer(method: str | None) -> None:

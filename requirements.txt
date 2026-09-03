@@ -10,6 +10,9 @@ rdflib==7.1.4
 antimony==2.15.0
 
 # LLM integration
+# Phase 3A uses the Responses API + responses.parse (Pydantic structured outputs).
+# Required: openai>=1.78.1 (pinned below). Do not drop below this without
+# re-checking responses.parse(text_format=...).
 openai==1.78.1
 requests>=2.32.0
 
