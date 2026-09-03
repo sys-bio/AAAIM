@@ -65,7 +65,8 @@ Artifacts live in `benchmark/phase3/`, not in the frozen `benchmark/data/` tree.
 | `phase3_cost.py` | `cost_estimate.json` |
 | `phase3_modes.py` | schemas, mocks, cache (library) |
 | `phase3_eval.py` | offline scoring (library) |
-| `phase3_openai_run.py` | nine-call OpenAI smoke runner (dry-run default) |
+| `phase3_openai_run.py` | OpenAI smoke (9) and validation-pilot (489) runner (dry-run default) |
+| `phase3_openai_eval.py` | Offline validation scoring after responses are frozen |
 
 ```powershell
 $env:PYTHONHASHSEED = "0"
@@ -78,6 +79,10 @@ python benchmark/scripts/phase3_cost.py
 python benchmark/scripts/phase3_openai_run.py
 python benchmark/scripts/phase3_openai_run.py --execute --max-cost-usd 1.00
 python benchmark/scripts/phase3_openai_run.py --cache-only
+python benchmark/scripts/phase3_openai_run.py --profile validation
+python benchmark/scripts/phase3_openai_run.py --profile validation --execute --max-cost-usd 5.00
+python benchmark/scripts/phase3_openai_run.py --profile validation --cache-only
+python benchmark/scripts/phase3_openai_eval.py --results-dir benchmark/phase3/validation
 ```
 
 `benchmark/phase3/_*/` is gitignored (live response cache). Pricing is read from a file;
@@ -233,9 +238,15 @@ Common `ModeResult` schema in `phase3_modes.py`. The OpenAI runner in
 `phase3_openai_run.py` uses the Responses API with Structured Outputs
 (`openai==1.78.1`, `responses.parse` + the existing Phase 3 Pydantic schema).
 Live HTTP still defaults to dry-run; `--execute` is required, with a run-level
-`--max-cost-usd` cap enforced locally. This runner's live ceiling is **nine**
-calls (the operational smoke test). The 489-call validation pilot is not
-authorized by that ceiling.
+`--max-cost-usd` cap enforced locally.
+
+Profiles:
+
+- `smoke` (default): nine calls, $1.00 cap, writes `benchmark/phase3/smoke/`.
+- `validation`: 163 frozen validation-pilot reactions × 3 variants = **489**
+  planned rows, $5.00 cap, writes `benchmark/phase3/validation/`. Compatible
+  smoke-test cache entries are reused and not repurchased. The answer key is
+  not joined in the runner; score with `phase3_openai_eval.py` after freeze.
 
 1. **Direct open-set LLM** — no candidates, no tools. Parametric identification.
 2. **Tool-assisted recovery** — queries, hits, source ids/URLs, and snippets are
@@ -416,20 +427,81 @@ python benchmark/scripts/phase3_openai_run.py --execute --max-cost-usd 1.00 --ou
 python benchmark/scripts/phase3_openai_run.py --cache-only --out-dir benchmark/phase3/smoke
 ```
 
+## Direct open-set validation pilot
+
+Same model, prompt template, schema, and inference settings as the smoke test
+(`gpt-5.6-terra`, `phase3-open-set-v3`, `phase3-structured-v1`,
+`max_output_tokens=1024`, `reasoning_effort=low`). The experimental unit is the
+**reaction** (163), not the 489 prompts. Test-split rows are never read.
+`pilot_answer_key.csv` is joined only after responses are frozen.
+
+The frozen sample shortfalls are kept (answer-absent 22 vs 50, rerank-failure
+16 vs 25). Do not resample to original quotas.
+
+```powershell
+python benchmark/scripts/phase3_openai_run.py --profile validation --max-cost-usd 5.00 --out-dir benchmark/phase3/validation --cache-dir benchmark/phase3/_response_cache
+python benchmark/scripts/phase3_openai_run.py --profile validation --execute --max-cost-usd 5.00 --max-requests 489 --out-dir benchmark/phase3/validation --cache-dir benchmark/phase3/_response_cache
+python benchmark/scripts/phase3_openai_run.py --profile validation --cache-only --out-dir benchmark/phase3/validation --cache-dir benchmark/phase3/_response_cache
+python benchmark/scripts/phase3_openai_eval.py --results-dir benchmark/phase3/validation
+```
+
+Expected (pre-execution dry-run): 489 planned rows, 9 compatible smoke cache
+hits, at most 480 new calls, conservative input 373,411 tokens, expected
+**$1.72**, retry-inclusive worst case **$19.90**, cap **$5.00**. The runtime
+gate, not the theoretical maximum, enforces the cap.
+
+### Observed validation run
+
+| Quantity | Value |
+| --- | ---: |
+| Planned rows | 489 |
+| Compatible smoke cache hits | 9 |
+| New live calls | 480 |
+| Succeeded | 463 |
+| Schema/compliance failures | 26 |
+| Refusals | 0 |
+| Model requested / returned | `gpt-5.6-terra` |
+| Input / output / reasoning tokens | 306,563 / 151,556 / 103,941 |
+| Calculated cost | **$2.585398** |
+| Cost per reaction | $0.0159 |
+
+The first live session was interrupted by a Windows `os.replace` lock on
+`results.jsonl` after 422 cached responses; the run resumed from cache and
+did not repurchase those calls. Cache-only replay then made **zero** additional
+API calls; `results.jsonl` was byte-identical.
+Phase 2 freeze verification still reports 15 artifacts, 0 problems.
+
+Exact Top-1 (reaction unit, n = 163):
+
+| Variant | Exact Top-1 | BRITE Top-1 | Coverage | Selective exact | Abstain | Incorrect in-catalog |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `target_only` | 49/163 (0.301) | 0.429 | 0.810 | 0.371 | 0.135 | 0.497 |
+| `target_plus_model` | 51/163 (0.313) | 0.380 | 0.785 | 0.398 | 0.160 | 0.454 |
+| `target_plus_neighborhood` | 51/163 (0.313) | 0.393 | 0.840 | 0.372 | 0.110 | 0.485 |
+
+Paired cluster-bootstrap accuracy deltas vs `target_only` are +0.012 with
+intervals that include zero (12 clusters; exploratory). Do not freeze a
+context winner from this gap. `target_only` remains the working default.
+
+Retrieval-failure recovery is exact Top-1 / 138 failure-stratum reactions
+(abstention is not recovery): 38/138 (0.275) `target_only`, 40/138 (0.290)
+with added context. Train-seen targets 43–48/114 vs unseen 3–6/49. Raw
+confidence is not calibrated (ECE ≈ 0.58; correct and incorrect means both
+≈ 0.96). Artifacts: `benchmark/phase3/validation/`.
+
 ## Stop point
 
-Phase 3A implements and (when authorized) executes only the nine-call smoke
-test. Remaining work before the full validation pilot:
+Phase 3A validation is method development, not a Phase 3 release and not the
+held-out test evaluation. Decisions from this pilot:
 
-1. Review smoke-test artifacts; do not treat three reactions as a result.
-2. Confirm provider, model, tokenizer, and a budget cap for **489** validation
-   calls. Raise this runner's live ceiling only with that explicit approval.
-3. Accept the validation shortfalls (answer-absent 22 vs 50, rerank-failure 16
-   vs 25). Do not restructure the cluster split to reach 200.
-4. Tool backend for mode 2 (local KEGG files vs a network API).
-5. Which encoder checkpoint to fine-tune, once downloading weights is allowed.
-6. Whether the final retriever is refit on train+validation; that choice defines
-   “seen target” for the test evaluation.
+1. Do not freeze a context variant. Working default: `target_only`.
+2. Retain direct open-set only as a selective recovery probe, not as an
+   unthresholded annotator. Unsupported in-catalog misses are ~45–50%.
+3. Do not use raw model confidence as a probability threshold.
+4. Do not run the held-out test set until the method is frozen.
+5. Another validation experiment is required before a test freeze (schema
+   failures at `max_output_tokens=1024`, calibration, unseen-target drop).
+6. Tool-assisted mode and bi-encoder training remain later work.
 
-Do not start the 489-call pilot, tool-assisted mode, test-set evaluation, or
-training from this smoke-test authorization.
+Do not start tool-assisted mode, test-set evaluation, or training from this
+validation-pilot authorization.

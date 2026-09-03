@@ -1,0 +1,152 @@
+{
+  "target_only": {
+    "all_retrieval_failure": {
+      "definition": "exact_top1 / reactions in unconstrained + empty_constrained + nonempty_answer_absent + retrievable_rerank_failure. Abstention is not recovery.",
+      "denominator": 138,
+      "n_abstain": 20,
+      "n_incorrect_in_catalog": 70,
+      "numerator": 38,
+      "recovery_rate": 0.2754
+    },
+    "empty_constrained": {
+      "abstention_rate": 0.18,
+      "coverage": 0.76,
+      "denominator": 50,
+      "numerator": 15,
+      "recovery_rate": 0.3,
+      "selective_exact_top1": 0.3947
+    },
+    "nonempty_answer_absent": {
+      "abstention_rate": 0.3182,
+      "coverage": 0.6364,
+      "denominator": 22,
+      "numerator": 6,
+      "recovery_rate": 0.2727,
+      "selective_exact_top1": 0.4286
+    },
+    "retrievable_rerank_failure": {
+      "abstention_rate": 0.0,
+      "coverage": 1.0,
+      "denominator": 16,
+      "numerator": 6,
+      "recovery_rate": 0.375,
+      "selective_exact_top1": 0.375
+    },
+    "retrievable_top1_success": {
+      "abstention_rate": 0.08,
+      "control_exact_top1": 0.44,
+      "coverage": 0.88,
+      "denominator": 25,
+      "numerator": 11,
+      "selective_exact_top1": 0.5
+    },
+    "unconstrained": {
+      "abstention_rate": 0.08,
+      "coverage": 0.84,
+      "denominator": 50,
+      "numerator": 11,
+      "recovery_rate": 0.22,
+      "selective_exact_top1": 0.2619
+    }
+  },
+  "target_plus_model": {
+    "all_retrieval_failure": {
+      "definition": "exact_top1 / reactions in unconstrained + empty_constrained + nonempty_answer_absent + retrievable_rerank_failure. Abstention is not recovery.",
+      "denominator": 138,
+      "n_abstain": 23,
+      "n_incorrect_in_catalog": 64,
+      "numerator": 40,
+      "recovery_rate": 0.2899
+    },
+    "empty_constrained": {
+      "abstention_rate": 0.2,
+      "coverage": 0.72,
+      "denominator": 50,
+      "numerator": 16,
+      "recovery_rate": 0.32,
+      "selective_exact_top1": 0.4444
+    },
+    "nonempty_answer_absent": {
+      "abstention_rate": 0.3636,
+      "coverage": 0.6364,
+      "denominator": 22,
+      "numerator": 5,
+      "recovery_rate": 0.2273,
+      "selective_exact_top1": 0.3571
+    },
+    "retrievable_rerank_failure": {
+      "abstention_rate": 0.0,
+      "coverage": 1.0,
+      "denominator": 16,
+      "numerator": 6,
+      "recovery_rate": 0.375,
+      "selective_exact_top1": 0.375
+    },
+    "retrievable_top1_success": {
+      "abstention_rate": 0.12,
+      "control_exact_top1": 0.44,
+      "coverage": 0.84,
+      "denominator": 25,
+      "numerator": 11,
+      "selective_exact_top1": 0.5238
+    },
+    "unconstrained": {
+      "abstention_rate": 0.1,
+      "coverage": 0.82,
+      "denominator": 50,
+      "numerator": 13,
+      "recovery_rate": 0.26,
+      "selective_exact_top1": 0.3171
+    }
+  },
+  "target_plus_neighborhood": {
+    "all_retrieval_failure": {
+      "definition": "exact_top1 / reactions in unconstrained + empty_constrained + nonempty_answer_absent + retrievable_rerank_failure. Abstention is not recovery.",
+      "denominator": 138,
+      "n_abstain": 15,
+      "n_incorrect_in_catalog": 69,
+      "numerator": 40,
+      "recovery_rate": 0.2899
+    },
+    "empty_constrained": {
+      "abstention_rate": 0.12,
+      "coverage": 0.88,
+      "denominator": 50,
+      "numerator": 15,
+      "recovery_rate": 0.3,
+      "selective_exact_top1": 0.3409
+    },
+    "nonempty_answer_absent": {
+      "abstention_rate": 0.2727,
+      "coverage": 0.6818,
+      "denominator": 22,
+      "numerator": 6,
+      "recovery_rate": 0.2727,
+      "selective_exact_top1": 0.4
+    },
+    "retrievable_rerank_failure": {
+      "abstention_rate": 0.0,
+      "coverage": 1.0,
+      "denominator": 16,
+      "numerator": 9,
+      "recovery_rate": 0.5625,
+      "selective_exact_top1": 0.5625
+    },
+    "retrievable_top1_success": {
+      "abstention_rate": 0.12,
+      "control_exact_top1": 0.44,
+      "coverage": 0.88,
+      "denominator": 25,
+      "numerator": 11,
+      "selective_exact_top1": 0.5
+    },
+    "unconstrained": {
+      "abstention_rate": 0.06,
+      "coverage": 0.8,
+      "denominator": 50,
+      "numerator": 10,
+      "recovery_rate": 0.2,
+      "selective_exact_top1": 0.25
+    }
+  }
+}

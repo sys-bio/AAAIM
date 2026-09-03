@@ -1,0 +1,29 @@
+{
+  "cache_dir": "benchmark/phase3/_response_cache",
+  "cap_usd": 5.0,
+  "conservative_input_tokens_est": 373411,
+  "conservative_input_tokens_est_new_calls": 366831,
+  "expected_usd": 1.722462,
+  "expected_usd_from_smoke_cost_per_call": 1.58976,
+  "inference": {
+    "max_output_tokens": 1024,
+    "max_retries": 2,
+    "reasoning_effort": "low"
+  },
+  "max_output_tokens_per_call": 1024,
+  "max_output_tokens_total_no_retry": 491520,
+  "max_output_tokens_total_with_retries": 1474560,
+  "model": "gpt-5.6-terra",
+  "n_compatible_cache_hits": 9,
+  "n_new_calls_max": 480,
+  "n_planned_rows": 489,
+  "note": "Pre-execution dry-run authorization. Recorded from the 2026-09-03 validation dry-run log before the first live call (9 compatible smoke-test cache hits, at most 480 new calls). Later cache-complete plans are not this file.",
+  "out_dir": "benchmark/phase3/validation",
+  "output_schema_version": "phase3-structured-v1",
+  "pricing_date": "2026-09-03",
+  "profile": "validation",
+  "recorded_from": "dry-run log 2026-09-03 11:00:15",
+  "retry_inclusive_worst_case_usd": 19.895706,
+  "template_version": "phase3-open-set-v3",
+  "tokenizer": "chars_div_2_conservative"
+}
