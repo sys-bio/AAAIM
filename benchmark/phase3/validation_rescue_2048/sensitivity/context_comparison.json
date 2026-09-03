@@ -1,0 +1,62 @@
+{
+  "target_plus_model_vs_target_only": {
+    "accuracy_delta": 0.0061,
+    "accuracy_delta_cluster_bootstrap": {
+      "high": 0.0585,
+      "low": -0.0735,
+      "mean": 0.0061,
+      "method": "cluster_bootstrap_paired_delta",
+      "n": 163,
+      "n_boot": 1000,
+      "n_clusters": 12
+    },
+    "coverage_delta": -0.0307,
+    "coverage_delta_cluster_bootstrap": {
+      "high": 0.0055,
+      "low": -0.0957,
+      "mean": -0.0307,
+      "method": "cluster_bootstrap_paired_delta",
+      "n": 163,
+      "n_boot": 1000,
+      "n_clusters": 12
+    },
+    "limitation": "Intervals are exploratory. Validation has 12 clusters; related models share biology, so reaction-level tests overstate precision.",
+    "mean_confidence_delta_answered_pairs": 0.0036,
+    "n_changed_only_in_abstention": 10,
+    "n_harmed": 8,
+    "n_helped": 9,
+    "n_paired_reactions": 163,
+    "n_unchanged": 136,
+    "prediction_agreement_rate": 0.5153
+  },
+  "target_plus_neighborhood_vs_target_only": {
+    "accuracy_delta": 0.0061,
+    "accuracy_delta_cluster_bootstrap": {
+      "high": 0.0688,
+      "low": -0.0756,
+      "mean": 0.0061,
+      "method": "cluster_bootstrap_paired_delta",
+      "n": 163,
+      "n_boot": 1000,
+      "n_clusters": 12
+    },
+    "coverage_delta": 0.0307,
+    "coverage_delta_cluster_bootstrap": {
+      "high": 0.0633,
+      "low": -0.0315,
+      "mean": 0.0307,
+      "method": "cluster_bootstrap_paired_delta",
+      "n": 163,
+      "n_boot": 1000,
+      "n_clusters": 12
+    },
+    "limitation": "Intervals are exploratory. Validation has 12 clusters; related models share biology, so reaction-level tests overstate precision.",
+    "mean_confidence_delta_answered_pairs": -0.0063,
+    "n_changed_only_in_abstention": 11,
+    "n_harmed": 11,
+    "n_helped": 12,
+    "n_paired_reactions": 163,
+    "n_unchanged": 129,
+    "prediction_agreement_rate": 0.4724
+  }
+}

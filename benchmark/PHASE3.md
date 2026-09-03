@@ -65,8 +65,8 @@ Artifacts live in `benchmark/phase3/`, not in the frozen `benchmark/data/` tree.
 | `phase3_cost.py` | `cost_estimate.json` |
 | `phase3_modes.py` | schemas, mocks, cache (library) |
 | `phase3_eval.py` | offline scoring (library) |
-| `phase3_openai_run.py` | OpenAI smoke (9) and validation-pilot (489) runner (dry-run default) |
-| `phase3_openai_eval.py` | Offline validation scoring after responses are frozen |
+| `phase3_openai_run.py` | OpenAI smoke (9), validation-pilot (489), and 26-row schema-invalid rescue runner (dry-run default) |
+| `phase3_openai_eval.py` | Offline validation scoring, artifact-manifest verification, and rescue sensitivity |
 
 ```powershell
 $env:PYTHONHASHSEED = "0"
@@ -83,6 +83,11 @@ python benchmark/scripts/phase3_openai_run.py --profile validation
 python benchmark/scripts/phase3_openai_run.py --profile validation --execute --max-cost-usd 5.00
 python benchmark/scripts/phase3_openai_run.py --profile validation --cache-only
 python benchmark/scripts/phase3_openai_eval.py --results-dir benchmark/phase3/validation
+python benchmark/scripts/phase3_openai_eval.py --verify-manifest
+python benchmark/scripts/phase3_openai_run.py --profile rescue_schema_invalid
+python benchmark/scripts/phase3_openai_run.py --profile rescue_schema_invalid --execute --max-cost-usd 1.00 --max-requests 26 --max-output-tokens 2048 --max-retries 0
+python benchmark/scripts/phase3_openai_run.py --profile rescue_schema_invalid --cache-only
+python benchmark/scripts/phase3_openai_eval.py --rescue-dir benchmark/phase3/validation_rescue_2048 --sensitivity-out-dir benchmark/phase3/validation_rescue_2048/sensitivity
 ```
 
 `benchmark/phase3/_*/` is gitignored (live response cache). Pricing is read from a file;
@@ -438,11 +443,25 @@ Same model, prompt template, schema, and inference settings as the smoke test
 The frozen sample shortfalls are kept (answer-absent 22 vs 50, rerank-failure
 16 vs 25). Do not resample to original quotas.
 
+This 163-reaction pilot **deliberately oversamples Phase 2 failure strata**.
+Overall 30–31% exact Top-1 describes this constructed validation pilot only.
+It is **not** an estimate of corpus-wide accuracy. Stratum-specific rates and
+paired comparisons across context variants are the principal interpretable
+results. The experimental unit is the reaction; the 489 prompts are three
+paired conditions on 163 reactions.
+
+True Phase 2 retrieval failures are only `unconstrained`,
+`empty_constrained`, and `nonempty_answer_absent` (**122** reactions in this
+pilot). `retrievable_rerank_failure` is separate: the answer was retrieved
+but ranked incorrectly. Direct open-set reports use **incorrect in-catalog
+prediction**, not “unsupported”; there is no external evidence in this mode.
+
 ```powershell
 python benchmark/scripts/phase3_openai_run.py --profile validation --max-cost-usd 5.00 --out-dir benchmark/phase3/validation --cache-dir benchmark/phase3/_response_cache
 python benchmark/scripts/phase3_openai_run.py --profile validation --execute --max-cost-usd 5.00 --max-requests 489 --out-dir benchmark/phase3/validation --cache-dir benchmark/phase3/_response_cache
 python benchmark/scripts/phase3_openai_run.py --profile validation --cache-only --out-dir benchmark/phase3/validation --cache-dir benchmark/phase3/_response_cache
 python benchmark/scripts/phase3_openai_eval.py --results-dir benchmark/phase3/validation
+python benchmark/scripts/phase3_openai_eval.py --verify-manifest
 ```
 
 Expected (pre-execution dry-run): 489 planned rows, 9 compatible smoke cache
@@ -450,7 +469,12 @@ hits, at most 480 new calls, conservative input 373,411 tokens, expected
 **$1.72**, retry-inclusive worst case **$19.90**, cap **$5.00**. The runtime
 gate, not the theoretical maximum, enforces the cap.
 
-### Observed validation run
+### Observed validation run (intention-to-treat)
+
+The original 489-row `results.jsonl` is immutable source data
+(newline-normalized SHA-256
+`0bb9c892ec811e532133f2cd6e1fce5e1e1d249e41a263388979ae6d1a29fbdd`).
+Offline analysis must not alter it.
 
 | Quantity | Value |
 | --- | ---: |
@@ -458,7 +482,7 @@ gate, not the theoretical maximum, enforces the cap.
 | Compatible smoke cache hits | 9 |
 | New live calls | 480 |
 | Succeeded | 463 |
-| Schema/compliance failures | 26 |
+| Schema-invalid (no parsed prediction) | 26 |
 | Refusals | 0 |
 | Model requested / returned | `gpt-5.6-terra` |
 | Input / output / reasoning tokens | 306,563 / 151,556 / 103,941 |
@@ -468,40 +492,94 @@ gate, not the theoretical maximum, enforces the cap.
 The first live session was interrupted by a Windows `os.replace` lock on
 `results.jsonl` after 422 cached responses; the run resumed from cache and
 did not repurchase those calls. Cache-only replay then made **zero** additional
-API calls; `results.jsonl` was byte-identical.
-Phase 2 freeze verification still reports 15 artifacts, 0 problems.
+API calls. Phase 2 freeze verification still reports 15 artifacts, 0 problems.
 
-Exact Top-1 (reaction unit, n = 163):
+The 26 schema-invalid rows are operational failures, not incorrect KEGG
+predictions. Intention-to-treat tables count them as unsuccessful in the 163
+denominator and report their count explicitly.
 
-| Variant | Exact Top-1 | BRITE Top-1 | Coverage | Selective exact | Abstain | Incorrect in-catalog |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `target_only` | 49/163 (0.301) | 0.429 | 0.810 | 0.371 | 0.135 | 0.497 |
-| `target_plus_model` | 51/163 (0.313) | 0.380 | 0.785 | 0.398 | 0.160 | 0.454 |
-| `target_plus_neighborhood` | 51/163 (0.313) | 0.393 | 0.840 | 0.372 | 0.110 | 0.485 |
+Exact Top-1 (reaction unit, n = 163; schema-invalid counted as unsuccessful):
+
+| Variant | Exact Top-1 | BRITE Top-1 | Coverage | Selective exact | Abstain | Incorrect in-catalog | Schema-invalid |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `target_only` | 49/163 (0.301) | 0.429 | 0.810 | 0.371 | 0.135 | 0.497 | 9 |
+| `target_plus_model` | 51/163 (0.313) | 0.380 | 0.785 | 0.398 | 0.160 | 0.454 | 9 |
+| `target_plus_neighborhood` | 51/163 (0.313) | 0.393 | 0.840 | 0.372 | 0.110 | 0.485 | 8 |
 
 Paired cluster-bootstrap accuracy deltas vs `target_only` are +0.012 with
 intervals that include zero (12 clusters; exploratory). Do not freeze a
 context winner from this gap. `target_only` remains the working default.
 
-Retrieval-failure recovery is exact Top-1 / 138 failure-stratum reactions
-(abstention is not recovery): 38/138 (0.275) `target_only`, 40/138 (0.290)
-with added context. Train-seen targets 43–48/114 vs unseen 3–6/49. Raw
-confidence is not calibrated (ECE ≈ 0.58; correct and incorrect means both
-≈ 0.96). Artifacts: `benchmark/phase3/validation/`.
+True retrieval-failure recovery is exact Top-1 / **122** reactions
+(`unconstrained` + `empty_constrained` + `nonempty_answer_absent`;
+abstention is not recovery; schema-invalid remains unsuccessful):
+
+| Variant | True retrieval-failure | Rerank-failure (separate) |
+| --- | ---: | ---: |
+| `target_only` | 32/122 (0.2623) | 6/16 |
+| `target_plus_model` | 34/122 (0.2787) | 6/16 |
+| `target_plus_neighborhood` | 31/122 (0.2541) | 9/16 |
+
+Train-seen targets 43–48/114 vs unseen 3–6/49. Raw confidence is not
+calibrated (ECE ≈ 0.58; correct and incorrect means both ≈ 0.96).
+Artifact manifest verification is read-only
+(`python benchmark/scripts/phase3_openai_eval.py --verify-manifest`).
+Artifacts: `benchmark/phase3/validation/`.
+
+### Targeted 26-row rescue (`max_output_tokens=2048`)
+
+A separate profile re-issued **only** the 26 original schema-invalid
+`(sample_id, variant)` keys. It does not mutate the original 489-row file.
+Same model, prompt, schema, `reasoning_effort=low`, and no-tools mode;
+`max_retries=0` so total provider requests cannot exceed 26.
+
+| Quantity | Value |
+| --- | ---: |
+| Planned / attempted / succeeded / failed | 26 / 26 / 26 / 0 |
+| Cached at dry-run / live / cache-only | 0 / 0 / 26 |
+| Cache-only new API calls | **0** |
+| Calculated rescue cost | **$0.294394** |
+| Rescue + original calculated cost | **$2.879792** |
+| Output tokens (min / max / mean) | 97 / 1760 / 827 |
+| Rows with output > 1024 | 8 |
+
+Observable truncation on the original 26: 13 rows recorded
+`n_output_tokens=1024` (the original ceiling); 10 were `ValidationError`
+with missing usage; 3 recorded zero output tokens.
+`LengthFinishReasonError` was not stored as `api_error`. Raising the
+ceiling parsed all 26.
+
+### Rescue-completed sensitivity
+
+For the original schema-invalid keys only, substitute the parsed 2048-token
+responses; keep the other 463 original rows. This is **not**
+intention-to-treat.
+
+| Variant | ITT exact Top-1 | Sensitivity exact Top-1 | ITT true RF (122) | Sensitivity true RF | ITT rerank (16) | Sensitivity rerank |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `target_only` | 49/163 | 50/163 | 32/122 | 33/122 | 6/16 | 6/16 |
+| `target_plus_model` | 51/163 | 51/163 | 34/122 | 34/122 | 6/16 | 6/16 |
+| `target_plus_neighborhood` | 51/163 | 51/163 | 31/122 | 31/122 | 9/16 | 9/16 |
+
+Sensitivity incorrect-in-catalog rates rise (0.528 / 0.491 / 0.528) because
+rescued rows are mostly additional wrong in-catalog guesses or abstentions,
+not additional correct identifications. Unseen-in-train remains far worse
+than seen (target_only 7/49 vs 43/114). Paired context intervals still
+include zero. Artifacts: `benchmark/phase3/validation_rescue_2048/`.
 
 ## Stop point
 
 Phase 3A validation is method development, not a Phase 3 release and not the
-held-out test evaluation. Decisions from this pilot:
+held-out test evaluation. The rescue-completed sensitivity does **not**
+change the following decisions:
 
 1. Do not freeze a context variant. Working default: `target_only`.
-2. Retain direct open-set only as a selective recovery probe, not as an
-   unthresholded annotator. Unsupported in-catalog misses are ~45–50%.
+2. Retain direct open-set only as a selective research probe, not as an
+   unthresholded annotator. Incorrect in-catalog predictions remain ~45–53%.
 3. Do not use raw model confidence as a probability threshold.
-4. Do not run the held-out test set until the method is frozen.
-5. Another validation experiment is required before a test freeze (schema
-   failures at `max_output_tokens=1024`, calibration, unseen-target drop).
-6. Tool-assisted mode and bi-encoder training remain later work.
+4. Do not run the held-out test set for unfiltered direct inference.
+5. Next work is retrieval methods that provide database evidence, not another
+   unfiltered direct-open-set provider/model comparison.
 
-Do not start tool-assisted mode, test-set evaluation, or training from this
-validation-pilot authorization.
+Do not start BM25, tool-assisted mode, bi-encoder training, test-set
+evaluation, or another provider/model from this authorization.

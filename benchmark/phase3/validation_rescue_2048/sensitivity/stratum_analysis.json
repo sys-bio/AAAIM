@@ -1,0 +1,218 @@
+{
+  "target_only": {
+    "all_non_top1": {
+      "definition": "exact_top1 / reactions that are not retrievable_top1_success. This is not a retrieval-failure rate; it mixes missing-answer and reranking-failure strata.",
+      "denominator": 138,
+      "numerator": 39,
+      "rate": 0.2826
+    },
+    "all_retrieval_failure": {
+      "alias_of": "true_retrieval_failure",
+      "definition": "exact_top1 / reactions in unconstrained + empty_constrained + nonempty_answer_absent. retrievable_rerank_failure is excluded. Abstention is not recovery. Schema-invalid rows remain in the intention-to-treat denominator as unsuccessful.",
+      "denominator": 122,
+      "n_abstain": 22,
+      "n_incorrect_in_catalog": 66,
+      "n_schema_invalid": 0,
+      "numerator": 33,
+      "recovery_rate": 0.2705
+    },
+    "empty_constrained": {
+      "abstention_rate": 0.18,
+      "coverage": 0.82,
+      "denominator": 50,
+      "n_schema_invalid": 0,
+      "numerator": 15,
+      "recovery_rate": 0.3,
+      "selective_exact_top1": 0.3659
+    },
+    "nonempty_answer_absent": {
+      "abstention_rate": 0.3182,
+      "coverage": 0.6818,
+      "denominator": 22,
+      "n_schema_invalid": 0,
+      "numerator": 7,
+      "recovery_rate": 0.3182,
+      "selective_exact_top1": 0.4667
+    },
+    "retrievable_rerank_failure": {
+      "abstention_rate": 0.0,
+      "coverage": 1.0,
+      "denominator": 16,
+      "n_schema_invalid": 0,
+      "numerator": 6,
+      "rerank_failure_exact_top1": 0.375,
+      "selective_exact_top1": 0.375
+    },
+    "retrievable_top1_success": {
+      "abstention_rate": 0.08,
+      "control_exact_top1": 0.44,
+      "coverage": 0.92,
+      "denominator": 25,
+      "n_schema_invalid": 0,
+      "numerator": 11,
+      "selective_exact_top1": 0.4783
+    },
+    "true_retrieval_failure": {
+      "definition": "exact_top1 / reactions in unconstrained + empty_constrained + nonempty_answer_absent. retrievable_rerank_failure is excluded. Abstention is not recovery. Schema-invalid rows remain in the intention-to-treat denominator as unsuccessful.",
+      "denominator": 122,
+      "n_abstain": 22,
+      "n_incorrect_in_catalog": 66,
+      "n_schema_invalid": 0,
+      "numerator": 33,
+      "recovery_rate": 0.2705
+    },
+    "unconstrained": {
+      "abstention_rate": 0.12,
+      "coverage": 0.88,
+      "denominator": 50,
+      "n_schema_invalid": 0,
+      "numerator": 11,
+      "recovery_rate": 0.22,
+      "selective_exact_top1": 0.25
+    }
+  },
+  "target_plus_model": {
+    "all_non_top1": {
+      "definition": "exact_top1 / reactions that are not retrievable_top1_success. This is not a retrieval-failure rate; it mixes missing-answer and reranking-failure strata.",
+      "denominator": 138,
+      "numerator": 40,
+      "rate": 0.2899
+    },
+    "all_retrieval_failure": {
+      "alias_of": "true_retrieval_failure",
+      "definition": "exact_top1 / reactions in unconstrained + empty_constrained + nonempty_answer_absent. retrievable_rerank_failure is excluded. Abstention is not recovery. Schema-invalid rows remain in the intention-to-treat denominator as unsuccessful.",
+      "denominator": 122,
+      "n_abstain": 26,
+      "n_incorrect_in_catalog": 60,
+      "n_schema_invalid": 0,
+      "numerator": 34,
+      "recovery_rate": 0.2787
+    },
+    "empty_constrained": {
+      "abstention_rate": 0.22,
+      "coverage": 0.78,
+      "denominator": 50,
+      "n_schema_invalid": 0,
+      "numerator": 16,
+      "recovery_rate": 0.32,
+      "selective_exact_top1": 0.4103
+    },
+    "nonempty_answer_absent": {
+      "abstention_rate": 0.3636,
+      "coverage": 0.6364,
+      "denominator": 22,
+      "n_schema_invalid": 0,
+      "numerator": 5,
+      "recovery_rate": 0.2273,
+      "selective_exact_top1": 0.3571
+    },
+    "retrievable_rerank_failure": {
+      "abstention_rate": 0.0,
+      "coverage": 1.0,
+      "denominator": 16,
+      "n_schema_invalid": 0,
+      "numerator": 6,
+      "rerank_failure_exact_top1": 0.375,
+      "selective_exact_top1": 0.375
+    },
+    "retrievable_top1_success": {
+      "abstention_rate": 0.12,
+      "control_exact_top1": 0.44,
+      "coverage": 0.88,
+      "denominator": 25,
+      "n_schema_invalid": 0,
+      "numerator": 11,
+      "selective_exact_top1": 0.5
+    },
+    "true_retrieval_failure": {
+      "definition": "exact_top1 / reactions in unconstrained + empty_constrained + nonempty_answer_absent. retrievable_rerank_failure is excluded. Abstention is not recovery. Schema-invalid rows remain in the intention-to-treat denominator as unsuccessful.",
+      "denominator": 122,
+      "n_abstain": 26,
+      "n_incorrect_in_catalog": 60,
+      "n_schema_invalid": 0,
+      "numerator": 34,
+      "recovery_rate": 0.2787
+    },
+    "unconstrained": {
+      "abstention_rate": 0.14,
+      "coverage": 0.86,
+      "denominator": 50,
+      "n_schema_invalid": 0,
+      "numerator": 13,
+      "recovery_rate": 0.26,
+      "selective_exact_top1": 0.3023
+    }
+  },
+  "target_plus_neighborhood": {
+    "all_non_top1": {
+      "definition": "exact_top1 / reactions that are not retrievable_top1_success. This is not a retrieval-failure rate; it mixes missing-answer and reranking-failure strata.",
+      "denominator": 138,
+      "numerator": 40,
+      "rate": 0.2899
+    },
+    "all_retrieval_failure": {
+      "alias_of": "true_retrieval_failure",
+      "definition": "exact_top1 / reactions in unconstrained + empty_constrained + nonempty_answer_absent. retrievable_rerank_failure is excluded. Abstention is not recovery. Schema-invalid rows remain in the intention-to-treat denominator as unsuccessful.",
+      "denominator": 122,
+      "n_abstain": 16,
+      "n_incorrect_in_catalog": 70,
+      "n_schema_invalid": 0,
+      "numerator": 31,
+      "recovery_rate": 0.2541
+    },
+    "empty_constrained": {
+      "abstention_rate": 0.12,
+      "coverage": 0.88,
+      "denominator": 50,
+      "n_schema_invalid": 0,
+      "numerator": 15,
+      "recovery_rate": 0.3,
+      "selective_exact_top1": 0.3409
+    },
+    "nonempty_answer_absent": {
+      "abstention_rate": 0.3182,
+      "coverage": 0.6818,
+      "denominator": 22,
+      "n_schema_invalid": 0,
+      "numerator": 6,
+      "recovery_rate": 0.2727,
+      "selective_exact_top1": 0.4
+    },
+    "retrievable_rerank_failure": {
+      "abstention_rate": 0.0,
+      "coverage": 1.0,
+      "denominator": 16,
+      "n_schema_invalid": 0,
+      "numerator": 9,
+      "rerank_failure_exact_top1": 0.5625,
+      "selective_exact_top1": 0.5625
+    },
+    "retrievable_top1_success": {
+      "abstention_rate": 0.12,
+      "control_exact_top1": 0.44,
+      "coverage": 0.88,
+      "denominator": 25,
+      "n_schema_invalid": 0,
+      "numerator": 11,
+      "selective_exact_top1": 0.5
+    },
+    "true_retrieval_failure": {
+      "definition": "exact_top1 / reactions in unconstrained + empty_constrained + nonempty_answer_absent. retrievable_rerank_failure is excluded. Abstention is not recovery. Schema-invalid rows remain in the intention-to-treat denominator as unsuccessful.",
+      "denominator": 122,
+      "n_abstain": 16,
+      "n_incorrect_in_catalog": 70,
+      "n_schema_invalid": 0,
+      "numerator": 31,
+      "recovery_rate": 0.2541
+    },
+    "unconstrained": {
+      "abstention_rate": 0.06,
+      "coverage": 0.94,
+      "denominator": 50,
+      "n_schema_invalid": 0,
+      "numerator": 10,
+      "recovery_rate": 0.2,
+      "selective_exact_top1": 0.2128
+    }
+  }
+}

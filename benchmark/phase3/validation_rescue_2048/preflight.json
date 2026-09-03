@@ -1,0 +1,27 @@
+{
+  "cache_dir": "benchmark\\phase3\\_response_cache",
+  "cap_usd": 1.0,
+  "conservative_input_tokens_est": 21012,
+  "conservative_input_tokens_est_new_calls": 0,
+  "expected_usd": 0.0,
+  "expected_usd_from_smoke_cost_per_call": 0.0,
+  "inference": {
+    "max_output_tokens": 2048,
+    "max_retries": 0,
+    "reasoning_effort": "low"
+  },
+  "max_output_tokens_per_call": 2048,
+  "max_output_tokens_total_no_retry": 0,
+  "max_output_tokens_total_with_retries": 0,
+  "model": "gpt-5.6-terra",
+  "n_compatible_cache_hits": 26,
+  "n_new_calls_max": 0,
+  "n_planned_rows": 26,
+  "out_dir": "benchmark\\phase3\\validation_rescue_2048",
+  "output_schema_version": "phase3-structured-v1",
+  "pricing_date": "2026-09-03",
+  "profile": "rescue_schema_invalid",
+  "retry_inclusive_worst_case_usd": 0.0,
+  "template_version": "phase3-open-set-v3",
+  "tokenizer": "chars_div_2_conservative"
+}
