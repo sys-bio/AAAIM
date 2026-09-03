@@ -1,4 +1,4 @@
-"""Phase 3A OpenAI Responses-API runner for the nine-call operational smoke test.
+"""Phase 3A OpenAI Responses-API runner for direct open-set inference.
 
 Reuses the existing Phase 3 prompt builders, structured-output schema, leakage
 scanner, result parser, cache, and offline evaluator. Does not invent a parallel
@@ -7,15 +7,21 @@ format.
 Required OpenAI Python SDK: openai==1.78.1 (Responses.parse + Pydantic
 text_format). See requirements.txt.
 
-Live spending is off unless ``--execute`` is passed. This module's live ceiling
-is nine API calls and the supplied ``--max-cost-usd`` cap (smoke default $1.00).
-The 489-call validation pilot is not authorized here.
+Live spending is off unless ``--execute`` is passed. Profiles:
+
+``smoke``
+    Nine calls, $1.00 default cap (operational check).
+``validation``
+    Frozen 163-reaction × 3-variant pilot (489 planned rows), $5.00 default cap.
+    Compatible smoke-test cache entries are reused; they are not repurchased.
 
 Usage::
 
     python benchmark/scripts/phase3_openai_run.py
     python benchmark/scripts/phase3_openai_run.py --execute --max-cost-usd 1.00
-    python benchmark/scripts/phase3_openai_run.py --cache-only
+    python benchmark/scripts/phase3_openai_run.py --profile validation
+    python benchmark/scripts/phase3_openai_run.py --profile validation --execute --max-cost-usd 5.00
+    python benchmark/scripts/phase3_openai_run.py --profile validation --cache-only
 """
 
 from __future__ import annotations
@@ -47,6 +53,7 @@ from benchmark.scripts.phase3_common import (
     OUT_PILOT_KEY,
     OUT_PROMPTS,
     OUT_SMOKE_DIR,
+    OUT_VALIDATION_DIR,
     OUTPUT_SCHEMA_VERSION,
     PILOT_SEED,
     PILOT_SPLIT,
@@ -58,6 +65,10 @@ from benchmark.scripts.phase3_common import (
     STRATA,
     TOKENIZER_CONSERVATIVE,
     TOKENIZER_SCAFFOLD,
+    VALIDATION_MAX_COST_USD,
+    VALIDATION_N_REACTIONS,
+    VALIDATION_N_REQUESTS,
+    VALIDATION_SELECTION_RULE,
     assert_no_kegg_leakage,
     atomic_write_json,
     atomic_write_jsonl,
@@ -91,9 +102,21 @@ DEFAULT_MAX_OUTPUT_TOKENS = 1024
 DEFAULT_MAX_RETRIES = 2
 DEFAULT_MAX_COST_USD = 1.00
 DEFAULT_REASONING_EFFORT = "low"
-LIVE_REQUEST_CEILING = SMOKE_N_REQUESTS
+SMOKE_LIVE_REQUEST_CEILING = SMOKE_N_REQUESTS
+VALIDATION_LIVE_REQUEST_CEILING = VALIDATION_N_REQUESTS
 SECRET_ENV = "OPENAI_API_KEY"
 ENV_FILENAME = ".env"
+# Observed usage from the committed nine-call smoke test (commit 7fe3363).
+# Used only to form an expected-cost prior for the validation pilot; billing
+# still uses recorded API usage.
+SMOKE_USAGE_PRIOR = {
+    "source": "benchmark/phase3/smoke/summary.json",
+    "n_calls": 9,
+    "input_tokens": 5634,
+    "output_tokens": 1545,
+    "reasoning_tokens": 676,
+    "cost_usd": 0.029808,
+}
 
 FORBIDDEN_PAYLOAD_KEYS = frozenset({
     "ground_truth_kegg_all",
@@ -417,6 +440,41 @@ def select_smoke_reactions(
     return pd.DataFrame(picked).reset_index(drop=True)
 
 
+def select_validation_reactions(sample: pd.DataFrame) -> pd.DataFrame:
+    """Return every frozen validation-pilot reaction, in a stable order.
+
+    Does not resample to original quotas. Documented shortfalls stay in the
+    sample. Test-split rows are refused.
+    """
+    if sample.empty:
+        raise ValueError("pilot sample is empty")
+    if "split" in sample.columns:
+        splits = set(sample["split"].astype(str))
+        if splits != {PILOT_SPLIT}:
+            raise ValueError(
+                f"validation sample must be validation-only; found splits {sorted(splits)}"
+            )
+    return sample.sort_values(
+        ["stratum", "cluster_id", "model_id", "reaction_id", "sample_id"]
+    ).reset_index(drop=True)
+
+
+def count_compatible_cache_hits(
+    planned: Sequence[PlannedRequest],
+    cache_dir: Path,
+) -> tuple[List[PlannedRequest], List[PlannedRequest]]:
+    cache = FileCache(cache_dir)
+    hits: List[PlannedRequest] = []
+    misses: List[PlannedRequest] = []
+    for item in planned:
+        payload = cache.get(item.cache_key)
+        if payload is None:
+            misses.append(item)
+            continue
+        hits.append(item)
+    return hits, misses
+
+
 def attach_variants(
     selected: pd.DataFrame,
     prompt_rows: Sequence[Mapping[str, Any]],
@@ -444,6 +502,75 @@ def attach_variants(
     if len(planned) != expected:
         raise ValueError(f"expected {expected} planned prompts, got {len(planned)}")
     return planned
+
+
+def audit_planned_requests(
+    plan: Mapping[str, Any],
+    *,
+    sample: pd.DataFrame,
+    require_all_sample_ids: bool,
+) -> Dict[str, Any]:
+    """Check a planned run against the frozen validation-pilot contract."""
+    planned: Sequence[PlannedRequest] = plan["planned"]
+    sample_ids = [str(x) for x in sample["sample_id"]]
+    rows = [
+        {
+            "sample_id": item.sample_id,
+            "model_id": item.model_id,
+            "reaction_id": item.reaction_id,
+            "variant": item.variant,
+            "template_version": item.template_version,
+            "max_output_tokens": item.settings.max_output_tokens,
+            "reasoning_effort": item.settings.reasoning_effort,
+            "model": item.settings.model,
+            "output_schema_version": item.settings.output_schema_version,
+        }
+        for item in planned
+    ]
+    frame = pd.DataFrame(rows)
+    dupes = int(frame.duplicated(["sample_id", "variant"]).sum())
+    by_sample = frame.groupby("sample_id").variant.apply(lambda s: set(s)).to_dict()
+    missing_ids = []
+    if require_all_sample_ids:
+        missing_ids = sorted(set(sample_ids) - set(frame.sample_id))
+    orphans = sorted(set(frame.sample_id) - set(sample_ids))
+    incomplete = [
+        sid for sid, variants in by_sample.items() if variants != set(CONTEXT_VARIANTS)
+    ]
+    settings_ok = (
+        frame.template_version.nunique() == 1
+        and frame.max_output_tokens.nunique() == 1
+        and frame.reasoning_effort.nunique() == 1
+        and frame.model.nunique() == 1
+        and frame.output_schema_version.nunique() == 1
+        and str(frame.template_version.iloc[0]) == PROMPT_TEMPLATE_VERSION
+        and int(frame.max_output_tokens.iloc[0]) == DEFAULT_MAX_OUTPUT_TOKENS
+        and str(frame.reasoning_effort.iloc[0]) == DEFAULT_REASONING_EFFORT
+        and str(frame.model.iloc[0]) == DEFAULT_MODEL
+        and str(frame.output_schema_version.iloc[0]) == OUTPUT_SCHEMA_VERSION
+    )
+    return {
+        "n_planned": len(frame),
+        "n_reactions": int(frame.sample_id.nunique()),
+        "n_duplicate_rows": dupes,
+        "n_orphan_sample_ids": len(orphans),
+        "n_missing_sample_ids": len(missing_ids),
+        "n_incomplete_variant_sets": len(incomplete),
+        "settings_match_smoke": settings_ok,
+        "split": plan.get("split"),
+        "answer_key_read": plan.get("answer_key_read"),
+        "test_split_read": plan.get("test_split_read"),
+        "ok": (
+            dupes == 0
+            and not orphans
+            and not missing_ids
+            and not incomplete
+            and settings_ok
+            and plan.get("split") == PILOT_SPLIT
+            and plan.get("answer_key_read") is False
+            and plan.get("test_split_read") is False
+        ),
+    }
 
 
 def _walk_forbidden_keys(obj: Any, *, where: str) -> None:
@@ -542,14 +669,18 @@ def preflight_cost(
     pricing: Mapping[str, Any],
     *,
     max_retries: int,
+    new_requests: Optional[Sequence[PlannedRequest]] = None,
 ) -> Dict[str, Any]:
     if not requests:
         raise ValueError("no requests to estimate")
     model = requests[0].settings.model
     rates = model_rates(pricing, model)
-    n_input = sum(r.n_input_tokens_est for r in requests)
+    billable = list(new_requests) if new_requests is not None else list(requests)
+    n_input = sum(r.n_input_tokens_est for r in billable)
+    n_input_all = sum(r.n_input_tokens_est for r in requests)
     max_out = requests[0].settings.max_output_tokens
-    n_calls = len(requests)
+    n_calls = len(billable)
+    n_planned = len(requests)
     attempts = n_calls * (1 + max_retries)
     n_output_max = attempts * max_out
     expected_no_retry = estimate_call_cost(
@@ -563,22 +694,57 @@ def preflight_cost(
         n_output=max_out,
         rates=rates,
     )
+    smoke_n = max(1, int(SMOKE_USAGE_PRIOR["n_calls"]))
+    mean_out = SMOKE_USAGE_PRIOR["output_tokens"] / smoke_n
+    mean_cost = SMOKE_USAGE_PRIOR["cost_usd"] / smoke_n
+    expected_cost_scaled = mean_cost * n_calls
+    expected_from_prior_tokens = estimate_call_cost(
+        n_input=n_input, n_output=int(round(mean_out * n_calls)), rates=rates,
+    )
+    # Gate on the more conservative of the two expected estimators, both of
+    # which are far below retry-inclusive max-output worst case.
+    expected_from_prior = max(expected_cost_scaled, expected_from_prior_tokens)
     return {
         "model": model,
         "pricing_date": pricing.get("pricing_date"),
         "pricing_source": pricing.get("source"),
         "rates": rates,
-        "n_calls": n_calls,
+        "n_calls": n_planned,
+        "n_new_calls": n_calls,
+        "n_cache_hits": n_planned - n_calls if new_requests is not None else 0,
         "max_attempts_including_retries": attempts,
-        "n_input_tokens_est": n_input,
+        "n_input_tokens_est": n_input_all,
+        "n_input_tokens_est_new_calls": n_input,
         "planned_max_output_tokens_per_call": max_out,
         "planned_max_output_tokens_total_no_retry": n_calls * max_out,
         "planned_max_output_tokens_total_with_retries": n_output_max,
         "token_estimate_method": TOKENIZER_CONSERVATIVE,
         "expected_usd_no_retry_at_max_output": round(expected_no_retry, 6),
+        "expected_usd_from_smoke_cost_per_call": round(expected_cost_scaled, 6),
+        "expected_usd_conservative_input_smoke_mean_output": round(expected_from_prior_tokens, 6),
+        "expected_usd_from_smoke_prior": round(expected_from_prior, 6),
+        "smoke_prior": SMOKE_USAGE_PRIOR,
         "worst_case_usd": round(worst, 6),
         "per_call_max_usd": round(per_call_max, 6),
     }
+
+
+def assert_budget_gate(
+    estimate: Mapping[str, Any],
+    max_cost_usd: float,
+    *,
+    require_worst_under_cap: bool,
+) -> None:
+    expected = float(estimate.get("expected_usd_from_smoke_prior") or 0.0)
+    if expected > max_cost_usd + 1e-12:
+        raise BudgetExceeded(
+            f"preflight expected ${expected:.6f} exceeds cap ${max_cost_usd:.2f}"
+        )
+    worst = float(estimate.get("worst_case_usd") or 0.0)
+    if require_worst_under_cap and worst > max_cost_usd + 1e-12:
+        raise BudgetExceeded(
+            f"preflight worst-case ${worst:.6f} exceeds cap ${max_cost_usd:.2f}"
+        )
 
 
 def extract_refusal(response: Any) -> Optional[str]:
@@ -666,6 +832,7 @@ def result_row(
     response_id: Optional[str],
     api_error: Optional[str],
     pricing: Mapping[str, Any],
+    latency_ms: Optional[float] = None,
 ) -> Dict[str, Any]:
     preds = interpreted.get("predictions") or []
     pred_dicts = [
@@ -712,6 +879,7 @@ def result_row(
         "reasoning_effort": planned.settings.reasoning_effort,
         "tokenizer": planned.token_estimate_method,
         "n_input_tokens_est": planned.n_input_tokens_est,
+        "latency_ms": latency_ms,
     }
 
 
@@ -890,14 +1058,42 @@ class RunConfig:
     load_env: bool = True
     n_reactions: int = SMOKE_N_REACTIONS
     seed: int = PILOT_SEED
+    profile: str = "smoke"
+    write_results_from_cache: bool = False
 
 
-def plan_smoke_run(config: RunConfig) -> Dict[str, Any]:
+def live_request_ceiling(profile: str) -> int:
+    if profile == "validation":
+        return VALIDATION_LIVE_REQUEST_CEILING
+    return SMOKE_LIVE_REQUEST_CEILING
+
+
+def plan_run(config: RunConfig) -> Dict[str, Any]:
     """Select, validate, and estimate without reading the answer key or test split."""
     require_live_tokenizer(TOKENIZER_CONSERVATIVE)
+    profile = config.profile
+    if profile not in {"smoke", "validation"}:
+        raise ValueError(f"unknown profile {profile}")
+    if profile == "validation":
+        smoke_dir = OUT_SMOKE_DIR.resolve()
+        if config.out_dir.resolve() == smoke_dir:
+            raise ValueError("validation output must not overwrite smoke-test artifacts")
     sample = pd.read_csv(config.sample_path)
     prompts = load_prompt_rows(config.prompts_path)
-    selected = select_smoke_reactions(sample, seed=config.seed, n=config.n_reactions)
+    if profile == "validation":
+        selected = select_validation_reactions(sample)
+        selection_rule = VALIDATION_SELECTION_RULE
+        expected_n = config.n_reactions * len(CONTEXT_VARIANTS)
+    else:
+        selected = select_smoke_reactions(sample, seed=config.seed, n=config.n_reactions)
+        selection_rule = SMOKE_SELECTION_RULE
+        expected_n = SMOKE_N_REQUESTS
+    if profile == "validation" and config.n_reactions == VALIDATION_N_REACTIONS:
+        if len(selected) != VALIDATION_N_REACTIONS:
+            raise ValueError(
+                f"validation pilot must have {VALIDATION_N_REACTIONS} reactions, got {len(selected)}"
+            )
+        expected_n = VALIDATION_N_REQUESTS
     prompt_subset = attach_variants(selected, prompts)
     settings = InferenceSettings(
         model=config.model,
@@ -906,31 +1102,36 @@ def plan_smoke_run(config: RunConfig) -> Dict[str, Any]:
         max_retries=config.max_retries,
     )
     planned = [finalize_request(row, settings) for row in prompt_subset]
-    if len(planned) != SMOKE_N_REQUESTS:
-        raise ValueError(f"smoke test must plan exactly {SMOKE_N_REQUESTS} calls, got {len(planned)}")
+    if len(planned) != expected_n:
+        raise ValueError(f"{profile} must plan exactly {expected_n} calls, got {len(planned)}")
     if config.max_requests < len(planned):
         raise ValueError(
-            f"--max-requests {config.max_requests} is below the planned {len(planned)} smoke calls"
+            f"--max-requests {config.max_requests} is below the planned {len(planned)} calls"
         )
-    if config.execute and config.max_requests > LIVE_REQUEST_CEILING:
+    ceiling = live_request_ceiling(profile)
+    if config.execute and config.max_requests > ceiling:
         raise ValueError(
-            f"this runner's live ceiling is {LIVE_REQUEST_CEILING} calls; "
-            "the 489-call validation pilot is not authorized here"
+            f"this runner's {profile} live ceiling is {ceiling} calls"
         )
+    cache_hits, cache_misses = count_compatible_cache_hits(planned, config.cache_dir)
     pricing = load_pricing(config.pricing_path)
-    estimate = preflight_cost(planned, pricing, max_retries=config.max_retries)
-    if estimate["worst_case_usd"] > config.max_cost_usd + 1e-12:
-        raise BudgetExceeded(
-            f"preflight worst-case ${estimate['worst_case_usd']:.6f} exceeds "
-            f"cap ${config.max_cost_usd:.2f}"
-        )
+    estimate = preflight_cost(
+        planned, pricing, max_retries=config.max_retries, new_requests=cache_misses,
+    )
+    assert_budget_gate(
+        estimate, config.max_cost_usd,
+        require_worst_under_cap=(profile == "smoke"),
+    )
     return {
-        "profile": "smoke",
-        "selection_rule": SMOKE_SELECTION_RULE,
+        "profile": profile,
+        "selection_rule": selection_rule,
         "seed": config.seed,
         "split": PILOT_SPLIT,
         "n_reactions": len(selected),
         "n_requests": len(planned),
+        "n_compatible_cache_hits": len(cache_hits),
+        "n_new_calls_max": len(cache_misses),
+        "cache_hit_ids": [item.cache_key for item in cache_hits],
         "variants": list(CONTEXT_VARIANTS),
         "selected": selected[["sample_id", "model_id", "reaction_id", "cluster_id", "stratum"]].to_dict(
             orient="records"
@@ -943,10 +1144,23 @@ def plan_smoke_run(config: RunConfig) -> Dict[str, Any]:
         "template_version": PROMPT_TEMPLATE_VERSION,
         "output_schema_version": OUTPUT_SCHEMA_VERSION,
         "tokenizer": TOKENIZER_CONSERVATIVE,
-        "live_request_ceiling": LIVE_REQUEST_CEILING,
+        "live_request_ceiling": ceiling,
         "answer_key_read": False,
         "test_split_read": False,
+        "inference": {
+            "max_output_tokens": config.max_output_tokens,
+            "reasoning_effort": config.reasoning_effort,
+            "max_retries": config.max_retries,
+        },
+        "cache_dir": str(config.cache_dir),
+        "out_dir": str(config.out_dir),
     }
+
+
+def plan_smoke_run(config: RunConfig) -> Dict[str, Any]:
+    """Backward-compatible smoke planner used by existing tests."""
+    config.profile = "smoke"
+    return plan_run(config)
 
 
 def _cache_payload(row: Mapping[str, Any]) -> Dict[str, Any]:
@@ -970,10 +1184,17 @@ def run_planned(
     parse_fn = config.parse_fn
     interrupted = False
 
-    def persist() -> None:
-        atomic_write_jsonl(rows, config.out_dir / "results.jsonl")
-        if not config.cache_only:
+    def persist(*, force: bool = False) -> None:
+        if config.cache_only:
+            return
+        if not (config.execute or force):
+            return
+        if config.execute:
+            atomic_write_jsonl(rows, config.out_dir / "results.jsonl")
             atomic_write_json(summarize_rows(rows), config.out_dir / "summary.json")
+            return
+        atomic_write_jsonl(rows, config.out_dir / "dry_run_results.jsonl")
+        atomic_write_json(summarize_rows(rows), config.out_dir / "dry_run_summary.json")
 
     try:
         for item in planned:
@@ -984,8 +1205,12 @@ def run_planned(
                 row["cache_hit"] = True
                 if hit.get("timestamp"):
                     row["timestamp"] = hit["timestamp"]
+                # Count original live spend toward the run cap so a resume
+                # cannot spend a second $5 on top of already-purchased calls.
+                spent += float(hit.get("cost_usd") or 0.0)
                 rows.append(row)
-                persist()
+                if len(rows) % 25 == 0:
+                    persist()
                 continue
             if config.cache_only:
                 raise RuntimeError(
@@ -1044,10 +1269,12 @@ def run_planned(
                 parse_fn = make_openai_parse_fn()
             kwargs = build_api_kwargs(item)
             try:
+                t0 = time.perf_counter()
                 response, attempts = call_with_retries(
                     parse_fn, kwargs,
                     max_retries=config.max_retries, sleep=config.sleep,
                 )
+                latency_ms = round((time.perf_counter() - t0) * 1000.0, 1)
             except Exception as exc:  # noqa: BLE001 — persist, then classify
                 api_calls += 1
                 name = exc.__class__.__name__
@@ -1115,14 +1342,21 @@ def run_planned(
                 response_id=getattr(response, "id", None),
                 api_error=None,
                 pricing=pricing,
+                latency_ms=latency_ms,
             )
             cache.put(item.cache_key, _cache_payload(row))
             rows.append(row)
             persist()
+            if api_calls % 25 == 0:
+                logger.info(
+                    "progress api_calls=%s rows=%s spent_usd=%.6f remaining=%.6f",
+                    api_calls, len(rows), spent, config.max_cost_usd - spent,
+                )
     except KeyboardInterrupt:
         interrupted = True
-        persist()
+        persist(force=True)
         raise
+    persist(force=True)
     summary = summarize_rows(rows)
     summary.update({
         "interrupted": interrupted,
@@ -1137,8 +1371,10 @@ def run_planned(
     })
     if config.cache_only:
         atomic_write_json(summary, config.out_dir / "cache_verify.json")
-    else:
+    elif config.execute:
         atomic_write_json(summary, config.out_dir / "summary.json")
+    else:
+        atomic_write_json(summary, config.out_dir / "dry_run_summary.json")
     eval_payload = None
     if config.evaluate and config.execute and any(
         r.get("terminal_status") in {"succeeded", "compliance_error", "refused", "schema_invalid"}
@@ -1147,6 +1383,23 @@ def run_planned(
         eval_payload = evaluate_persisted_rows(rows, config.answer_key_path)
         atomic_write_json(eval_payload, config.out_dir / "eval.json")
     return {"rows": rows, "summary": summary, "eval": eval_payload}
+
+
+def freeze_results_from_cache(
+    plan: Mapping[str, Any],
+    config: RunConfig,
+) -> List[Dict[str, Any]]:
+    """Write original cached payloads in plan order without flipping cache_hit."""
+    cache = FileCache(config.cache_dir)
+    rows: List[Dict[str, Any]] = []
+    for item in plan["planned"]:
+        hit = cache.get(item.cache_key)
+        if hit is None:
+            raise RuntimeError(f"missing cache entry for {item.cache_key}")
+        rows.append(dict(hit))
+    config.out_dir.mkdir(parents=True, exist_ok=True)
+    atomic_write_jsonl(rows, config.out_dir / "results.jsonl")
+    return rows
 
 
 def write_plan_artifacts(plan: Mapping[str, Any], out_dir: Path) -> None:
@@ -1170,6 +1423,10 @@ def write_plan_artifacts(plan: Mapping[str, Any], out_dir: Path) -> None:
         "pricing_date": plan["pricing"].get("pricing_date"),
         "pricing_source": plan["pricing"].get("source"),
         "live_request_ceiling": plan["live_request_ceiling"],
+        "n_compatible_cache_hits": plan.get("n_compatible_cache_hits", 0),
+        "n_new_calls_max": plan.get("n_new_calls_max", plan["n_requests"]),
+        "cache_hit_ids": plan.get("cache_hit_ids", []),
+        "inference": plan.get("inference"),
         "answer_key_read": False,
         "test_split_read": False,
         "required_openai_sdk": REQUIRED_OPENAI_SDK,
@@ -1197,49 +1454,98 @@ def write_plan_artifacts(plan: Mapping[str, Any], out_dir: Path) -> None:
     }
     atomic_write_json(public_plan, out_dir / "plan.json")
     atomic_write_jsonl(public_plan["requests"], out_dir / "requests.jsonl")
+    atomic_write_json(
+        {
+            "profile": plan["profile"],
+            "n_planned_rows": plan["n_requests"],
+            "n_compatible_cache_hits": plan.get("n_compatible_cache_hits", 0),
+            "n_new_calls_max": plan.get("n_new_calls_max", plan["n_requests"]),
+            "conservative_input_tokens_est": plan["estimate"]["n_input_tokens_est"],
+            "conservative_input_tokens_est_new_calls": plan["estimate"].get(
+                "n_input_tokens_est_new_calls", plan["estimate"]["n_input_tokens_est"]
+            ),
+            "max_output_tokens_per_call": plan["estimate"]["planned_max_output_tokens_per_call"],
+            "max_output_tokens_total_no_retry": plan["estimate"]["planned_max_output_tokens_total_no_retry"],
+            "max_output_tokens_total_with_retries": plan["estimate"]["planned_max_output_tokens_total_with_retries"],
+            "expected_usd": plan["estimate"].get("expected_usd_from_smoke_prior"),
+            "expected_usd_from_smoke_cost_per_call": plan["estimate"].get(
+                "expected_usd_from_smoke_cost_per_call"
+            ),
+            "retry_inclusive_worst_case_usd": plan["estimate"]["worst_case_usd"],
+            "cap_usd": plan["max_cost_usd"],
+            "model": plan["model"],
+            "template_version": plan["template_version"],
+            "output_schema_version": plan["output_schema_version"],
+            "inference": plan.get("inference"),
+            "out_dir": str(out_dir),
+            "cache_dir": str(plan.get("cache_dir") or ""),
+            "pricing_date": plan["pricing"].get("pricing_date"),
+            "tokenizer": plan["tokenizer"],
+        },
+        out_dir / "preflight.json",
+    )
 
 
 def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--profile", choices=("smoke", "validation"), default="smoke")
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--execute", action="store_true",
                         help="Contact OpenAI. Default is dry-run with zero API calls.")
     parser.add_argument("--cache-only", action="store_true",
                         help="Replay from cache; fail if any request would need the API.")
-    parser.add_argument("--max-cost-usd", type=float, default=DEFAULT_MAX_COST_USD)
-    parser.add_argument("--max-requests", type=int, default=SMOKE_N_REQUESTS)
+    parser.add_argument("--max-cost-usd", type=float, default=None)
+    parser.add_argument("--max-requests", type=int, default=None)
     parser.add_argument("--max-output-tokens", type=int, default=DEFAULT_MAX_OUTPUT_TOKENS)
     parser.add_argument("--max-retries", type=int, default=DEFAULT_MAX_RETRIES)
     parser.add_argument("--reasoning-effort", default=DEFAULT_REASONING_EFFORT)
-    parser.add_argument("--out-dir", type=Path, default=OUT_SMOKE_DIR)
+    parser.add_argument("--out-dir", type=Path, default=None)
     parser.add_argument("--cache-dir", type=Path, default=CACHE_DIR)
     parser.add_argument("--pricing", type=Path, default=PRICING_OPENAI_TERRA)
     parser.add_argument("--sample", type=Path, default=OUT_PILOT)
     parser.add_argument("--prompts", type=Path, default=OUT_PROMPTS)
     parser.add_argument("--answer-key", type=Path, default=OUT_PILOT_KEY)
     parser.add_argument("--skip-eval", action="store_true")
+    parser.add_argument("--write-results-from-cache", action="store_true",
+                        help="Rewrite results.jsonl from original cache payloads; no API calls.")
     parser.add_argument("--no-dotenv", action="store_true")
     return parser.parse_args(argv)
 
 
 def config_from_args(args: argparse.Namespace) -> RunConfig:
+    profile = str(args.profile)
+    if profile == "validation":
+        max_cost = VALIDATION_MAX_COST_USD if args.max_cost_usd is None else float(args.max_cost_usd)
+        max_requests = VALIDATION_N_REQUESTS if args.max_requests is None else int(args.max_requests)
+        out_dir = OUT_VALIDATION_DIR if args.out_dir is None else args.out_dir
+        n_reactions = VALIDATION_N_REACTIONS
+        evaluate = False
+    else:
+        max_cost = DEFAULT_MAX_COST_USD if args.max_cost_usd is None else float(args.max_cost_usd)
+        max_requests = SMOKE_N_REQUESTS if args.max_requests is None else int(args.max_requests)
+        out_dir = OUT_SMOKE_DIR if args.out_dir is None else args.out_dir
+        n_reactions = SMOKE_N_REACTIONS
+        evaluate = not bool(args.skip_eval)
     return RunConfig(
         sample_path=args.sample,
         prompts_path=args.prompts,
         answer_key_path=args.answer_key,
         pricing_path=args.pricing,
-        out_dir=args.out_dir,
+        out_dir=out_dir,
         cache_dir=args.cache_dir,
         model=args.model,
         execute=bool(args.execute),
         cache_only=bool(args.cache_only),
-        max_cost_usd=float(args.max_cost_usd),
-        max_requests=int(args.max_requests),
+        max_cost_usd=max_cost,
+        max_requests=max_requests,
         max_output_tokens=int(args.max_output_tokens),
         max_retries=int(args.max_retries),
         reasoning_effort=str(args.reasoning_effort),
-        evaluate=not bool(args.skip_eval),
+        evaluate=evaluate,
         load_env=not bool(args.no_dotenv),
+        n_reactions=n_reactions,
+        profile=profile,
+        write_results_from_cache=bool(args.write_results_from_cache),
     )
 
 
@@ -1253,16 +1559,45 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if live:
         assert_env_file_protected(config.repo_root)
         require_api_key_for_live()
-    plan = plan_smoke_run(config)
+    plan = plan_run(config)
+    sample = pd.read_csv(config.sample_path)
+    audit = audit_planned_requests(
+        plan, sample=sample, require_all_sample_ids=(config.profile == "validation"),
+    )
+    if not audit["ok"]:
+        raise ValueError(f"plan audit failed: {audit}")
     write_plan_artifacts(plan, config.out_dir)
     estimate = plan["estimate"]
     logger.info(
-        "plan model=%s requests=%d input_tokens_est=%d max_output_total=%d "
+        "plan profile=%s model=%s requests=%d cache_hits=%d new_max=%d "
+        "input_tokens_est=%d max_output_total=%d expected_usd=%.6f "
         "worst_case_usd=%.6f cap=%.2f out=%s",
-        plan["model"], plan["n_requests"], estimate["n_input_tokens_est"],
+        plan["profile"], plan["model"], plan["n_requests"],
+        plan.get("n_compatible_cache_hits", 0), plan.get("n_new_calls_max", plan["n_requests"]),
+        estimate["n_input_tokens_est"],
         estimate["planned_max_output_tokens_total_with_retries"],
+        estimate.get("expected_usd_from_smoke_prior", 0.0),
         estimate["worst_case_usd"], config.max_cost_usd, config.out_dir,
     )
+    if config.write_results_from_cache:
+        rows = freeze_results_from_cache(plan, config)
+        summary = summarize_rows(rows)
+        summary.update({
+            "frozen_from_cache": True,
+            "recorded_cost_usd": round(
+                sum(float(r.get("cost_usd") or 0.0) for r in rows), 8
+            ),
+            "model_requested": config.model,
+            "out_dir": str(config.out_dir),
+            "cache_dir": str(config.cache_dir),
+        })
+        atomic_write_json(summary, config.out_dir / "summary.json")
+        logger.info(
+            "froze %s original cache payloads; succeeded=%s failed=%s cost_usd=%s",
+            len(rows), summary.get("n_succeeded"), summary.get("n_failed"),
+            summary.get("recorded_cost_usd"),
+        )
+        return 0
     outcome = run_planned(plan, config)
     summary = outcome["summary"]
     logger.info(

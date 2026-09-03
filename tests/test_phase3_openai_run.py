@@ -5,6 +5,7 @@ No live network calls. Secrets are never asserted, logged, or written.
 
 from __future__ import annotations
 
+import inspect
 import json
 import sys
 from pathlib import Path
@@ -53,10 +54,12 @@ from benchmark.scripts.phase3_openai_run import (
     is_retryable,
     load_prompt_rows,
     main,
+    plan_run,
     plan_smoke_run,
     require_api_key_for_live,
     run_planned,
     select_smoke_reactions,
+    select_validation_reactions,
     usage_from_response,
     write_plan_artifacts,
 )
@@ -294,9 +297,15 @@ def test_test_split_rows_are_refused():
     sample.loc[0, "split"] = "test"
     with pytest.raises(ValueError, match="validation-only"):
         select_smoke_reactions(sample)
+    with pytest.raises(ValueError, match="validation-only"):
+        select_validation_reactions(sample)
 
 
 def test_plan_does_not_read_answer_key(tmp_path):
+    src = inspect.getsource(plan_run)
+    assert "answer_key_path" not in src
+    assert "OUT_PILOT_KEY" not in src
+    assert "pilot_answer_key" not in src
     paths = _workspace(tmp_path, answer_key=False)
     cfg = _config(paths, answer_key_path=tmp_path / "missing_answer_key.csv")
     plan = plan_smoke_run(cfg)
@@ -590,3 +599,98 @@ def test_live_artifacts_select_exactly_nine_validation_prompts():
         assert "candidate list" not in item.user.lower()
     again = select_smoke_reactions(sample)
     assert list(selected.sample_id) == list(again.sample_id)
+
+
+def test_validation_budget_gate_allows_theoretical_max_above_cap():
+    from benchmark.scripts.phase3_openai_run import assert_budget_gate
+    estimate = {
+        "expected_usd_from_smoke_prior": 1.6,
+        "worst_case_usd": 20.0,
+    }
+    assert_budget_gate(estimate, 5.0, require_worst_under_cap=False)
+    with pytest.raises(BudgetExceeded, match="worst-case"):
+        assert_budget_gate(estimate, 5.0, require_worst_under_cap=True)
+    with pytest.raises(BudgetExceeded, match="expected"):
+        assert_budget_gate(estimate, 1.0, require_worst_under_cap=False)
+
+
+def test_validation_plan_cannot_access_answer_key(tmp_path, monkeypatch):
+    from benchmark.scripts.phase3_openai_run import plan_run
+    paths = _workspace(tmp_path)
+    real_read = pd.read_csv
+
+    def guarded(path, *args, **kwargs):
+        text = str(path)
+        if "pilot_answer_key" in text or "answer_key" in Path(text).name:
+            raise AssertionError("answer key read during request construction")
+        return real_read(path, *args, **kwargs)
+
+    monkeypatch.setattr(pd, "read_csv", guarded)
+
+    original_read_text = Path.read_text
+
+    def guarded_read_text(self, *args, **kwargs):
+        if "pilot_answer_key" in self.name or "answer_key" in self.name:
+            raise AssertionError("answer key path opened during request construction")
+        return original_read_text(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", guarded_read_text)
+    cfg = _config(
+        paths, execute=False, profile="validation", n_reactions=3, max_requests=9,
+        max_cost_usd=5.0,
+    )
+    plan = plan_run(cfg)
+    assert plan["n_requests"] == 9
+    assert plan["answer_key_read"] is False
+    assert plan["profile"] == "validation"
+
+
+def test_validation_refuses_to_overwrite_smoke_dir(tmp_path):
+    from benchmark.scripts.phase3_common import OUT_SMOKE_DIR
+    from benchmark.scripts.phase3_openai_run import plan_run
+    paths = _workspace(tmp_path)
+    cfg = _config(
+        paths, execute=False, profile="validation", n_reactions=3, max_requests=9,
+        max_cost_usd=5.0, out_dir=OUT_SMOKE_DIR,
+    )
+    with pytest.raises(ValueError, match="must not overwrite smoke"):
+        plan_run(cfg)
+
+
+@live_only
+def test_live_validation_plan_has_489_rows_and_reuses_smoke_cache():
+    from benchmark.scripts.phase3_common import VALIDATION_N_REQUESTS
+    from benchmark.scripts.phase3_modes import CACHE_DIR
+    from benchmark.scripts.phase3_openai_run import (
+        audit_planned_requests, plan_run,
+    )
+    sample = pd.read_csv(OUT_PILOT)
+    cfg = RunConfig(
+        sample_path=OUT_PILOT,
+        prompts_path=OUT_PROMPTS,
+        pricing_path=PRICING_OPENAI_TERRA,
+        out_dir=PHASE3_DIR / "validation",
+        cache_dir=CACHE_DIR,
+        execute=False,
+        profile="validation",
+        n_reactions=163,
+        max_requests=VALIDATION_N_REQUESTS,
+        max_cost_usd=5.0,
+        evaluate=False,
+        load_env=False,
+    )
+    plan = plan_run(cfg)
+    audit = audit_planned_requests(plan, sample=sample, require_all_sample_ids=True)
+    assert audit["ok"] is True
+    assert plan["n_requests"] == 489
+    assert plan["n_reactions"] == 163
+    assert plan["n_compatible_cache_hits"] >= 9
+    assert plan["n_new_calls_max"] == 489 - plan["n_compatible_cache_hits"]
+    smoke_plan = json.loads((PHASE3_DIR / "smoke" / "plan.json").read_text(encoding="utf-8"))
+    smoke_ids = {req["cache_id"] for req in smoke_plan["requests"]}
+    assert smoke_ids <= set(plan["cache_hit_ids"])
+    assert plan["inference"]["reasoning_effort"] == "low"
+    assert plan["inference"]["max_output_tokens"] == 1024
+    assert plan["template_version"] == PROMPT_TEMPLATE_VERSION
+    assert plan["estimate"]["expected_usd_from_smoke_prior"] < 5.0
+

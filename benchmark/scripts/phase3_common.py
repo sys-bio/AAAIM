@@ -10,6 +10,7 @@ import hashlib
 import json
 import os
 import re
+import time
 from pathlib import Path
 from typing import AbstractSet, Any, Dict, FrozenSet, Iterable, List, Optional, Sequence, Tuple
 
@@ -45,6 +46,7 @@ OUT_KEGG_CATALOG_IDS = PHASE3_DIR / "kegg_catalog_ids.json"
 PRICING_EXAMPLE = PHASE3_DIR / "pricing.example.json"
 PRICING_OPENAI_TERRA = PHASE3_DIR / "pricing.openai.gpt-5.6-terra.json"
 OUT_SMOKE_DIR = PHASE3_DIR / "smoke"
+OUT_VALIDATION_DIR = PHASE3_DIR / "validation"
 
 YEAST_CLUSTER = "CLU_BIOMD0000000042"
 PHASE2_TAG = "benchmark-phase2-v1"
@@ -102,6 +104,16 @@ DEFAULT_MODEL = "gpt-5.6-terra"
 SMOKE_N_REACTIONS = 3
 SMOKE_N_REQUESTS = 9
 SMOKE_SELECTION_RULE = "seeded_round_robin_one_per_stratum_v1"
+VALIDATION_N_REACTIONS = 163
+VALIDATION_N_REQUESTS = 489
+VALIDATION_SELECTION_RULE = "frozen_validation_pilot_all_rows_v1"
+VALIDATION_MAX_COST_USD = 5.00
+RETRIEVAL_FAILURE_STRATA = (
+    STRATUM_UNCONSTRAINED,
+    STRATUM_EMPTY,
+    STRATUM_ABSENT,
+    STRATUM_RERANK,
+)
 LIVE_TOKENIZER_REQUIRED = (
     "Live runs must use the chosen model's tokenizer or a conservative "
     "provider-specific bound; chars/4 is scaffolding only and must not gate spend."
@@ -129,13 +141,33 @@ def write_json(obj: Any, path: Path) -> None:
     atomic_write_json(obj, path)
 
 
+def _replace_with_retry(tmp: Path, path: Path, *, attempts: int = 12, delay_s: float = 0.05) -> None:
+    """Atomically replace ``path`` with ``tmp``.
+
+    Windows can deny ``os.replace`` when a reader (indexer, antivirus, editor)
+    still has the destination open. Retry briefly rather than dropping a
+    completed API response.
+    """
+    last_exc: Optional[BaseException] = None
+    for i in range(attempts):
+        try:
+            os.replace(tmp, path)
+            return
+        except PermissionError as exc:
+            last_exc = exc
+            time.sleep(delay_s * (i + 1))
+    if last_exc is not None:
+        raise last_exc
+    raise PermissionError(f"could not replace {path}")
+
+
 def atomic_write_json(obj: Any, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_name(path.name + ".tmp")
     with open(tmp, "w", newline="\n", encoding="utf-8") as fh:
         json.dump(obj, fh, indent=2, sort_keys=True)
         fh.write("\n")
-    os.replace(tmp, path)
+    _replace_with_retry(tmp, path)
 
 
 def atomic_write_jsonl(rows: Sequence[Dict[str, Any]], path: Path) -> None:
@@ -144,7 +176,7 @@ def atomic_write_jsonl(rows: Sequence[Dict[str, Any]], path: Path) -> None:
     with open(tmp, "w", newline="\n", encoding="utf-8") as fh:
         for row in rows:
             fh.write(json.dumps(row, sort_keys=True, separators=(",", ":")) + "\n")
-    os.replace(tmp, path)
+    _replace_with_retry(tmp, path)
 
 
 def write_jsonl(rows: Sequence[Dict[str, Any]], path: Path) -> None:
