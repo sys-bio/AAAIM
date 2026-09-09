@@ -1,0 +1,14 @@
+{
+  "catalog_size": 12312,
+  "config_hash": "0b808b72948311a44ebfd5869168751297df47a6afcfd1484a3b6907c9cabe88",
+  "device": "cuda",
+  "epoch": 1,
+  "gpu_name": "NVIDIA GeForce RTX 3070",
+  "labels_loaded_during_ranking": false,
+  "model_revision": "5e62ea33e012fda8c02802b906664c915ebd1bb1",
+  "n_queries": 969,
+  "peak_allocated_vram_bytes": 665053696,
+  "peak_reserved_vram_bytes": 729808896,
+  "ranking_sha256_before_label_join": "660c7ff55d787928050ba963cf4236788de21f661a523a5ebc1c47abbfc2f304",
+  "seconds": 15.343188500000906
+}

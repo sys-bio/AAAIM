@@ -1,0 +1,39 @@
+{
+  "cloud_or_rented_gpu_used": false,
+  "evaluation": {
+    "test_rows_read_ranked_or_scored": 0,
+    "validation_labels_joined_only_after_ranking_digest_was_recorded": true
+  },
+  "external_model_used_beyond_authorized_checkpoint": false,
+  "initialization": "BAAI/bge-small-en-v1.5@5e62ea33e012fda8c02802b906664c915ebd1bb1",
+  "paid_api_used": false,
+  "ranking": {
+    "catalog_size_per_epoch": [
+      12312,
+      12312,
+      12312,
+      12312
+    ],
+    "labels_loaded_during_ranking": [
+      false,
+      false,
+      false,
+      false
+    ],
+    "model_visible_queries_digit_bounded_kegg_reaction_id_scan_passed": true,
+    "n_queries_per_epoch": [
+      969,
+      969,
+      969,
+      969
+    ],
+    "split": "validation only"
+  },
+  "smoke_checkpoint_used": false,
+  "training": {
+    "model_visible_queries_digit_bounded_kegg_reaction_id_scan_passed": true,
+    "n_queries": 3466,
+    "split": "train only",
+    "test_keys_or_labels_used": 0
+  }
+}

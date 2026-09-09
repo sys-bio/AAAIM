@@ -1,4 +1,4 @@
-"""Leakage-safe Phase 3B bi-encoder preparation and bounded smoke training.
+"""Leakage-safe Phase 3B bi-encoder smoke and prespecified full training.
 
 The module intentionally keeps the held-out test split inaccessible.  Training
 examples are built only after train keys have been selected, and validation
@@ -18,6 +18,7 @@ import os
 import pickle
 import platform
 import random
+import shutil
 import subprocess
 import sys
 import time
@@ -48,6 +49,7 @@ from benchmark.scripts.phase3_common import (
 )
 
 OUT = PHASE3_DIR / "phase3b_smoke"
+FULL_OUT = PHASE3_DIR / "phase3b_full"
 MODEL_NAME = "BAAI/bge-small-en-v1.5"
 MODEL_REVISION = "5e62ea33e012fda8c02802b906664c915ebd1bb1"
 MODEL_LICENSE = "MIT"
@@ -58,7 +60,10 @@ DOCUMENT_TEMPLATE = retrieval.DOCUMENT_TEMPLATE_VERSION
 DATASET_SCHEMA = "phase3b-training-examples-v1"
 CHECKPOINT_SCHEMA = "phase3b-biencoder-checkpoint-v1"
 RANKING_SCHEMA = "phase3b-validation-ranking-v1"
+FULL_RANKING_SCHEMA = "phase3b-full-validation-ranking-v1"
+FULL_RUN_SCHEMA = "phase3b-full-run-v1"
 DEFAULT_SEED = 20260909
+BOOTSTRAP_SEED = 20260902
 
 
 @functools.lru_cache(maxsize=1)
@@ -1046,6 +1051,1070 @@ def verify_manifest(out: Path = OUT) -> list[str]:
     return problems
 
 
+def full_training_config() -> TrainingConfig:
+    """The single prespecified Phase 3B full-run configuration."""
+    microbatches_per_epoch = math.ceil(3466 / 4)
+    updates_per_epoch = math.ceil(microbatches_per_epoch / 2)
+    total_updates = updates_per_epoch * 3
+    return TrainingConfig(
+        max_length=256,
+        physical_batch_size=4,
+        gradient_accumulation_steps=2,
+        learning_rate=2e-5,
+        warmup_steps=math.ceil(total_updates * 0.10),
+        max_optimizer_steps=total_updates,
+        epochs=3,
+        temperature=0.02,
+        max_grad_norm=1.0,
+        seed=DEFAULT_SEED,
+        bm25_hard_negatives=2,
+        random_negatives=1,
+        mixed_precision=True,
+    )
+
+
+def full_epoch_layout(n_examples: int, config: TrainingConfig, epoch: int) -> list[list[list[int]]]:
+    """Physical batches grouped into optimizer updates without crossing epochs."""
+    if epoch not in (1, 2, 3):
+        raise ValueError("full training epoch must be 1, 2, or 3")
+    order = _epoch_order(n_examples, config.seed, epoch - 1)
+    physical = [order[i:i + config.physical_batch_size] for i in range(0, n_examples, config.physical_batch_size)]
+    return [physical[i:i + config.gradient_accumulation_steps] for i in range(0, len(physical), config.gradient_accumulation_steps)]
+
+
+def assert_full_initializer(initializer: str | Path | None) -> None:
+    """Full runs initialize only from the pinned official checkpoint or full-run resume."""
+    if initializer is None or str(initializer) == f"{MODEL_NAME}@{MODEL_REVISION}":
+        return
+    normalized = str(initializer).replace("\\", "/").lower()
+    if "phase3b_smoke" in normalized or "overfit" in normalized or "representative" in normalized:
+        raise ValueError("smoke checkpoints are forbidden as full-run initializers")
+    if "phase3b_full/_checkpoints" not in normalized:
+        raise ValueError("full-run resume checkpoint must come from the Phase 3B full output")
+
+
+def select_best_epoch(epoch_metrics: Mapping[int, Mapping[str, Any]]) -> int:
+    """Prespecified validation-only hierarchy with earlier-epoch tie breaking."""
+    if set(epoch_metrics) != {0, 1, 2, 3}:
+        raise ValueError("checkpoint selection requires epochs 0 through 3")
+    return max(
+        epoch_metrics,
+        key=lambda epoch: (
+            float(epoch_metrics[epoch]["exact"]["recall_at_1"]["reaction_micro"]),
+            float(epoch_metrics[epoch]["exact"]["recall_at_10"]["reaction_micro"]),
+            float(epoch_metrics[epoch]["seen_unseen"]["unseen"]["recall_at_10"]["reaction_micro"]),
+            -epoch,
+        ),
+    )
+
+
+def validate_full_ranking_rows(rows: Sequence[Mapping[str, Any]], *, epoch: int, expected: int = 969) -> None:
+    if len(rows) != expected:
+        raise ValueError(f"epoch {epoch} ranking count mismatch: {len(rows)} != {expected}")
+    keys: set[tuple[str, str]] = set()
+    for row in rows:
+        if row.get("schema") != FULL_RANKING_SCHEMA or row.get("split") != "validation":
+            raise ValueError("full-run rankings must be validation-only")
+        if int(row.get("epoch", -1)) != epoch:
+            raise ValueError("ranking epoch mismatch")
+        key = (str(row["model_id"]), str(row["reaction_id"]))
+        if key in keys:
+            raise ValueError("duplicate ranking key")
+        keys.add(key)
+        ids = list(row["ranked_ids"])
+        if len(ids) != 100:
+            raise ValueError("full-catalog validation ranking must contain exactly 100 IDs")
+        if len(ids) != len(set(ids)):
+            raise ValueError("duplicate ranked ID")
+
+
+def _read_full_ranking(path: Path, epoch: int) -> list[dict[str, Any]]:
+    rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
+    validate_full_ranking_rows(rows, epoch=epoch)
+    return rows
+
+
+def _load_official_start(config: TrainingConfig, cache: Path) -> tuple[Any, Any, Any]:
+    import torch
+    from transformers import AutoModel, AutoTokenizer
+
+    assert_full_initializer(f"{MODEL_NAME}@{MODEL_REVISION}")
+    tokenizer = AutoTokenizer.from_pretrained(
+        config.model_name, revision=config.model_revision, cache_dir=cache, local_files_only=True,
+    )
+    model = AutoModel.from_pretrained(
+        config.model_name, revision=config.model_revision, cache_dir=cache, local_files_only=True,
+    )
+    resolved = getattr(model.config, "_commit_hash", None)
+    if resolved != MODEL_REVISION:
+        raise ValueError(f"official checkpoint revision mismatch: {resolved}")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if device.type != "cuda":
+        raise RuntimeError("full Phase 3B training requires CUDA")
+    model.to(device)
+    return model, tokenizer, device
+
+
+def freeze_full_epoch_rankings(
+    model: Any, tokenizer: Any, device: Any, config: TrainingConfig, *, epoch: int, out: Path,
+    batch_size: int = 64,
+) -> tuple[Path, dict[str, Any]]:
+    """Freeze label-free validation rankings; never loads a label table."""
+    import torch
+
+    path = out / f"rankings_epoch_{epoch}.jsonl"
+    runtime_path = out / f"ranking_runtime_epoch_{epoch}.json"
+    if path.exists() or runtime_path.exists():
+        raise FileExistsError(f"refusing to overwrite completed epoch-{epoch} rankings")
+    population = retrieval.load_query_population("validation")
+    queries = [retrieval.query_text(row) for row in population.to_dict("records")]
+    assert_no_kegg_leakage(queries, where=f"full-run validation epoch {epoch}")
+    docs = retrieval.load_catalog()
+    model.eval()
+    torch.cuda.empty_cache()
+    torch.cuda.reset_peak_memory_stats()
+    started = time.perf_counter()
+    document_embeddings = _encode_texts(
+        model, tokenizer, [x["text"] for x in docs], device,
+        max_length=config.max_length, batch_size=batch_size,
+    )
+    query_embeddings = _encode_texts(
+        model, tokenizer, queries, device, max_length=config.max_length, batch_size=batch_size,
+    )
+    ranks = retrieval.dense_rank(
+        query_embeddings, document_embeddings, [x["kegg_id"] for x in docs], topn=100,
+    )
+    rows = [{
+        "schema": FULL_RANKING_SCHEMA,
+        "epoch": epoch,
+        "model_id": row["model_id"],
+        "reaction_id": row["reaction_id"],
+        "split": "validation",
+        "ranked_ids": ids,
+    } for row, ids in zip(population.to_dict("records"), ranks)]
+    validate_full_ranking_rows(rows, epoch=epoch)
+    atomic_write_jsonl(rows, path)
+    runtime = {
+        "epoch": epoch,
+        "ranking_sha256_before_label_join": sha256_file(path),
+        "seconds": time.perf_counter() - started,
+        "device": str(device),
+        "gpu_name": torch.cuda.get_device_name(0),
+        "peak_allocated_vram_bytes": int(torch.cuda.max_memory_allocated()),
+        "peak_reserved_vram_bytes": int(torch.cuda.max_memory_reserved()),
+        "model_revision": MODEL_REVISION,
+        "config_hash": config.hash,
+        "labels_loaded_during_ranking": False,
+        "n_queries": len(rows),
+        "catalog_size": len(docs),
+    }
+    write_json(runtime, runtime_path)
+    model.train()
+    return path, runtime
+
+
+def _first_rank(ids: Sequence[str], truths: set[str], *, brite: bool = False) -> int | None:
+    for rank, candidate in enumerate(ids, 1):
+        if candidate in truths or (brite and is_equivalent(candidate, truths, "brite_orthology")):
+            return rank
+    return None
+
+
+def _metric_three_way(frame: pd.DataFrame, column: str) -> dict[str, Any]:
+    return {
+        "reaction_micro": round(float(frame[column].astype(float).mean()), 6),
+        "model_macro": round(float(frame.groupby("model_id")[column].mean().mean()), 6),
+        "cluster_macro": round(float(frame.groupby("cluster_id")[column].mean().mean()), 6),
+        "n_reactions": len(frame),
+    }
+
+
+def score_full_epoch_rankings(path: Path, *, epoch: int, out: Path) -> tuple[dict[str, Any], pd.DataFrame]:
+    """Join validation labels only after the epoch ranking is frozen."""
+    frozen_digest = sha256_file(path)
+    rows = _read_full_ranking(path, epoch)
+    truth = _load_validation_truth_after_freeze(path)
+    rank_map = {(x["model_id"], x["reaction_id"]): x["ranked_ids"] for x in rows}
+    scored_rows = []
+    for item in truth.itertuples():
+        ids = rank_map[(item.model_id, item.reaction_id)]
+        targets = set(item.truth)
+        exact = _first_rank(ids, targets)
+        brite = _first_rank(ids, targets, brite=True)
+        scored = {
+            "model_id": item.model_id,
+            "reaction_id": item.reaction_id,
+            "cluster_id": item.cluster_id,
+            "stratum": item.stratum,
+            "seen_in_train": bool(item.seen_in_train),
+            "multi_positive": len(targets) > 1,
+            "ground_truth_ids": list(item.truth),
+            "first_hit_rank_exact": exact,
+            "first_hit_rank_brite_orthology": brite,
+            "mrr_at_10_exact": 0.0 if exact is None or exact > 10 else 1.0 / exact,
+            "mrr_at_10_brite_orthology": 0.0 if brite is None or brite > 10 else 1.0 / brite,
+        }
+        for k in (1, 3, 5, 10):
+            scored[f"recall_at_{k}_exact"] = exact is not None and exact <= k
+            scored[f"recall_at_{k}_brite_orthology"] = brite is not None and brite <= k
+        scored_rows.append(scored)
+    frame = pd.DataFrame(scored_rows)
+    exact = {
+        f"recall_at_{k}": _metric_three_way(frame, f"recall_at_{k}_exact") for k in (1, 3, 5, 10)
+    }
+    exact["mrr_at_10"] = _metric_three_way(frame, "mrr_at_10_exact")
+    brite_metrics = {
+        f"recall_at_{k}": _metric_three_way(frame, f"recall_at_{k}_brite_orthology")
+        for k in (1, 3, 5, 10)
+    }
+    brite_metrics["mrr_at_10"] = _metric_three_way(frame, "mrr_at_10_brite_orthology")
+
+    def subset_metrics(subset: pd.DataFrame) -> dict[str, Any]:
+        return {
+            f"recall_at_{k}": _metric_three_way(subset, f"recall_at_{k}_exact") for k in (1, 3, 5, 10)
+        } | {"mrr_at_10": _metric_three_way(subset, "mrr_at_10_exact")}
+
+    metrics = {
+        "schema": FULL_RUN_SCHEMA,
+        "epoch": epoch,
+        "scope": "validation-only; ranking frozen before label join; no test rows",
+        "ranking_sha256_before_label_join": frozen_digest,
+        "exact": exact,
+        "brite_orthology": brite_metrics,
+        "seen_unseen": {
+            "seen": subset_metrics(frame[frame.seen_in_train]),
+            "unseen": subset_metrics(frame[~frame.seen_in_train]),
+        },
+        "failure_strata": {
+            "true_retrieval_failure": subset_metrics(frame[frame.stratum.isin(TRUE_RETRIEVAL_FAILURE_STRATA)]),
+            "rerank_failure": subset_metrics(frame[frame.stratum.eq("retrievable_rerank_failure")]),
+        },
+        "multi_positive": {
+            "multi": subset_metrics(frame[frame.multi_positive]),
+            "single": subset_metrics(frame[~frame.multi_positive]),
+        },
+        "n_validation_reactions": len(frame),
+        "test_rows_read": 0,
+    }
+    if sha256_file(path) != frozen_digest:
+        raise RuntimeError("ranking mutated during offline scoring")
+    write_json(metrics, out / f"metrics_epoch_{epoch}.json")
+    return metrics, frame
+
+
+def _atomic_copy(source: Path, destination: Path) -> None:
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    tmp = destination.with_name(destination.name + ".tmp")
+    shutil.copyfile(source, tmp)
+    _replace_with_retry(tmp, destination)
+
+
+def _checkpoint_record(path: Path, *, epoch: int, role: str, config: TrainingConfig, dataset_hash: str) -> dict[str, Any]:
+    return {
+        "epoch": epoch,
+        "role": role,
+        "path": repo_relative_posix(path),
+        "bytes": path.stat().st_size,
+        "sha256": sha256_file(path),
+        "config_hash": config.hash,
+        "dataset_hash": dataset_hash,
+        "contains": ["model", "optimizer", "scheduler", "grad_scaler", "epoch", "cursor", "rng-compatible deterministic ordering"],
+    }
+
+
+def _full_checkpoint_paths(out: Path, epoch: int) -> tuple[Path, Path]:
+    root = out / "_checkpoints"
+    return root / f"epoch_{epoch}.pt", root / "latest.pt"
+
+
+def load_full_resume_checkpoint(
+    path: Path, *, model: Any, optimizer: Any, scheduler: Any, scaler: Any,
+    config: TrainingConfig, dataset_hash: str,
+) -> dict[str, Any]:
+    assert_full_initializer(path)
+    state = load_checkpoint(
+        path, model=model, optimizer=optimizer, scheduler=scheduler, scaler=scaler,
+        config=config, dataset_hash=dataset_hash,
+    )
+    if int(state.get("completed_epoch", -1)) not in (0, 1, 2, 3):
+        raise ValueError("invalid full-run checkpoint epoch state")
+    return state
+
+
+def train_one_full_epoch(
+    examples: Sequence[Mapping[str, Any]], config: TrainingConfig, *, epoch: int,
+    model: Any, tokenizer: Any, device: Any, optimizer: Any, scheduler: Any, scaler: Any,
+    state: dict[str, Any], out: Path, docs: Mapping[str, str], dataset_hash: str,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Train exactly one deterministic epoch, with resumable optimizer-group cursor."""
+    import torch
+
+    groups = full_epoch_layout(len(examples), config, epoch)
+    if state.get("active_epoch") not in (None, epoch):
+        raise ValueError("resume state points at a different active epoch")
+    start_group = int(state.get("update_group_cursor", 0)) if state.get("active_epoch") == epoch else 0
+    partial_path = out / "_checkpoints" / f"partial_epoch_{epoch}.json"
+    partial = json.loads(partial_path.read_text(encoding="utf-8")) if start_group and partial_path.exists() else {
+        "trajectory": [], "loss_weighted_sum": 0.0, "examples": 0, "grad_norms": [], "skipped": 0,
+    }
+    if start_group and len(partial["trajectory"]) != start_group:
+        raise ValueError("partial epoch trajectory/cursor mismatch")
+    model.train()
+    torch.cuda.empty_cache()
+    torch.cuda.reset_peak_memory_stats()
+    started = time.perf_counter()
+    optimizer.zero_grad(set_to_none=True)
+    try:
+        for group_index in range(start_group, len(groups)):
+            physical_batches = groups[group_index]
+            group_loss_sum = 0.0
+            group_examples = 0
+            for indices in physical_batches:
+                batch = [examples[i] for i in indices]
+                with torch.autocast("cuda", dtype=torch.float16, enabled=config.mixed_precision):
+                    loss = _batch_loss(model, tokenizer, batch, docs, config, device)
+                scaler.scale(loss / len(physical_batches)).backward()
+                group_loss_sum += float(loss.detach().cpu()) * len(batch)
+                group_examples += len(batch)
+            scaler.unscale_(optimizer)
+            grad_norm = float(torch.nn.utils.clip_grad_norm_(model.parameters(), config.max_grad_norm).detach().cpu())
+            scale_before = scaler.get_scale()
+            scaler.step(optimizer)
+            scaler.update()
+            optimizer.zero_grad(set_to_none=True)
+            skipped = scaler.get_scale() < scale_before
+            if not skipped:
+                scheduler.step()
+                state["optimizer_step"] = int(state.get("optimizer_step", 0)) + 1
+                partial["grad_norms"].append(grad_norm)
+            else:
+                partial["skipped"] = int(partial["skipped"]) + 1
+            state["active_epoch"] = epoch
+            state["update_group_cursor"] = group_index + 1
+            state["examples_processed"] = int(state.get("examples_processed", 0)) + group_examples
+            partial["loss_weighted_sum"] = float(partial["loss_weighted_sum"]) + group_loss_sum
+            partial["examples"] = int(partial["examples"]) + group_examples
+            partial["trajectory"].append({
+                "epoch": epoch,
+                "update_group": group_index + 1,
+                "optimizer_step": int(state["optimizer_step"]),
+                "mean_loss": group_loss_sum / group_examples,
+                "learning_rate": float(optimizer.param_groups[0]["lr"]),
+                "grad_norm": None if skipped else grad_norm,
+                "examples": group_examples,
+                "skipped": skipped,
+            })
+    except KeyboardInterrupt:
+        write_json(partial, partial_path)
+        _, latest = _full_checkpoint_paths(out, epoch)
+        save_checkpoint(
+            latest, model=model, optimizer=optimizer, scheduler=scheduler, scaler=scaler,
+            state=state, config=config, dataset_hash=dataset_hash,
+        )
+        write_json(state, out / "run_state.json")
+        raise
+    if int(partial["examples"]) != len(examples):
+        raise RuntimeError(f"epoch {epoch} processed {partial['examples']} != {len(examples)} examples")
+    state.update({
+        "completed_epoch": epoch,
+        "active_epoch": None,
+        "update_group_cursor": 0,
+    })
+    epoch_checkpoint, latest = _full_checkpoint_paths(out, epoch)
+    if epoch_checkpoint.exists():
+        raise FileExistsError(f"refusing to overwrite completed checkpoint: {epoch_checkpoint}")
+    save_checkpoint(
+        epoch_checkpoint, model=model, optimizer=optimizer, scheduler=scheduler, scaler=scaler,
+        state=state, config=config, dataset_hash=dataset_hash,
+    )
+    _atomic_copy(epoch_checkpoint, latest)
+    elapsed = time.perf_counter() - started
+    grad_norms = [float(x) for x in partial["grad_norms"]]
+    epoch_metrics = {
+        "epoch": epoch,
+        "mean_training_loss": float(partial["loss_weighted_sum"]) / int(partial["examples"]),
+        "loss_trajectory": partial["trajectory"],
+        "learning_rate_trajectory": [x["learning_rate"] for x in partial["trajectory"]],
+        "gradient_norm_summary": {
+            "count": len(grad_norms),
+            "min": min(grad_norms) if grad_norms else None,
+            "mean": sum(grad_norms) / len(grad_norms) if grad_norms else None,
+            "max": max(grad_norms) if grad_norms else None,
+        },
+        "optimizer_updates_epoch": len(groups) - int(partial["skipped"]),
+        "optimizer_updates_total": int(state["optimizer_step"]),
+        "examples_processed_epoch": int(partial["examples"]),
+        "examples_processed_total": int(state["examples_processed"]),
+        "skipped_optimizer_updates": int(partial["skipped"]),
+        "training_seconds": elapsed,
+        "examples_per_second": int(partial["examples"]) / elapsed,
+        "peak_allocated_vram_bytes": int(torch.cuda.max_memory_allocated()),
+        "peak_reserved_vram_bytes": int(torch.cuda.max_memory_reserved()),
+        "checkpoint": _checkpoint_record(
+            epoch_checkpoint, epoch=epoch, role="completed_epoch", config=config, dataset_hash=dataset_hash,
+        ),
+        "resumed_within_epoch": start_group > 0,
+    }
+    write_json(epoch_metrics, out / f"training_metrics_epoch_{epoch}.json")
+    write_json(state, out / "run_state.json")
+    if partial_path.exists():
+        partial_path.unlink()
+    return epoch_metrics, state
+
+
+def score_reference_rankings(path: Path, truth: pd.DataFrame, *, method: str) -> tuple[pd.DataFrame, dict[tuple[str, str], list[str]]]:
+    """Score an already-frozen baseline without invoking its optional runtime stack."""
+    rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
+    rank_map = {(str(x["model_id"]), str(x["reaction_id"])): list(x["ranked_ids"]) for x in rows}
+    expected = set(zip(truth.model_id.astype(str), truth.reaction_id.astype(str)))
+    if set(rank_map) != expected or len(rows) != len(rank_map):
+        raise ValueError(f"baseline population mismatch for {method}")
+    scored = []
+    for item in truth.itertuples():
+        ids = rank_map[(item.model_id, item.reaction_id)]
+        targets = set(item.truth)
+        exact = _first_rank(ids, targets)
+        brite = _first_rank(ids, targets, brite=True)
+        row = {
+            "model_id": item.model_id,
+            "reaction_id": item.reaction_id,
+            "cluster_id": item.cluster_id,
+            "stratum": item.stratum,
+            "seen_in_train": bool(item.seen_in_train),
+            "multi_positive": len(targets) > 1,
+            "ground_truth_ids": list(item.truth),
+            "first_hit_rank_exact": exact,
+            "first_hit_rank_brite_orthology": brite,
+            "mrr_at_10_exact": 0.0 if exact is None or exact > 10 else 1.0 / exact,
+            "mrr_at_10_brite_orthology": 0.0 if brite is None or brite > 10 else 1.0 / brite,
+        }
+        for k in (1, 3, 5, 10):
+            row[f"recall_at_{k}_exact"] = exact is not None and exact <= k
+            row[f"recall_at_{k}_brite_orthology"] = brite is not None and brite <= k
+        scored.append(row)
+    return pd.DataFrame(scored), rank_map
+
+
+def summarize_scored_frame(frame: pd.DataFrame) -> dict[str, Any]:
+    metrics: dict[str, Any] = {}
+    for kind in ("exact", "brite_orthology"):
+        metrics[kind] = {
+            f"recall_at_{k}": _metric_three_way(frame, f"recall_at_{k}_{kind}")
+            for k in (1, 3, 5, 10)
+        }
+        metrics[kind]["mrr_at_10"] = _metric_three_way(frame, f"mrr_at_10_{kind}")
+    return metrics
+
+
+def paired_cluster_bootstrap_strict(
+    a: pd.DataFrame, b: pd.DataFrame, column: str, *, seed: int = BOOTSTRAP_SEED,
+    n_boot: int = 10_000,
+) -> dict[str, Any]:
+    """Paired reaction-micro difference with strict population/cluster alignment."""
+    keys = ["model_id", "reaction_id"]
+    a_small = a[keys + ["cluster_id", column]].copy()
+    b_small = b[keys + ["cluster_id", column]].copy()
+    if a_small.duplicated(keys).any() or b_small.duplicated(keys).any():
+        raise ValueError("bootstrap input contains duplicate reactions")
+    merged = a_small.merge(b_small, on=keys, suffixes=("_a", "_b"), validate="one_to_one")
+    if len(merged) != len(a_small) or len(merged) != len(b_small):
+        raise ValueError("bootstrap populations are not aligned")
+    if not merged.cluster_id_a.equals(merged.cluster_id_b):
+        raise ValueError("bootstrap cluster assignments are not aligned")
+    groups = sorted(merged.cluster_id_a.unique())
+    if len(groups) != 12:
+        raise ValueError(f"expected 12 frozen validation clusters, found {len(groups)}")
+    per_cluster = {
+        cluster: (
+            float((part[f"{column}_a"].astype(float) - part[f"{column}_b"].astype(float)).sum()),
+            len(part),
+        )
+        for cluster, part in merged.groupby("cluster_id_a")
+    }
+    rng = random.Random(seed)
+    values = []
+    for _ in range(n_boot):
+        drawn = [rng.choice(groups) for _ in groups]
+        numerator = sum(per_cluster[x][0] for x in drawn)
+        denominator = sum(per_cluster[x][1] for x in drawn)
+        values.append(numerator / denominator)
+    values.sort()
+    point = float(
+        (merged[f"{column}_a"].astype(float) - merged[f"{column}_b"].astype(float)).mean()
+    )
+    low = values[int(0.025 * n_boot)]
+    high = values[min(n_boot - 1, int(0.975 * n_boot))]
+    return {
+        "delta_selected_minus_reference": round(point, 6),
+        "ci_95_percentile": [round(low, 6), round(high, 6)],
+        "includes_zero": bool(low <= 0.0 <= high),
+        "seed": seed,
+        "n_boot": n_boot,
+        "unit": "frozen validation cluster",
+        "n_clusters": len(groups),
+        "n_reactions": len(merged),
+        "estimand": f"paired reaction-micro {column} difference",
+        "limitation": "Only 12 validation clusters; percentile intervals may be unstable.",
+    }
+
+
+def build_transition_analysis(
+    epoch0: pd.DataFrame, selected: pd.DataFrame, bm25: pd.DataFrame,
+    *, epoch0_ranks: Mapping[tuple[str, str], Sequence[str]],
+    selected_ranks: Mapping[tuple[str, str], Sequence[str]],
+    bm25_ranks: Mapping[tuple[str, str], Sequence[str]],
+    expected_reactions: int = 969,
+) -> dict[str, Any]:
+    keys = ["model_id", "reaction_id"]
+    base = epoch0[keys + ["cluster_id", "stratum", "seen_in_train", "multi_positive", "ground_truth_ids", "first_hit_rank_exact"]]
+    joined = base.merge(
+        selected[keys + ["first_hit_rank_exact"]], on=keys,
+        suffixes=("_epoch0", "_selected"), validate="one_to_one",
+    ).merge(
+        bm25[keys + ["first_hit_rank_exact"]].rename(columns={"first_hit_rank_exact": "first_hit_rank_bm25"}),
+        on=keys, validate="one_to_one",
+    )
+    if len(joined) != expected_reactions:
+        raise ValueError(f"transition population must contain all {expected_reactions} validation reactions")
+    r0 = joined.first_hit_rank_exact_epoch0.fillna(101).astype(int)
+    rs = joined.first_hit_rank_exact_selected.fillna(101).astype(int)
+    rb = joined.first_hit_rank_bm25.fillna(101).astype(int)
+    masks = {
+        "incorrect_epoch0_to_correct_selected": (r0 != 1) & (rs == 1),
+        "correct_epoch0_to_incorrect_selected": (r0 == 1) & (rs != 1),
+        "improved_rank_without_top1": (rs < r0) & (rs > 1),
+        "worsened_rank": rs > r0,
+        "recovered_within_top10": (r0 > 10) & (rs <= 10),
+        "lost_from_top10": (r0 <= 10) & (rs > 10),
+    }
+    top1_matrix = {
+        "wrong_to_wrong": int(((r0 != 1) & (rs != 1)).sum()),
+        "wrong_to_correct": int(((r0 != 1) & (rs == 1)).sum()),
+        "correct_to_wrong": int(((r0 == 1) & (rs != 1)).sum()),
+        "correct_to_correct": int(((r0 == 1) & (rs == 1)).sum()),
+    }
+    if sum(top1_matrix.values()) != len(joined):
+        raise RuntimeError("Top-1 transition counts do not partition the population")
+
+    def breakdown(mask: pd.Series) -> dict[str, Any]:
+        part = joined[mask]
+        return {
+            "total": len(part),
+            "seen": int(part.seen_in_train.sum()),
+            "unseen": int((~part.seen_in_train).sum()),
+            "true_retrieval_failure": int(part.stratum.isin(TRUE_RETRIEVAL_FAILURE_STRATA).sum()),
+            "rerank_failure": int(part.stratum.eq("retrievable_rerank_failure").sum()),
+            "multi_positive": int(part.multi_positive.sum()),
+            "single_positive": int((~part.multi_positive).sum()),
+            "by_stratum": {str(k): int(v) for k, v in sorted(part.stratum.value_counts().items())},
+        }
+
+    example_masks = {
+        "successful_biochemical_retrieval_learned": masks["incorrect_epoch0_to_correct_selected"],
+        "harmed_by_fine_tuning": masks["correct_epoch0_to_incorrect_selected"],
+        "unseen_target_improvement": (~joined.seen_in_train) & (rs < r0),
+        "unseen_target_regression": (~joined.seen_in_train) & (rs > r0),
+        "bm25_success_biencoder_misses": (rb == 1) & (rs != 1),
+        "biencoder_success_bm25_misses": (rs == 1) & (rb != 1),
+    }
+    population = retrieval.load_query_population("validation").set_index(keys)
+    examples = []
+    for category, mask in example_masks.items():
+        candidates = joined[mask].sort_values(keys)
+        if candidates.empty:
+            examples.append({"category": category, "eligible_count": 0, "example": None})
+            continue
+        item = candidates.iloc[0]
+        key = (str(item.model_id), str(item.reaction_id))
+        query_row = population.loc[key]
+        examples.append({
+            "category": category,
+            "eligible_count": len(candidates),
+            "selection": "lexicographically first eligible validation reaction",
+            "example": {
+                "model_id": key[0],
+                "reaction_id": key[1],
+                "cluster_id": item.cluster_id,
+                "stratum": item.stratum,
+                "seen_in_train": bool(item.seen_in_train),
+                "multi_positive": bool(item.multi_positive),
+                "ground_truth_ids": list(item.ground_truth_ids),
+                "query": retrieval.query_text(query_row.to_dict()),
+                "first_hit_rank_exact": {
+                    "epoch0": None if int(r0.loc[item.name]) == 101 else int(r0.loc[item.name]),
+                    "selected": None if int(rs.loc[item.name]) == 101 else int(rs.loc[item.name]),
+                    "bm25": None if int(rb.loc[item.name]) == 101 else int(rb.loc[item.name]),
+                },
+                "top10": {
+                    "epoch0": list(epoch0_ranks[key][:10]),
+                    "selected": list(selected_ranks[key][:10]),
+                    "bm25": list(bm25_ranks[key][:10]),
+                },
+            },
+        })
+    return {
+        "scope": "paired 969-reaction validation population; exact reaction matching",
+        "n_reactions": len(joined),
+        "rank_not_in_top100_value_for_comparison": 101,
+        "top1_transition_matrix": top1_matrix,
+        "transitions": {name: breakdown(mask) for name, mask in masks.items()},
+        "examples": examples,
+        "example_selection_is_mechanical": True,
+    }
+
+
+def _compact_exact(metrics: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        name: dict(metrics["exact"][name])
+        for name in ("recall_at_1", "recall_at_3", "recall_at_5", "recall_at_10", "mrr_at_10")
+    }
+
+
+def _rank_map_from_full(path: Path, epoch: int) -> dict[tuple[str, str], list[str]]:
+    return {(x["model_id"], x["reaction_id"]): list(x["ranked_ids"]) for x in _read_full_ranking(path, epoch)}
+
+
+def _full_report(
+    epoch_comparison: Mapping[str, Any], baseline: Mapping[str, Any], bootstrap: Mapping[str, Any],
+    transition: Mapping[str, Any], runtime: Mapping[str, Any], selection: Mapping[str, Any],
+    recommendation: Mapping[str, Any],
+) -> str:
+    lines = [
+        "# Phase 3B full bi-encoder training", "",
+        "One prespecified BGE-small configuration was trained for exactly three epochs. All checkpoint selection and analysis are validation-only: each 969-query, 12,312-document ranking was frozen before validation labels were joined, and no held-out test row or label was read.",
+        "", "## Epoch learning curve", "",
+        "| Epoch | Train loss | Updates | Train min | Rank min | Exact R@1 | R@3 | R@5 | R@10 | MRR@10 | Unseen R@10 |",
+        "|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    for row in epoch_comparison["epochs"]:
+        loss = "—" if row["mean_training_loss"] is None else f"{row['mean_training_loss']:.6f}"
+        lines.append(
+            f"| {row['epoch']} | {loss} | {row['optimizer_updates_epoch']} | "
+            f"{row['training_seconds']/60:.2f} | {row['ranking_seconds']/60:.2f} | "
+            f"{row['recall_at_1']:.6f} | {row['recall_at_3']:.6f} | {row['recall_at_5']:.6f} | "
+            f"{row['recall_at_10']:.6f} | {row['mrr_at_10']:.6f} | {row['unseen_recall_at_10']:.6f} |"
+        )
+    lines += [
+        "", "## Validation-selected checkpoint", "",
+        f"Epoch **{selection['selected_epoch']}** was selected by the prespecified hierarchy: exact reaction-micro R@1, then R@10, then unseen R@10, then earlier epoch. Its retained reference is `{selection['selected_reference']}`.",
+        "", "## Frozen-baseline comparison", "",
+        "| Method | Exact R@1 | Exact R@10 | Delta R@1 vs selected | Delta R@10 vs selected |",
+        "|---|---:|---:|---:|---:|",
+    ]
+    selected_r1 = baseline["selected"]["exact"]["recall_at_1"]["reaction_micro"]
+    selected_r10 = baseline["selected"]["exact"]["recall_at_10"]["reaction_micro"]
+    for method, metrics in baseline["references"].items():
+        r1 = metrics["exact"]["recall_at_1"]["reaction_micro"]
+        r10 = metrics["exact"]["recall_at_10"]["reaction_micro"]
+        lines.append(f"| {method} | {r1:.6f} | {r10:.6f} | {selected_r1-r1:+.6f} | {selected_r10-r10:+.6f} |")
+    lines += ["", "## Paired cluster bootstrap", "", "10,000 percentile replicates use seed 20260902 and the 12 frozen validation clusters. Intervals containing zero are not evidence of superiority.", ""]
+    for name, comparisons in bootstrap["comparisons"].items():
+        for metric, result in comparisons.items():
+            lo, hi = result["ci_95_percentile"]
+            lines.append(f"- Selected vs {name}, {metric}: {result['delta_selected_minus_reference']:+.6f}, 95% CI [{lo:+.6f}, {hi:+.6f}]; includes zero: {str(result['includes_zero']).lower()}.")
+    selected_seen = baseline["selected_strata"]
+    lines += [
+        "", "## Selected-checkpoint strata", "",
+        f"Seen R@10: {selected_seen['seen_recall_at_10']:.6f}; unseen R@10: {selected_seen['unseen_recall_at_10']:.6f}; true-retrieval-failure R@10: {selected_seen['true_retrieval_failure_recall_at_10']:.6f}; rerank-failure R@10: {selected_seen['rerank_failure_recall_at_10']:.6f}.",
+        "", "## What fine-tuning changed", "",
+    ]
+    for name, values in transition["transitions"].items():
+        lines.append(f"- {name}: {values['total']} (seen {values['seen']}, unseen {values['unseen']}, multi-positive {values['multi_positive']}).")
+    lines += ["", "Mechanically selected examples (lexicographically first eligible):", ""]
+    for item in transition["examples"]:
+        example = item["example"]
+        if example is None:
+            lines.append(f"- {item['category']}: no eligible reaction.")
+        else:
+            ranks = example["first_hit_rank_exact"]
+            lines.append(f"- {item['category']}: `{example['model_id']}/{example['reaction_id']}`; epoch 0 rank {ranks['epoch0']}, selected rank {ranks['selected']}, BM25 rank {ranks['bm25']}.")
+    lines += [
+        "", "## Runtime, storage, and recommendation", "",
+        f"Training took {runtime['total_training_seconds']/60:.2f} minutes and validation ranking took {runtime['total_ranking_seconds']/60:.2f} minutes. Peak allocated/reserved VRAM was {runtime['peak_allocated_vram_bytes']/2**30:.2f}/{runtime['peak_reserved_vram_bytes']/2**30:.2f} GiB. Three completed epoch checkpoints occupy {runtime['completed_checkpoint_bytes']/2**30:.2f} GiB; including the retained best and latest copies, checkpoint storage is {runtime['retained_checkpoint_bytes_on_disk']/2**30:.2f} GiB. All are ignored by Git.",
+        "", recommendation["summary"], "",
+        "The selected inference weights should be archived outside Git according to `archive_plan.json`; no upload was performed.",
+    ]
+    return "\n".join(lines) + "\n"
+
+
+def build_full_derived(out: Path = FULL_OUT) -> list[Path]:
+    """Rebuild all label-derived full-run summaries deterministically."""
+    epoch_metrics: dict[int, dict[str, Any]] = {}
+    epoch_frames: dict[int, pd.DataFrame] = {}
+    for epoch in range(4):
+        epoch_metrics[epoch], epoch_frames[epoch] = score_full_epoch_rankings(
+            out / f"rankings_epoch_{epoch}.jsonl", epoch=epoch, out=out,
+        )
+    selected_epoch = select_best_epoch(epoch_metrics)
+    config = full_training_config()
+    dataset_hash = json.loads((out / "dataset_manifest.json").read_text(encoding="utf-8"))["dataset_sha256"]
+    checkpoint_root = out / "_checkpoints"
+    if selected_epoch:
+        source = checkpoint_root / f"epoch_{selected_epoch}.pt"
+        best = checkpoint_root / "best.pt"
+        if best.exists() and sha256_file(best) != sha256_file(source):
+            raise ValueError("existing retained best checkpoint does not match validation selection")
+        if not best.exists():
+            _atomic_copy(source, best)
+        selected_reference = repo_relative_posix(best)
+        selected_checkpoint = _checkpoint_record(
+            best, epoch=selected_epoch, role="validation_selected_best", config=config,
+            dataset_hash=dataset_hash,
+        )
+    else:
+        selected_reference = f"{MODEL_NAME}@{MODEL_REVISION}"
+        selected_checkpoint = {
+            "epoch": 0, "role": "validation_selected_official_checkpoint",
+            "path": selected_reference, "revision": MODEL_REVISION,
+            "config_hash": config.hash, "dataset_hash": dataset_hash,
+        }
+    latest = checkpoint_root / "latest.pt"
+    latest_checkpoint = _checkpoint_record(
+        latest, epoch=3, role="latest_completed_epoch", config=config, dataset_hash=dataset_hash,
+    )
+    selection = {
+        "selection_population": "validation only; epochs 0 through 3",
+        "hierarchy": ["exact reaction-micro Recall@1", "exact reaction-micro Recall@10", "unseen-target Recall@10", "earlier epoch"],
+        "selected_epoch": selected_epoch,
+        "selected_reference": selected_reference,
+        "selected_checkpoint": selected_checkpoint,
+        "latest_checkpoint": latest_checkpoint,
+        "test_rows_read": 0,
+    }
+    write_json(selection, out / "selected_checkpoint.json")
+
+    epoch_rows = []
+    trajectory = []
+    for epoch in range(4):
+        ranking_runtime = json.loads((out / f"ranking_runtime_epoch_{epoch}.json").read_text(encoding="utf-8"))
+        training = None if epoch == 0 else json.loads((out / f"training_metrics_epoch_{epoch}.json").read_text(encoding="utf-8"))
+        if training:
+            trajectory.extend(training["loss_trajectory"])
+        metrics = epoch_metrics[epoch]
+        epoch_rows.append({
+            "epoch": epoch,
+            "mean_training_loss": None if training is None else training["mean_training_loss"],
+            "optimizer_updates_epoch": 0 if training is None else training["optimizer_updates_epoch"],
+            "examples_processed_epoch": 0 if training is None else training["examples_processed_epoch"],
+            "skipped_optimizer_updates": 0 if training is None else training["skipped_optimizer_updates"],
+            "training_seconds": 0.0 if training is None else training["training_seconds"],
+            "ranking_seconds": ranking_runtime["seconds"],
+            "recall_at_1": metrics["exact"]["recall_at_1"]["reaction_micro"],
+            "recall_at_3": metrics["exact"]["recall_at_3"]["reaction_micro"],
+            "recall_at_5": metrics["exact"]["recall_at_5"]["reaction_micro"],
+            "recall_at_10": metrics["exact"]["recall_at_10"]["reaction_micro"],
+            "mrr_at_10": metrics["exact"]["mrr_at_10"]["reaction_micro"],
+            "model_macro_recall_at_10": metrics["exact"]["recall_at_10"]["model_macro"],
+            "cluster_macro_recall_at_10": metrics["exact"]["recall_at_10"]["cluster_macro"],
+            "unseen_recall_at_10": metrics["seen_unseen"]["unseen"]["recall_at_10"]["reaction_micro"],
+            "brite_orthology_recall_at_10": metrics["brite_orthology"]["recall_at_10"]["reaction_micro"],
+        })
+    epoch_comparison = {
+        "selected_epoch": selected_epoch,
+        "epochs": epoch_rows,
+        "selection_hierarchy_applied_without_early_stopping": True,
+    }
+    write_json(epoch_comparison, out / "epoch_comparison.json")
+    write_json({"optimizer_groups": trajectory, "n_optimizer_groups": len(trajectory)}, out / "training_trajectory.json")
+
+    truth = _load_validation_truth_after_freeze(out / "rankings_epoch_0.jsonl")
+    baseline_files = {
+        "phase2_rule_based": retrieval.OUT / "rankings_phase2_rule_based.jsonl",
+        "bm25": retrieval.OUT / "rankings_bm25.jsonl",
+        "bge_m3_dense": retrieval.OUT / "rankings_bge_m3_dense.jsonl",
+        "bm25_bge_m3_rrf": retrieval.OUT / "rankings_bm25_bge_m3_rrf.jsonl",
+    }
+    baseline_frames: dict[str, pd.DataFrame] = {}
+    baseline_ranks: dict[str, dict[tuple[str, str], list[str]]] = {}
+    baseline_summaries = {}
+    baseline_provenance = {}
+    for method, path in baseline_files.items():
+        baseline_frames[method], baseline_ranks[method] = score_reference_rankings(path, truth, method=method)
+        baseline_summaries[method] = summarize_scored_frame(baseline_frames[method])
+        baseline_provenance[method] = {"path": repo_relative_posix(path), "sha256": sha256_file(path)}
+    selected_frame = epoch_frames[selected_epoch]
+    selected_metrics = epoch_metrics[selected_epoch]
+    baseline_comparison = {
+        "selected_epoch": selected_epoch,
+        "selected": summarize_scored_frame(selected_frame),
+        "references": {"epoch0_bge_small": summarize_scored_frame(epoch_frames[0]), **baseline_summaries},
+        "frozen_baseline_provenance": baseline_provenance,
+        "selected_strata": {
+            "seen_recall_at_10": selected_metrics["seen_unseen"]["seen"]["recall_at_10"]["reaction_micro"],
+            "unseen_recall_at_10": selected_metrics["seen_unseen"]["unseen"]["recall_at_10"]["reaction_micro"],
+            "true_retrieval_failure_recall_at_10": selected_metrics["failure_strata"]["true_retrieval_failure"]["recall_at_10"]["reaction_micro"],
+            "rerank_failure_recall_at_10": selected_metrics["failure_strata"]["rerank_failure"]["recall_at_10"]["reaction_micro"],
+        },
+    }
+    write_json(baseline_comparison, out / "baseline_comparison.json")
+    write_json(
+        {str(epoch): metrics["seen_unseen"] for epoch, metrics in epoch_metrics.items()},
+        out / "seen_unseen_analysis.json",
+    )
+    write_json(
+        {str(epoch): metrics["failure_strata"] for epoch, metrics in epoch_metrics.items()},
+        out / "failure_stratum_analysis.json",
+    )
+
+    compare_frames = {
+        "epoch0_bge_small": epoch_frames[0],
+        "bge_m3_dense": baseline_frames["bge_m3_dense"],
+        "bm25": baseline_frames["bm25"],
+        "bm25_bge_m3_rrf": baseline_frames["bm25_bge_m3_rrf"],
+    }
+    bootstrap = {
+        "selected_epoch": selected_epoch,
+        "comparisons": {
+            name: {
+                "recall_at_1": paired_cluster_bootstrap_strict(selected_frame, frame, "recall_at_1_exact"),
+                "recall_at_10": paired_cluster_bootstrap_strict(selected_frame, frame, "recall_at_10_exact"),
+            }
+            for name, frame in compare_frames.items()
+        },
+    }
+    write_json(bootstrap, out / "bootstrap_comparisons.json")
+    epoch0_ranks = _rank_map_from_full(out / "rankings_epoch_0.jsonl", 0)
+    selected_ranks = _rank_map_from_full(out / f"rankings_epoch_{selected_epoch}.jsonl", selected_epoch)
+    transition = build_transition_analysis(
+        epoch_frames[0], selected_frame, baseline_frames["bm25"],
+        epoch0_ranks=epoch0_ranks, selected_ranks=selected_ranks,
+        bm25_ranks=baseline_ranks["bm25"],
+    )
+    write_json(transition, out / "transition_analysis.json")
+
+    training_metrics = [json.loads((out / f"training_metrics_epoch_{epoch}.json").read_text(encoding="utf-8")) for epoch in (1, 2, 3)]
+    ranking_metrics = [json.loads((out / f"ranking_runtime_epoch_{epoch}.json").read_text(encoding="utf-8")) for epoch in range(4)]
+    completed = [checkpoint_root / f"epoch_{epoch}.pt" for epoch in (1, 2, 3)]
+    runtime = {
+        "total_training_seconds": sum(x["training_seconds"] for x in training_metrics),
+        "total_ranking_seconds": sum(x["seconds"] for x in ranking_metrics),
+        "peak_allocated_vram_bytes": max([x["peak_allocated_vram_bytes"] for x in training_metrics + ranking_metrics]),
+        "peak_reserved_vram_bytes": max([x["peak_reserved_vram_bytes"] for x in training_metrics + ranking_metrics]),
+        "completed_checkpoint_bytes": sum(x.stat().st_size for x in completed),
+        "retained_checkpoint_bytes_on_disk": sum(
+            x.stat().st_size for x in [*completed, checkpoint_root / "best.pt", latest]
+            if x.exists()
+        ),
+        "checkpoint_records": [
+            _checkpoint_record(path, epoch=epoch, role="completed_epoch", config=config, dataset_hash=dataset_hash)
+            for epoch, path in zip((1, 2, 3), completed)
+        ],
+        "best_checkpoint": selected_checkpoint,
+        "latest_checkpoint": latest_checkpoint,
+    }
+    write_json(runtime, out / "runtime_vram.json")
+
+    before_last = epoch_rows[2]
+    last = epoch_rows[3]
+    r1_delta = last["recall_at_1"] - before_last["recall_at_1"]
+    r10_delta = last["recall_at_10"] - before_last["recall_at_10"]
+    unseen_delta = last["unseen_recall_at_10"] - before_last["unseen_recall_at_10"]
+    plateaued = abs(r1_delta) < 1 / 969 and abs(r10_delta) < 1 / 969 and abs(unseen_delta) < 1 / 122
+    still_improving = r1_delta >= 5 / 969 and r10_delta >= -1 / 969 and unseen_delta >= -1 / 122
+    peaked_before = selected_epoch < 3
+    overfitting_visible = last["recall_at_1"] < max(x["recall_at_1"] for x in epoch_rows[:3])
+    if still_improving and not plateaued:
+        summary = "Epoch 3 remained meaningfully better by the recorded rule; a separately authorized extension experiment is scientifically reasonable, but was not run."
+    elif plateaued:
+        summary = "Epoch 3 was plateaued relative to epoch 2; the validation curve does not justify automatically extending training."
+    elif peaked_before or overfitting_visible:
+        summary = "Validation performance peaked before epoch 3 or showed degradation; extending this run is not currently justified."
+    else:
+        summary = "Epoch 3 changed the validation trade-off without a clear continuing improvement signal; no automatic extension is justified."
+    recommendation = {
+        "selected_epoch": selected_epoch,
+        "epoch3_minus_epoch2": {"recall_at_1": r1_delta, "recall_at_10": r10_delta, "unseen_recall_at_10": unseen_delta},
+        "meaningful_improvement_rule": "R@1 gain of at least 5/969 with R@10 decline no worse than 1/969 and unseen R@10 decline no worse than 1/122",
+        "performance_peaked_before_epoch3": peaked_before,
+        "plateaued": plateaued,
+        "epoch3_still_meaningfully_improving": still_improving and not plateaued,
+        "overfitting_visible": overfitting_visible,
+        "extension_run_executed": False,
+        "summary": summary,
+    }
+    write_json(recommendation, out / "recommendation.json")
+    archive_plan = {
+        "status": "prepared only; no archive created or uploaded",
+        "selected_epoch": selected_epoch,
+        "selected_source": selected_reference,
+        "inference_archive": {
+            "required": ["model state_dict", "pinned tokenizer/config", "pooling and L2-normalization recipe", "query/document templates", "model revision", "training config and checksums"],
+            "exclude": ["optimizer state", "scheduler state", "gradient scaler state"],
+            "suggested_name": f"aaaim-phase3b-bge-small-epoch-{selected_epoch}-inference.tar.zst",
+            "verification": "record SHA-256 and byte size after exporting; restore into the pinned BGE-small architecture and run a frozen validation-ranking digest check",
+        },
+        "resume_archive": {
+            "required": ["selected/latest full .pt checkpoint", "optimizer", "scheduler", "gradient scaler", "training state/cursor", "full training config", "dataset hash", "pinned tokenizer/config"],
+            "latest_checkpoint": latest_checkpoint,
+            "note": "Resume archive is larger and is only needed for a separately authorized continuation experiment.",
+        },
+        "git_policy": "checkpoint, cache, environment, and archive bytes remain ignored and unstaged",
+        "upload_performed": False,
+    }
+    write_json(archive_plan, out / "archive_plan.json")
+    safety_audit = {
+        "training": {
+            "split": "train only",
+            "model_visible_queries_digit_bounded_kegg_reaction_id_scan_passed": True,
+            "n_queries": int(json.loads((out / "dataset_manifest.json").read_text(encoding="utf-8"))["example_count"]),
+            "test_keys_or_labels_used": 0,
+        },
+        "ranking": {
+            "split": "validation only",
+            "n_queries_per_epoch": [x["n_queries"] for x in ranking_metrics],
+            "catalog_size_per_epoch": [x["catalog_size"] for x in ranking_metrics],
+            "model_visible_queries_digit_bounded_kegg_reaction_id_scan_passed": True,
+            "labels_loaded_during_ranking": [x["labels_loaded_during_ranking"] for x in ranking_metrics],
+        },
+        "evaluation": {
+            "validation_labels_joined_only_after_ranking_digest_was_recorded": True,
+            "test_rows_read_ranked_or_scored": 0,
+        },
+        "initialization": f"{MODEL_NAME}@{MODEL_REVISION}",
+        "smoke_checkpoint_used": False,
+        "paid_api_used": False,
+        "cloud_or_rented_gpu_used": False,
+        "external_model_used_beyond_authorized_checkpoint": False,
+    }
+    write_json(safety_audit, out / "safety_audit.json")
+    (out / "REPORT.md").write_text(
+        _full_report(epoch_comparison, baseline_comparison, bootstrap, transition, runtime, selection, recommendation),
+        encoding="utf-8", newline="\n",
+    )
+    return [
+        out / name for name in (
+            "selected_checkpoint.json", "epoch_comparison.json", "training_trajectory.json",
+            "baseline_comparison.json", "seen_unseen_analysis.json", "failure_stratum_analysis.json",
+            "bootstrap_comparisons.json", "transition_analysis.json", "runtime_vram.json",
+            "recommendation.json", "archive_plan.json", "REPORT.md",
+            "safety_audit.json",
+            *(f"metrics_epoch_{epoch}.json" for epoch in range(4)),
+        )
+    ]
+
+
+def rebuild_full_reports_twice(out: Path = FULL_OUT) -> dict[str, Any]:
+    first_paths = build_full_derived(out)
+    first = {repo_relative_posix(path): path.read_bytes() for path in first_paths}
+    second_paths = build_full_derived(out)
+    second = {repo_relative_posix(path): path.read_bytes() for path in second_paths}
+    if first != second:
+        changed = sorted(set(first) | set(second) - {k for k in first if first.get(k) == second.get(k)})
+        raise RuntimeError(f"derived full-run rebuild was not byte-identical: {changed}")
+    result = {
+        "passes": 2,
+        "byte_identical": True,
+        "files": [{"path": key, "sha256": hashlib.sha256(value).hexdigest(), "bytes": len(value)} for key, value in sorted(first.items())],
+    }
+    write_json(result, out / "rebuild_verification.json")
+    artifacts = [
+        path for path in out.iterdir()
+        if path.is_file() and not path.name.startswith("_") and path.name != "artifact_manifest.json"
+    ]
+    write_artifact_manifest(out, artifacts)
+    return result
+
+
+def run_full_training(out: Path = FULL_OUT, *, resume: bool = False) -> None:
+    import torch
+
+    config = full_training_config()
+    validate_config(config)
+    assert_full_initializer(f"{MODEL_NAME}@{MODEL_REVISION}")
+    prior_run_markers = [out / "run_state.json", out / "rankings_epoch_0.jsonl", out / "_checkpoints" / "latest.pt"]
+    if not resume and any(path.exists() for path in prior_run_markers):
+        raise FileExistsError("full-run state already exists; use --resume rather than overwriting it")
+    examples, dataset_summary, negative_summary = build_training_examples()
+    assert_train_only(examples)
+    if len(examples) != 3466 or dataset_summary["n_excluded_no_catalog_positive"] != 31:
+        raise ValueError("prespecified full training population invariant failed")
+    if negative_summary["source_counts"] != {"bm25": 6932, "random": 3466}:
+        raise ValueError("prespecified explicit-negative recipe invariant failed")
+    if config.max_optimizer_steps != 1302 or config.warmup_steps != 131:
+        raise ValueError("prespecified full optimizer schedule invariant failed")
+    write_dataset_artifacts(out, examples, dataset_summary, negative_summary)
+    training_config = {
+        "schema": FULL_RUN_SCHEMA,
+        "configuration": asdict(config),
+        "config_hash": config.hash,
+        "usable_training_queries": len(examples),
+        "physical_batches_per_epoch": math.ceil(len(examples) / config.physical_batch_size),
+        "optimizer_updates_per_epoch": len(full_epoch_layout(len(examples), config, 1)),
+        "total_optimizer_update_groups": config.max_optimizer_steps,
+        "warmup_fraction": 0.10,
+        "model_initialization": f"{MODEL_NAME}@{MODEL_REVISION}",
+        "smoke_checkpoint_used": False,
+        "negative_pool_note": "gradient accumulation does not enlarge the candidate pool; each forward pass sees only that query's positives plus two BM25 and one random explicit negative",
+        "test_rows_read": 0,
+    }
+    write_json(training_config, out / "full_training_config.json")
+    initialization = {
+        "epoch": 0, "source": "original official checkpoint", "model": MODEL_NAME,
+        "revision": MODEL_REVISION, "smoke_checkpoint_used": False,
+        "cache": repo_relative_posix(OUT / "_model_cache"),
+    }
+    initialization_path = out / "initialization.json"
+    if initialization_path.exists() and json.loads(initialization_path.read_text(encoding="utf-8")) != initialization:
+        raise ValueError("existing initialization metadata is incompatible")
+    write_json(initialization, initialization_path)
+    _seed_everything(config.seed)
+    model, tokenizer, device = _load_official_start(config, OUT / "_model_cache")
+    docs = {d["kegg_id"]: d["text"] for d in retrieval.load_catalog()}
+    optimizer = torch.optim.AdamW(model.parameters(), lr=config.learning_rate)
+    scheduler = _linear_schedule(optimizer, warmup_steps=config.warmup_steps, total_steps=config.max_optimizer_steps)
+    scaler = torch.amp.GradScaler("cuda", enabled=True, init_scale=128.0)
+    dataset_hash = dataset_summary["dataset_sha256"]
+    state: dict[str, Any] = {
+        "completed_epoch": 0, "active_epoch": None, "update_group_cursor": 0,
+        "optimizer_step": 0, "examples_processed": 0,
+    }
+    latest = out / "_checkpoints" / "latest.pt"
+    if resume and latest.exists():
+        state = load_full_resume_checkpoint(
+            latest, model=model, optimizer=optimizer, scheduler=scheduler, scaler=scaler,
+            config=config, dataset_hash=dataset_hash,
+        )
+    elif resume and not (out / "rankings_epoch_0.jsonl").exists():
+        raise FileNotFoundError("no resumable full-run checkpoint or epoch-zero ranking exists")
+
+    def evaluate_current(epoch: int, *, existing_ok: bool) -> None:
+        ranking = out / f"rankings_epoch_{epoch}.jsonl"
+        if ranking.exists():
+            if not existing_ok:
+                raise FileExistsError(f"refusing to overwrite epoch-{epoch} ranking")
+            _read_full_ranking(ranking, epoch)
+        else:
+            freeze_full_epoch_rankings(model, tokenizer, device, config, epoch=epoch, out=out)
+        score_full_epoch_rankings(ranking, epoch=epoch, out=out)
+
+    completed = int(state["completed_epoch"])
+    active = state.get("active_epoch")
+    if completed == 0 and active is None:
+        evaluate_current(0, existing_ok=resume)
+    else:
+        for epoch in range(completed):
+            if not (out / f"rankings_epoch_{epoch}.jsonl").exists():
+                raise FileNotFoundError(f"completed epoch {epoch} is missing its frozen ranking")
+        if not (out / f"rankings_epoch_{completed}.jsonl").exists():
+            if active is not None:
+                raise FileNotFoundError("cannot reconstruct a completed-epoch ranking from a mid-epoch model")
+            evaluate_current(completed, existing_ok=False)
+        else:
+            score_full_epoch_rankings(out / f"rankings_epoch_{completed}.jsonl", epoch=completed, out=out)
+
+    start_epoch = int(active) if active is not None else completed + 1
+    for epoch in range(start_epoch, 4):
+        _, state = train_one_full_epoch(
+            examples, config, epoch=epoch, model=model, tokenizer=tokenizer, device=device,
+            optimizer=optimizer, scheduler=scheduler, scaler=scaler, state=state, out=out,
+            docs=docs, dataset_hash=dataset_hash,
+        )
+        evaluate_current(epoch, existing_ok=False)
+    if int(state["completed_epoch"]) != 3 or int(state["examples_processed"]) != 3 * len(examples):
+        raise RuntimeError("full training did not complete exactly three passes")
+    rebuild_full_reports_twice(out)
+
+
 def _write_runtime_config(out: Path, config: TrainingConfig) -> None:
     payload = {
         **asdict(config),
@@ -1067,22 +2136,32 @@ def _write_runtime_config(out: Path, config: TrainingConfig) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", choices=["preflight", "build", "overfit", "smoke", "validate", "finalize", "verify"])
-    parser.add_argument("--out", type=Path, default=OUT)
+    parser.add_argument("command", choices=[
+        "preflight", "build", "overfit", "smoke", "validate", "finalize", "verify",
+        "full", "full-rebuild", "full-verify",
+    ])
+    parser.add_argument("--out", type=Path)
     parser.add_argument("--stage", default="initial_active_environment")
     parser.add_argument("--verify-tensor", action="store_true")
     parser.add_argument("--sample-size", type=int, default=160)
     parser.add_argument("--steps", type=int)
     parser.add_argument("--resume", action="store_true")
     args = parser.parse_args()
+    args.out = args.out or (FULL_OUT if args.command.startswith("full") else OUT)
     args.out.mkdir(parents=True, exist_ok=True)
     if args.command == "preflight":
         print(json.dumps(record_environment(args.out, args.stage, verify_tensor=args.verify_tensor), indent=2, sort_keys=True))
         return 0
-    if args.command == "verify":
+    if args.command in {"verify", "full-verify"}:
         problems = verify_manifest(args.out)
         print(json.dumps({"problems": problems, "n_problems": len(problems)}))
         return int(bool(problems))
+    if args.command == "full-rebuild":
+        print(json.dumps(rebuild_full_reports_twice(args.out), indent=2, sort_keys=True))
+        return 0
+    if args.command == "full":
+        run_full_training(args.out, resume=args.resume)
+        return 0
     if args.command == "finalize":
         finalize_artifacts(args.out)
         return 0

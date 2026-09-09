@@ -1,0 +1,7 @@
+{
+  "active_epoch": null,
+  "completed_epoch": 3,
+  "examples_processed": 10398,
+  "optimizer_step": 1302,
+  "update_group_cursor": 0
+}

@@ -1,0 +1,100 @@
+{
+  "best_checkpoint": {
+    "bytes": 399385639,
+    "config_hash": "0b808b72948311a44ebfd5869168751297df47a6afcfd1484a3b6907c9cabe88",
+    "contains": [
+      "model",
+      "optimizer",
+      "scheduler",
+      "grad_scaler",
+      "epoch",
+      "cursor",
+      "rng-compatible deterministic ordering"
+    ],
+    "dataset_hash": "142c9f0d404531cf2a8c59ddfabdc80a2858dddd4656a1becc1fb5c0ff292a05",
+    "epoch": 1,
+    "path": "benchmark/phase3/phase3b_full/_checkpoints/best.pt",
+    "role": "validation_selected_best",
+    "sha256": "8773b04f09916889b74c956e708044fe2c653fa764fe73c422ecc376ecae81c1"
+  },
+  "checkpoint_records": [
+    {
+      "bytes": 399385639,
+      "config_hash": "0b808b72948311a44ebfd5869168751297df47a6afcfd1484a3b6907c9cabe88",
+      "contains": [
+        "model",
+        "optimizer",
+        "scheduler",
+        "grad_scaler",
+        "epoch",
+        "cursor",
+        "rng-compatible deterministic ordering"
+      ],
+      "dataset_hash": "142c9f0d404531cf2a8c59ddfabdc80a2858dddd4656a1becc1fb5c0ff292a05",
+      "epoch": 1,
+      "path": "benchmark/phase3/phase3b_full/_checkpoints/epoch_1.pt",
+      "role": "completed_epoch",
+      "sha256": "8773b04f09916889b74c956e708044fe2c653fa764fe73c422ecc376ecae81c1"
+    },
+    {
+      "bytes": 399385639,
+      "config_hash": "0b808b72948311a44ebfd5869168751297df47a6afcfd1484a3b6907c9cabe88",
+      "contains": [
+        "model",
+        "optimizer",
+        "scheduler",
+        "grad_scaler",
+        "epoch",
+        "cursor",
+        "rng-compatible deterministic ordering"
+      ],
+      "dataset_hash": "142c9f0d404531cf2a8c59ddfabdc80a2858dddd4656a1becc1fb5c0ff292a05",
+      "epoch": 2,
+      "path": "benchmark/phase3/phase3b_full/_checkpoints/epoch_2.pt",
+      "role": "completed_epoch",
+      "sha256": "64130ebd1084c01bd21573b6b667f8165ebae4faecbe62c8867e036b3933fd81"
+    },
+    {
+      "bytes": 399385639,
+      "config_hash": "0b808b72948311a44ebfd5869168751297df47a6afcfd1484a3b6907c9cabe88",
+      "contains": [
+        "model",
+        "optimizer",
+        "scheduler",
+        "grad_scaler",
+        "epoch",
+        "cursor",
+        "rng-compatible deterministic ordering"
+      ],
+      "dataset_hash": "142c9f0d404531cf2a8c59ddfabdc80a2858dddd4656a1becc1fb5c0ff292a05",
+      "epoch": 3,
+      "path": "benchmark/phase3/phase3b_full/_checkpoints/epoch_3.pt",
+      "role": "completed_epoch",
+      "sha256": "d32143f3c2a53935d842e766750900f94e6c7dcbe06d1aae1380d86a52bf1468"
+    }
+  ],
+  "completed_checkpoint_bytes": 1198156917,
+  "latest_checkpoint": {
+    "bytes": 399385639,
+    "config_hash": "0b808b72948311a44ebfd5869168751297df47a6afcfd1484a3b6907c9cabe88",
+    "contains": [
+      "model",
+      "optimizer",
+      "scheduler",
+      "grad_scaler",
+      "epoch",
+      "cursor",
+      "rng-compatible deterministic ordering"
+    ],
+    "dataset_hash": "142c9f0d404531cf2a8c59ddfabdc80a2858dddd4656a1becc1fb5c0ff292a05",
+    "epoch": 3,
+    "path": "benchmark/phase3/phase3b_full/_checkpoints/latest.pt",
+    "role": "latest_completed_epoch",
+    "sha256": "d32143f3c2a53935d842e766750900f94e6c7dcbe06d1aae1380d86a52bf1468"
+  },
+  "peak_allocated_vram_bytes": 2244414464,
+  "peak_reserved_vram_bytes": 2386558976,
+  "retained_checkpoint_bytes_on_disk": 1996928195,
+  "total_ranking_seconds": 61.71071810000103,
+  "total_training_seconds": 202.39842859999953
+}

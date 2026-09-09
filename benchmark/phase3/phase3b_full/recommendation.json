@@ -1,0 +1,15 @@
+{
+  "epoch3_minus_epoch2": {
+    "recall_at_1": 0.0020639999999999548,
+    "recall_at_10": -0.0030959999999999877,
+    "unseen_recall_at_10": 0.0
+  },
+  "epoch3_still_meaningfully_improving": false,
+  "extension_run_executed": false,
+  "meaningful_improvement_rule": "R@1 gain of at least 5/969 with R@10 decline no worse than 1/969 and unseen R@10 decline no worse than 1/122",
+  "overfitting_visible": true,
+  "performance_peaked_before_epoch3": true,
+  "plateaued": false,
+  "selected_epoch": 1,
+  "summary": "Validation performance peaked before epoch 3 or showed degradation; extending this run is not currently justified."
+}

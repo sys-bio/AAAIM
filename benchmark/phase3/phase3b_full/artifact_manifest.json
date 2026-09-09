@@ -1,0 +1,221 @@
+{
+  "files": [
+    {
+      "bytes": 4463,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/REPORT.md",
+      "sha256": "bd30d97efadf798c3d52bd361004badae7f07028bd4c4e822607fe4fa4e8a347"
+    },
+    {
+      "bytes": 1916,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/archive_plan.json",
+      "sha256": "071b9d675305d4897592db0697a3c17b5e0027b58a1d5a1ed671a760cdcea653"
+    },
+    {
+      "bytes": 11925,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/baseline_comparison.json",
+      "sha256": "b44a89a7bd085ef8179096b3c64806f68a60d0859ead3a96169b05b0605cebac"
+    },
+    {
+      "bytes": 4255,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/bootstrap_comparisons.json",
+      "sha256": "a4bc9a908826731b8e0433caecc864d137813387cb2ea20516a33d40e320d4a3"
+    },
+    {
+      "bytes": 320,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/dataset_manifest.json",
+      "sha256": "041069e52944be07acb88285389439abbc9b1a5aec355df49c6c5e1ed893d9aa"
+    },
+    {
+      "bytes": 8765,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/dataset_summary.json",
+      "sha256": "37b535aa5030a47bb13c20e4340081d9520daa4e5dc4cb5a4c4f370e44dafc24"
+    },
+    {
+      "bytes": 964,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/environment.json",
+      "sha256": "d73980b796302e6082ef685babb7eec0970a8441ed828d092927fb577f1a799b"
+    },
+    {
+      "bytes": 2535,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/epoch_comparison.json",
+      "sha256": "16b4ba1bb85c843dab254ea49181446bd2f6d102b54e797b6788254e1c908de8"
+    },
+    {
+      "bytes": 6735,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/failure_stratum_analysis.json",
+      "sha256": "61818060f99320e7df24ff75210fbbe0728906f00c6a7409f37132725297b0e9"
+    },
+    {
+      "bytes": 1230,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/full_training_config.json",
+      "sha256": "a942dd64356ce04b58ac12af4f49bb0aa6728acf817cb524fbf6365e0f7a930b"
+    },
+    {
+      "bytes": 248,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/initialization.json",
+      "sha256": "be72fc00fbe773ac1f98fcb6e9e00f341126385406ae213366833307d4193915"
+    },
+    {
+      "bytes": 6867,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/metrics_epoch_0.json",
+      "sha256": "6ed289b50f44fed8e081914af9d3d48462d8f22f6d6363e39530ec58943bdd7c"
+    },
+    {
+      "bytes": 6932,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/metrics_epoch_1.json",
+      "sha256": "18a2133c783ac010d91b9f3250cae13fd2cdce31bb1b0f801a24deda02229511"
+    },
+    {
+      "bytes": 6923,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/metrics_epoch_2.json",
+      "sha256": "7647764dbe63c33742bb89d9113774e6f42c6dbe9a303e50bfbfb43f6347f135"
+    },
+    {
+      "bytes": 6924,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/metrics_epoch_3.json",
+      "sha256": "2e90a444daf0601deb499605da184b54857c3f0ca8259cd5a64099f764b81123"
+    },
+    {
+      "bytes": 804,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/negative_summary.json",
+      "sha256": "aa20b9f0958839803179bf791a830e5273f959fabc287538d5faae0617354ba3"
+    },
+    {
+      "bytes": 535,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/ranking_runtime_epoch_0.json",
+      "sha256": "388b357a3672403f7db1748101f42d5d4b75b3664547036a6a771c5caac1f598"
+    },
+    {
+      "bytes": 535,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/ranking_runtime_epoch_1.json",
+      "sha256": "a9ba94fed0134ee96f18980dcdc34d6620c67e7df7d6b5ccea0cd61ead94114b"
+    },
+    {
+      "bytes": 535,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/ranking_runtime_epoch_2.json",
+      "sha256": "885c96740d527fcaa7827645e9e77f0017aa422ac89016f6d1fac33bd3d38bcd"
+    },
+    {
+      "bytes": 535,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/ranking_runtime_epoch_3.json",
+      "sha256": "6a80f5885158ca7cf91a07956faf39f77939d764b71449c69f6d7af97bf1b79f"
+    },
+    {
+      "bytes": 1018040,
+      "n_lines": 969,
+      "path": "benchmark/phase3/phase3b_full/rankings_epoch_0.jsonl",
+      "sha256": "d9bf62194d06c229715e9e4eaeab34392eb9492a698b1fe37ddfee61cb5f2c67"
+    },
+    {
+      "bytes": 1018040,
+      "n_lines": 969,
+      "path": "benchmark/phase3/phase3b_full/rankings_epoch_1.jsonl",
+      "sha256": "660c7ff55d787928050ba963cf4236788de21f661a523a5ebc1c47abbfc2f304"
+    },
+    {
+      "bytes": 1018040,
+      "n_lines": 969,
+      "path": "benchmark/phase3/phase3b_full/rankings_epoch_2.jsonl",
+      "sha256": "7ffb661461375e78900d7002a1196a8659025fb5643ba30519dba7a25bbbae13"
+    },
+    {
+      "bytes": 1018040,
+      "n_lines": 969,
+      "path": "benchmark/phase3/phase3b_full/rankings_epoch_3.jsonl",
+      "sha256": "582eef3fc5c7efc38839eb157e7632ab33a791f21557abdf0a9862574af7a2d0"
+    },
+    {
+      "bytes": 3224,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/rebuild_verification.json",
+      "sha256": "bfeb0e444789c3a943e6aec795e397af7eb9a3c30823ba4f6c8534abf2992dc5"
+    },
+    {
+      "bytes": 631,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/recommendation.json",
+      "sha256": "dfc83f383794a6f908efc23a5eccb9d1ec5a06f25e710e195bcca71173875c77"
+    },
+    {
+      "bytes": 136,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/run_state.json",
+      "sha256": "9b39afb79af35280acf8c4f113c7daa4aedeaa3613fa18caa8706be795a3d558"
+    },
+    {
+      "bytes": 3372,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/runtime_vram.json",
+      "sha256": "aee279860bd8849ba6f9c1a61637b729552ff5000171c8af405b1e82fdb9d30d"
+    },
+    {
+      "bytes": 966,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/safety_audit.json",
+      "sha256": "7c7d6691c1ed58cc4da07c0e63be1bd73bd12ad9ab2c62637b80ea5feb5da95a"
+    },
+    {
+      "bytes": 6721,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/seen_unseen_analysis.json",
+      "sha256": "e051fb7561d3f7cb44f5d13ae2f73844b985d51c5f29e280744f893479e1a8c1"
+    },
+    {
+      "bytes": 1558,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/selected_checkpoint.json",
+      "sha256": "fb15fa7f6a0a31d252a2c397b03a47da3f6239c0bf060bf9a19dd27487c87f03"
+    },
+    {
+      "bytes": 123925,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/training_metrics_epoch_1.json",
+      "sha256": "3bcc368995a4dec89da507fb7ed1d87577a1c58cd52768e51061e0b9a5ec60b7"
+    },
+    {
+      "bytes": 124438,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/training_metrics_epoch_2.json",
+      "sha256": "ebddadd73941018954061453df74e21e77d9ca96e1793d1bf7d3d4f1b202dae4"
+    },
+    {
+      "bytes": 124769,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/training_metrics_epoch_3.json",
+      "sha256": "5011c1c0b5ca67a90f87af7b741f2dd7fab463d0266033d5dbaf9ff2736a35e9"
+    },
+    {
+      "bytes": 333784,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/training_trajectory.json",
+      "sha256": "990b2341c31f6ccbc3c363e3d05f74b19b6396fb81a4927b7e9cfb346bc4ea01"
+    },
+    {
+      "bytes": 13562,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_full/transition_analysis.json",
+      "sha256": "073f19e909b827168cb9eb2127265ad9ea38d60b78966aab569bae9bfda2653b"
+    }
+  ],
+  "n_files": 36
+}

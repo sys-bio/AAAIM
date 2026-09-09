@@ -1,0 +1,55 @@
+{
+  "git_policy": "checkpoint, cache, environment, and archive bytes remain ignored and unstaged",
+  "inference_archive": {
+    "exclude": [
+      "optimizer state",
+      "scheduler state",
+      "gradient scaler state"
+    ],
+    "required": [
+      "model state_dict",
+      "pinned tokenizer/config",
+      "pooling and L2-normalization recipe",
+      "query/document templates",
+      "model revision",
+      "training config and checksums"
+    ],
+    "suggested_name": "aaaim-phase3b-bge-small-epoch-1-inference.tar.zst",
+    "verification": "record SHA-256 and byte size after exporting; restore into the pinned BGE-small architecture and run a frozen validation-ranking digest check"
+  },
+  "resume_archive": {
+    "latest_checkpoint": {
+      "bytes": 399385639,
+      "config_hash": "0b808b72948311a44ebfd5869168751297df47a6afcfd1484a3b6907c9cabe88",
+      "contains": [
+        "model",
+        "optimizer",
+        "scheduler",
+        "grad_scaler",
+        "epoch",
+        "cursor",
+        "rng-compatible deterministic ordering"
+      ],
+      "dataset_hash": "142c9f0d404531cf2a8c59ddfabdc80a2858dddd4656a1becc1fb5c0ff292a05",
+      "epoch": 3,
+      "path": "benchmark/phase3/phase3b_full/_checkpoints/latest.pt",
+      "role": "latest_completed_epoch",
+      "sha256": "d32143f3c2a53935d842e766750900f94e6c7dcbe06d1aae1380d86a52bf1468"
+    },
+    "note": "Resume archive is larger and is only needed for a separately authorized continuation experiment.",
+    "required": [
+      "selected/latest full .pt checkpoint",
+      "optimizer",
+      "scheduler",
+      "gradient scaler",
+      "training state/cursor",
+      "full training config",
+      "dataset hash",
+      "pinned tokenizer/config"
+    ]
+  },
+  "selected_epoch": 1,
+  "selected_source": "benchmark/phase3/phase3b_full/_checkpoints/best.pt",
+  "status": "prepared only; no archive created or uploaded",
+  "upload_performed": false
+}

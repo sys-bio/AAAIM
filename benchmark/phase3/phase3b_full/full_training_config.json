@@ -1,0 +1,32 @@
+{
+  "config_hash": "0b808b72948311a44ebfd5869168751297df47a6afcfd1484a3b6907c9cabe88",
+  "configuration": {
+    "bm25_hard_negatives": 2,
+    "document_template": "phase3-retrieval-document-v1",
+    "epochs": 3,
+    "gradient_accumulation_steps": 2,
+    "learning_rate": 2e-05,
+    "max_grad_norm": 1.0,
+    "max_length": 256,
+    "max_optimizer_steps": 1302,
+    "mixed_precision": true,
+    "model_name": "BAAI/bge-small-en-v1.5",
+    "model_revision": "5e62ea33e012fda8c02802b906664c915ebd1bb1",
+    "physical_batch_size": 4,
+    "query_template": "phase3-retrieval-query-v1",
+    "random_negatives": 1,
+    "seed": 20260909,
+    "temperature": 0.02,
+    "warmup_steps": 131
+  },
+  "model_initialization": "BAAI/bge-small-en-v1.5@5e62ea33e012fda8c02802b906664c915ebd1bb1",
+  "negative_pool_note": "gradient accumulation does not enlarge the candidate pool; each forward pass sees only that query's positives plus two BM25 and one random explicit negative",
+  "optimizer_updates_per_epoch": 434,
+  "physical_batches_per_epoch": 867,
+  "schema": "phase3b-full-run-v1",
+  "smoke_checkpoint_used": false,
+  "test_rows_read": 0,
+  "total_optimizer_update_groups": 1302,
+  "usable_training_queries": 3466,
+  "warmup_fraction": 0.1
+}

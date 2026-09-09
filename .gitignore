@@ -48,3 +48,5 @@ benchmark/phase3/retrieval_baselines/_*/
 # Phase 3B model snapshots, optimizer checkpoints, rankings, and isolated env.
 benchmark/phase3/phase3b_smoke/_*/
 benchmark/phase3/phase3b_smoke/_*
+# Phase 3B full-run model/checkpoint/embedding scratch.
+benchmark/phase3/phase3b_full/_*

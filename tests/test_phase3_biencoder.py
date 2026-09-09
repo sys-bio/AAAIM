@@ -263,3 +263,183 @@ def test_loading_training_rows_does_not_mutate_frozen_artifacts():
     before = {path: path.read_bytes() for path in paths}
     pb.load_training_rows()
     assert before == {path: path.read_bytes() for path in paths}
+
+
+def test_full_run_fresh_initializer_and_smoke_rejection():
+    pb.assert_full_initializer(f"{pb.MODEL_NAME}@{pb.MODEL_REVISION}")
+    pb.assert_full_initializer(pb.FULL_OUT / "_checkpoints" / "latest.pt")
+    with pytest.raises(ValueError, match="smoke checkpoints"):
+        pb.assert_full_initializer(pb.OUT / "_checkpoints" / "representative" / "latest.pt")
+
+
+def test_full_configuration_and_exact_epoch_boundaries():
+    config = pb.full_training_config()
+    assert config.physical_batch_size == 4
+    assert config.gradient_accumulation_steps == 2
+    assert config.max_optimizer_steps == 1302
+    assert config.warmup_steps == 131
+    assert config.epochs == 3
+    for epoch in (1, 2, 3):
+        groups = pb.full_epoch_layout(3466, config, epoch)
+        assert len(groups) == 434
+        flat = [index for group in groups for batch in group for index in batch]
+        assert len(flat) == len(set(flat)) == 3466
+        assert set(flat) == set(range(3466))
+        assert sum(len(group) for group in groups) == 867
+        assert len(groups[-1]) == 1 and len(groups[-1][0]) == 2
+
+
+def test_full_resume_cursor_does_not_repeat_optimizer_groups():
+    groups = pb.full_epoch_layout(3466, pb.full_training_config(), 2)
+    cursor = 177
+    completed = {index for group in groups[:cursor] for batch in group for index in batch}
+    remaining = {index for group in groups[cursor:] for batch in group for index in batch}
+    assert completed.isdisjoint(remaining)
+    assert completed | remaining == set(range(3466))
+    assert len(groups[cursor:]) == len(groups) - cursor
+
+
+def test_full_checkpoint_atomicity_and_compatibility(tmp_path):
+    model, optimizer, scheduler, scaler = _checkpoint_objects()
+    config = pb.full_training_config()
+    checkpoint_dir = tmp_path / "phase3b_full" / "_checkpoints"
+    checkpoint = checkpoint_dir / "latest.pt"
+    state = {
+        "completed_epoch": 1, "active_epoch": None, "update_group_cursor": 0,
+        "optimizer_step": 434, "examples_processed": 3466,
+    }
+    pb.save_checkpoint(
+        checkpoint, model=model, optimizer=optimizer, scheduler=scheduler, scaler=scaler,
+        state=state, config=config, dataset_hash="dataset-a",
+    )
+    assert checkpoint.exists() and not checkpoint.with_name("latest.pt.tmp").exists()
+    assert pb.load_full_resume_checkpoint(
+        checkpoint, model=model, optimizer=optimizer, scheduler=scheduler, scaler=scaler,
+        config=config, dataset_hash="dataset-a",
+    ) == state
+    with pytest.raises(ValueError, match="dataset"):
+        pb.load_full_resume_checkpoint(
+            checkpoint, model=model, optimizer=optimizer, scheduler=scheduler, scaler=scaler,
+            config=config, dataset_hash="dataset-b",
+        )
+    with pytest.raises(ValueError, match="configuration"):
+        pb.load_full_resume_checkpoint(
+            checkpoint, model=model, optimizer=optimizer, scheduler=scheduler, scaler=scaler,
+            config=pb.TrainingConfig(max_optimizer_steps=1301, warmup_steps=131, epochs=3),
+            dataset_hash="dataset-a",
+        )
+
+
+def _full_ranking_row(epoch=0, split="validation"):
+    return {
+        "schema": pb.FULL_RANKING_SCHEMA, "epoch": epoch, "split": split,
+        "model_id": "m", "reaction_id": "r",
+        "ranked_ids": [f"R{i:05d}" for i in range(1, 101)],
+    }
+
+
+def test_full_ranking_epoch_uniqueness_completeness_and_test_rejection():
+    row = _full_ranking_row()
+    pb.validate_full_ranking_rows([row], epoch=0, expected=1)
+    with pytest.raises(ValueError, match="epoch mismatch"):
+        pb.validate_full_ranking_rows([row], epoch=1, expected=1)
+    duplicate = [row, dict(row)]
+    with pytest.raises(ValueError, match="duplicate ranking key"):
+        pb.validate_full_ranking_rows(duplicate, epoch=0, expected=2)
+    short = dict(row, ranked_ids=row["ranked_ids"][:99])
+    with pytest.raises(ValueError, match="exactly 100"):
+        pb.validate_full_ranking_rows([short], epoch=0, expected=1)
+    with pytest.raises(ValueError, match="validation-only"):
+        pb.validate_full_ranking_rows([_full_ranking_row(split="test")], epoch=0, expected=1)
+
+
+def test_full_ranking_refuses_overwrite_before_loading_labels(tmp_path, monkeypatch):
+    (tmp_path / "rankings_epoch_0.jsonl").write_text("frozen\n", encoding="utf-8")
+    called = False
+
+    def forbidden(*args, **kwargs):
+        nonlocal called
+        called = True
+        raise AssertionError("validation labels must not be loaded")
+
+    monkeypatch.setattr(pb, "_load_validation_truth_after_freeze", forbidden)
+    with pytest.raises(FileExistsError, match="refusing to overwrite"):
+        pb.freeze_full_epoch_rankings(None, None, None, pb.full_training_config(), epoch=0, out=tmp_path)
+    assert not called
+
+
+def test_checkpoint_selection_hierarchy_is_deterministic():
+    def metric(r1, r10, unseen):
+        return {
+            "exact": {"recall_at_1": {"reaction_micro": r1}, "recall_at_10": {"reaction_micro": r10}},
+            "seen_unseen": {"unseen": {"recall_at_10": {"reaction_micro": unseen}}},
+        }
+
+    assert pb.select_best_epoch({
+        0: metric(.5, .8, .2), 1: metric(.6, .7, .2),
+        2: metric(.6, .8, .1), 3: metric(.6, .8, .3),
+    }) == 3
+    tied = {epoch: metric(.6, .8, .3) for epoch in range(4)}
+    assert pb.select_best_epoch(tied) == 0
+
+
+def test_paired_bootstrap_requires_population_and_cluster_alignment():
+    rows = [{
+        "model_id": f"m{i}", "reaction_id": "r", "cluster_id": f"c{i}",
+        "recall_at_1_exact": i % 2 == 0,
+    } for i in range(12)]
+    first = pd.DataFrame(rows)
+    second = first.copy()
+    result = pb.paired_cluster_bootstrap_strict(first, second, "recall_at_1_exact", n_boot=50)
+    assert result["delta_selected_minus_reference"] == 0
+    assert result["n_clusters"] == 12
+    with pytest.raises(ValueError, match="populations are not aligned"):
+        pb.paired_cluster_bootstrap_strict(first, second.iloc[:-1], "recall_at_1_exact", n_boot=10)
+    changed = second.copy()
+    changed.at[0, "cluster_id"] = "different"
+    with pytest.raises(ValueError, match="cluster assignments"):
+        pb.paired_cluster_bootstrap_strict(first, changed, "recall_at_1_exact", n_boot=10)
+
+
+def test_transition_counts_partition_population(monkeypatch):
+    keys = [("m", f"r{i}") for i in range(4)]
+
+    def frame(ranks):
+        return pd.DataFrame([{
+            "model_id": model, "reaction_id": reaction, "cluster_id": "c",
+            "stratum": "empty_constrained", "seen_in_train": i < 2,
+            "multi_positive": i == 0, "ground_truth_ids": ["R00001"],
+            "first_hit_rank_exact": ranks[i],
+        } for i, (model, reaction) in enumerate(keys)])
+
+    population = pd.DataFrame([{
+        "model_id": model, "reaction_id": reaction,
+        "reaction_equation": "A => B", "participant_evidence": "A; B",
+    } for model, reaction in keys])
+    monkeypatch.setattr(pb.retrieval, "load_query_population", lambda split: population)
+    ranks = {key: ["R00001"] for key in keys}
+    result = pb.build_transition_analysis(
+        frame([None, 1, 4, 8]), frame([1, None, 2, None]), frame([1, 1, None, 2]),
+        epoch0_ranks=ranks, selected_ranks=ranks, bm25_ranks=ranks, expected_reactions=4,
+    )
+    assert sum(result["top1_transition_matrix"].values()) == 4
+    assert result["transitions"]["incorrect_epoch0_to_correct_selected"]["total"] == 1
+    assert result["transitions"]["correct_epoch0_to_incorrect_selected"]["total"] == 1
+
+
+def test_full_helpers_do_not_mutate_frozen_baseline_rankings():
+    paths = [
+        pb.retrieval.OUT / "rankings_phase2_rule_based.jsonl",
+        pb.retrieval.OUT / "rankings_bm25.jsonl",
+        pb.retrieval.OUT / "rankings_bge_m3_dense.jsonl",
+        pb.retrieval.OUT / "rankings_bm25_bge_m3_rrf.jsonl",
+    ]
+    before = {path: path.read_bytes() for path in paths}
+    pb.full_training_config()
+    pb.select_best_epoch({
+        epoch: {
+            "exact": {"recall_at_1": {"reaction_micro": 0}, "recall_at_10": {"reaction_micro": 0}},
+            "seen_unseen": {"unseen": {"recall_at_10": {"reaction_micro": 0}}},
+        } for epoch in range(4)
+    })
+    assert before == {path: path.read_bytes() for path in paths}

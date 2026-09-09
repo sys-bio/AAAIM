@@ -11,3 +11,6 @@ benchmark/manifest/*.json text eol=lf
 benchmark/phase3/*.csv text eol=lf
 benchmark/phase3/*.json text eol=lf
 benchmark/phase3/*.jsonl text eol=lf
+benchmark/phase3/phase3b_full/*.json text eol=lf
+benchmark/phase3/phase3b_full/*.jsonl text eol=lf
+benchmark/phase3/phase3b_full/*.md text eol=lf
