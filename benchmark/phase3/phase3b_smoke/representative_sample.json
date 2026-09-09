@@ -1,0 +1,656 @@
+{
+  "keys": [
+    {
+      "model_id": "BIOMD0000000015",
+      "reaction_id": "adrnr"
+    },
+    {
+      "model_id": "BIOMD0000000015",
+      "reaction_id": "den"
+    },
+    {
+      "model_id": "BIOMD0000000015",
+      "reaction_id": "gdrnr"
+    },
+    {
+      "model_id": "BIOMD0000000015",
+      "reaction_id": "polyam"
+    },
+    {
+      "model_id": "BIOMD0000000018",
+      "reaction_id": "MTHFD"
+    },
+    {
+      "model_id": "BIOMD0000000051",
+      "reaction_id": "vG6PDH"
+    },
+    {
+      "model_id": "BIOMD0000000070",
+      "reaction_id": "vPGLDH"
+    },
+    {
+      "model_id": "BIOMD0000000172",
+      "reaction_id": "G3PDH"
+    },
+    {
+      "model_id": "BIOMD0000000176",
+      "reaction_id": "G3PDH"
+    },
+    {
+      "model_id": "BIOMD0000000177",
+      "reaction_id": "G3PDH"
+    },
+    {
+      "model_id": "BIOMD0000000206",
+      "reaction_id": "v1"
+    },
+    {
+      "model_id": "BIOMD0000000206",
+      "reaction_id": "v4"
+    },
+    {
+      "model_id": "BIOMD0000000281",
+      "reaction_id": "r_12"
+    },
+    {
+      "model_id": "BIOMD0000000627",
+      "reaction_id": "reaction_5"
+    },
+    {
+      "model_id": "BIOMD0000000627",
+      "reaction_id": "reaction_6"
+    },
+    {
+      "model_id": "BIOMD0000000627",
+      "reaction_id": "reaction_7"
+    },
+    {
+      "model_id": "BIOMD0000000627",
+      "reaction_id": "reaction_8"
+    },
+    {
+      "model_id": "BIOMD0000000691",
+      "reaction_id": "v1_cell_1"
+    },
+    {
+      "model_id": "BIOMD0000000691",
+      "reaction_id": "v1_cell_2"
+    },
+    {
+      "model_id": "BIOMD0000000691",
+      "reaction_id": "v3_cell_1"
+    },
+    {
+      "model_id": "BIOMD0000000691",
+      "reaction_id": "v3_cell_2"
+    },
+    {
+      "model_id": "BIOMD0000001062",
+      "reaction_id": "R_CLB6PH"
+    },
+    {
+      "model_id": "BIOMD0000001062",
+      "reaction_id": "R_CYSTA"
+    },
+    {
+      "model_id": "BIOMD0000001062",
+      "reaction_id": "R_HCO3E"
+    },
+    {
+      "model_id": "BIOMD0000001062",
+      "reaction_id": "R_LACZ"
+    },
+    {
+      "model_id": "BIOMD0000001062",
+      "reaction_id": "R_LACZpp"
+    },
+    {
+      "model_id": "BIOMD0000001062",
+      "reaction_id": "R_MALTATr"
+    },
+    {
+      "model_id": "BIOMD0000001062",
+      "reaction_id": "R_MOAT2"
+    },
+    {
+      "model_id": "BIOMD0000001062",
+      "reaction_id": "R_S7PI"
+    },
+    {
+      "model_id": "BIOMD0000001062",
+      "reaction_id": "R_SERD_L"
+    },
+    {
+      "model_id": "BIOMD0000001062",
+      "reaction_id": "R_TRE6PH"
+    },
+    {
+      "model_id": "BIOMD0000001062",
+      "reaction_id": "R_TRE6PP"
+    },
+    {
+      "model_id": "BIOMD0000001062",
+      "reaction_id": "R_TRE6PS"
+    },
+    {
+      "model_id": "BIOMD0000001062",
+      "reaction_id": "R_TREH"
+    },
+    {
+      "model_id": "BIOMD0000001062",
+      "reaction_id": "R_TREHpp"
+    },
+    {
+      "model_id": "BIOMD0000001062",
+      "reaction_id": "R_UAGPT3"
+    },
+    {
+      "model_id": "BIOMD0000001091",
+      "reaction_id": "R_ATPM"
+    },
+    {
+      "model_id": "BIOMD0000001091",
+      "reaction_id": "R_BG_CELLB"
+    },
+    {
+      "model_id": "BIOMD0000001091",
+      "reaction_id": "R_GALS4"
+    },
+    {
+      "model_id": "BIOMD0000001091",
+      "reaction_id": "R_MTI"
+    },
+    {
+      "model_id": "BIOMD0000001091",
+      "reaction_id": "R_PGM1_2"
+    },
+    {
+      "model_id": "BIOMD0000001091",
+      "reaction_id": "R_R03491"
+    },
+    {
+      "model_id": "BIOMD0000001091",
+      "reaction_id": "R_R04650"
+    },
+    {
+      "model_id": "BIOMD0000001091",
+      "reaction_id": "R_R05549"
+    },
+    {
+      "model_id": "BIOMD0000001091",
+      "reaction_id": "R_R05940"
+    },
+    {
+      "model_id": "BIOMD0000001091",
+      "reaction_id": "R_R05998"
+    },
+    {
+      "model_id": "BIOMD0000001091",
+      "reaction_id": "R_R06000"
+    },
+    {
+      "model_id": "BIOMD0000001091",
+      "reaction_id": "R_R06005"
+    },
+    {
+      "model_id": "BIOMD0000001091",
+      "reaction_id": "R_R06009"
+    },
+    {
+      "model_id": "BIOMD0000001091",
+      "reaction_id": "R_R06012"
+    },
+    {
+      "model_id": "BIOMD0000001091",
+      "reaction_id": "R_R06092"
+    },
+    {
+      "model_id": "BIOMD0000001091",
+      "reaction_id": "R_R06147"
+    },
+    {
+      "model_id": "BIOMD0000001091",
+      "reaction_id": "R_RAFGH"
+    },
+    {
+      "model_id": "BIOMD0000001091",
+      "reaction_id": "R_SUC2"
+    },
+    {
+      "model_id": "BIOMD0000001091",
+      "reaction_id": "R_TALA"
+    },
+    {
+      "model_id": "BIOMD0000001091",
+      "reaction_id": "R_TRE6PH"
+    },
+    {
+      "model_id": "BIOMD0000001091",
+      "reaction_id": "R_YBR184W_2"
+    },
+    {
+      "model_id": "BIOMD0000001091",
+      "reaction_id": "R_YGR287C"
+    },
+    {
+      "model_id": "BIOMD0000001093",
+      "reaction_id": "R_BZALDH"
+    },
+    {
+      "model_id": "BIOMD0000001093",
+      "reaction_id": "R_BZDH"
+    },
+    {
+      "model_id": "BIOMD0000001093",
+      "reaction_id": "R_HCO3E"
+    },
+    {
+      "model_id": "BIOMD0000001093",
+      "reaction_id": "R_MTI"
+    },
+    {
+      "model_id": "BIOMD0000001093",
+      "reaction_id": "R_S7PI"
+    },
+    {
+      "model_id": "BIOMD0000001093",
+      "reaction_id": "R_SERD_L"
+    },
+    {
+      "model_id": "BIOMD0000001093",
+      "reaction_id": "R_UAGPT3"
+    },
+    {
+      "model_id": "BIOMD0000000013",
+      "reaction_id": "E1"
+    },
+    {
+      "model_id": "BIOMD0000000015",
+      "reaction_id": "ada"
+    },
+    {
+      "model_id": "BIOMD0000000018",
+      "reaction_id": "ATIC12"
+    },
+    {
+      "model_id": "BIOMD0000000051",
+      "reaction_id": "vALDO"
+    },
+    {
+      "model_id": "BIOMD0000000067",
+      "reaction_id": "V_Acs"
+    },
+    {
+      "model_id": "BIOMD0000000070",
+      "reaction_id": "vAK"
+    },
+    {
+      "model_id": "BIOMD0000000108",
+      "reaction_id": "reaction_1"
+    },
+    {
+      "model_id": "BIOMD0000000172",
+      "reaction_id": "ADH"
+    },
+    {
+      "model_id": "BIOMD0000000206",
+      "reaction_id": "v2"
+    },
+    {
+      "model_id": "BIOMD0000000212",
+      "reaction_id": "Vak1"
+    },
+    {
+      "model_id": "BIOMD0000000232",
+      "reaction_id": "v2"
+    },
+    {
+      "model_id": "BIOMD0000000268",
+      "reaction_id": "V_ART"
+    },
+    {
+      "model_id": "BIOMD0000000281",
+      "reaction_id": "r_1"
+    },
+    {
+      "model_id": "BIOMD0000000471",
+      "reaction_id": "r_0005"
+    },
+    {
+      "model_id": "BIOMD0000000590",
+      "reaction_id": "r10"
+    },
+    {
+      "model_id": "BIOMD0000000627",
+      "reaction_id": "AK_astrocytes"
+    },
+    {
+      "model_id": "BIOMD0000000633",
+      "reaction_id": "ALD"
+    },
+    {
+      "model_id": "BIOMD0000000691",
+      "reaction_id": "v2_cell_1"
+    },
+    {
+      "model_id": "BIOMD0000001062",
+      "reaction_id": "R_23PDE2pp"
+    },
+    {
+      "model_id": "BIOMD0000001091",
+      "reaction_id": "R_2DOXG6PP"
+    },
+    {
+      "model_id": "BIOMD0000001093",
+      "reaction_id": "R_1PPDCRc"
+    },
+    {
+      "model_id": "BIOMD0000000013",
+      "reaction_id": "E12"
+    },
+    {
+      "model_id": "BIOMD0000000013",
+      "reaction_id": "E13"
+    },
+    {
+      "model_id": "BIOMD0000000013",
+      "reaction_id": "E7"
+    },
+    {
+      "model_id": "BIOMD0000000013",
+      "reaction_id": "E10"
+    },
+    {
+      "model_id": "BIOMD0000000471",
+      "reaction_id": "r_0225"
+    },
+    {
+      "model_id": "BIOMD0000000013",
+      "reaction_id": "E14"
+    },
+    {
+      "model_id": "BIOMD0000000015",
+      "reaction_id": "asli"
+    },
+    {
+      "model_id": "BIOMD0000000070",
+      "reaction_id": "vATPase"
+    },
+    {
+      "model_id": "BIOMD0000000172",
+      "reaction_id": "HK"
+    },
+    {
+      "model_id": "BIOMD0000000172",
+      "reaction_id": "PDC"
+    },
+    {
+      "model_id": "BIOMD0000000172",
+      "reaction_id": "PFK"
+    },
+    {
+      "model_id": "BIOMD0000000172",
+      "reaction_id": "PGI"
+    },
+    {
+      "model_id": "BIOMD0000000176",
+      "reaction_id": "HXK"
+    },
+    {
+      "model_id": "BIOMD0000000176",
+      "reaction_id": "PDC"
+    },
+    {
+      "model_id": "BIOMD0000000176",
+      "reaction_id": "PFK"
+    },
+    {
+      "model_id": "BIOMD0000000176",
+      "reaction_id": "PGI"
+    },
+    {
+      "model_id": "BIOMD0000000177",
+      "reaction_id": "HXK"
+    },
+    {
+      "model_id": "BIOMD0000000177",
+      "reaction_id": "PDC"
+    },
+    {
+      "model_id": "BIOMD0000000177",
+      "reaction_id": "PFK"
+    },
+    {
+      "model_id": "BIOMD0000000177",
+      "reaction_id": "PGI"
+    },
+    {
+      "model_id": "BIOMD0000000212",
+      "reaction_id": "Vcgs"
+    },
+    {
+      "model_id": "BIOMD0000000232",
+      "reaction_id": "v5"
+    },
+    {
+      "model_id": "BIOMD0000000268",
+      "reaction_id": "V_CTGL"
+    },
+    {
+      "model_id": "BIOMD0000000268",
+      "reaction_id": "V_SAHH"
+    },
+    {
+      "model_id": "BIOMD0000000281",
+      "reaction_id": "r_10"
+    },
+    {
+      "model_id": "BIOMD0000000013",
+      "reaction_id": "E11"
+    },
+    {
+      "model_id": "BIOMD0000000013",
+      "reaction_id": "E15"
+    },
+    {
+      "model_id": "BIOMD0000000013",
+      "reaction_id": "E16"
+    },
+    {
+      "model_id": "BIOMD0000000013",
+      "reaction_id": "E17"
+    },
+    {
+      "model_id": "BIOMD0000000013",
+      "reaction_id": "E2"
+    },
+    {
+      "model_id": "BIOMD0000000013",
+      "reaction_id": "E3"
+    },
+    {
+      "model_id": "BIOMD0000000013",
+      "reaction_id": "E4"
+    },
+    {
+      "model_id": "BIOMD0000000013",
+      "reaction_id": "E5"
+    },
+    {
+      "model_id": "BIOMD0000000013",
+      "reaction_id": "E6"
+    },
+    {
+      "model_id": "BIOMD0000000013",
+      "reaction_id": "E8"
+    },
+    {
+      "model_id": "BIOMD0000000013",
+      "reaction_id": "E9"
+    },
+    {
+      "model_id": "BIOMD0000000015",
+      "reaction_id": "adna"
+    },
+    {
+      "model_id": "BIOMD0000000015",
+      "reaction_id": "ampd"
+    },
+    {
+      "model_id": "BIOMD0000000015",
+      "reaction_id": "aprt"
+    },
+    {
+      "model_id": "BIOMD0000000015",
+      "reaction_id": "arna"
+    },
+    {
+      "model_id": "BIOMD0000000015",
+      "reaction_id": "asuc"
+    },
+    {
+      "model_id": "BIOMD0000000015",
+      "reaction_id": "gdna"
+    },
+    {
+      "model_id": "BIOMD0000000015",
+      "reaction_id": "gmpr"
+    },
+    {
+      "model_id": "BIOMD0000000015",
+      "reaction_id": "gprt"
+    },
+    {
+      "model_id": "BIOMD0000000015",
+      "reaction_id": "grna"
+    },
+    {
+      "model_id": "BIOMD0000000015",
+      "reaction_id": "hxd"
+    },
+    {
+      "model_id": "BIOMD0000000015",
+      "reaction_id": "xd"
+    },
+    {
+      "model_id": "BIOMD0000000070",
+      "reaction_id": "vBPGP"
+    },
+    {
+      "model_id": "BIOMD0000000070",
+      "reaction_id": "vGSSGRD"
+    },
+    {
+      "model_id": "BIOMD0000000206",
+      "reaction_id": "v8"
+    },
+    {
+      "model_id": "BIOMD0000000212",
+      "reaction_id": "VlysKR"
+    },
+    {
+      "model_id": "BIOMD0000000232",
+      "reaction_id": "vresp"
+    },
+    {
+      "model_id": "BIOMD0000000473",
+      "reaction_id": "r_0001"
+    },
+    {
+      "model_id": "BIOMD0000000473",
+      "reaction_id": "r_0156"
+    },
+    {
+      "model_id": "BIOMD0000000473",
+      "reaction_id": "r_0264"
+    },
+    {
+      "model_id": "BIOMD0000000473",
+      "reaction_id": "r_2127"
+    },
+    {
+      "model_id": "BIOMD0000000590",
+      "reaction_id": "r4"
+    },
+    {
+      "model_id": "BIOMD0000000633",
+      "reaction_id": "GS"
+    },
+    {
+      "model_id": "BIOMD0000000633",
+      "reaction_id": "PFK2"
+    },
+    {
+      "model_id": "BIOMD0000001062",
+      "reaction_id": "R_23PDE4pp"
+    },
+    {
+      "model_id": "BIOMD0000001062",
+      "reaction_id": "R_23PDE7pp"
+    },
+    {
+      "model_id": "BIOMD0000001062",
+      "reaction_id": "R_23PDE9pp"
+    },
+    {
+      "model_id": "BIOMD0000001062",
+      "reaction_id": "R_3AMACHYD"
+    },
+    {
+      "model_id": "BIOMD0000001062",
+      "reaction_id": "R_3KGK"
+    },
+    {
+      "model_id": "BIOMD0000001062",
+      "reaction_id": "R_3NTD2pp"
+    },
+    {
+      "model_id": "BIOMD0000001091",
+      "reaction_id": "R_R00145"
+    },
+    {
+      "model_id": "BIOMD0000000176",
+      "reaction_id": "ENO"
+    },
+    {
+      "model_id": "BIOMD0000001091",
+      "reaction_id": "R_DGK1"
+    },
+    {
+      "model_id": "BIOMD0000001093",
+      "reaction_id": "R_A5PISO"
+    },
+    {
+      "model_id": "BIOMD0000001091",
+      "reaction_id": "R_R03046"
+    },
+    {
+      "model_id": "BIOMD0000001091",
+      "reaction_id": "R_PPA_1"
+    },
+    {
+      "model_id": "BIOMD0000001062",
+      "reaction_id": "R_DXPRIi"
+    },
+    {
+      "model_id": "BIOMD0000001093",
+      "reaction_id": "R_LYSMO"
+    },
+    {
+      "model_id": "BIOMD0000000472",
+      "reaction_id": "r_0974"
+    }
+  ],
+  "n_bm25_easy_at_10": 121,
+  "n_bm25_hard_after_100": 28,
+  "n_clusters": 21,
+  "n_examples": 160,
+  "n_multi_positive": 65,
+  "phase2_strata": {
+    "empty_constrained": 74,
+    "nonempty_answer_absent": 22,
+    "retrievable_rerank_failure": 17,
+    "retrievable_top1_success": 22,
+    "unconstrained": 25
+  }
+}

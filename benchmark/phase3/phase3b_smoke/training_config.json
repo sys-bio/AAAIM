@@ -1,0 +1,58 @@
+{
+  "model_metadata": {
+    "architecture": "BertModel; 12 layers; hidden size 384; 12 heads",
+    "cache_destination": "benchmark/phase3/phase3b_smoke/_model_cache",
+    "license": "MIT",
+    "name": "BAAI/bge-small-en-v1.5",
+    "observed_cache_bytes": 134410637,
+    "official_source": "https://huggingface.co/BAAI/bge-small-en-v1.5",
+    "parameters": 33360000,
+    "revision": "5e62ea33e012fda8c02802b906664c915ebd1bb1",
+    "role": "general retrieval starting checkpoint; becomes AAAIM biochemical retriever only through fine-tuning"
+  },
+  "recommended_full_run": {
+    "authorization": "proposal only; full training was not launched",
+    "checkpoint_retention": "best plus latest, including optimizer/scaler/scheduler state",
+    "cloud_gpu_rental_justified": false,
+    "early_stopping_metric": "validation Recall@1 (primary); preserve Recall@10, unseen-target Recall@10, and true-retrieval-failure Recall@10",
+    "epochs": 3,
+    "estimated_checkpoint_bytes_each": 399384843,
+    "estimated_checkpoint_storage_bytes_best_plus_latest": 798769686,
+    "estimated_peak_allocated_vram_bytes": 2141377024,
+    "estimated_seconds_per_epoch": 88.07917837795479,
+    "evaluation_frequency": "once per epoch after atomically freezing all validation rankings",
+    "explicit_negatives_per_query": {
+      "bm25": 2,
+      "random": 1
+    },
+    "gradient_accumulation_steps": 2,
+    "learning_rate": 2e-05,
+    "local_training_practical": true,
+    "max_length": 256,
+    "patience": 2,
+    "physical_batch_size": 4,
+    "revision": "5e62ea33e012fda8c02802b906664c915ebd1bb1",
+    "starting_checkpoint": "BAAI/bge-small-en-v1.5",
+    "warmup": "10% of optimizer steps"
+  },
+  "representative_smoke": {
+    "bm25_hard_negatives": 2,
+    "document_template": "phase3-retrieval-document-v1",
+    "epochs": 20,
+    "gradient_accumulation_steps": 2,
+    "learning_rate": 2e-05,
+    "max_grad_norm": 1.0,
+    "max_length": 256,
+    "max_optimizer_steps": 21,
+    "mixed_precision": true,
+    "model_name": "BAAI/bge-small-en-v1.5",
+    "model_revision": "5e62ea33e012fda8c02802b906664c915ebd1bb1",
+    "physical_batch_size": 4,
+    "query_template": "phase3-retrieval-query-v1",
+    "random_negatives": 1,
+    "seed": 20260909,
+    "temperature": 0.02,
+    "warmup_steps": 2
+  },
+  "representative_smoke_config_hash": "fa2312858c2682a489a9a668b346a17da02afe4dc4c3182683654930fc21cd0e"
+}

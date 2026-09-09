@@ -45,3 +45,6 @@ benchmark/dist/*.zip
 benchmark/phase3/_*/
 # Phase 3 retrieval model/embedding caches (large and reproducible).
 benchmark/phase3/retrieval_baselines/_*/
+# Phase 3B model snapshots, optimizer checkpoints, rankings, and isolated env.
+benchmark/phase3/phase3b_smoke/_*/
+benchmark/phase3/phase3b_smoke/_*

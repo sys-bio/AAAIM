@@ -1,0 +1,17 @@
+{
+  "checkpoint_bytes": 399384843,
+  "examples_per_second": 39.70291349669605,
+  "peak_allocated_vram_bytes": 2141377024,
+  "projected_full_epoch_minutes": 1.4679863062992464,
+  "projected_full_epoch_seconds": 88.07917837795479,
+  "projection_basis": "linear projection from bounded representative smoke optimization; excludes validation and startup",
+  "representative_training_seconds": 4.231427499998972,
+  "validation_ranking_runtime": {
+    "device": "cuda",
+    "labels_loaded_during_ranking": false,
+    "n_queries": 969,
+    "peak_allocated_vram_bytes": 382363136,
+    "ranking_sha256": "b9033d001352e65f2f2c42e44182f55a559256f09e2152fac6c0cd45c74999cb",
+    "seconds": 15.920499899999413
+  }
+}

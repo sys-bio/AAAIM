@@ -1,0 +1,8 @@
+{
+  "dataset_sha256": "142c9f0d404531cf2a8c59ddfabdc80a2858dddd4656a1becc1fb5c0ff292a05",
+  "example_count": 3466,
+  "full_examples_committed": false,
+  "ordering": "model_id, reaction_id ascending",
+  "rebuild_command": "python -m benchmark.scripts.phase3_biencoder build",
+  "schema": "phase3b-training-examples-v1"
+}
