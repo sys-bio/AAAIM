@@ -25,6 +25,8 @@ tqdm
 
 ## for creating embeddings
 sentence-transformers
+# Phase 3 off-the-shelf BGE-M3 baseline (exact runtime version also recorded).
+transformers==5.16.1
 
 
 # UI (for later phases)

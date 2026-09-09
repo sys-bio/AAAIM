@@ -33,7 +33,7 @@ from benchmark.scripts.phase3_common import (
     estimate_tokens_conservative,
     require_live_tokenizer,
 )
-from benchmark.scripts.phase3_modes import parse_structured_output
+from benchmark.scripts.phase3_modes import CACHE_DIR, parse_structured_output
 from benchmark.scripts.phase3_openai_run import (
     SECRET_ENV,
     BudgetExceeded,
@@ -69,6 +69,10 @@ FAKE_KEY = "sk-test-secret-value-not-for-commit"
 live_only = pytest.mark.skipif(
     not (PHASE3_DIR / "pilot_sample.csv").exists(),
     reason="Phase 3 artifacts not built",
+)
+response_cache_only = pytest.mark.skipif(
+    not CACHE_DIR.exists() or not any(CACHE_DIR.rglob("*.json")),
+    reason="gitignored Phase 3 response cache not available",
 )
 
 
@@ -658,6 +662,7 @@ def test_validation_refuses_to_overwrite_smoke_dir(tmp_path):
 
 
 @live_only
+@response_cache_only
 def test_live_validation_plan_has_489_rows_and_reuses_smoke_cache():
     from benchmark.scripts.phase3_common import VALIDATION_N_REQUESTS
     from benchmark.scripts.phase3_modes import CACHE_DIR

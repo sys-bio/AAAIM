@@ -1,0 +1,5 @@
+{
+  "decision_basis": "BGE-M3 standalone Recall@10 is below BM25; RRF's +0.005160 overall delta versus BM25 has a 95% interval containing zero, while its unseen-target gain remains useful as a reference; BGE-M3 also required a 4.56 GB model cache and approximately 56.7 CPU minutes for one-time catalog encoding.",
+  "recommendation": "Use a smaller encoder as the Phase 3B starting checkpoint; retain BGE-M3 as the frozen off-the-shelf reference.",
+  "scope": "validation-only recommendation; no trained model or held-out test evaluation"
+}

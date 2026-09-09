@@ -1,0 +1,3 @@
+model_id,reaction_id,frozen_stratum,corrected_evaluation_stratum,ground_truth_kegg_all
+BIOMD0000000042,reaction_1,nonempty_answer_absent,retrievable_top1_success,R00299;R00771
+BIOMD0000000042,reaction_3,nonempty_answer_absent,retrievable_rerank_failure,R01015;R01070

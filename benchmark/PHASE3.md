@@ -583,3 +583,92 @@ change the following decisions:
 
 Do not start BM25, tool-assisted mode, bi-encoder training, test-set
 evaluation, or another provider/model from this authorization.
+
+## Framework-independent retrieval baselines (Phase 3 retrieval milestone)
+
+The subsequent authorization evaluates four retrieval-only conditions on all 969
+validation reactions: the already-frozen Phase 2 candidates, native Okapi BM25,
+off-the-shelf `BAAI/bge-m3` dense retrieval, and rank-only BM25+dense RRF.  It does
+not read held-out test labels, call an LLM, train an encoder, or change any Phase 1,
+Phase 2, or Phase 3A artifact.
+
+Implementation plan: (1) freeze label-free target-local queries and a common KEGG
+document template; (2) freeze component rankings before labels are joined; (3) fuse
+100-deep component rankings with one-indexed RRF; (4) evaluate offline at the reaction
+unit and rebuild all derived reports twice; (5) verify the complete suite and frozen
+artifact digests before committing.
+
+Canonical query (`phase3-retrieval-query-v1`):
+
+```text
+Equation: {normalized SBML reaction equation}
+Participants: {name} [species={SBML species id}; ChEBI={ids}; KEGG-compound={ids}]; ...
+```
+
+The reaction is target-local. Every string is scanned with the Phase 3 digit-bounded
+`R#####` policy and redacted before ranking. Ground truth and catalog membership are
+not inputs to query construction.
+
+Canonical catalog document (`phase3-retrieval-document-v1`) consists of labelled,
+nonempty `DEFINITION`, `NAME`, `EQUATION`, `ENZYME`, `RCLASS`, and `BRITE` lines in
+that order. The frozen snapshot does not expose a separate KO field; BRITE contains
+the available orthology/enzyme hierarchy. KEGG compound IDs and compound names occur
+in `EQUATION` and `DEFINITION`. The reaction identifier is removed from all searchable
+text and retained only as the document key.
+
+BM25 is project-native Okapi BM25 (`phase3_retrieval.py v1`), with the prespecified
+`k1=1.2`, `b=0.75`. Its regex tokenizer lowercases while preserving biochemical
+alphanumeric tokens, underscores, numbers, decimal points, hyphens, charges, slashes,
+and colons. There is no stemming, stopword removal, query expansion, or validation
+hyperparameter search.
+
+Dense retrieval uses only the normalized dense CLS vector from official
+`BAAI/bge-m3`, pinned to Hugging Face commit
+`5617a9f61b028005a4858fdac845db406aefb181`. Similarity is exact inner product over
+L2-normalized vectors (cosine). Learned-sparse and multi-vector outputs are disabled;
+the encoder is not fine-tuned. CUDA uses FP16 with batch backoff on OOM; CPU uses FP32.
+Catalog-cache identity includes catalog SHA-256, document template, model revision,
+pooling, normalization, similarity, and max length.
+
+RRF uses `score(d) = sum(1 / (60 + rank_i(d)))`, one-indexed ranks, zero contribution
+for a missing document, and ascending KEGG ID to resolve score ties. Both components
+are retrieved to depth 100 before fusion.
+
+Exact commands:
+
+```powershell
+python -m benchmark.scripts.phase3_retrieval bm25
+python -m benchmark.scripts.phase3_retrieval phase2
+python -u -m benchmark.scripts.phase3_retrieval dense --revision 5617a9f61b028005a4858fdac845db406aefb181 --batch 2
+python -m benchmark.scripts.phase3_retrieval fuse
+python -m benchmark.scripts.phase3_retrieval evaluate
+python -m benchmark.scripts.phase3_retrieval evaluate
+python -m benchmark.scripts.phase3_retrieval verify
+python -m pytest tests/test_phase3_retrieval.py -q --basetemp benchmark/phase3/_pytest_retrieval
+python -m pytest -q --basetemp benchmark/phase3/_pytest_all
+python benchmark/scripts/freeze_phase2.py --verify
+python benchmark/scripts/phase3_openai_eval.py --verify-manifest
+```
+
+Outputs and the human-readable result live in
+`benchmark/phase3/retrieval_baselines/`. Model and embedding caches are reproducible,
+gitignored, and are not part of the artifact manifest. This milestone is an
+off-the-shelf baseline only; Phase 3B training, reranking, LangChain integration, and
+held-out test evaluation remain out of scope.
+
+### Frozen multi-label stratum inconsistency
+
+The retrieval audit found two validation rows whose frozen Phase 3 stratum disagrees
+with the frozen candidates and multi-label answer key. Phase 2's
+`analyze_retrieval.py` splits `ground_truth_kegg_all` on `|`, but the Phase 1 artifact
+uses `;`: `BIOMD0000000042/reaction_1` contains alternate answer `R00299` at Phase 2
+rank 1, and `reaction_3` contains alternate answer `R01070` at rank 2. Both were
+therefore incorrectly frozen as `nonempty_answer_absent`.
+
+No frozen Phase 1–3A artifact or split is changed. This milestone records the two rows
+in `frozen_stratum_discrepancies.csv` and derives its evaluation stratum mechanically
+from the frozen status, candidates, and all semicolon-separated ground truths. The
+corrected validation counts are 85 unconstrained, 419 empty constrained, 20 nonempty
+answer absent, 17 retrievable rerank failures, and 428 rule-based Top-1 successes.
+Thus true retrieval failure is 524 reactions, not 526. Overall retrieval metrics and
+split membership are unchanged; only stratum-specific denominators are corrected.
