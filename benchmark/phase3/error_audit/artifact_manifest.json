@@ -1,0 +1,65 @@
+{
+  "files": [
+    {
+      "bytes": 1478,
+      "n_lines": null,
+      "path": "benchmark/phase3/error_audit/README.md",
+      "sha256": "108cb3648d9b285c716abc5ba31f4bb6d2d755248e00ef5388c22b7bf6d7a08f"
+    },
+    {
+      "bytes": 2476337,
+      "n_lines": 143,
+      "path": "benchmark/phase3/error_audit/all_method_disagreements.csv",
+      "sha256": "7eea9fcb73a3ec0f5d57f03bb13d98742e8fbe03be4f908c10c9ae807fb6d995"
+    },
+    {
+      "bytes": 2833787,
+      "n_lines": 164,
+      "path": "benchmark/phase3/error_audit/all_validation_outcomes.csv",
+      "sha256": "14a70bc7144ed47d08e2e2dafe74ae286e792e00758a1424003c560de43c4eb6"
+    },
+    {
+      "bytes": 1667,
+      "n_lines": null,
+      "path": "benchmark/phase3/error_audit/deterministic_rebuild.json",
+      "sha256": "4461180ee9bc8ef0503641899f4aecfae4ee0de7fe2696531f514299fa41fadf"
+    },
+    {
+      "bytes": 715,
+      "n_lines": null,
+      "path": "benchmark/phase3/error_audit/inventory_summary.json",
+      "sha256": "66654f7096fcd76be3d69aa8ea92d8b325bad4b9c70257575bdf204c7cbbd8d3"
+    },
+    {
+      "bytes": 666890,
+      "n_lines": 40,
+      "path": "benchmark/phase3/error_audit/phase3c_abstentions.csv",
+      "sha256": "39b768af179cdef205ca31a1dab62b771d7fa0d8206cbfef9e16a42ae3392e68"
+    },
+    {
+      "bytes": 35896,
+      "n_lines": 3,
+      "path": "benchmark/phase3/error_audit/phase3c_compliance_cases.csv",
+      "sha256": "36af96b47707e9b53e4d72f931aa53c52180c517689087748f1f36903530cacc"
+    },
+    {
+      "bytes": 386815,
+      "n_lines": 23,
+      "path": "benchmark/phase3/error_audit/phase3c_incorrect_selections.csv",
+      "sha256": "53a7db0908edaee033d98ac695dddda1f2d243341622b4a55f7b9c9a52409f32"
+    },
+    {
+      "bytes": 1052328,
+      "n_lines": 62,
+      "path": "benchmark/phase3/error_audit/phase3c_noncorrect_review.csv",
+      "sha256": "a2fd3e4016112ebc8bc11e13903df49e9f49b6313695a9457d867b69bf846b7c"
+    },
+    {
+      "bytes": 2170,
+      "n_lines": null,
+      "path": "benchmark/phase3/error_audit/source_provenance.json",
+      "sha256": "519757f37f578515be387147b54ffa4df73dab929b9a678445e3d06157f2d133"
+    }
+  ],
+  "n_files": 10
+}
