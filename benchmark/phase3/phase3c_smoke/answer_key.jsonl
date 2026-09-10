@@ -1,0 +1,5 @@
+{"answer_present_in_fused_top10":false,"first_ground_truth_evidence_rank":null,"ground_truth_ids":["R00162"],"model_id":"BIOMD0000000171","reaction_id":"P1_pho","sample_id":"P3C0001"}
+{"answer_present_in_fused_top10":true,"first_ground_truth_evidence_rank":1,"ground_truth_ids":["R02344","R02946"],"model_id":"BIOMD0000000017","reaction_id":"R11","sample_id":"P3C0002"}
+{"answer_present_in_fused_top10":false,"first_ground_truth_evidence_rank":null,"ground_truth_ids":["R02947"],"model_id":"BIOMD0000000017","reaction_id":"R9","sample_id":"P3C0003"}
+{"answer_present_in_fused_top10":true,"first_ground_truth_evidence_rank":1,"ground_truth_ids":["R01015","R01070"],"model_id":"BIOMD0000000042","reaction_id":"reaction_3","sample_id":"P3C0004"}
+{"answer_present_in_fused_top10":true,"first_ground_truth_evidence_rank":1,"ground_truth_ids":["R00209"],"model_id":"BIOMD0000000017","reaction_id":"R3","sample_id":"P3C0005"}
