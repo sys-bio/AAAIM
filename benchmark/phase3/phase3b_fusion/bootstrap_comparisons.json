@@ -1,0 +1,105 @@
+{
+  "comparisons": {
+    "fusion_minus_bm25": {
+      "recall_at_1": {
+        "ci_95_percentile": [
+          0.013003,
+          0.243697
+        ],
+        "delta_selected_minus_reference": 0.095975,
+        "estimand": "paired reaction-micro recall_at_1_exact difference",
+        "includes_zero": false,
+        "limitation": "Only 12 validation clusters; percentile intervals may be unstable.",
+        "n_boot": 10000,
+        "n_clusters": 12,
+        "n_reactions": 969,
+        "seed": 20260902,
+        "unit": "frozen validation cluster"
+      },
+      "recall_at_10": {
+        "ci_95_percentile": [
+          0.00479,
+          0.190299
+        ],
+        "delta_selected_minus_reference": 0.033024,
+        "estimand": "paired reaction-micro recall_at_10_exact difference",
+        "includes_zero": false,
+        "limitation": "Only 12 validation clusters; percentile intervals may be unstable.",
+        "n_boot": 10000,
+        "n_clusters": 12,
+        "n_reactions": 969,
+        "seed": 20260902,
+        "unit": "frozen validation cluster"
+      }
+    },
+    "fusion_minus_bm25_bge_m3_rrf": {
+      "recall_at_1": {
+        "ci_95_percentile": [
+          0.100209,
+          0.225131
+        ],
+        "delta_selected_minus_reference": 0.139319,
+        "estimand": "paired reaction-micro recall_at_1_exact difference",
+        "includes_zero": false,
+        "limitation": "Only 12 validation clusters; percentile intervals may be unstable.",
+        "n_boot": 10000,
+        "n_clusters": 12,
+        "n_reactions": 969,
+        "seed": 20260902,
+        "unit": "frozen validation cluster"
+      },
+      "recall_at_10": {
+        "ci_95_percentile": [
+          0.014855,
+          0.07732
+        ],
+        "delta_selected_minus_reference": 0.027864,
+        "estimand": "paired reaction-micro recall_at_10_exact difference",
+        "includes_zero": false,
+        "limitation": "Only 12 validation clusters; percentile intervals may be unstable.",
+        "n_boot": 10000,
+        "n_clusters": 12,
+        "n_reactions": 969,
+        "seed": 20260902,
+        "unit": "frozen validation cluster"
+      }
+    },
+    "fusion_minus_trained_biencoder_epoch1": {
+      "recall_at_1": {
+        "ci_95_percentile": [
+          -0.011299,
+          0.067278
+        ],
+        "delta_selected_minus_reference": 0.03612,
+        "estimand": "paired reaction-micro recall_at_1_exact difference",
+        "includes_zero": true,
+        "limitation": "Only 12 validation clusters; percentile intervals may be unstable.",
+        "n_boot": 10000,
+        "n_clusters": 12,
+        "n_reactions": 969,
+        "seed": 20260902,
+        "unit": "frozen validation cluster"
+      },
+      "recall_at_10": {
+        "ci_95_percentile": [
+          -0.011609,
+          0.245487
+        ],
+        "delta_selected_minus_reference": 0.03096,
+        "estimand": "paired reaction-micro recall_at_10_exact difference",
+        "includes_zero": true,
+        "limitation": "Only 12 validation clusters; percentile intervals may be unstable.",
+        "n_boot": 10000,
+        "n_clusters": 12,
+        "n_reactions": 969,
+        "seed": 20260902,
+        "unit": "frozen validation cluster"
+      }
+    }
+  },
+  "interpretation_rule": "Do not claim superiority when the 95% percentile interval includes zero.",
+  "n_clusters": 12,
+  "replicates": 10000,
+  "resampling_unit": "frozen validation cluster",
+  "seed": 20260902
+}

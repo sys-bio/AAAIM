@@ -1,0 +1,63 @@
+{
+  "at_10": {
+    "correct_for_bm25_only": 43,
+    "correct_for_both": 848,
+    "correct_for_trained_biencoder_only": 45,
+    "lost_by_fusion_relative_to_bm25": 2,
+    "lost_by_fusion_relative_to_trained_biencoder": 12,
+    "missed_by_both": 33,
+    "recovered_by_fusion_beyond_bm25": 34,
+    "recovered_by_fusion_beyond_both_components": 1,
+    "recovered_by_fusion_beyond_trained_biencoder": 42
+  },
+  "component_to_fusion_transition_matrices": {
+    "bm25": {
+      "recall_at_1": {
+        "correct_both": 742,
+        "lost_by_fusion": 14,
+        "missed_both": 106,
+        "recovered_by_fusion": 107
+      },
+      "recall_at_10": {
+        "correct_both": 889,
+        "lost_by_fusion": 2,
+        "missed_both": 44,
+        "recovered_by_fusion": 34
+      }
+    },
+    "trained_biencoder_epoch1": {
+      "recall_at_1": {
+        "correct_both": 793,
+        "lost_by_fusion": 21,
+        "missed_both": 99,
+        "recovered_by_fusion": 56
+      },
+      "recall_at_10": {
+        "correct_both": 881,
+        "lost_by_fusion": 12,
+        "missed_both": 34,
+        "recovered_by_fusion": 42
+      }
+    }
+  },
+  "n_reactions": 969,
+  "rank_sources": {
+    "bge_m3_dense": 969,
+    "bm25": 969,
+    "bm25_bge_m3_rrf": 969,
+    "bm25_trained_epoch1_rrf": 969,
+    "phase2_rule_based": 969,
+    "trained_biencoder_epoch1": 969
+  },
+  "rank_transitions": {
+    "demoted_vs_bm25": 45,
+    "demoted_vs_trained_biencoder_epoch1": 46,
+    "lost_top10_vs_bm25": 2,
+    "lost_top10_vs_trained_biencoder_epoch1": 12,
+    "lost_top1_vs_bm25": 14,
+    "lost_top1_vs_trained_biencoder_epoch1": 21,
+    "promoted_vs_bm25": 166,
+    "promoted_vs_trained_biencoder_epoch1": 109
+  },
+  "scope": "exact validation reaction outcomes"
+}

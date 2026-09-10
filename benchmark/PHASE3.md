@@ -672,3 +672,106 @@ corrected validation counts are 85 unconstrained, 419 empty constrained, 20 none
 answer absent, 17 retrievable rerank failures, and 428 rule-based Top-1 successes.
 Thus true retrieval failure is 524 reactions, not 526. Overall retrieval metrics and
 split membership are unchanged; only stratum-specific denominators are corrected.
+
+## Phase 3B selected-model package and BM25 fusion
+
+The prespecified three-epoch Phase 3B run selected epoch 1 on validation. Its source
+checkpoint SHA-256 is
+`8773b04f09916889b74c956e708044fe2c653fa764fe73c422ecc376ecae81c1`;
+the initializer is `BAAI/bge-small-en-v1.5` at immutable revision
+`5e62ea33e012fda8c02802b906664c915ebd1bb1`. Inference uses CLS pooling, L2
+normalization, maximum sequence length 256, and the existing v1 query/document
+templates.
+
+### Portable inference archive
+
+`benchmark.scripts.phase3b_release` converts only the selected model state to a
+standard local Hugging Face layout with `model.safetensors`, configuration,
+tokenizer files, inference metadata, source/catalog/input digests, environment
+versions, a fixed inference fixture, loading instructions, and a per-file manifest.
+Optimizer, scheduler, scaler, cursor/RNG state, the checkpoint container, and the
+original Hugging Face cache are excluded. Resuming optimization would require those
+excluded states plus the exact training configuration and dataset; no resume archive
+was created because no continuation is planned.
+
+The deterministic ZIP was independently built twice with byte-identical output:
+
+| Field | Value |
+| --- | --- |
+| File | `benchmark/dist/aaaim-phase3b-selected-epoch1-inference.zip` (gitignored) |
+| SHA-256 | `3412a3fa546347d8209ab62ca7ef55fb490e148b5f90c25cf33616328a0d0f53` |
+| Compressed size | 111,163,286 bytes |
+| Uncompressed size | 134,416,825 bytes |
+
+Clean-room restoration extracted into a fresh temporary directory, forced offline
+loading from the extracted archive, and did not access `best.pt` or the original
+cache. The fixed inference fixture and all 969 validation Top-100 ranked KEGG-ID
+lists reproduced exactly. The committed registry/restoration records and exact
+future upload/restore instructions are under `benchmark/dist/`; the ZIP is not
+committed and no upload occurred.
+
+```powershell
+benchmark/phase3/_phase3b_env/Scripts/python.exe -m benchmark.scripts.phase3b_release build-archive
+benchmark/phase3/_phase3b_env/Scripts/python.exe -m benchmark.scripts.phase3b_release verify-archive
+benchmark/phase3/_phase3b_env/Scripts/python.exe -m benchmark.scripts.phase3b_release restore --batch 64
+```
+
+### Prespecified BM25 + trained epoch-1 RRF
+
+The fusion uses only the already-frozen 100-deep BM25 and epoch-1 rankings. It is
+equal-weight reciprocal rank fusion with `k=60`, one-indexed ranks, zero contribution
+for a missing document, and ascending KEGG-ID tie-breaking. The union receives
+positive RRF scores; all remaining zero-score IDs follow in ascending order, yielding
+a complete 12,312-ID catalog permutation for every validation reaction. No labels,
+re-encoding, retraining, tuning, or weighted search enter ranking construction. The
+XZ-compressed ranking is hashed before ground truth is loaded.
+
+Exact reaction-micro results:
+
+| Method | R@1 | R@3 | R@5 | R@10 | MRR@10 | Unseen R@10 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Phase 2 rule-based | 0.441692 | 0.459236 | 0.459236 | 0.459236 | 0.449260 | 0.450820 |
+| BM25 | 0.780186 | 0.884417 | 0.901961 | 0.919505 | 0.832932 | 0.778689 |
+| Off-the-shelf BGE-M3 | 0.431373 | 0.626419 | 0.722394 | 0.785346 | 0.550519 | 0.532787 |
+| BM25 + BGE-M3 RRF | 0.736842 | 0.854489 | 0.897833 | 0.924665 | 0.802582 | 0.819672 |
+| Trained epoch-1 bi-encoder | 0.840041 | 0.897833 | 0.911249 | 0.921569 | 0.871584 | 0.647541 |
+| **BM25 + trained epoch-1 RRF** | **0.876161** | **0.928793** | **0.937049** | **0.952528** | **0.902243** | **0.844262** |
+
+The new fusion's BRITE/orthology-aware reaction-micro R@1/R@3/R@5/R@10 and
+MRR@10 are 0.907121/0.952528/0.958720/0.969040 and 0.928424. Exact R@10
+model macro and cluster macro are 0.810343 and 0.803688. Seen R@10 is 0.968123;
+true Phase 2 retrieval-failure R@10 is 0.940840. The 17-row Phase 2 reranking-failure
+subset declines to 0.529412 versus 0.882353 for the trained model, an important
+small-stratum tradeoff.
+
+At R@10, BM25-only/trained-only/both/neither counts are 43/45/848/33. Fusion
+recovers 34 reactions beyond BM25 and 42 beyond the trained model (one missed by
+both), while losing 2 BM25 hits and 12 trained-model hits. It improves unseen-target
+R@10 by 0.196721 over the trained model and increases rather than harms trained-model
+R@1 (+0.036120).
+
+Paired 10,000-replicate cluster bootstraps use seed 20260902 and 12 validation
+clusters. Fusion minus BM25 intervals exclude zero for R@1 (+0.095975,
+95% CI [+0.013003, +0.243697]) and R@10 (+0.033024,
+[+0.004790, +0.190299]). Fusion minus old BM25+BGE-M3 RRF also excludes zero for
+R@1 (+0.139319, [+0.100209, +0.225131]) and R@10 (+0.027864,
+[+0.014855, +0.077320]). Fusion minus the trained model includes zero for R@1
+(+0.036120, [-0.011299, +0.067278]) and R@10 (+0.030960,
+[-0.011609, +0.245487]); no superiority claim is made for those comparisons.
+Only 12 clusters are available, so all percentile intervals may be unstable.
+
+For the future Phase 3C Top-10 database evidence set, use
+`bm25_trained_epoch1_rrf`. It is the validation Pareto winner over exact R@1, overall
+R@10, and unseen-target R@10, while the uncertainty versus the trained component and
+the reranking-failure subset regression must remain visible. This is only the
+retriever selection; no Phase 3C or LangChain workflow was started.
+
+```powershell
+python -m benchmark.scripts.phase3b_release fusion
+python -m benchmark.scripts.phase3b_release verify-fusion
+python -m pytest tests/test_phase3b_release.py -q --basetemp benchmark/phase3/_pytest_phase3b_release
+```
+
+All scientific outputs, complete metrics, strata, overlaps/transitions, bootstrap
+results, qualitative examples, deterministic rebuild record, and read-only manifest
+are in `benchmark/phase3/phase3b_fusion/`.
