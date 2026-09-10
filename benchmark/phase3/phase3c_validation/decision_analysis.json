@@ -1,0 +1,104 @@
+{
+  "questions": {
+    "1_grounding_reduces_unsupported_guessing": {
+      "answer": true,
+      "grounded": {
+        "count": 0,
+        "denominator": 163,
+        "rate": 0.0
+      },
+      "paired_delta": {
+        "ci_95_percentile": [
+          -0.904762,
+          -0.597826
+        ],
+        "delta": -0.797546,
+        "n_clusters": 12,
+        "positive_superiority_claim_allowed": false,
+        "replicates": 10000,
+        "seed": 20260902,
+        "unit": "frozen validation cluster"
+      },
+      "phase3a_unsupported_in_catalog": {
+        "count": 130,
+        "denominator": 163,
+        "rate": 0.797546
+      }
+    },
+    "2_recovers_truth_at_fusion_ranks_2_10": {
+      "answer": true,
+      "promoted_truth": {
+        "count": 16,
+        "denominator": 40,
+        "rate": 0.4
+      }
+    },
+    "3_harms_correct_fusion_top1": {
+      "abstention_count": 6,
+      "count": 7,
+      "denominator": 93,
+      "incorrect_replacement_count": 1,
+      "rate": 0.075269
+    },
+    "4_justifies_api_cost": {
+      "answer": "yes_for_accuracy_and_grounding_at_the_observed_cost",
+      "complete_pilot_recorded_cost_usd": 2.108151,
+      "grounded_minus_fusion_exact": {
+        "ci_95_percentile": [
+          0.01,
+          0.141304
+        ],
+        "delta": 0.055215,
+        "n_clusters": 12,
+        "positive_superiority_claim_allowed": true,
+        "replicates": 10000,
+        "seed": 20260902,
+        "unit": "frozen validation cluster"
+      },
+      "mean_recorded_cost_per_reaction_usd": 0.01293344,
+      "rationale": "Nine net additional exact answers versus fusion, a positive cluster-bootstrap interval, useful abstention behavior, and zero unsupported IDs justify the measured validation cost; deployment economics remain application-specific."
+    },
+    "5_final_system": {
+      "answer": "grounded_llm_on_every_reaction",
+      "explanation_note": "Explanation-only use may be an interface option, but this experiment did not establish it as an accuracy improvement.",
+      "fusion_alone": false,
+      "fusion_plus_llm_explanation_only": false,
+      "grounded_llm_on_every_reaction": true,
+      "prespecified_selective_routing": false,
+      "routing_note": "No selective-routing rule was prespecified; any rule suggested from these outcomes is post hoc and unvalidated."
+    },
+    "6_all_969_validation_scientifically_necessary": {
+      "answer": false,
+      "rationale": "The paired 163-reaction pilot answers the prespecified method-development questions; a larger validation run would require a separate prespecified question."
+    },
+    "7_ready_to_freeze_before_one_heldout_test_run": {
+      "answer": true,
+      "rationale": "Freeze the audited configuration and artifacts before any single held-out test evaluation; no held-out test data were accessed here."
+    }
+  },
+  "schema": "phase3c-validation-decision-v1",
+  "supporting_counts": {
+    "absent_top10_abstentions": {
+      "count": 18,
+      "denominator": 30,
+      "rate": 0.6
+    },
+    "fusion_exact": {
+      "count": 93,
+      "denominator": 163,
+      "rate": 0.570552
+    },
+    "grounded_exact": {
+      "count": 102,
+      "denominator": 163,
+      "rate": 0.625767
+    },
+    "phase3a_exact": {
+      "count": 49,
+      "denominator": 163,
+      "rate": 0.300613
+    },
+    "rank1_harm": 7,
+    "rank2_10_recoveries": 16
+  }
+}

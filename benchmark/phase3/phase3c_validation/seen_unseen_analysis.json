@@ -1,0 +1,138 @@
+{
+  "False": {
+    "abstention_rate": {
+      "count": 25,
+      "denominator": 49,
+      "rate": 0.510204
+    },
+    "brite_orthology_accuracy": {
+      "count": 22,
+      "denominator": 49,
+      "rate": 0.44898
+    },
+    "correct_answer_absent_abstention_accuracy": {
+      "count": 10,
+      "denominator": 14,
+      "rate": 0.714286
+    },
+    "correct_answer_present_selection_accuracy": {
+      "count": 20,
+      "denominator": 35,
+      "rate": 0.571429
+    },
+    "coverage": {
+      "count": 24,
+      "denominator": 49,
+      "rate": 0.489796
+    },
+    "evidence_compliance_rate": {
+      "count": 49,
+      "denominator": 49,
+      "rate": 1.0
+    },
+    "exact_top1_accuracy": {
+      "count": 20,
+      "denominator": 49,
+      "rate": 0.408163
+    },
+    "harm_rate_relative_to_fusion_top1": {
+      "count": 3,
+      "denominator": 16,
+      "rate": 0.1875
+    },
+    "incorrect_in_evidence_prediction_rate": {
+      "count": 4,
+      "denominator": 49,
+      "rate": 0.081633
+    },
+    "n": 49,
+    "recovery_rate_beyond_fusion_top1": {
+      "count": 7,
+      "denominator": 33,
+      "rate": 0.212121
+    },
+    "schema_invalid_rate": {
+      "count": 0,
+      "denominator": 49,
+      "rate": 0.0
+    },
+    "selective_exact_accuracy": {
+      "count": 20,
+      "denominator": 24,
+      "rate": 0.833333
+    },
+    "unsupported_fabricated_id_rate": {
+      "count": 0,
+      "denominator": 49,
+      "rate": 0.0
+    }
+  },
+  "True": {
+    "abstention_rate": {
+      "count": 14,
+      "denominator": 114,
+      "rate": 0.122807
+    },
+    "brite_orthology_accuracy": {
+      "count": 97,
+      "denominator": 114,
+      "rate": 0.850877
+    },
+    "correct_answer_absent_abstention_accuracy": {
+      "count": 8,
+      "denominator": 16,
+      "rate": 0.5
+    },
+    "correct_answer_present_selection_accuracy": {
+      "count": 82,
+      "denominator": 98,
+      "rate": 0.836735
+    },
+    "coverage": {
+      "count": 100,
+      "denominator": 114,
+      "rate": 0.877193
+    },
+    "evidence_compliance_rate": {
+      "count": 112,
+      "denominator": 114,
+      "rate": 0.982456
+    },
+    "exact_top1_accuracy": {
+      "count": 82,
+      "denominator": 114,
+      "rate": 0.719298
+    },
+    "harm_rate_relative_to_fusion_top1": {
+      "count": 4,
+      "denominator": 77,
+      "rate": 0.051948
+    },
+    "incorrect_in_evidence_prediction_rate": {
+      "count": 18,
+      "denominator": 114,
+      "rate": 0.157895
+    },
+    "n": 114,
+    "recovery_rate_beyond_fusion_top1": {
+      "count": 9,
+      "denominator": 37,
+      "rate": 0.243243
+    },
+    "schema_invalid_rate": {
+      "count": 0,
+      "denominator": 114,
+      "rate": 0.0
+    },
+    "selective_exact_accuracy": {
+      "count": 82,
+      "denominator": 100,
+      "rate": 0.82
+    },
+    "unsupported_fabricated_id_rate": {
+      "count": 0,
+      "denominator": 114,
+      "rate": 0.0
+    }
+  }
+}

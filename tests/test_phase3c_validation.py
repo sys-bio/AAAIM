@@ -242,3 +242,31 @@ def test_derived_evaluation_rebuilds_byte_identically(cold_plan, tmp_path):
     validation.write_evaluation(cold_plan, responses, first)
     validation.write_evaluation(cold_plan, responses, second)
     assert {path.name: path.read_bytes() for path in first.iterdir()} == {path.name: path.read_bytes() for path in second.iterdir()}
+    rebuild = validation.write_deterministic_rebuild(cold_plan, responses, tmp_path / "rebuild")
+    assert json.loads(rebuild.read_text(encoding="utf-8"))["all_byte_equal"] is True
+
+
+@pytest.mark.skipif(not (validation.OUT / "frozen_responses.jsonl").exists(), reason="paid validation responses not frozen yet")
+def test_frozen_predictions_obey_evidence_constraint(cold_plan):
+    responses = validation._read_jsonl(validation.OUT / "frozen_responses.jsonl")
+    rows = validation.build_scored_rows(cold_plan, responses)
+    assert len(rows) == 163
+    assert sum(row["grounded_unsupported"] for row in rows) == 0
+    assert all(not row["grounded_answered"] or row["grounded_predicted_kegg_id"] in row["evidence_ids"] for row in rows)
+
+
+@pytest.mark.skipif(not (validation.OUT / "cost_usage_report.json").exists(), reason="paid validation evaluation not frozen yet")
+def test_decision_analysis_answers_all_prespecified_questions():
+    result = validation.decision_analysis()
+    questions = result["questions"]
+    assert len(questions) == 7
+    assert questions["1_grounding_reduces_unsupported_guessing"]["answer"] is True
+    assert questions["5_final_system"]["answer"] in {"fusion_alone", "grounded_llm_on_every_reaction"}
+    assert questions["5_final_system"]["prespecified_selective_routing"] is False
+    assert questions["6_all_969_validation_scientifically_necessary"]["answer"] is False
+
+
+@pytest.mark.skipif(not (validation.OUT / "artifact_manifest.json").exists(), reason="validation manifest not frozen yet")
+def test_committed_manifest_excludes_raw_scratch():
+    manifest = json.loads((validation.OUT / "artifact_manifest.json").read_text(encoding="utf-8"))
+    assert all(not Path(item["path"]).name.startswith("_") for item in manifest["files"])

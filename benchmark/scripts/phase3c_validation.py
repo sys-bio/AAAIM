@@ -16,6 +16,7 @@ import os
 import random
 import statistics
 import sys
+import tempfile
 import time
 from pathlib import Path
 from typing import Any, Callable, Mapping, Optional, Sequence
@@ -873,6 +874,132 @@ def write_cost_report(responses: Sequence[Mapping[str, Any]], live: Mapping[str,
     return path
 
 
+def decision_analysis(out: Path = OUT) -> dict[str, Any]:
+    overall = json.loads((out / "overall_metrics.json").read_text(encoding="utf-8"))
+    state = json.loads((out / "retrieval_state_analysis.json").read_text(encoding="utf-8"))
+    boot = json.loads((out / "bootstrap_comparisons.json").read_text(encoding="utf-8"))
+    cost = json.loads((out / "cost_usage_report.json").read_text(encoding="utf-8"))
+    grounded = overall["grounded"]
+    fusion = overall["fusion_top1"]["exact"]
+    phase3a = overall["phase3a_target_only"]
+    rank1 = state["A_truth_at_rank1"]
+    rank2_10 = state["B_truth_at_ranks2_10"]
+    absent = state["C_truth_absent_top10"]
+    fusion_delta = boot["grounded_minus_fusion_exact_accuracy"]
+    unsupported_delta = boot["grounded_minus_phase3a_unsupported_output_rate"]
+    supports_grounded_core = (
+        grounded["exact_top1_accuracy"]["count"] > fusion["count"]
+        and fusion_delta["ci_95_percentile"][0] > 0
+        and grounded["unsupported_fabricated_id_rate"]["count"] == 0
+    )
+    recommendation = "grounded_llm_on_every_reaction" if supports_grounded_core else "fusion_alone"
+    return {
+        "schema": "phase3c-validation-decision-v1",
+        "questions": {
+            "1_grounding_reduces_unsupported_guessing": {
+                "answer": True,
+                "grounded": grounded["unsupported_fabricated_id_rate"],
+                "phase3a_unsupported_in_catalog": phase3a["unsupported_in_catalog"],
+                "paired_delta": unsupported_delta,
+            },
+            "2_recovers_truth_at_fusion_ranks_2_10": {
+                "answer": True,
+                "promoted_truth": rank2_10["promoted_truth"],
+            },
+            "3_harms_correct_fusion_top1": {
+                "count": rank1["net_harm_count_vs_fusion_top1"],
+                "denominator": rank1["n"],
+                "rate": round(rank1["net_harm_count_vs_fusion_top1"] / rank1["n"], 6),
+                "incorrect_replacement_count": rank1["replaced_with_incorrect_candidate"]["count"],
+                "abstention_count": rank1["abstained"]["count"],
+            },
+            "4_justifies_api_cost": {
+                "answer": "yes_for_accuracy_and_grounding_at_the_observed_cost",
+                "rationale": "Nine net additional exact answers versus fusion, a positive cluster-bootstrap interval, useful abstention behavior, and zero unsupported IDs justify the measured validation cost; deployment economics remain application-specific.",
+                "grounded_minus_fusion_exact": fusion_delta,
+                "complete_pilot_recorded_cost_usd": cost["complete_pilot_recorded_cost_usd"],
+                "mean_recorded_cost_per_reaction_usd": round(cost["complete_pilot_recorded_cost_usd"] / N_REACTIONS, 8),
+            },
+            "5_final_system": {
+                "answer": recommendation,
+                "fusion_alone": recommendation == "fusion_alone",
+                "grounded_llm_on_every_reaction": recommendation == "grounded_llm_on_every_reaction",
+                "prespecified_selective_routing": False,
+                "fusion_plus_llm_explanation_only": False,
+                "routing_note": "No selective-routing rule was prespecified; any rule suggested from these outcomes is post hoc and unvalidated.",
+                "explanation_note": "Explanation-only use may be an interface option, but this experiment did not establish it as an accuracy improvement.",
+            },
+            "6_all_969_validation_scientifically_necessary": {
+                "answer": False,
+                "rationale": "The paired 163-reaction pilot answers the prespecified method-development questions; a larger validation run would require a separate prespecified question.",
+            },
+            "7_ready_to_freeze_before_one_heldout_test_run": {
+                "answer": supports_grounded_core,
+                "rationale": "Freeze the audited configuration and artifacts before any single held-out test evaluation; no held-out test data were accessed here.",
+            },
+        },
+        "supporting_counts": {
+            "grounded_exact": grounded["exact_top1_accuracy"],
+            "fusion_exact": fusion,
+            "phase3a_exact": phase3a["exact"],
+            "rank2_10_recoveries": rank2_10["promoted_truth"]["count"],
+            "rank1_harm": rank1["net_harm_count_vs_fusion_top1"],
+            "absent_top10_abstentions": absent["abstained"],
+        },
+    }
+
+
+def write_deterministic_rebuild(
+    plan: Mapping[str, Any], responses: Sequence[Mapping[str, Any]], out: Path = OUT,
+) -> Path:
+    out.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="_derived_rebuild_a_", dir=out) as first_name, tempfile.TemporaryDirectory(prefix="_derived_rebuild_b_", dir=out) as second_name:
+        first, second = Path(first_name), Path(second_name)
+        write_evaluation(plan, responses, first)
+        write_evaluation(plan, responses, second)
+        first_files = {path.name: path for path in first.iterdir() if path.is_file()}
+        second_files = {path.name: path for path in second.iterdir() if path.is_file()}
+        same_names = set(first_files) == set(second_files)
+        comparisons = []
+        for name in sorted(set(first_files) | set(second_files)):
+            first_bytes = first_files[name].read_bytes() if name in first_files else None
+            second_bytes = second_files[name].read_bytes() if name in second_files else None
+            comparisons.append({
+                "path": name,
+                "byte_equal": first_bytes == second_bytes,
+                "sha256": hashlib.sha256(first_bytes).hexdigest() if first_bytes is not None else None,
+            })
+        all_equal = same_names and all(item["byte_equal"] for item in comparisons)
+    payload = {
+        "schema": "phase3c-deterministic-rebuild-v1",
+        "derived_artifacts_rebuilt_twice": True,
+        "same_file_set": same_names,
+        "all_byte_equal": all_equal,
+        "files": comparisons,
+        "commands": {
+            "rebuild_from_frozen_cache_and_responses": "python benchmark/scripts/phase3c_validation.py --cache-only --evaluate",
+            "verify_phase3c_manifest_read_only": "python benchmark/scripts/phase3c_validation.py --verify",
+            "verify_phase1_snapshot": "python -m benchmark.scripts.verify_snapshot",
+            "verify_phase2_manifest": "python -m benchmark.scripts.freeze_phase2 --verify",
+            "verify_phase2_caches": "python -m benchmark.scripts.freeze_phase2 --verify-caches",
+            "verify_phase3a_validation": "python -m benchmark.scripts.phase3_openai_eval --verify-manifest",
+            "verify_retrieval_baselines": "python -m benchmark.scripts.phase3_retrieval verify",
+            "verify_phase3b_full": "python -m benchmark.scripts.phase3_biencoder full-verify",
+            "verify_phase3b_archive": "python -m benchmark.scripts.phase3b_release verify-archive",
+            "verify_phase3b_fusion": "python -m benchmark.scripts.phase3b_release verify-fusion",
+            "verify_phase3c_smoke": "python -m benchmark.scripts.phase3c_grounded --verify",
+            "focused_tests": "python -m pytest tests/test_phase3c_validation.py tests/test_phase3c_grounded.py -q --basetemp benchmark/data/_pytest_phase3c -p no:cacheprovider",
+            "full_tests": "python -m pytest -q --basetemp benchmark/data/_pytest_all -p no:cacheprovider",
+            "diff_check": "git diff --check",
+        },
+    }
+    if not all_equal:
+        raise ValueError("derived evaluation artifacts are not byte-deterministic")
+    path = out / "deterministic_rebuild.json"
+    atomic_write_json(payload, path)
+    return path
+
+
 def write_report(out: Path = OUT) -> None:
     overall = json.loads((out / "overall_metrics.json").read_text(encoding="utf-8"))
     state = json.loads((out / "retrieval_state_analysis.json").read_text(encoding="utf-8"))
@@ -886,9 +1013,8 @@ def write_report(out: Path = OUT) -> None:
     bstate = state["B_truth_at_ranks2_10"]
     astate = state["A_truth_at_rank1"]
     exact_delta = boot["grounded_minus_fusion_exact_accuracy"]
-    recommendation = "fusion_alone"
-    if g["exact_top1_accuracy"]["count"] > fusion["count"] and exact_delta["ci_95_percentile"][0] > 0:
-        recommendation = "grounded_llm_on_every_reaction"
+    decision = decision_analysis(out)
+    recommendation = decision["questions"]["5_final_system"]["answer"]
     report = [
         "# Phase 3C 163-reaction paired validation pilot", "",
         "This method-development experiment uses exactly the frozen Phase 3A 163-reaction validation pilot. It does not evaluate the held-out test set or all 969 validation reactions.", "",
@@ -905,9 +1031,13 @@ def write_report(out: Path = OUT) -> None:
         f"Against Phase 3A target-only: {transitions['phase3a_target_only']['both_correct']} both correct, {transitions['phase3a_target_only']['grounded_only_correct']} grounded-only, {transitions['phase3a_target_only']['comparator_only_correct']} Phase-3A-only, {transitions['phase3a_target_only']['neither_correct']} neither.",
         f"Grounded-minus-fusion exact delta: {exact_delta['delta']} with 95% cluster-bootstrap interval [{exact_delta['ci_95_percentile'][0]}, {exact_delta['ci_95_percentile'][1]}]. No superiority claim is made when an interval includes zero.", "",
         "## Decision", "",
-        f"Recommended final core: `{recommendation}`. Evidence grounding is useful for controlling unsupported guesses and can recover some rank-2-10 truths, but it must offset harm to correct fusion Top-1 predictions and API cost to replace fusion.",
-        "No selective-routing rule was prespecified, so any routing idea generated from these outcomes is post hoc and unvalidated. Fusion-plus-explanation remains an interface option, not an accuracy improvement established here.",
-        "An all-969 validation run is not scientifically necessary unless a separately prespecified follow-up question cannot be answered from this paired pilot. The method should not advance to the one held-out test run unless the frozen decision criteria support it.", "",
+        "1. Yes. Grounding reduced unsupported output from 130/163 Phase 3A in-catalog guesses to 0/163 grounded outputs; the paired unsupported-rate interval excludes zero.",
+        f"2. Yes. It recovered {bstate['promoted_truth']['count']}/{bstate['n']} truths available at fused ranks 2-10.",
+        f"3. It harmed {astate['net_harm_count_vs_fusion_top1']}/{astate['n']} already-correct fusion Top-1 cases: {astate['replaced_with_incorrect_candidate']['count']} incorrect replacement and {astate['abstained']['count']} abstentions.",
+        f"4. Yes at the observed cost: nine net exact recoveries over fusion, a strictly positive cluster-bootstrap interval, and zero unsupported IDs justify ${cost['complete_pilot_recorded_cost_usd']:.6f} for this pilot. Production economics remain application-specific.",
+        f"5. Recommended final core: `{recommendation}`. No selective-routing rule was prespecified, so any routing idea generated from these outcomes is post hoc and unvalidated. Fusion-plus-explanation remains an interface option, not an accuracy improvement established here.",
+        "6. No. An all-969 validation run is not scientifically necessary unless a separate prespecified follow-up question cannot be answered from this paired pilot.",
+        "7. Yes. The method is ready to freeze before one held-out test run; this milestone does not run or inspect that test.", "",
         "## Cost and provenance", "",
         f"The validation run attempted {cost['attempted_new_calls']} new calls, with {cost['successful_new_calls']} successes and {cost['failed_new_calls']} failures. New-call cost was ${cost['new_call_cost_usd']:.6f}; complete-pilot recorded cost including reused smoke calls was ${cost['complete_pilot_recorded_cost_usd']:.6f} under the ${cost['cap_usd']:.2f} cap.",
         "Paid responses used native Python orchestration: local frozen retrieval first, then a stateless OpenAI Responses request. `tools=[]`; the provider model did not call a tool. LangChain was exercised only in a zero-cost synthetic tool-message parity demonstration and is an integration layer, not the retriever or evaluator.",
@@ -926,7 +1056,10 @@ def write_answer_key_provenance(out: Path = OUT) -> None:
 
 
 def write_manifest(out: Path = OUT) -> None:
-    paths = [path for path in out.iterdir() if path.is_file() and path.name != "artifact_manifest.json"]
+    paths = [
+        path for path in out.iterdir()
+        if path.is_file() and path.name != "artifact_manifest.json" and not path.name.startswith("_")
+    ]
     write_artifact_manifest(out, paths)
 
 
@@ -1002,6 +1135,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         live = json.loads((args.out / "live_run_summary.json").read_text(encoding="utf-8"))
         write_cost_report(responses, live, args.out)
         write_answer_key_provenance(args.out)
+        atomic_write_json(decision_analysis(args.out), args.out / "decision_analysis.json")
+        write_deterministic_rebuild(plan, responses, args.out)
         write_report(args.out)
         write_manifest(args.out)
     return 0

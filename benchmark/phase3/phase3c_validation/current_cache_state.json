@@ -1,0 +1,1326 @@
+{
+  "cache_identity_definition": "SHA-256 of stable reaction experimental unit plus the canonical provider-payload digest; smoke compatibility uses the original provider-payload digest as a read-only alias",
+  "compatible_hits": [
+    {
+      "cache_id": "f38471780a98fb529d54e84a08ae027431de49482ff134cd5b82a3d8b27136fd",
+      "model_id": "BIOMD0000000017",
+      "reaction_id": "R11",
+      "sample_id": "P3P0001",
+      "source": "phase3c_smoke",
+      "source_cache_id": "4a3374a881c5ecde2d8f54021d5d0a3f192691ffefabe37b10d015bb48304f74"
+    },
+    {
+      "cache_id": "ddfc79bf4d5e2354ba6575436447f6e642d90ac4fbea86d93e50645d5e881d05",
+      "model_id": "BIOMD0000000017",
+      "reaction_id": "R2",
+      "sample_id": "P3P0002",
+      "source": "phase3c_validation",
+      "source_cache_id": "ddfc79bf4d5e2354ba6575436447f6e642d90ac4fbea86d93e50645d5e881d05"
+    },
+    {
+      "cache_id": "c32b1cd74e15c781222cf96ef6f49c936cf47afe7a11f50e386db31f7fe2eb2d",
+      "model_id": "BIOMD0000000017",
+      "reaction_id": "R5",
+      "sample_id": "P3P0003",
+      "source": "phase3c_validation",
+      "source_cache_id": "c32b1cd74e15c781222cf96ef6f49c936cf47afe7a11f50e386db31f7fe2eb2d"
+    },
+    {
+      "cache_id": "2f7343576523c45b96a247e04798df36633ae672415c53a7f5e2719d4c96daed",
+      "model_id": "BIOMD0000000017",
+      "reaction_id": "R6",
+      "sample_id": "P3P0004",
+      "source": "phase3c_validation",
+      "source_cache_id": "2f7343576523c45b96a247e04798df36633ae672415c53a7f5e2719d4c96daed"
+    },
+    {
+      "cache_id": "a0f1d53f636d541534975fba9e7e136dabfee32bc46c39f32402f3b72bfdc3d1",
+      "model_id": "BIOMD0000000017",
+      "reaction_id": "R7",
+      "sample_id": "P3P0005",
+      "source": "phase3c_validation",
+      "source_cache_id": "a0f1d53f636d541534975fba9e7e136dabfee32bc46c39f32402f3b72bfdc3d1"
+    },
+    {
+      "cache_id": "0aedd6ba4feca6164c25dd7f91d12498e0e5933a7c799a277fb4ca7919134a28",
+      "model_id": "BIOMD0000000017",
+      "reaction_id": "R8",
+      "sample_id": "P3P0006",
+      "source": "phase3c_validation",
+      "source_cache_id": "0aedd6ba4feca6164c25dd7f91d12498e0e5933a7c799a277fb4ca7919134a28"
+    },
+    {
+      "cache_id": "64ffa15d1115900604bc7b1b55db23ff5cac4c35e6c1f41c3e5bd502b7ec3857",
+      "model_id": "BIOMD0000000023",
+      "reaction_id": "v3",
+      "sample_id": "P3P0007",
+      "source": "phase3c_validation",
+      "source_cache_id": "64ffa15d1115900604bc7b1b55db23ff5cac4c35e6c1f41c3e5bd502b7ec3857"
+    },
+    {
+      "cache_id": "4c7fc71eeea6e9daabb6540638c6e8848cc14c2c652f433c452a28c2a9c948d7",
+      "model_id": "BIOMD0000000023",
+      "reaction_id": "v4",
+      "sample_id": "P3P0008",
+      "source": "phase3c_validation",
+      "source_cache_id": "4c7fc71eeea6e9daabb6540638c6e8848cc14c2c652f433c452a28c2a9c948d7"
+    },
+    {
+      "cache_id": "f396a42820d98105c84838314e5dd9245c5afee928d5300be92fdebd1e08790f",
+      "model_id": "BIOMD0000000023",
+      "reaction_id": "v5",
+      "sample_id": "P3P0009",
+      "source": "phase3c_validation",
+      "source_cache_id": "f396a42820d98105c84838314e5dd9245c5afee928d5300be92fdebd1e08790f"
+    },
+    {
+      "cache_id": "c6707b7a0faef134672632ab05246ff66e374a5eb8d6eb343d39e5f0f51e2507",
+      "model_id": "BIOMD0000000023",
+      "reaction_id": "v6",
+      "sample_id": "P3P0010",
+      "source": "phase3c_validation",
+      "source_cache_id": "c6707b7a0faef134672632ab05246ff66e374a5eb8d6eb343d39e5f0f51e2507"
+    },
+    {
+      "cache_id": "6de2e7e0dc021954c669ec33c89cc25b1db776a6d4b89dd835b8403eb7e7077e",
+      "model_id": "BIOMD0000000023",
+      "reaction_id": "v8",
+      "sample_id": "P3P0011",
+      "source": "phase3c_validation",
+      "source_cache_id": "6de2e7e0dc021954c669ec33c89cc25b1db776a6d4b89dd835b8403eb7e7077e"
+    },
+    {
+      "cache_id": "15b96eaec9fd8cce736015841756079f7d6a7ecc4a005a45d4b4eea9893c7922",
+      "model_id": "BIOMD0000000042",
+      "reaction_id": "reaction_6",
+      "sample_id": "P3P0012",
+      "source": "phase3c_validation",
+      "source_cache_id": "15b96eaec9fd8cce736015841756079f7d6a7ecc4a005a45d4b4eea9893c7922"
+    },
+    {
+      "cache_id": "d0c6bb092dc1b41c244bb986f82d73a1da817a94d3810298b9dc542afebfb3b3",
+      "model_id": "BIOMD0000000061",
+      "reaction_id": "vTIM",
+      "sample_id": "P3P0013",
+      "source": "phase3c_validation",
+      "source_cache_id": "d0c6bb092dc1b41c244bb986f82d73a1da817a94d3810298b9dc542afebfb3b3"
+    },
+    {
+      "cache_id": "5e8ea9b2666e614610bdc1c39d9680ef553fb9f12c3fa6a3dc3d43d3c13bb212",
+      "model_id": "BIOMD0000000061",
+      "reaction_id": "vlpGlyc",
+      "sample_id": "P3P0014",
+      "source": "phase3c_validation",
+      "source_cache_id": "5e8ea9b2666e614610bdc1c39d9680ef553fb9f12c3fa6a3dc3d43d3c13bb212"
+    },
+    {
+      "cache_id": "747e940b28fcecbac6fbbb93095b25d39063653da4b158dd087b8744e4db3903",
+      "model_id": "BIOMD0000000064",
+      "reaction_id": "vGAPDH",
+      "sample_id": "P3P0015",
+      "source": "phase3c_validation",
+      "source_cache_id": "747e940b28fcecbac6fbbb93095b25d39063653da4b158dd087b8744e4db3903"
+    },
+    {
+      "cache_id": "db6fbe362126f5b1020b1de966058f833706ccec09e9418ea6cb4886b1ed2d60",
+      "model_id": "BIOMD0000000064",
+      "reaction_id": "vGLK",
+      "sample_id": "P3P0016",
+      "source": "phase3c_validation",
+      "source_cache_id": "db6fbe362126f5b1020b1de966058f833706ccec09e9418ea6cb4886b1ed2d60"
+    },
+    {
+      "cache_id": "8548543d576a43b8328e3dc5118432a1007c73c6378c7d878ee5ab5cd40ea70f",
+      "model_id": "BIOMD0000000071",
+      "reaction_id": "vPFK",
+      "sample_id": "P3P0017",
+      "source": "phase3c_validation",
+      "source_cache_id": "8548543d576a43b8328e3dc5118432a1007c73c6378c7d878ee5ab5cd40ea70f"
+    },
+    {
+      "cache_id": "a451ab3392f1aae0c7489af2f64f4975473bd09c1bf8c1b39226b6f262dca507",
+      "model_id": "BIOMD0000000211",
+      "reaction_id": "vPGK",
+      "sample_id": "P3P0018",
+      "source": "phase3c_validation",
+      "source_cache_id": "a451ab3392f1aae0c7489af2f64f4975473bd09c1bf8c1b39226b6f262dca507"
+    },
+    {
+      "cache_id": "8f4314c79858d392f035a80b0081dea83f81c034f4d23857f71a715952449068",
+      "model_id": "BIOMD0000000247",
+      "reaction_id": "vGLK",
+      "sample_id": "P3P0019",
+      "source": "phase3c_validation",
+      "source_cache_id": "8f4314c79858d392f035a80b0081dea83f81c034f4d23857f71a715952449068"
+    },
+    {
+      "cache_id": "5031ad7c5fb384e3657134fd6bb94288b3a541b71e51d49ad80b0fedaed15643",
+      "model_id": "BIOMD0000000247",
+      "reaction_id": "vPYK",
+      "sample_id": "P3P0020",
+      "source": "phase3c_validation",
+      "source_cache_id": "5031ad7c5fb384e3657134fd6bb94288b3a541b71e51d49ad80b0fedaed15643"
+    },
+    {
+      "cache_id": "f904a942f756124366dca128a6bdb4dc6b36559f1ff8e2457e4b9fad49ec29af",
+      "model_id": "BIOMD0000000088",
+      "reaction_id": "re161",
+      "sample_id": "P3P0021",
+      "source": "phase3c_validation",
+      "source_cache_id": "f904a942f756124366dca128a6bdb4dc6b36559f1ff8e2457e4b9fad49ec29af"
+    },
+    {
+      "cache_id": "d3d113eafc7b8bce627633f0d7ab7b85a95046f8eb3ea2cb22d0b2efe78f265a",
+      "model_id": "BIOMD0000000088",
+      "reaction_id": "re163",
+      "sample_id": "P3P0022",
+      "source": "phase3c_validation",
+      "source_cache_id": "d3d113eafc7b8bce627633f0d7ab7b85a95046f8eb3ea2cb22d0b2efe78f265a"
+    },
+    {
+      "cache_id": "1e5fb3a225caf003ae86860c09b1edfb88b95bb886f952e905514cfd4dcd23a9",
+      "model_id": "BIOMD0000000088",
+      "reaction_id": "re167",
+      "sample_id": "P3P0023",
+      "source": "phase3c_validation",
+      "source_cache_id": "1e5fb3a225caf003ae86860c09b1edfb88b95bb886f952e905514cfd4dcd23a9"
+    },
+    {
+      "cache_id": "365e3422507d5ea4d087bad7ccfae8d739c9eb26a4286bc54840a4d1c1ed513f",
+      "model_id": "BIOMD0000000088",
+      "reaction_id": "re169",
+      "sample_id": "P3P0024",
+      "source": "phase3c_validation",
+      "source_cache_id": "365e3422507d5ea4d087bad7ccfae8d739c9eb26a4286bc54840a4d1c1ed513f"
+    },
+    {
+      "cache_id": "d61b9a0948ffd71b81d82dd0b20f4c5f78f37b6c249119f939a49548e50f2e46",
+      "model_id": "BIOMD0000000088",
+      "reaction_id": "re171",
+      "sample_id": "P3P0025",
+      "source": "phase3c_validation",
+      "source_cache_id": "d61b9a0948ffd71b81d82dd0b20f4c5f78f37b6c249119f939a49548e50f2e46"
+    },
+    {
+      "cache_id": "0c4a807e95b0304b5785a586913831da1cbe55d61ae659ae5cb6224447a55927",
+      "model_id": "BIOMD0000000088",
+      "reaction_id": "re173",
+      "sample_id": "P3P0026",
+      "source": "phase3c_validation",
+      "source_cache_id": "0c4a807e95b0304b5785a586913831da1cbe55d61ae659ae5cb6224447a55927"
+    },
+    {
+      "cache_id": "e12ed39da3ac3779b31fbffa382477b00d89c15b3600a5159820ab4c75bdd54e",
+      "model_id": "BIOMD0000000088",
+      "reaction_id": "re56",
+      "sample_id": "P3P0027",
+      "source": "phase3c_validation",
+      "source_cache_id": "e12ed39da3ac3779b31fbffa382477b00d89c15b3600a5159820ab4c75bdd54e"
+    },
+    {
+      "cache_id": "4ea3becae6d626852fa14ba3ecac42061e45330a844e92b64fcdc7453bb0adf8",
+      "model_id": "BIOMD0000000088",
+      "reaction_id": "re57",
+      "sample_id": "P3P0028",
+      "source": "phase3c_validation",
+      "source_cache_id": "4ea3becae6d626852fa14ba3ecac42061e45330a844e92b64fcdc7453bb0adf8"
+    },
+    {
+      "cache_id": "a6d6c2f92d479a476617d0494e0c5f0be4e56aa58b972911cd67c52e04cc8aa2",
+      "model_id": "BIOMD0000000088",
+      "reaction_id": "re58",
+      "sample_id": "P3P0029",
+      "source": "phase3c_validation",
+      "source_cache_id": "a6d6c2f92d479a476617d0494e0c5f0be4e56aa58b972911cd67c52e04cc8aa2"
+    },
+    {
+      "cache_id": "405e61b0b9138466c90c7b33c531bee68f41077fd997e5b43083d93bc7c47e33",
+      "model_id": "BIOMD0000000190",
+      "reaction_id": "PAO_for_aD",
+      "sample_id": "P3P0030",
+      "source": "phase3c_validation",
+      "source_cache_id": "405e61b0b9138466c90c7b33c531bee68f41077fd997e5b43083d93bc7c47e33"
+    },
+    {
+      "cache_id": "2497f1b4b5331189757a15de8023dedb4e7d8fc95ebe2529c35de1cb291295c7",
+      "model_id": "BIOMD0000000190",
+      "reaction_id": "SSAT_for_D",
+      "sample_id": "P3P0031",
+      "source": "phase3c_validation",
+      "source_cache_id": "2497f1b4b5331189757a15de8023dedb4e7d8fc95ebe2529c35de1cb291295c7"
+    },
+    {
+      "cache_id": "ffcf03fa7f35c3ae41996e86ffa82a13e5a662ed0012979716f8f44944bd4b9b",
+      "model_id": "BIOMD0000000190",
+      "reaction_id": "SSAT_for_S",
+      "sample_id": "P3P0032",
+      "source": "phase3c_validation",
+      "source_cache_id": "ffcf03fa7f35c3ae41996e86ffa82a13e5a662ed0012979716f8f44944bd4b9b"
+    },
+    {
+      "cache_id": "9f2d7c01f510ca6c7208941c80f560781827bf2e36a5be1aa31cbd534a8d14e2",
+      "model_id": "BIOMD0000000245",
+      "reaction_id": "r6",
+      "sample_id": "P3P0033",
+      "source": "phase3c_validation",
+      "source_cache_id": "9f2d7c01f510ca6c7208941c80f560781827bf2e36a5be1aa31cbd534a8d14e2"
+    },
+    {
+      "cache_id": "60a290a402bd42e60106c52a4028729220ead7bf7265c2f9c8236d0a8fa4282b",
+      "model_id": "BIOMD0000000602",
+      "reaction_id": "R00678_Tdo",
+      "sample_id": "P3P0034",
+      "source": "phase3c_validation",
+      "source_cache_id": "60a290a402bd42e60106c52a4028729220ead7bf7265c2f9c8236d0a8fa4282b"
+    },
+    {
+      "cache_id": "440cbb0fb5213c9b6a7ff9a48f994401d11331efa38192537b887fd27cd1683e",
+      "model_id": "BIOMD0000000602",
+      "reaction_id": "R01956_Kat2",
+      "sample_id": "P3P0035",
+      "source": "phase3c_validation",
+      "source_cache_id": "440cbb0fb5213c9b6a7ff9a48f994401d11331efa38192537b887fd27cd1683e"
+    },
+    {
+      "cache_id": "e5d92531029f0a75d150a1c9806bf0fce422fc0d5046b20e3babe049e457ab07",
+      "model_id": "BIOMD0000000602",
+      "reaction_id": "R01960",
+      "sample_id": "P3P0036",
+      "source": "phase3c_validation",
+      "source_cache_id": "e5d92531029f0a75d150a1c9806bf0fce422fc0d5046b20e3babe049e457ab07"
+    },
+    {
+      "cache_id": "2af8c1b2339cfeb272fa26f665d096b35a8d4a68ab7574a179b25812423cf5d7",
+      "model_id": "BIOMD0000000602",
+      "reaction_id": "R02173_Maob",
+      "sample_id": "P3P0037",
+      "source": "phase3c_validation",
+      "source_cache_id": "2af8c1b2339cfeb272fa26f665d096b35a8d4a68ab7574a179b25812423cf5d7"
+    },
+    {
+      "cache_id": "4b248f70f1dea35625dd4deea1d31d4ea0d4be1188f06288a6b421fdb95beff6",
+      "model_id": "BIOMD0000000602",
+      "reaction_id": "R02668",
+      "sample_id": "P3P0038",
+      "source": "phase3c_validation",
+      "source_cache_id": "4b248f70f1dea35625dd4deea1d31d4ea0d4be1188f06288a6b421fdb95beff6"
+    },
+    {
+      "cache_id": "622f16210c653651b2702ca7b338d8178baf5603bb05005d6c829c2de9c006a1",
+      "model_id": "BIOMD0000000602",
+      "reaction_id": "R02908_Maoa",
+      "sample_id": "P3P0039",
+      "source": "phase3c_validation",
+      "source_cache_id": "622f16210c653651b2702ca7b338d8178baf5603bb05005d6c829c2de9c006a1"
+    },
+    {
+      "cache_id": "3ab55bbaf24b0e7a4818353cdaaaffec02d4dd01fac1b1008c5ea95ead6326a2",
+      "model_id": "BIOMD0000000602",
+      "reaction_id": "R02908_Maob",
+      "sample_id": "P3P0040",
+      "source": "phase3c_validation",
+      "source_cache_id": "3ab55bbaf24b0e7a4818353cdaaaffec02d4dd01fac1b1008c5ea95ead6326a2"
+    },
+    {
+      "cache_id": "fc2983ea08bcb4debb24f83f3455e88f6daba9812ca512aa167403e45f0041db",
+      "model_id": "BIOMD0000000602",
+      "reaction_id": "R02911",
+      "sample_id": "P3P0041",
+      "source": "phase3c_validation",
+      "source_cache_id": "fc2983ea08bcb4debb24f83f3455e88f6daba9812ca512aa167403e45f0041db"
+    },
+    {
+      "cache_id": "0eee6e8366aeaaca20c084c6dc3512cfa098a4354248acc03a9d020f198d2f94",
+      "model_id": "BIOMD0000000602",
+      "reaction_id": "R04171_Kat1",
+      "sample_id": "P3P0042",
+      "source": "phase3c_validation",
+      "source_cache_id": "0eee6e8366aeaaca20c084c6dc3512cfa098a4354248acc03a9d020f198d2f94"
+    },
+    {
+      "cache_id": "f75193f09d32ef88e09738734f7926b77936f5ebb5fe43bc8a0ec992a7eb7746",
+      "model_id": "BIOMD0000001061",
+      "reaction_id": "R_ADSL2r",
+      "sample_id": "P3P0043",
+      "source": "phase3c_validation",
+      "source_cache_id": "f75193f09d32ef88e09738734f7926b77936f5ebb5fe43bc8a0ec992a7eb7746"
+    },
+    {
+      "cache_id": "f2151e76a91242f6a70882509e7310a9611a708fb515ef141953df63b04b537b",
+      "model_id": "BIOMD0000001061",
+      "reaction_id": "R_ALCD19",
+      "sample_id": "P3P0044",
+      "source": "phase3c_validation",
+      "source_cache_id": "f2151e76a91242f6a70882509e7310a9611a708fb515ef141953df63b04b537b"
+    },
+    {
+      "cache_id": "3ee061510a56a69924a800ae0decbb7f46d9997639d6bb05f561a39f20303d65",
+      "model_id": "BIOMD0000001061",
+      "reaction_id": "R_ASPO6",
+      "sample_id": "P3P0045",
+      "source": "phase3c_validation",
+      "source_cache_id": "3ee061510a56a69924a800ae0decbb7f46d9997639d6bb05f561a39f20303d65"
+    },
+    {
+      "cache_id": "0f030e0324ccbfaa681b374d3eb8d2fc8b0dbf70abceeb2c1e2cf3d834bc27cf",
+      "model_id": "BIOMD0000001061",
+      "reaction_id": "R_G1SAT",
+      "sample_id": "P3P0046",
+      "source": "phase3c_validation",
+      "source_cache_id": "0f030e0324ccbfaa681b374d3eb8d2fc8b0dbf70abceeb2c1e2cf3d834bc27cf"
+    },
+    {
+      "cache_id": "5c53e149b03f427344d23905d5bd504e455f3cabb15e338f6f18b12795bf5580",
+      "model_id": "BIOMD0000001061",
+      "reaction_id": "R_MAN1PT2",
+      "sample_id": "P3P0047",
+      "source": "phase3c_validation",
+      "source_cache_id": "5c53e149b03f427344d23905d5bd504e455f3cabb15e338f6f18b12795bf5580"
+    },
+    {
+      "cache_id": "00f9096187560e4a7d73380d1f46d8ba84c57f94fc8fa81a0f32ce88da6ca70a",
+      "model_id": "BIOMD0000001061",
+      "reaction_id": "R_PYK2",
+      "sample_id": "P3P0048",
+      "source": "phase3c_validation",
+      "source_cache_id": "00f9096187560e4a7d73380d1f46d8ba84c57f94fc8fa81a0f32ce88da6ca70a"
+    },
+    {
+      "cache_id": "e0e1947b00e9744b048e40d8709f76e7e99eed0849034afb822d85996702052e",
+      "model_id": "BIOMD0000001061",
+      "reaction_id": "R_TRDR",
+      "sample_id": "P3P0049",
+      "source": "phase3c_validation",
+      "source_cache_id": "e0e1947b00e9744b048e40d8709f76e7e99eed0849034afb822d85996702052e"
+    },
+    {
+      "cache_id": "e510edf88c033a27aa074f3940faf9a4bc96f4a250c1d93bd85ae453b6c0523d",
+      "model_id": "BIOMD0000001061",
+      "reaction_id": "R_UAMAGS",
+      "sample_id": "P3P0050",
+      "source": "phase3c_validation",
+      "source_cache_id": "e510edf88c033a27aa074f3940faf9a4bc96f4a250c1d93bd85ae453b6c0523d"
+    },
+    {
+      "cache_id": "3713fcc8d6a4b6d1c0118b0b4315bfcdfeebe32e64cf60fa7ff9b94e94301443",
+      "model_id": "BIOMD0000000017",
+      "reaction_id": "R9",
+      "sample_id": "P3P0051",
+      "source": "phase3c_smoke",
+      "source_cache_id": "6ae1becc2c5a0ff792849ef2e9c3a14970a12eca87591c120f372f25bac28743"
+    },
+    {
+      "cache_id": "a0da08539f0eaec7309d6881bf735c04a934ee4d0f728fc08b54cf2f08538ec8",
+      "model_id": "BIOMD0000000023",
+      "reaction_id": "v9",
+      "sample_id": "P3P0052",
+      "source": "phase3c_validation",
+      "source_cache_id": "a0da08539f0eaec7309d6881bf735c04a934ee4d0f728fc08b54cf2f08538ec8"
+    },
+    {
+      "cache_id": "6b8f0e1097147fc73e48c15a4758adb0786b7eb3a36fb9e890075f4a9279a266",
+      "model_id": "BIOMD0000000042",
+      "reaction_id": "reaction_1",
+      "sample_id": "P3P0053",
+      "source": "phase3c_validation",
+      "source_cache_id": "6b8f0e1097147fc73e48c15a4758adb0786b7eb3a36fb9e890075f4a9279a266"
+    },
+    {
+      "cache_id": "749edb00bbfe106e40c6f6466f7d1cac5b64f15543cf74a0ad9469acabce0482",
+      "model_id": "BIOMD0000000042",
+      "reaction_id": "reaction_3",
+      "sample_id": "P3P0054",
+      "source": "phase3c_smoke",
+      "source_cache_id": "ebb8bad155a5b8d3ffd3abb492e84a1e63a3e04a3faa68ac17f05eb02a7e3b61"
+    },
+    {
+      "cache_id": "8896427a67e46bf5e3b25fd2a40dca8b1234da4d93aef1d10a14274e7ef8379f",
+      "model_id": "BIOMD0000000071",
+      "reaction_id": "vGlyK",
+      "sample_id": "P3P0055",
+      "source": "phase3c_validation",
+      "source_cache_id": "8896427a67e46bf5e3b25fd2a40dca8b1234da4d93aef1d10a14274e7ef8379f"
+    },
+    {
+      "cache_id": "bc8fcfac7929ed08333df92ed5455e72ef838d11b07bee586462e884c0372b85",
+      "model_id": "BIOMD0000000068",
+      "reaction_id": "v1",
+      "sample_id": "P3P0056",
+      "source": "phase3c_validation",
+      "source_cache_id": "bc8fcfac7929ed08333df92ed5455e72ef838d11b07bee586462e884c0372b85"
+    },
+    {
+      "cache_id": "7319b7990e057f06669d8a7230913b5916cbb674fed0afb109e35997d5dc30fa",
+      "model_id": "BIOMD0000000088",
+      "reaction_id": "re137",
+      "sample_id": "P3P0057",
+      "source": "phase3c_validation",
+      "source_cache_id": "7319b7990e057f06669d8a7230913b5916cbb674fed0afb109e35997d5dc30fa"
+    },
+    {
+      "cache_id": "1a1963c88b1a8f7b40592639b8467ce336e8a07eb136b4ce3bbd9c3d45224c77",
+      "model_id": "BIOMD0000000088",
+      "reaction_id": "re138",
+      "sample_id": "P3P0058",
+      "source": "phase3c_validation",
+      "source_cache_id": "1a1963c88b1a8f7b40592639b8467ce336e8a07eb136b4ce3bbd9c3d45224c77"
+    },
+    {
+      "cache_id": "d27ad8df9b75a00de350f072060230382164a1586eab203ed9f413629b44fc37",
+      "model_id": "BIOMD0000000088",
+      "reaction_id": "re139",
+      "sample_id": "P3P0059",
+      "source": "phase3c_validation",
+      "source_cache_id": "d27ad8df9b75a00de350f072060230382164a1586eab203ed9f413629b44fc37"
+    },
+    {
+      "cache_id": "c79d220e106bf45ff6c48a0a3162c140e7f0090dcd5194160f93af1ba5f31518",
+      "model_id": "BIOMD0000000088",
+      "reaction_id": "re140",
+      "sample_id": "P3P0060",
+      "source": "phase3c_validation",
+      "source_cache_id": "c79d220e106bf45ff6c48a0a3162c140e7f0090dcd5194160f93af1ba5f31518"
+    },
+    {
+      "cache_id": "6bbd14e93e2998bfd5ae5e920152dfcbb2a9323129afb807b038596ee5aa035f",
+      "model_id": "BIOMD0000000088",
+      "reaction_id": "re157",
+      "sample_id": "P3P0061",
+      "source": "phase3c_validation",
+      "source_cache_id": "6bbd14e93e2998bfd5ae5e920152dfcbb2a9323129afb807b038596ee5aa035f"
+    },
+    {
+      "cache_id": "d70c968c95baeeb7a9dd880085df9d0e38514efa6075d14152578c48c6bfd5a7",
+      "model_id": "BIOMD0000000171",
+      "reaction_id": "T1_pho",
+      "sample_id": "P3P0062",
+      "source": "phase3c_validation",
+      "source_cache_id": "d70c968c95baeeb7a9dd880085df9d0e38514efa6075d14152578c48c6bfd5a7"
+    },
+    {
+      "cache_id": "91c0bbfaed9990f6eb89775c1d61628c3935634238a967b00a648ae0ff750334",
+      "model_id": "BIOMD0000000190",
+      "reaction_id": "MAT",
+      "sample_id": "P3P0063",
+      "source": "phase3c_validation",
+      "source_cache_id": "91c0bbfaed9990f6eb89775c1d61628c3935634238a967b00a648ae0ff750334"
+    },
+    {
+      "cache_id": "623f419132471b6ee808ab867c030c2a7f8733b90b09f6a4373ef7670d6513f3",
+      "model_id": "BIOMD0000000231",
+      "reaction_id": "v1",
+      "sample_id": "P3P0064",
+      "source": "phase3c_validation",
+      "source_cache_id": "623f419132471b6ee808ab867c030c2a7f8733b90b09f6a4373ef7670d6513f3"
+    },
+    {
+      "cache_id": "ac0d6ed87879021a170417d3033a699909e0ec664dd8c528ae765e9770cdfad5",
+      "model_id": "BIOMD0000000231",
+      "reaction_id": "v3",
+      "sample_id": "P3P0065",
+      "source": "phase3c_validation",
+      "source_cache_id": "ac0d6ed87879021a170417d3033a699909e0ec664dd8c528ae765e9770cdfad5"
+    },
+    {
+      "cache_id": "83a36ab6177ee4b42a19c7787c33c07c5b23a993de229b9eeb0407153cfd6d6a",
+      "model_id": "BIOMD0000000231",
+      "reaction_id": "v4",
+      "sample_id": "P3P0066",
+      "source": "phase3c_validation",
+      "source_cache_id": "83a36ab6177ee4b42a19c7787c33c07c5b23a993de229b9eeb0407153cfd6d6a"
+    },
+    {
+      "cache_id": "fd26c93835795cdcfeab4c0509049a3cfbcdc2af847548a14dc116722d689cba",
+      "model_id": "BIOMD0000000245",
+      "reaction_id": "r3",
+      "sample_id": "P3P0067",
+      "source": "phase3c_validation",
+      "source_cache_id": "fd26c93835795cdcfeab4c0509049a3cfbcdc2af847548a14dc116722d689cba"
+    },
+    {
+      "cache_id": "a165490a99d355e22e6f8afb419ecf9465af8351c8ad5a2a95b040fe52780424",
+      "model_id": "BIOMD0000000602",
+      "reaction_id": "R01956_Kat1",
+      "sample_id": "P3P0068",
+      "source": "phase3c_validation",
+      "source_cache_id": "a165490a99d355e22e6f8afb419ecf9465af8351c8ad5a2a95b040fe52780424"
+    },
+    {
+      "cache_id": "bf7ed2adc3ffb3e4c1738df9dc7245f81b4e8eba64eeb1eac6c3061e6df5ab73",
+      "model_id": "BIOMD0000000602",
+      "reaction_id": "R04171_Kat2",
+      "sample_id": "P3P0069",
+      "source": "phase3c_validation",
+      "source_cache_id": "bf7ed2adc3ffb3e4c1738df9dc7245f81b4e8eba64eeb1eac6c3061e6df5ab73"
+    },
+    {
+      "cache_id": "24d1a4fd181dde3a3cca998921880395b12fd81aaceef305ec31ce94b6707c86",
+      "model_id": "BIOMD0000000602",
+      "reaction_id": "R04171_Kat3",
+      "sample_id": "P3P0070",
+      "source": "phase3c_validation",
+      "source_cache_id": "24d1a4fd181dde3a3cca998921880395b12fd81aaceef305ec31ce94b6707c86"
+    },
+    {
+      "cache_id": "b3a4db37eec6175abef10c095ddb38bab2cbf297f398b19517935941470cccf1",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R00150_C3_cytop",
+      "sample_id": "P3P0071",
+      "source": "phase3c_validation",
+      "source_cache_id": "b3a4db37eec6175abef10c095ddb38bab2cbf297f398b19517935941470cccf1"
+    },
+    {
+      "cache_id": "a8d907b47f758a0a958920ca58738ca6b7cd67c76a0548ee2d3163e454e71682",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R00281_C3_cytop",
+      "sample_id": "P3P0072",
+      "source": "phase3c_validation",
+      "source_cache_id": "a8d907b47f758a0a958920ca58738ca6b7cd67c76a0548ee2d3163e454e71682"
+    },
+    {
+      "cache_id": "a2b9ac4ca046e46238d3cf4869cd2034d7a73235770100ee859cbc8da0dca767",
+      "model_id": "BIOMD0000000042",
+      "reaction_id": "reaction_2",
+      "sample_id": "P3P0073",
+      "source": "phase3c_validation",
+      "source_cache_id": "a2b9ac4ca046e46238d3cf4869cd2034d7a73235770100ee859cbc8da0dca767"
+    },
+    {
+      "cache_id": "c3025da593448a1f9546d01115b9b8902d9e1304e1e09ccdb4919202e447a384",
+      "model_id": "BIOMD0000000061",
+      "reaction_id": "vALD",
+      "sample_id": "P3P0074",
+      "source": "phase3c_validation",
+      "source_cache_id": "c3025da593448a1f9546d01115b9b8902d9e1304e1e09ccdb4919202e447a384"
+    },
+    {
+      "cache_id": "0e4deb0ef718929178f17c0a5aebcf2df21bdae6fe66ea9f172fd40a49fb8d1d",
+      "model_id": "BIOMD0000000064",
+      "reaction_id": "vALD",
+      "sample_id": "P3P0075",
+      "source": "phase3c_validation",
+      "source_cache_id": "0e4deb0ef718929178f17c0a5aebcf2df21bdae6fe66ea9f172fd40a49fb8d1d"
+    },
+    {
+      "cache_id": "5d00379f4901c0ad0f741e485dc2e8274afd47c6b4e81e81846bc13248563a7b",
+      "model_id": "BIOMD0000000064",
+      "reaction_id": "vPGI",
+      "sample_id": "P3P0076",
+      "source": "phase3c_validation",
+      "source_cache_id": "5d00379f4901c0ad0f741e485dc2e8274afd47c6b4e81e81846bc13248563a7b"
+    },
+    {
+      "cache_id": "335d12efb9bdfc32b5b61ecd33d88b791416b7d09d3c6361a0019c2e8540e12d",
+      "model_id": "BIOMD0000000071",
+      "reaction_id": "vGPO",
+      "sample_id": "P3P0077",
+      "source": "phase3c_validation",
+      "source_cache_id": "335d12efb9bdfc32b5b61ecd33d88b791416b7d09d3c6361a0019c2e8540e12d"
+    },
+    {
+      "cache_id": "aa6fbe6a55f4480b135913646e022aa44b447681aff28933b3f2cbcaa2446d10",
+      "model_id": "BIOMD0000000071",
+      "reaction_id": "vPGI",
+      "sample_id": "P3P0078",
+      "source": "phase3c_validation",
+      "source_cache_id": "aa6fbe6a55f4480b135913646e022aa44b447681aff28933b3f2cbcaa2446d10"
+    },
+    {
+      "cache_id": "ccddcc3c8805414306b0fc55fa5bca420fdb7da61417551b888069cc74256fbb",
+      "model_id": "BIOMD0000000211",
+      "reaction_id": "vGPO",
+      "sample_id": "P3P0079",
+      "source": "phase3c_validation",
+      "source_cache_id": "ccddcc3c8805414306b0fc55fa5bca420fdb7da61417551b888069cc74256fbb"
+    },
+    {
+      "cache_id": "af9013a6d2cd68cf3689be1c4f2036d41ab20dcb11863f7ff3832e1d183c4977",
+      "model_id": "BIOMD0000000211",
+      "reaction_id": "vPFK",
+      "sample_id": "P3P0080",
+      "source": "phase3c_validation",
+      "source_cache_id": "af9013a6d2cd68cf3689be1c4f2036d41ab20dcb11863f7ff3832e1d183c4977"
+    },
+    {
+      "cache_id": "f7548d802bffb2e1987124f5a510d5a515aa57e2d227632f529ad974e10ebb91",
+      "model_id": "BIOMD0000000211",
+      "reaction_id": "vPGI",
+      "sample_id": "P3P0081",
+      "source": "phase3c_validation",
+      "source_cache_id": "f7548d802bffb2e1987124f5a510d5a515aa57e2d227632f529ad974e10ebb91"
+    },
+    {
+      "cache_id": "35d341b5226e0468541157ca038c211e7f02b699a48eb5214b50aced5c9eb730",
+      "model_id": "BIOMD0000000247",
+      "reaction_id": "vALD",
+      "sample_id": "P3P0082",
+      "source": "phase3c_validation",
+      "source_cache_id": "35d341b5226e0468541157ca038c211e7f02b699a48eb5214b50aced5c9eb730"
+    },
+    {
+      "cache_id": "973f582c3cf406dca4d5aa3224bf69ff262b1fedd6d1771ace683e6a2707cd13",
+      "model_id": "BIOMD0000000247",
+      "reaction_id": "vPGI",
+      "sample_id": "P3P0083",
+      "source": "phase3c_validation",
+      "source_cache_id": "973f582c3cf406dca4d5aa3224bf69ff262b1fedd6d1771ace683e6a2707cd13"
+    },
+    {
+      "cache_id": "26d9ccfa6d34c0fcfa5666da61b36abe33e686ccd0ad4577d7143bcc61a7d13c",
+      "model_id": "BIOMD0000001061",
+      "reaction_id": "R_FACOAL160",
+      "sample_id": "P3P0084",
+      "source": "phase3c_validation",
+      "source_cache_id": "26d9ccfa6d34c0fcfa5666da61b36abe33e686ccd0ad4577d7143bcc61a7d13c"
+    },
+    {
+      "cache_id": "36d72c499fff1f5a8443004fcbc39d6c3cc7b5c8a64d4c636cc9a45d1c6a6845",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R00760_C3_cytop",
+      "sample_id": "P3P0085",
+      "source": "phase3c_validation",
+      "source_cache_id": "36d72c499fff1f5a8443004fcbc39d6c3cc7b5c8a64d4c636cc9a45d1c6a6845"
+    },
+    {
+      "cache_id": "0518898cc207c432772be43ecf45510fb1518c79e5e7046d02f12053f941cdbc",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R00771_C3_cytop",
+      "sample_id": "P3P0086",
+      "source": "phase3c_validation",
+      "source_cache_id": "0518898cc207c432772be43ecf45510fb1518c79e5e7046d02f12053f941cdbc"
+    },
+    {
+      "cache_id": "946e4d55a76cb488a346b0cc54a5aeb0fdcaae96eac4e19efb12099cc967c7b6",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R00867_C3_cytop",
+      "sample_id": "P3P0087",
+      "source": "phase3c_validation",
+      "source_cache_id": "946e4d55a76cb488a346b0cc54a5aeb0fdcaae96eac4e19efb12099cc967c7b6"
+    },
+    {
+      "cache_id": "b6672252af1f36aaa2bef0cb5471e4557db41a54d581b897ab2887a63afbd39f",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R08639_C3_cytop",
+      "sample_id": "P3P0088",
+      "source": "phase3c_validation",
+      "source_cache_id": "b6672252af1f36aaa2bef0cb5471e4557db41a54d581b897ab2887a63afbd39f"
+    },
+    {
+      "cache_id": "09ada1d64a6bf0e3bf5a8d920b633bb107a03744178b8387f8abd2b0aa3c5d5e",
+      "model_id": "BIOMD0000000017",
+      "reaction_id": "R3",
+      "sample_id": "P3P0089",
+      "source": "phase3c_smoke",
+      "source_cache_id": "5b6157a180f379cc060694f2e23bb4af5b5c1d6c7254a5462becbbbc30c3e8ce"
+    },
+    {
+      "cache_id": "a98c58741ef4c2a879ef9fbd2f904381831b74eff012207c6302f3a80d56bd00",
+      "model_id": "BIOMD0000000017",
+      "reaction_id": "R4",
+      "sample_id": "P3P0090",
+      "source": "phase3c_validation",
+      "source_cache_id": "a98c58741ef4c2a879ef9fbd2f904381831b74eff012207c6302f3a80d56bd00"
+    },
+    {
+      "cache_id": "3bd0e852331b6ea9725905105a040c00a6d73fcd43ebd8b35dc665402fed8a41",
+      "model_id": "BIOMD0000000023",
+      "reaction_id": "v7",
+      "sample_id": "P3P0091",
+      "source": "phase3c_validation",
+      "source_cache_id": "3bd0e852331b6ea9725905105a040c00a6d73fcd43ebd8b35dc665402fed8a41"
+    },
+    {
+      "cache_id": "e4497b7dc0aad43bc15316704494eb6103fd000dde99bef1164de279744bbded",
+      "model_id": "BIOMD0000000061",
+      "reaction_id": "vGAPDH",
+      "sample_id": "P3P0092",
+      "source": "phase3c_validation",
+      "source_cache_id": "e4497b7dc0aad43bc15316704494eb6103fd000dde99bef1164de279744bbded"
+    },
+    {
+      "cache_id": "0e23b13e2fdfd233fe6996ba34dfeb585cbc960349f9e695cbdf5a2062abe3a1",
+      "model_id": "BIOMD0000000071",
+      "reaction_id": "vALD",
+      "sample_id": "P3P0093",
+      "source": "phase3c_validation",
+      "source_cache_id": "0e23b13e2fdfd233fe6996ba34dfeb585cbc960349f9e695cbdf5a2062abe3a1"
+    },
+    {
+      "cache_id": "0e2fdc4b72b786ca960009a4f4e06e1bcbb02100685f2dd376ee6a5cb7c57ced",
+      "model_id": "BIOMD0000000211",
+      "reaction_id": "vENO",
+      "sample_id": "P3P0094",
+      "source": "phase3c_validation",
+      "source_cache_id": "0e2fdc4b72b786ca960009a4f4e06e1bcbb02100685f2dd376ee6a5cb7c57ced"
+    },
+    {
+      "cache_id": "27b2d2f7a0a6c79f071f10cdd8363e22ee9f39ee0ecabcc1183f686494a229be",
+      "model_id": "BIOMD0000000247",
+      "reaction_id": "vG6PDH",
+      "sample_id": "P3P0095",
+      "source": "phase3c_validation",
+      "source_cache_id": "27b2d2f7a0a6c79f071f10cdd8363e22ee9f39ee0ecabcc1183f686494a229be"
+    },
+    {
+      "cache_id": "4f0a8b86ac003f6e8d039d94d51727c04ab927f6c1da28276a328cdce6fa47b4",
+      "model_id": "BIOMD0000000068",
+      "reaction_id": "vThr",
+      "sample_id": "P3P0096",
+      "source": "phase3c_validation",
+      "source_cache_id": "4f0a8b86ac003f6e8d039d94d51727c04ab927f6c1da28276a328cdce6fa47b4"
+    },
+    {
+      "cache_id": "34cf909619ba565fc7de7ff0ecc1fdcc1ef92d486b4a0b855e8ef61574daf7bc",
+      "model_id": "BIOMD0000000088",
+      "reaction_id": "re156",
+      "sample_id": "P3P0097",
+      "source": "phase3c_validation",
+      "source_cache_id": "34cf909619ba565fc7de7ff0ecc1fdcc1ef92d486b4a0b855e8ef61574daf7bc"
+    },
+    {
+      "cache_id": "4ddabab416649a107bf5187e480f61cb8ff1ea6e42f752821dab5d1699075a10",
+      "model_id": "BIOMD0000000171",
+      "reaction_id": "P_pho",
+      "sample_id": "P3P0098",
+      "source": "phase3c_validation",
+      "source_cache_id": "4ddabab416649a107bf5187e480f61cb8ff1ea6e42f752821dab5d1699075a10"
+    },
+    {
+      "cache_id": "526dfb9d9b61857ff879b0c681a1c406b3703788d72223ac0caf1e14a6bc7b0c",
+      "model_id": "BIOMD0000000171",
+      "reaction_id": "T_pho",
+      "sample_id": "P3P0099",
+      "source": "phase3c_validation",
+      "source_cache_id": "526dfb9d9b61857ff879b0c681a1c406b3703788d72223ac0caf1e14a6bc7b0c"
+    },
+    {
+      "cache_id": "f2178fbdf58ef1fd5918cf5303197f3021d94f3db8d59775ba9fbdad38262187",
+      "model_id": "BIOMD0000000190",
+      "reaction_id": "ODC",
+      "sample_id": "P3P0100",
+      "source": "phase3c_validation",
+      "source_cache_id": "f2178fbdf58ef1fd5918cf5303197f3021d94f3db8d59775ba9fbdad38262187"
+    },
+    {
+      "cache_id": "d3545751460cae126bd7fe4bdab7726695a5b8c3afcf07b33558c6e47335dba4",
+      "model_id": "BIOMD0000000190",
+      "reaction_id": "SAMdc",
+      "sample_id": "P3P0101",
+      "source": "phase3c_validation",
+      "source_cache_id": "d3545751460cae126bd7fe4bdab7726695a5b8c3afcf07b33558c6e47335dba4"
+    },
+    {
+      "cache_id": "669c1ff1a48857d8b95f95c4c6d5ec8cfbdb2e67774185a7033045259ff88af3",
+      "model_id": "BIOMD0000000190",
+      "reaction_id": "SpdS",
+      "sample_id": "P3P0102",
+      "source": "phase3c_validation",
+      "source_cache_id": "669c1ff1a48857d8b95f95c4c6d5ec8cfbdb2e67774185a7033045259ff88af3"
+    },
+    {
+      "cache_id": "3bd61da201438e8644b2b02b4683fc6801f7933edd789e0830c419abb907a46a",
+      "model_id": "BIOMD0000000231",
+      "reaction_id": "v2",
+      "sample_id": "P3P0103",
+      "source": "phase3c_validation",
+      "source_cache_id": "3bd61da201438e8644b2b02b4683fc6801f7933edd789e0830c419abb907a46a"
+    },
+    {
+      "cache_id": "69e2b56d1b244421a55e5898c1820f4f39f8dec3c90fc67a2e5ea11047362b43",
+      "model_id": "BIOMD0000000245",
+      "reaction_id": "r4",
+      "sample_id": "P3P0104",
+      "source": "phase3c_validation",
+      "source_cache_id": "69e2b56d1b244421a55e5898c1820f4f39f8dec3c90fc67a2e5ea11047362b43"
+    },
+    {
+      "cache_id": "9028f0d2753bfd989259dfe73b9684d6b9e101752ec4bb3cd9b85e6292bc8638",
+      "model_id": "BIOMD0000000602",
+      "reaction_id": "R00988",
+      "sample_id": "P3P0105",
+      "source": "phase3c_validation",
+      "source_cache_id": "9028f0d2753bfd989259dfe73b9684d6b9e101752ec4bb3cd9b85e6292bc8638"
+    },
+    {
+      "cache_id": "d9de10bd3412c6a03ba5a6bd4c19291d885b8a93d4f7f5eaf8335184f03a5c15",
+      "model_id": "BIOMD0000000602",
+      "reaction_id": "R01814_Tph2",
+      "sample_id": "P3P0106",
+      "source": "phase3c_validation",
+      "source_cache_id": "d9de10bd3412c6a03ba5a6bd4c19291d885b8a93d4f7f5eaf8335184f03a5c15"
+    },
+    {
+      "cache_id": "c7536c60ce3110c646fefc3eab233d0bb38bde9ba0706185eaff29b739c6a90d",
+      "model_id": "BIOMD0000000602",
+      "reaction_id": "R02665",
+      "sample_id": "P3P0107",
+      "source": "phase3c_validation",
+      "source_cache_id": "c7536c60ce3110c646fefc3eab233d0bb38bde9ba0706185eaff29b739c6a90d"
+    },
+    {
+      "cache_id": "8c248fef304629571015f566fac3b1ed416398f4e28f78e691e798fa17746474",
+      "model_id": "BIOMD0000001061",
+      "reaction_id": "R_ACACT1r",
+      "sample_id": "P3P0108",
+      "source": "phase3c_validation",
+      "source_cache_id": "8c248fef304629571015f566fac3b1ed416398f4e28f78e691e798fa17746474"
+    },
+    {
+      "cache_id": "7e51ffdbac9d225aa6fe2d6b4bcb4ee374cdd3abda99eeed9286bd9dbd3ec08f",
+      "model_id": "BIOMD0000001061",
+      "reaction_id": "R_ACGK",
+      "sample_id": "P3P0109",
+      "source": "phase3c_validation",
+      "source_cache_id": "7e51ffdbac9d225aa6fe2d6b4bcb4ee374cdd3abda99eeed9286bd9dbd3ec08f"
+    },
+    {
+      "cache_id": "f754f5608596c0b250454f56d07fa4f9738c20dbc3caf0760e0c79225c32cbcb",
+      "model_id": "BIOMD0000001061",
+      "reaction_id": "R_ACKr",
+      "sample_id": "P3P0110",
+      "source": "phase3c_validation",
+      "source_cache_id": "f754f5608596c0b250454f56d07fa4f9738c20dbc3caf0760e0c79225c32cbcb"
+    },
+    {
+      "cache_id": "7efcf03d602c88fa92813939fdab4df61f4d8b4a0beb0b93aea49d4e53e7382f",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R02749_C3_cytop",
+      "sample_id": "P3P0111",
+      "source": "phase3c_validation",
+      "source_cache_id": "7efcf03d602c88fa92813939fdab4df61f4d8b4a0beb0b93aea49d4e53e7382f"
+    },
+    {
+      "cache_id": "39f7b50b24bb28ac4180a9623bd7d6b4b4d1259c2d5d2d62402dd270550367cd",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R03083_C3_cytop",
+      "sample_id": "P3P0112",
+      "source": "phase3c_validation",
+      "source_cache_id": "39f7b50b24bb28ac4180a9623bd7d6b4b4d1259c2d5d2d62402dd270550367cd"
+    },
+    {
+      "cache_id": "ffaefd3f66188f7f974ed68ac03076836209fafd5db9ca03e641ef05d4beed94",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R08549_C3_cytop",
+      "sample_id": "P3P0113",
+      "source": "phase3c_validation",
+      "source_cache_id": "ffaefd3f66188f7f974ed68ac03076836209fafd5db9ca03e641ef05d4beed94"
+    },
+    {
+      "cache_id": "0770c1e5b8774e871de11401f1ecb03f2077bbf5740e1497ac50893f3e998acf",
+      "model_id": "BIOMD0000000171",
+      "reaction_id": "P1_pho",
+      "sample_id": "P3P0114",
+      "source": "phase3c_smoke",
+      "source_cache_id": "37ce394fb232188c488a3f4464908539e6f70c5db804795d50aaff6645323826"
+    },
+    {
+      "cache_id": "c398e272c51b66b7e966416b66e4f7bd2c682c70544f895e1691d43234e019f6",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R00190_C3_cytop",
+      "sample_id": "P3P0115",
+      "source": "phase3c_validation",
+      "source_cache_id": "c398e272c51b66b7e966416b66e4f7bd2c682c70544f895e1691d43234e019f6"
+    },
+    {
+      "cache_id": "b6fdd487ee4d590408899cfc5f64373a4f1cfe1c44eb1261f61114de9799a3ad",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R00200_C3_cytop",
+      "sample_id": "P3P0116",
+      "source": "phase3c_validation",
+      "source_cache_id": "b6fdd487ee4d590408899cfc5f64373a4f1cfe1c44eb1261f61114de9799a3ad"
+    },
+    {
+      "cache_id": "c4b5ee9a565df52941a5deeab30eb999f1ba7f249e250fd7e2bde32f5f610263",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R00226_C3_cytop",
+      "sample_id": "P3P0117",
+      "source": "phase3c_validation",
+      "source_cache_id": "c4b5ee9a565df52941a5deeab30eb999f1ba7f249e250fd7e2bde32f5f610263"
+    },
+    {
+      "cache_id": "8b7ea48ac5ac51f5912b93c436f5b00e79ba8006fcdd50586f5c10c2e09c010c",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R00248_C3_cytop",
+      "sample_id": "P3P0118",
+      "source": "phase3c_validation",
+      "source_cache_id": "8b7ea48ac5ac51f5912b93c436f5b00e79ba8006fcdd50586f5c10c2e09c010c"
+    },
+    {
+      "cache_id": "0526ea19613f8addadc347a1ba3e4f815dc0dec81695961ff3d15be67be07bc3",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R00345_C3_cytop",
+      "sample_id": "P3P0119",
+      "source": "phase3c_validation",
+      "source_cache_id": "0526ea19613f8addadc347a1ba3e4f815dc0dec81695961ff3d15be67be07bc3"
+    },
+    {
+      "cache_id": "42ad7ea6ba38df984de967048ff45b810cbbda2b8db53a45d2ccd23c5d5a841b",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R00355_C3_cytop",
+      "sample_id": "P3P0120",
+      "source": "phase3c_validation",
+      "source_cache_id": "42ad7ea6ba38df984de967048ff45b810cbbda2b8db53a45d2ccd23c5d5a841b"
+    },
+    {
+      "cache_id": "0f691d5748bb774804f8ca314191f15f36cd5043db55426d1aa9fbf54b8bdf2e",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R00430_C3_cytop",
+      "sample_id": "P3P0121",
+      "source": "phase3c_validation",
+      "source_cache_id": "0f691d5748bb774804f8ca314191f15f36cd5043db55426d1aa9fbf54b8bdf2e"
+    },
+    {
+      "cache_id": "0b817acc8bd9978d54a4a271680c5c9d2db99e81e8aaceb5b986b938e23a3593",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R00506_C3_cytop",
+      "sample_id": "P3P0122",
+      "source": "phase3c_validation",
+      "source_cache_id": "0b817acc8bd9978d54a4a271680c5c9d2db99e81e8aaceb5b986b938e23a3593"
+    },
+    {
+      "cache_id": "33b7dc3d4e13ad9c8d4567a1b318f81bd79e31d6f07d97b92d91adc7bbcde636",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R00516_C3_cytop",
+      "sample_id": "P3P0123",
+      "source": "phase3c_validation",
+      "source_cache_id": "33b7dc3d4e13ad9c8d4567a1b318f81bd79e31d6f07d97b92d91adc7bbcde636"
+    },
+    {
+      "cache_id": "cd002c4c1615782f124848c26d711b1aafdb600faa5fa37d518aaab7a5cce1ee",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R00575_C3_cytop",
+      "sample_id": "P3P0124",
+      "source": "phase3c_validation",
+      "source_cache_id": "cd002c4c1615782f124848c26d711b1aafdb600faa5fa37d518aaab7a5cce1ee"
+    },
+    {
+      "cache_id": "13bd402f9ff76c15579bf903dd02cdcbe632492b9fd712b16d7a60abbe201a6b",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R00844_C3_cytop",
+      "sample_id": "P3P0125",
+      "source": "phase3c_validation",
+      "source_cache_id": "13bd402f9ff76c15579bf903dd02cdcbe632492b9fd712b16d7a60abbe201a6b"
+    },
+    {
+      "cache_id": "faa32c76204392c9f348b359ebde0663cf0f8567813331fe54ac0c1bceed3e90",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R00936_C3_cytop",
+      "sample_id": "P3P0126",
+      "source": "phase3c_validation",
+      "source_cache_id": "faa32c76204392c9f348b359ebde0663cf0f8567813331fe54ac0c1bceed3e90"
+    },
+    {
+      "cache_id": "8360b3da1baea6b6465ec2cfbf014888f71d9a020648be82cb1bd3e0b2e589d7",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R00937_C3_cytop",
+      "sample_id": "P3P0127",
+      "source": "phase3c_validation",
+      "source_cache_id": "8360b3da1baea6b6465ec2cfbf014888f71d9a020648be82cb1bd3e0b2e589d7"
+    },
+    {
+      "cache_id": "93f744a5512df49e2318c46ba6d7070f0a99c9d1a7dd4e2dcf4c3d8c2d8209e5",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R00967_C3_cytop",
+      "sample_id": "P3P0128",
+      "source": "phase3c_validation",
+      "source_cache_id": "93f744a5512df49e2318c46ba6d7070f0a99c9d1a7dd4e2dcf4c3d8c2d8209e5"
+    },
+    {
+      "cache_id": "40f291eccbba4ba6ceee23ed4478f3edee4a84d3b83b68bff05b413b4ef9f861",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R01056_C3_cytop",
+      "sample_id": "P3P0129",
+      "source": "phase3c_validation",
+      "source_cache_id": "40f291eccbba4ba6ceee23ed4478f3edee4a84d3b83b68bff05b413b4ef9f861"
+    },
+    {
+      "cache_id": "92e9966fc9617f8518a3b786606dc82f632dede6922861495b324e92b66e6fd2",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R01057_C3_cytop",
+      "sample_id": "P3P0130",
+      "source": "phase3c_validation",
+      "source_cache_id": "92e9966fc9617f8518a3b786606dc82f632dede6922861495b324e92b66e6fd2"
+    },
+    {
+      "cache_id": "59773310df4578ba13568db44ae554a7b8f08d04dab3dcbb8284bf99173ae111",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R01072_C3_cytop",
+      "sample_id": "P3P0131",
+      "source": "phase3c_validation",
+      "source_cache_id": "59773310df4578ba13568db44ae554a7b8f08d04dab3dcbb8284bf99173ae111"
+    },
+    {
+      "cache_id": "1935070da3ff8a34a417398e7c1c5a0871427c440bc1e04faa6836664ee836a2",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R01073_C3_cytop",
+      "sample_id": "P3P0132",
+      "source": "phase3c_validation",
+      "source_cache_id": "1935070da3ff8a34a417398e7c1c5a0871427c440bc1e04faa6836664ee836a2"
+    },
+    {
+      "cache_id": "5f97db8222081e4fc9b637fbc6df62a4b255efcb6536edd8f75de2f8b5e38604",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R01127_C3_cytop",
+      "sample_id": "P3P0133",
+      "source": "phase3c_validation",
+      "source_cache_id": "5f97db8222081e4fc9b637fbc6df62a4b255efcb6536edd8f75de2f8b5e38604"
+    },
+    {
+      "cache_id": "f7f442f46fe5e029c315017f7e9fe22a55661200b15affd0452b8dc73d312c5c",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R01134_C3_cytop",
+      "sample_id": "P3P0134",
+      "source": "phase3c_validation",
+      "source_cache_id": "f7f442f46fe5e029c315017f7e9fe22a55661200b15affd0452b8dc73d312c5c"
+    },
+    {
+      "cache_id": "425cf4080895d7c12c4fe82689c83a976a67a02213c18fe5ddb156c604777d9c",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R01251_C3_cytop",
+      "sample_id": "P3P0135",
+      "source": "phase3c_validation",
+      "source_cache_id": "425cf4080895d7c12c4fe82689c83a976a67a02213c18fe5ddb156c604777d9c"
+    },
+    {
+      "cache_id": "dbb27de187b36927bc022f1838262325714d450970d3f930b1604460feb0e135",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R01512_C3_cytop",
+      "sample_id": "P3P0136",
+      "source": "phase3c_validation",
+      "source_cache_id": "dbb27de187b36927bc022f1838262325714d450970d3f930b1604460feb0e135"
+    },
+    {
+      "cache_id": "6544651e9dc6fe0fe20323ed171e220dbc2ae03f8008fc79370069b632ea9b73",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R01525_C3_cytop",
+      "sample_id": "P3P0137",
+      "source": "phase3c_validation",
+      "source_cache_id": "6544651e9dc6fe0fe20323ed171e220dbc2ae03f8008fc79370069b632ea9b73"
+    },
+    {
+      "cache_id": "554ad75a951b68bf2dfff1e5cf9c6cb6b5726232eae973d736ec7c3ddd96284e",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R01561_C3_cytop",
+      "sample_id": "P3P0138",
+      "source": "phase3c_validation",
+      "source_cache_id": "554ad75a951b68bf2dfff1e5cf9c6cb6b5726232eae973d736ec7c3ddd96284e"
+    },
+    {
+      "cache_id": "49a0c10bc47713ac584103d348a0524ea301813904a6dead5211709988878cc7",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R01641_C3_cytop",
+      "sample_id": "P3P0139",
+      "source": "phase3c_validation",
+      "source_cache_id": "49a0c10bc47713ac584103d348a0524ea301813904a6dead5211709988878cc7"
+    },
+    {
+      "cache_id": "bb076176a8123d9ba905226039fb35c8e58ef1bdb8757e2c28ca6773cbe8b037",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R01724_C3_cytop",
+      "sample_id": "P3P0140",
+      "source": "phase3c_validation",
+      "source_cache_id": "bb076176a8123d9ba905226039fb35c8e58ef1bdb8757e2c28ca6773cbe8b037"
+    },
+    {
+      "cache_id": "7b97a3830e76594ad851aabf9025872e81239cc4860c6a1884f6e43ac8aff35a",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R01775_C3_cytop",
+      "sample_id": "P3P0141",
+      "source": "phase3c_validation",
+      "source_cache_id": "7b97a3830e76594ad851aabf9025872e81239cc4860c6a1884f6e43ac8aff35a"
+    },
+    {
+      "cache_id": "21dd06c24cfaee58d031264779fe1cbb387bcbed5bd84c97437aacc3a50857aa",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R01869_C3_cytop",
+      "sample_id": "P3P0142",
+      "source": "phase3c_validation",
+      "source_cache_id": "21dd06c24cfaee58d031264779fe1cbb387bcbed5bd84c97437aacc3a50857aa"
+    },
+    {
+      "cache_id": "eb447667cdf917c8a4672b7aaf8970f13c34c33cbb798cc76f4bf091767a6e22",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R01870_C3_cytop",
+      "sample_id": "P3P0143",
+      "source": "phase3c_validation",
+      "source_cache_id": "eb447667cdf917c8a4672b7aaf8970f13c34c33cbb798cc76f4bf091767a6e22"
+    },
+    {
+      "cache_id": "39f70e9b56833e31a1b6c3a14b44596b799c7de42ca54686ded7bed3b15c3ddb",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R01920_C3_cytop",
+      "sample_id": "P3P0144",
+      "source": "phase3c_validation",
+      "source_cache_id": "39f70e9b56833e31a1b6c3a14b44596b799c7de42ca54686ded7bed3b15c3ddb"
+    },
+    {
+      "cache_id": "1d16d87c75f6b0fee286dc21bf59c16556c6ef5b40787e6b80dad44f3a89ea94",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R01978_C3_cytop",
+      "sample_id": "P3P0145",
+      "source": "phase3c_validation",
+      "source_cache_id": "1d16d87c75f6b0fee286dc21bf59c16556c6ef5b40787e6b80dad44f3a89ea94"
+    },
+    {
+      "cache_id": "466e17090580bd7db4bf07de29d8fa6adc17d19150308bdecff218dc1e56fe72",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R01993_C3_cytop",
+      "sample_id": "P3P0146",
+      "source": "phase3c_validation",
+      "source_cache_id": "466e17090580bd7db4bf07de29d8fa6adc17d19150308bdecff218dc1e56fe72"
+    },
+    {
+      "cache_id": "7056e1689a99cde43772d16b639864c6c35d8ebd6aae2b96cc27081bfd58369a",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R02018_C3_cytop",
+      "sample_id": "P3P0147",
+      "source": "phase3c_validation",
+      "source_cache_id": "7056e1689a99cde43772d16b639864c6c35d8ebd6aae2b96cc27081bfd58369a"
+    },
+    {
+      "cache_id": "e93d6dd93d417b7ff2a2a2c5518360499bbc74245be43340943dd5ac9541c4f3",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R02022_C3_cytop",
+      "sample_id": "P3P0148",
+      "source": "phase3c_validation",
+      "source_cache_id": "e93d6dd93d417b7ff2a2a2c5518360499bbc74245be43340943dd5ac9541c4f3"
+    },
+    {
+      "cache_id": "2ac4f4c523ea74595c84894f7aab2fe85cf0ad869c22a49b11734d5680bb1c07",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R02023_C3_cytop",
+      "sample_id": "P3P0149",
+      "source": "phase3c_validation",
+      "source_cache_id": "2ac4f4c523ea74595c84894f7aab2fe85cf0ad869c22a49b11734d5680bb1c07"
+    },
+    {
+      "cache_id": "6d70d35f32183db7a26efc7b640e0f9d5a43bab2b996dd205dc001226541c3f9",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R02024_C3_cytop",
+      "sample_id": "P3P0150",
+      "source": "phase3c_validation",
+      "source_cache_id": "6d70d35f32183db7a26efc7b640e0f9d5a43bab2b996dd205dc001226541c3f9"
+    },
+    {
+      "cache_id": "1d40998615f276be2d4d99dcc5b1b2bc9594ff6487a3a4b1260e06dbee6def32",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R02081_C3_cytop",
+      "sample_id": "P3P0151",
+      "source": "phase3c_validation",
+      "source_cache_id": "1d40998615f276be2d4d99dcc5b1b2bc9594ff6487a3a4b1260e06dbee6def32"
+    },
+    {
+      "cache_id": "63b0a526aba9a0a4d6f606fd7d05deb5d225d6c2c768ee8506900b0788e6307b",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R02291_C3_cytop",
+      "sample_id": "P3P0152",
+      "source": "phase3c_validation",
+      "source_cache_id": "63b0a526aba9a0a4d6f606fd7d05deb5d225d6c2c768ee8506900b0788e6307b"
+    },
+    {
+      "cache_id": "9df4ab6a02bfb71e1724dafd65fd545b0b30874be5202e8341d53d2969a5410f",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R02294_C3_cytop",
+      "sample_id": "P3P0153",
+      "source": "phase3c_validation",
+      "source_cache_id": "9df4ab6a02bfb71e1724dafd65fd545b0b30874be5202e8341d53d2969a5410f"
+    },
+    {
+      "cache_id": "c3c54794345496ace73f25d7c47d0d35dd5822f6d137c682d76d3f12ae9e5d35",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R02323_C3_cytop",
+      "sample_id": "P3P0154",
+      "source": "phase3c_validation",
+      "source_cache_id": "c3c54794345496ace73f25d7c47d0d35dd5822f6d137c682d76d3f12ae9e5d35"
+    },
+    {
+      "cache_id": "0b8563b26a18bbdd8d8d582dd2fdaf55d5dbd1e582bc15426fbe704dec1f6cf2",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R02327_C3_cytop",
+      "sample_id": "P3P0155",
+      "source": "phase3c_validation",
+      "source_cache_id": "0b8563b26a18bbdd8d8d582dd2fdaf55d5dbd1e582bc15426fbe704dec1f6cf2"
+    },
+    {
+      "cache_id": "28abad2bbdc66c040699183ae6661bddd1d3b34c11fafc2853e4cf00044bdcd0",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R02413_C3_cytop",
+      "sample_id": "P3P0156",
+      "source": "phase3c_validation",
+      "source_cache_id": "28abad2bbdc66c040699183ae6661bddd1d3b34c11fafc2853e4cf00044bdcd0"
+    },
+    {
+      "cache_id": "89c341db1a491ec84e7660839bfe2c9862a97662d413ef540a1a60cf36afddd7",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R02869_C3_cytop",
+      "sample_id": "P3P0157",
+      "source": "phase3c_validation",
+      "source_cache_id": "89c341db1a491ec84e7660839bfe2c9862a97662d413ef540a1a60cf36afddd7"
+    },
+    {
+      "cache_id": "5debdc4480e6af09d9c193a66023a3845818f4348b952b9a9ff0fc58559684e0",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R03192_C3_cytop",
+      "sample_id": "P3P0158",
+      "source": "phase3c_validation",
+      "source_cache_id": "5debdc4480e6af09d9c193a66023a3845818f4348b952b9a9ff0fc58559684e0"
+    },
+    {
+      "cache_id": "80ece4fe5bea29d3f7e2303329756ca71dd97cf10b9642d44d4589f515582b83",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R04198_C3_cytop",
+      "sample_id": "P3P0159",
+      "source": "phase3c_validation",
+      "source_cache_id": "80ece4fe5bea29d3f7e2303329756ca71dd97cf10b9642d44d4589f515582b83"
+    },
+    {
+      "cache_id": "7eb9f7d6d48f9c70d442df758917dceeabdf5d9090740a2a6003d3787f8aebc6",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R04467_C3_cytop",
+      "sample_id": "P3P0160",
+      "source": "phase3c_validation",
+      "source_cache_id": "7eb9f7d6d48f9c70d442df758917dceeabdf5d9090740a2a6003d3787f8aebc6"
+    },
+    {
+      "cache_id": "4cc2f36bb0325d25ed438db111941073ff9c30536b316ae203ee84420743cf7f",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R04534_C3_cytop",
+      "sample_id": "P3P0161",
+      "source": "phase3c_validation",
+      "source_cache_id": "4cc2f36bb0325d25ed438db111941073ff9c30536b316ae203ee84420743cf7f"
+    },
+    {
+      "cache_id": "4b950d50e2f4c0e1d888f2ba483387d8d828e8d87a4faffe39b7d1a153ceb7f9",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R06861_C3_cytop",
+      "sample_id": "P3P0162",
+      "source": "phase3c_validation",
+      "source_cache_id": "4b950d50e2f4c0e1d888f2ba483387d8d828e8d87a4faffe39b7d1a153ceb7f9"
+    },
+    {
+      "cache_id": "018618133f125802a682e3f29931e59da2721d307c87d94387119fb530f90e23",
+      "model_id": "BIOMD0000001090",
+      "reaction_id": "R_R07168_C3_cytop",
+      "sample_id": "P3P0163",
+      "source": "phase3c_validation",
+      "source_cache_id": "018618133f125802a682e3f29931e59da2721d307c87d94387119fb530f90e23"
+    }
+  ],
+  "identity_covers": [
+    "model",
+    "prompt/template version",
+    "response schema version",
+    "evidence bytes and digest",
+    "retrieval provenance/config",
+    "max output tokens",
+    "reasoning effort",
+    "store",
+    "provider tools",
+    "all API-request-affecting orchestration"
+  ],
+  "n_compatible": 163,
+  "n_pending": 0,
+  "orchestration_note": "Framework selection is excluded only because it does not alter the serialized API request; paid requests use the native path.",
+  "pending": [],
+  "schema": "phase3c-validation-cache-compatibility-v1"
+}

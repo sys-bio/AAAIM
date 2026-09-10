@@ -1,0 +1,28 @@
+{
+  "fusion_top1": {
+    "both_correct": 86,
+    "comparator": "fusion_top1",
+    "comparator_only_correct": 7,
+    "grounded_appropriate_abstention": 18,
+    "grounded_harm": 7,
+    "grounded_incorrect_abstention": 21,
+    "grounded_only_correct": 16,
+    "grounded_recovery": 16,
+    "grounded_unsupported_output": 0,
+    "n": 163,
+    "neither_correct": 54
+  },
+  "phase3a_target_only": {
+    "both_correct": 35,
+    "comparator": "phase3a_target_only",
+    "comparator_only_correct": 14,
+    "grounded_appropriate_abstention": 18,
+    "grounded_harm": 14,
+    "grounded_incorrect_abstention": 21,
+    "grounded_only_correct": 67,
+    "grounded_recovery": 67,
+    "grounded_unsupported_output": 0,
+    "n": 163,
+    "neither_correct": 47
+  }
+}
