@@ -52,3 +52,5 @@ benchmark/phase3/phase3b_smoke/_*
 benchmark/phase3/phase3b_full/_*
 # Phase 3C raw Responses API cache; committed artifacts are scrubbed derivatives.
 benchmark/phase3/phase3c_smoke/_*/
+# Phase 3C paired-validation raw cache, attempt ledger, and resumable scratch.
+benchmark/phase3/phase3c_validation/_*/

@@ -1,0 +1,38 @@
+{
+  "api": "responses",
+  "automatic_retries": 0,
+  "context": "target-local only",
+  "cost_cap_usd": 3.5,
+  "llm_judge": false,
+  "max_attempts": 158,
+  "max_new_calls": 158,
+  "max_output_tokens": 2048,
+  "model": "gpt-5.6-terra",
+  "no_new_phase3a_calls": true,
+  "one_request_per_reaction": true,
+  "orchestration_path": "native_python_pre_retrieval_then_responses_api",
+  "population": {
+    "n": 163,
+    "sha256": "be086250023be617df278ab62549756b23bd477f8f5d6de92531608dcbf1088a",
+    "source": "benchmark/phase3/pilot_sample.csv"
+  },
+  "prompt_version": "phase3c-grounded-prompt-v1",
+  "reasoning_effort": "low",
+  "response_schema_version": "phase3c-grounded-output-v1",
+  "retrieval": {
+    "bm25_sha256": "f0b700248e388bd75fb7bca9c05a46ecbb6b5802861a8631eadb944e0b1572f0",
+    "catalog_sha256": "00acb4de1bbfb1ddae0298a09d218f93eb22241844179439ff34a2912fba046c",
+    "catalog_size": 12312,
+    "fusion_path": "benchmark/phase3/phase3b_fusion/rankings_bm25_trained_epoch1_rrf.jsonl.xz",
+    "fusion_sha256": "9601149e0297831ebfbfb4fde24b725a9b00287cf1b4d74270bf2921be138b31",
+    "method": "bm25_trained_epoch1_rrf",
+    "rrf_k": 60,
+    "schema": "phase3c-kegg-evidence-v1",
+    "trained_epoch1_sha256": "660c7ff55d787928050ba963cf4236788de21f661a523a5ebc1c47abbfc2f304"
+  },
+  "retrieval_top_k": 10,
+  "schema": "phase3c-validation-config-v1",
+  "store": false,
+  "test_rows_read": 0,
+  "tools": []
+}
