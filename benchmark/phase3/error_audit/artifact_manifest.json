@@ -7,6 +7,12 @@
       "sha256": "108cb3648d9b285c716abc5ba31f4bb6d2d755248e00ef5388c22b7bf6d7a08f"
     },
     {
+      "bytes": 11083,
+      "n_lines": null,
+      "path": "benchmark/phase3/error_audit/SAMPLING_REPORT.md",
+      "sha256": "ca045144a7547ed736f6f86f3e3bc5b985ad42c5213ded5c92311481ecaaa728"
+    },
+    {
       "bytes": 2476337,
       "n_lines": 143,
       "path": "benchmark/phase3/error_audit/all_method_disagreements.csv",
@@ -25,10 +31,46 @@
       "sha256": "4461180ee9bc8ef0503641899f4aecfae4ee0de7fe2696531f514299fa41fadf"
     },
     {
+      "bytes": 2635,
+      "n_lines": 61,
+      "path": "benchmark/phase3/error_audit/formal_audit_blinded_order.csv",
+      "sha256": "a89c2f5bba19dbd4b1725a6bddd8013338dea9c217e96095ba2f4641b2c9dfea"
+    },
+    {
+      "bytes": 49206,
+      "n_lines": 61,
+      "path": "benchmark/phase3/error_audit/formal_audit_crosswalk.csv",
+      "sha256": "36cfc74244c100372022bb0889b416c80b8057ff46175811e9ab4c39fd0bdb7a"
+    },
+    {
+      "bytes": 23194,
+      "n_lines": 61,
+      "path": "benchmark/phase3/error_audit/formal_audit_sample.csv",
+      "sha256": "53622e877f65bae66bfaf58698a706963cd37322e07e8f7c865b392bc6e2ef89"
+    },
+    {
+      "bytes": 35752,
+      "n_lines": 60,
+      "path": "benchmark/phase3/error_audit/formal_audit_sample.jsonl",
+      "sha256": "9ed0306012b465ef6623dbef8513c8d3f7c09f6b2b921a89e26e9a0f66fb7dac"
+    },
+    {
       "bytes": 715,
       "n_lines": null,
       "path": "benchmark/phase3/error_audit/inventory_summary.json",
       "sha256": "66654f7096fcd76be3d69aa8ea92d8b325bad4b9c70257575bdf204c7cbbd8d3"
+    },
+    {
+      "bytes": 554,
+      "n_lines": 3,
+      "path": "benchmark/phase3/error_audit/manual_nomination_diagnostics.csv",
+      "sha256": "639f7e8ac57dbcca21288ee9312592d21e973984a99238735c27c58a9386ad1a"
+    },
+    {
+      "bytes": 95,
+      "n_lines": 1,
+      "path": "benchmark/phase3/error_audit/manual_nominations.csv",
+      "sha256": "98333f3b62ba260afddc1d1cccf499d90a7c1b96f6f39d1f146f7f6d397510d2"
     },
     {
       "bytes": 666890,
@@ -55,11 +97,29 @@
       "sha256": "a2fd3e4016112ebc8bc11e13903df49e9f49b6313695a9457d867b69bf846b7c"
     },
     {
+      "bytes": 6451,
+      "n_lines": null,
+      "path": "benchmark/phase3/error_audit/sampling_config.json",
+      "sha256": "6310381286139c21817c1756bba6af0ba301d514c31cfeec7d44c886ca0ead18"
+    },
+    {
+      "bytes": 5659,
+      "n_lines": null,
+      "path": "benchmark/phase3/error_audit/sampling_distribution.json",
+      "sha256": "b345eb54bfc429f4518a8b638f59b1274c90d6e7bf5763632feaf1071539d147"
+    },
+    {
+      "bytes": 3592,
+      "n_lines": null,
+      "path": "benchmark/phase3/error_audit/sampling_eligibility_counts.json",
+      "sha256": "b0f67a726752e6297174dead9a003ee63439bbf7a23f422c5363d2978d17110e"
+    },
+    {
       "bytes": 2170,
       "n_lines": null,
       "path": "benchmark/phase3/error_audit/source_provenance.json",
       "sha256": "519757f37f578515be387147b54ffa4df73dab929b9a678445e3d06157f2d133"
     }
   ],
-  "n_files": 10
+  "n_files": 20
 }

@@ -1,0 +1,96 @@
+{
+  "disagreement_subtype_availability": {
+    "bm25_correct_trained_incorrect": 16,
+    "exact_mismatch_brite_orthology_match": 43,
+    "fusion_correct_components_differ": 24,
+    "fusion_correct_grounded_harms": 7,
+    "fusion_incorrect_grounded_recovers": 16,
+    "grounded_correct_phase3a_incorrect": 67,
+    "large_ground_truth_rank_change": 134,
+    "one_method_abstains_another_correct": 20,
+    "phase3a_correct_grounded_incorrect": 14,
+    "trained_correct_bm25_incorrect": 29
+  },
+  "documented_edge_case_unique_validation_reactions": 12,
+  "failure_type_availability": {
+    "evidence_compliance_case": 2,
+    "fusion_top1_correct_grounded_abstained": 6,
+    "fusion_top1_correct_grounded_incorrect": 1,
+    "other_grounded_nonexact": 17,
+    "truth_absent_fusion_top10_grounded_incorrect_in_evidence": 12,
+    "truth_fusion_ranks2_10_grounded_abstained": 15,
+    "truth_fusion_ranks2_10_grounded_incorrect": 9
+  },
+  "mechanical_rule_availability": {
+    "exact_mismatch_resolved_by_frozen_brite_orthology": 43,
+    "ground_truth_id_absent_from_frozen_catalog": 5,
+    "multiple_ground_truth_kegg_ids": 6
+  },
+  "primary_category_raw_eligibility": {
+    "cross_method_disagreement": 151,
+    "manual_nomination_or_documented_edge_case": 12,
+    "mechanically_suspicious": 50,
+    "phase3c_failure_harm": 61,
+    "random_control": 163
+  },
+  "schema": "phase3-formal-audit-eligibility-counts-v1",
+  "selection_stage_eligibility": {
+    "cross_method_disagreement": {
+      "deduplicated_by_prior_primary_assignment": 37,
+      "eligible_at_selection_stage": 114,
+      "raw_eligible": 151,
+      "selected": 10,
+      "subtype_availability_at_selection_stage": {
+        "bm25_correct_trained_incorrect": 13,
+        "exact_mismatch_brite_orthology_match": 25,
+        "fusion_correct_components_differ": 13,
+        "fusion_correct_grounded_harms": 0,
+        "fusion_incorrect_grounded_recovers": 15,
+        "grounded_correct_phase3a_incorrect": 58,
+        "large_ground_truth_rank_change": 104,
+        "one_method_abstains_another_correct": 12,
+        "phase3a_correct_grounded_incorrect": 6,
+        "trained_correct_bm25_incorrect": 16
+      }
+    },
+    "manual_nomination_or_documented_edge_case": {
+      "deduplicated_by_prior_primary_assignment": 0,
+      "eligible_at_selection_stage": 12,
+      "raw_eligible": 12,
+      "selected": 5
+    },
+    "mechanically_suspicious": {
+      "deduplicated_by_prior_primary_assignment": 20,
+      "eligible_at_selection_stage": 30,
+      "raw_eligible": 50,
+      "rule_availability_at_selection_stage": {
+        "exact_mismatch_resolved_by_frozen_brite_orthology": 24,
+        "ground_truth_id_absent_from_frozen_catalog": 5,
+        "multiple_ground_truth_kegg_ids": 3
+      },
+      "selected": 10
+    },
+    "phase3c_failure_harm": {
+      "deduplicated_by_prior_primary_assignment": 11,
+      "eligible_at_selection_stage": 50,
+      "raw_eligible": 61,
+      "selected": 15,
+      "subtype_availability_at_selection_stage": {
+        "evidence_compliance_case": 2,
+        "fusion_top1_correct_grounded_abstained": 5,
+        "fusion_top1_correct_grounded_incorrect": 1,
+        "other_grounded_nonexact": 15,
+        "truth_absent_fusion_top10_grounded_incorrect_in_evidence": 10,
+        "truth_fusion_ranks2_10_grounded_abstained": 11,
+        "truth_fusion_ranks2_10_grounded_incorrect": 7
+      }
+    },
+    "random_control": {
+      "deduplicated_by_prior_primary_assignment": 0,
+      "eligible_at_selection_stage": 163,
+      "raw_eligible": 163,
+      "selected": 20
+    }
+  },
+  "validation_population": 163
+}
