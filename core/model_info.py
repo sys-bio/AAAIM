@@ -532,7 +532,9 @@ def get_species_display_names(
         except ValueError:
             entity_type = EntityType.CHEMICAL
 
-    if entity_type in (EntityType.GENE, EntityType.PROTEIN):
+    if entity_type in (EntityType.GENE, EntityType.PROTEIN) or (
+        entity_type == EntityType.AUTO and model_type == ModelType.SBML_QUAL
+    ):
         names = {}
         
         if model_type == ModelType.SBML_FBC:
@@ -935,7 +937,7 @@ def extract_model_info(model_file: str, species_ids: List[str], entity_type: str
     ########## REACTIONS/TRANSITIONS ##########
     reactions = []
     
-    if entity_type in (EntityType.GENE, EntityType.PROTEIN) and model_type == ModelType.SBML_QUAL:
+    if entity_type in (EntityType.AUTO, EntityType.GENE, EntityType.PROTEIN) and model_type == ModelType.SBML_QUAL:
         # For SBML-qual gene models, extract boolean transitions
         reactions = extract_qual_transitions(model_file, species_ids)
         
@@ -1252,4 +1254,4 @@ def format_prompt(
                 prompt += f"\nReturn up to {top_k} standardized names or common synonyms for each {entity_type_str}, ranked by likelihood. Provide components names for complexes, which may exceed the limit of {top_k}.\n"
                 prompt += f"Use the below format, do not include any other text except the synonyms.\n\n"
                 prompt += 'SpeciesA: "name1", "name2", …\nSpeciesB: …'
-            return _finish(prompt) 
+            return _finish(prompt)

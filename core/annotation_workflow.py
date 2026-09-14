@@ -10,7 +10,7 @@ import logging
 import time
 import warnings
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
@@ -32,6 +32,7 @@ from core.llm_interface import (
     parse_llm_response,
     query_llm,
     query_llm_message,
+    summarize_usage_records,
 )
 from utils.constants import (
     SPECIES_ANNOTATION_RANKING_PROMPT,
@@ -576,6 +577,8 @@ def rank_species_annotations_with_llm(
     llm_model: str = "gpt-4o-mini",
     n_return: int = 3,
     model_notes: str = "",
+    max_completion_tokens: Optional[int] = None,
+    usage_callback: Optional[Callable[[Dict[str, Any]], None]] = None,
 ) -> pd.DataFrame:
     """Re-rank species candidates with an LLM and keep at most *n_return* IDs per species.
 
@@ -615,7 +618,13 @@ def rank_species_annotations_with_llm(
             entities=entities,
         )
         parsed = _parse_ranked_id_lines(
-            query_llm(prompt, model=llm_model, entity_type=EntityType.CHEMICAL)
+            query_llm(
+                prompt,
+                model=llm_model,
+                entity_type=EntityType.CHEMICAL,
+                max_completion_tokens=max_completion_tokens,
+                usage_callback=usage_callback,
+            )
         )
         for sid, sub, _choices in to_rank:
             selected = parsed.get(sid)
@@ -674,6 +683,7 @@ def annotate_single_model(
     verbose: bool = False,
     em_max_iterations: int = 5,
     message: str = "",
+    max_completion_tokens: Optional[int] = None,
 ) -> Tuple[pd.DataFrame, Dict[str, Any]]:
     """
     Annotate a single model that has no or limited existing annotations.
@@ -711,6 +721,8 @@ def annotate_single_model(
         em_max_iterations: Reaction EM rematch rounds (default 5). Use 0 to skip
             EM, or 1–2 for a faster run.
         message: Optional user note included in LLM prompts.
+        max_completion_tokens: Optional per-request output-token ceiling passed
+            to the LLM provider. Token usage is recorded in ``metrics['llm_usage']``.
 
     Returns:
         AnnotationResult. Species tables are on ``species_recommendations_df``;
@@ -725,6 +737,7 @@ def annotate_single_model(
     all_prompts: List[str] = []
     all_responses: List[str] = []
     assistant_messages: List[Dict[str, Any]] = []
+    llm_usage_records: List[Dict[str, Any]] = []
     system_prompt: str = ""
 
     # logger.info(f"Starting annotation for model: {model_file}")
@@ -772,6 +785,7 @@ def annotate_single_model(
             save_to=save_to,
             verbose=verbose,
             message=message,
+            max_completion_tokens=max_completion_tokens,
         )
         if not hasattr(species_result, "species_recommendations_df"):
             return species_result
@@ -798,6 +812,7 @@ def annotate_single_model(
             verbose=verbose,
             em_max_iterations=em_max_iterations,
             message=message,
+            max_completion_tokens=max_completion_tokens,
         )
         if hasattr(reaction_result, "recommendations_df"):
             reaction_result.species_recommendations_df = species_df
@@ -965,6 +980,8 @@ def annotate_single_model(
                         system_prompt,
                         model=llm_model,
                         entity_type=entity_type,
+                        max_completion_tokens=max_completion_tokens,
+                        usage_callback=llm_usage_records.append,
                     )
                     result = assistant_message.get("content") if assistant_message else ""
                     chunk_llm_time = time.time() - llm_start
@@ -1019,6 +1036,8 @@ def annotate_single_model(
                     system_prompt,
                     model=llm_model,
                     entity_type=entity_type,
+                    max_completion_tokens=max_completion_tokens,
+                    usage_callback=llm_usage_records.append,
                 )
                 result = assistant_message.get("content") if assistant_message else ""
                 llm_time = time.time() - llm_start
@@ -1092,6 +1111,8 @@ def annotate_single_model(
                 model_notes=_notes_plus_message(
                     (model_info or {}).get("model_notes", ""), message
                 ),
+                max_completion_tokens=max_completion_tokens,
+                usage_callback=llm_usage_records.append,
             )
             llm_time += time.time() - rank_start
             if not ranked_df.empty:
@@ -1105,6 +1126,7 @@ def annotate_single_model(
     metrics = _calculate_metrics(
         recommendations_df, existing_annotations, max_entities, len(all_entity_ids), total_time, llm_time, search_time
     )
+    metrics["llm_usage"] = summarize_usage_records(llm_usage_records)
 
     if not recommendations_df.empty and "id" in recommendations_df.columns:
         recommendations_df = recommendations_df[recommendations_df["id"] != "Reason:"].reset_index(drop=True)

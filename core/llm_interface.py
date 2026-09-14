@@ -8,7 +8,7 @@ import os
 import re
 import time
 import requests
-from typing import Dict, List, Tuple, Any, Optional
+from typing import Callable, Dict, List, Tuple, Any, Optional
 from openai import OpenAI, RateLimitError, APIError
 import logging
 from utils.constants import (
@@ -71,7 +71,9 @@ def _make_api_call_with_retry(client, model: str, messages: list,
                                max_retries: int = DEFAULT_MAX_RETRIES,
                                initial_delay: float = DEFAULT_INITIAL_DELAY,
                                max_delay: float = DEFAULT_MAX_DELAY,
-                               api_name: str = "API"):
+                               api_name: str = "API",
+                               max_completion_tokens: Optional[int] = None,
+                               usage_callback: Optional[Callable[[Dict[str, Any]], None]] = None):
     """
     Make an API call with retry logic for rate limit errors (429).
     
@@ -92,10 +94,12 @@ def _make_api_call_with_retry(client, model: str, messages: list,
     
     for attempt in range(max_retries + 1):
         try:
-            response = client.chat.completions.create(
-                model=model,
-                messages=messages
-            )
+            request_kwargs = {"model": model, "messages": messages}
+            if max_completion_tokens is not None:
+                request_kwargs["max_completion_tokens"] = max_completion_tokens
+            response = client.chat.completions.create(**request_kwargs)
+            if usage_callback is not None:
+                usage_callback(_extract_usage(response))
             return response
             
         except RateLimitError as e:
@@ -160,6 +164,8 @@ def _make_openrouter_api_call_with_retry(
     max_retries: int = DEFAULT_MAX_RETRIES,
     initial_delay: float = DEFAULT_INITIAL_DELAY,
     max_delay: float = DEFAULT_MAX_DELAY,
+    max_completion_tokens: Optional[int] = None,
+    usage_callback: Optional[Callable[[Dict[str, Any]], None]] = None,
 ):
     """
     Make an OpenRouter chat completion request.
@@ -176,6 +182,8 @@ def _make_openrouter_api_call_with_retry(
         "messages": messages,
         "reasoning": {"enabled": True},
     }
+    if max_completion_tokens is not None:
+        payload["max_tokens"] = max_completion_tokens
 
     delay = initial_delay
     last_exception = None
@@ -213,7 +221,10 @@ def _make_openrouter_api_call_with_retry(
                 continue
 
             response.raise_for_status()
-            return response.json()
+            response_json = response.json()
+            if usage_callback is not None:
+                usage_callback(_extract_usage(response_json))
+            return response_json
 
         except requests.RequestException as e:
             last_exception = e
@@ -254,6 +265,55 @@ def _extract_response_text(response: Any) -> Optional[str]:
     return None
 
 
+def _value_from_object_or_dict(value: Any, key: str, default: Any = None) -> Any:
+    """Read one field from either an SDK object or a JSON dictionary."""
+    if isinstance(value, dict):
+        return value.get(key, default)
+    return getattr(value, key, default)
+
+
+def _extract_usage(response: Any) -> Dict[str, Any]:
+    """Normalize token usage returned by OpenAI-compatible chat APIs."""
+    usage = _value_from_object_or_dict(response, "usage")
+    if usage is None:
+        return {}
+
+    details = _value_from_object_or_dict(usage, "completion_tokens_details")
+    prompt_details = _value_from_object_or_dict(usage, "prompt_tokens_details")
+    result = {
+        "input_tokens": int(_value_from_object_or_dict(usage, "prompt_tokens", 0) or 0),
+        "output_tokens": int(_value_from_object_or_dict(usage, "completion_tokens", 0) or 0),
+        "total_tokens": int(_value_from_object_or_dict(usage, "total_tokens", 0) or 0),
+        "reasoning_tokens": int(
+            _value_from_object_or_dict(details, "reasoning_tokens", 0) or 0
+        ),
+        "cached_input_tokens": int(
+            _value_from_object_or_dict(prompt_details, "cached_tokens", 0) or 0
+        ),
+    }
+    response_model = _value_from_object_or_dict(response, "model")
+    if response_model:
+        result["model"] = str(response_model)
+    return result
+
+
+def summarize_usage_records(records: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Sum normalized usage records from every LLM request in one workflow."""
+    token_fields = (
+        "input_tokens",
+        "output_tokens",
+        "total_tokens",
+        "reasoning_tokens",
+        "cached_input_tokens",
+    )
+    summary = {field: sum(int(record.get(field, 0) or 0) for record in records) for field in token_fields}
+    summary["requests"] = len(records)
+    models = list(dict.fromkeys(record.get("model") for record in records if record.get("model")))
+    if models:
+        summary["models"] = models
+    return summary
+
+
 def _extract_assistant_message(response: Any) -> Optional[Dict[str, Any]]:
     """Extract an assistant message dict, preserving OpenRouter reasoning details."""
     if response is None:
@@ -289,6 +349,8 @@ def query_llm_message(
     entity_type: str = "chemical",
     max_retries: int = DEFAULT_MAX_RETRIES,
     initial_delay: float = DEFAULT_INITIAL_DELAY,
+    max_completion_tokens: Optional[int] = None,
+    usage_callback: Optional[Callable[[Dict[str, Any]], None]] = None,
 ) -> Dict[str, Any]:
     """
     Query the configured LLM and return the assistant message dict.
@@ -310,11 +372,15 @@ def query_llm_message(
         model=model,
         max_retries=max_retries,
         initial_delay=initial_delay,
+        max_completion_tokens=max_completion_tokens,
+        usage_callback=usage_callback,
     )
 
 
 def query_llm(prompt: str, developer_prompt: str = None, model=GPT_MINI_MODEL, entity_type: str = "chemical",
-              max_retries: int = DEFAULT_MAX_RETRIES, initial_delay: float = DEFAULT_INITIAL_DELAY):
+              max_retries: int = DEFAULT_MAX_RETRIES, initial_delay: float = DEFAULT_INITIAL_DELAY,
+              max_completion_tokens: Optional[int] = None,
+              usage_callback: Optional[Callable[[Dict[str, Any]], None]] = None):
     """
     Query the configured LLM with the formatted prompt.
     Includes automatic retry with exponential backoff for rate limit errors (429).
@@ -338,6 +404,8 @@ def query_llm(prompt: str, developer_prompt: str = None, model=GPT_MINI_MODEL, e
         entity_type=entity_type,
         max_retries=max_retries,
         initial_delay=initial_delay,
+        max_completion_tokens=max_completion_tokens,
+        usage_callback=usage_callback,
     )
     text = assistant_message.get("content") if assistant_message else None
     if text:
@@ -351,6 +419,8 @@ def query_llm_message_with_history(
     model: str = GPT_MINI_MODEL,
     max_retries: int = DEFAULT_MAX_RETRIES,
     initial_delay: float = DEFAULT_INITIAL_DELAY,
+    max_completion_tokens: Optional[int] = None,
+    usage_callback: Optional[Callable[[Dict[str, Any]], None]] = None,
 ) -> Dict[str, Any]:
     """Query the LLM with full history and return the assistant message dict."""
     response = None
@@ -359,7 +429,9 @@ def query_llm_message_with_history(
         response = _make_api_call_with_retry(
             client, model, messages,
             max_retries=max_retries, initial_delay=initial_delay,
-            api_name="OpenAI"
+            api_name="OpenAI",
+            max_completion_tokens=max_completion_tokens,
+            usage_callback=usage_callback,
         )
     elif _is_openrouter_model(model):
         response = _make_openrouter_api_call_with_retry(
@@ -367,6 +439,8 @@ def query_llm_message_with_history(
             messages,
             max_retries=max_retries,
             initial_delay=initial_delay,
+            max_completion_tokens=max_completion_tokens,
+            usage_callback=usage_callback,
         )
     else:
         raise ValueError(
@@ -379,7 +453,9 @@ def query_llm_message_with_history(
 
 def query_llm_with_history(messages: list, model: str = GPT_MINI_MODEL,
                            max_retries: int = DEFAULT_MAX_RETRIES,
-                           initial_delay: float = DEFAULT_INITIAL_DELAY) -> str:
+                           initial_delay: float = DEFAULT_INITIAL_DELAY,
+                           max_completion_tokens: Optional[int] = None,
+                           usage_callback: Optional[Callable[[Dict[str, Any]], None]] = None) -> str:
     """
     Query the LLM with a full conversation history (multi-turn).
     
@@ -403,6 +479,8 @@ def query_llm_with_history(messages: list, model: str = GPT_MINI_MODEL,
         model=model,
         max_retries=max_retries,
         initial_delay=initial_delay,
+        max_completion_tokens=max_completion_tokens,
+        usage_callback=usage_callback,
     )
     text = assistant_message.get("content") if assistant_message else None
     if text:
