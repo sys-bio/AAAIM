@@ -627,6 +627,10 @@ def parse_llm_response(
         components = parse_typed_components(names_str)
         if components:
             component_dict[species_id] = components
+            # Typed groups are reserved for physical complexes, including in a
+            # forced gene/protein run.  Preserve that structure downstream
+            # while the component tags still enforce the requested ontology.
+            entity_type_dict[species_id] = EntityType.COMPLEX.value
             names = [name for _typ, group in components for name in group]
         else:
             names = _extract_synonym_names(names_str)

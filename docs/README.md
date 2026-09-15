@@ -71,7 +71,7 @@ Set `annotate` to choose what to annotate:
 - **Metrics**: Accuracy is NA when no existing annotations available
 - **Large Models**: Automatically splits models with >50 species into chunks to avoid LLM context limits
 
-Species annotation uses two size knobs. `top_k` is how many ontology IDs direct/RAG retrieval keeps per species (default 3). `n_return` is how many of those the final LLM ranking returns (default 3). Synonym generation is fixed at 3 and is not controlled by either parameter. The LLM ranking step runs only when there are more candidates than `n_return`, and then all such entities are ranked in one LLM call (not one call per entity). Set `top_k` higher than `n_return` (for example `top_k=10`, `n_return=3`) when you want the LLM to choose from a larger pool. Reactions ignore `top_k` at retrieval (all matching KEGG candidates are generated) and use the same skip rule. If every reaction already has `n_return` or fewer candidates, ranking is skipped and no `*_llm_ranked.csv` is written.
+Species annotation uses two size knobs. `top_k` is the number of biological identities retained by direct/RAG retrieval per ordinary species or per parsed complex component (default 3). `n_return` is the number of identities retained by the final LLM ranking (default 3). Taxon-specific accessions belonging to one identity do not consume additional identity slots. Synonym generation is fixed at 3 and is not controlled by either parameter. The LLM ranking step runs only when a unit has more identities than `n_return`, and all such units are ranked in one LLM call. For example, `top_k=3, n_return=1` retrieves three identities and reports the top identity; a three-component complex reports one identity for each component. Reactions retain their existing candidate-based interpretation of these parameters.
 
 #### Chemical Annotation (ChEBI)
 
@@ -95,9 +95,14 @@ result = annotate_model(
     model_file="path/to/model.xml",
     entity_type="gene",
     database="ncbigene",
-    tax_id="9606"  # for human
+    tax_id=["9606", "10090", "10116"]  # human, mouse, and rat
 )
 ```
+
+For multi-taxon searches, candidate identities are ranked before their
+taxon-specific accessions are expanded. The output records `identity`,
+`identity_rank`, `candidate_rank`, and `tax_id`, so a top-one identity may have
+one accession row per organism.
 
 #### Protein Annotation (UniProt)
 
@@ -138,7 +143,7 @@ print(result.recommendations_df[['species_id', 'type', 'synonyms_LLM', 'predicti
   - Chemicals → ChEBI
   - Genes → NCBI Gene
   - Proteins → UniProt
-  - Complexes → each component is searched in the database for that component's type (chemical → ChEBI, protein → UniProt, gene → NCBI Gene). The LLM lists all components, with a synonym group and type per component. Untyped (legacy) complex replies still search every allowed database.
+  - Complexes → each component is searched in the database for that component's type (chemical → ChEBI, protein → UniProt, gene → NCBI Gene). The LLM lists all components, with a synonym group and type per component. Component boundaries are retained in the output and ranking is performed per component. Untyped (legacy) complex replies still search every allowed database as one unresolved unit.
 - Species with `unknown` type are included in results with their LLM-suggested synonyms but no database matches
 
 #### Reaction Annotation (KEGG)
@@ -344,8 +349,8 @@ result = annotate_model(
     entity_type = "gene",				 # type of entities to annotate ("chemical", "gene", "protein", "auto", "reaction")
     database = "ncbigene",				 # database to use ("chebi", "ncbigene", "uniprot", "kegg") or list for auto mode
     method = "direct",					 # species search: "direct" or "rag"; reactions always use rule-based matching + LLM ranking
-    top_k = 10,						 # database candidates to retrieve per species (direct/RAG)
-    n_return = 3,					 # IDs kept after the final LLM ranking (species and reactions)
+    top_k = 3,						 # identity pool per species or complex component
+    n_return = 1,					 # final identities kept per species/component
     chunk_size = 50,					 # split large models into chunks of 50 entities (None for no chunking)
     species_recommendations_df = None,			 # species table or CSV; used when annotate="reactions"
     save_to = None,					 # output prefix; writes <save_to>_species.csv / <save_to>_reactions.csv
@@ -424,7 +429,13 @@ print_evaluation_results(
 
 ### Direct matching
 
-After LLM performs synonym normalization (3 synonyms), use direct dictionary matching to find ontology IDs and report hit counting. Retrieval keeps the `top_k` IDs with the highest hit counts. An LLM then re-ranks those candidates and returns `n_return` IDs.
+After LLM name normalization, direct matching expands composite gene/protein fields into lookup-safe forms. For example, `MAP2K1 (MEK1), MAP2K2 (MEK2)` contributes the original text plus `MAP2K1`, `MEK1`, `MAP2K2`, and `MEK2`; transcript descriptors are removed from additional lookup variants. Chemical punctuation is preserved.
+
+Retrieval ranks `top_k` biological identities per ordinary species or parsed complex component. NCBI Gene and UniProt candidates are grouped across requested taxa before accessions are expanded. The LLM then retains up to `n_return` identities per unit. Output columns preserve `component_id`, `component_name`, `component_type`, `identity`, `identity_rank`, `retrieval_identity_rank`, `candidate_rank`, and `tax_id`. An unmatched parsed component receives its own empty row so complex completeness can be evaluated.
+
+Cross-taxon identity grouping uses exact normalized canonical labels, not fuzzy
+symbol similarity. This keeps ortholog labels together while preventing distinct
+near-symbol genes such as `PDPK1`/`PDK1` or `PXN`/`PXDN` from being merged.
 
 ### Rule-based reaction matching + LLM ranking
 
@@ -432,7 +443,7 @@ Used when `annotate="reactions"` or `annotate="both"`. After species ChEBI IDs a
 
 ### Retrival augmented generation (RAG)
 
-After LLM performs synonym normalization (3 synonyms), use RAG with embeddings to find the most similar ontology terms by cosine similarity. Retrieval keeps the `top_k` nearest IDs. An LLM then re-ranks those candidates and returns `n_return` IDs.
+After LLM name normalization, RAG finds similar ontology terms by cosine similarity. Multi-taxon NCBI Gene and UniProt hits use the same identity grouping and component-aware ranking as direct matching; `top_k` and `n_return` therefore limit identities rather than raw taxon accessions.
 
 To use RAG, create embeddings of the ontology first:
 
@@ -507,7 +518,9 @@ You can restrict which databases are used by providing a `database` list paramet
 - **Files**:
   - `names2ncbigene_bigg_organisms_protein-coding.lzma`: Mapping from names to NCBI gene IDs, only include protein-coding genes from 18 species covered in Bigg models for file size considerations
   - `ncbigene2label_bigg_organisms_protein-coding.lzma`: Mapping from NCBI gene IDs to labels (primary name)
-  - `ncbigene2names_tax{tax_id}_protein-coding.lzma`: NCBI gene synonyms for tax_id used for RAG approach
+  - `names2ncbigene_tax{tax_id}_protein-coding.lzma`: organism-specific names used for direct matching
+  - `ncbigene2names_tax{tax_id}_protein-coding.lzma`: organism-specific names used for RAG indexing
+  - Included manuscript organisms: human (`9606`), mouse (`10090`), and rat (`10116`)
 - **Source**: Data are obtained from the NCBI gene FTP site: [https://ftp.ncbi.nih.gov/gene/DATA/GENE_INFO/](https://ftp.ncbi.nih.gov/gene/DATA/GENE_INFO/).
 
 ### UniProt Data

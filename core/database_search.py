@@ -51,6 +51,7 @@ _KEGG_REACTION2NAME_DICT: Optional[Dict[str, str]] = None
 _KEGG2EC_DICT: Optional[Dict[str, Dict[str, List[str]]]] = None
 _KEGG_REACTION_FEATURES_DICT: Optional[Dict[str, Dict[str, Any]]] = None
 _KEGG_PARSED_REACTIONS_DICT: Optional[Dict[str, Dict[str, Any]]] = None
+_NORMALIZED_TAXON_NAMES_CACHE: Dict[Tuple[str, Optional[str]], Dict[str, List[str]]] = {}
 
 def get_data_dir() -> Path:
     """Get the path to the AAAIM data directory."""
@@ -205,21 +206,29 @@ def load_uniprot_names_dict(tax_id: str = None) -> Dict[str, List[str]]:
     
     return names_dict
 
-def load_uniprot_label_dict(tax_id: str = None) -> Dict[str, str]:
+def load_uniprot_label_dict(tax_id: Any = None) -> Dict[str, str]:
     """
     Load the UniProt ID to label dictionary.
     
     Args:
-        tax_id: If provided, loads organism-specific reference file.
-                If None, tries to load the combined file
+        tax_id: If provided, loads an organism-specific reference file. A
+                list of taxonomy identifiers merges the corresponding files.
+                If None, loads the combined reference file.
     
     Returns:
         Dictionary mapping UniProt IDs to their labels
     """
-    global _UNIPROT_LABEL_DICT
-    
-    if _UNIPROT_LABEL_DICT is not None:
-        return _UNIPROT_LABEL_DICT
+    if isinstance(tax_id, list):
+        labels: Dict[str, str] = {}
+        for tid in tax_id:
+            labels.update(load_uniprot_label_dict(tax_id=tid))
+        return labels
+
+    cache_key = f"uniprot_labels_{tax_id or 'combined'}"
+    if not hasattr(load_uniprot_label_dict, "_cache"):
+        load_uniprot_label_dict._cache = {}
+    if cache_key in load_uniprot_label_dict._cache:
+        return load_uniprot_label_dict._cache[cache_key]
 
     if tax_id:
         # Load organism-specific file
@@ -236,7 +245,8 @@ def load_uniprot_label_dict(tax_id: str = None) -> Dict[str, str]:
     
     with lzma.open(data_file, 'rb') as f:
         label_dict = pickle.load(f)
-    
+
+    load_uniprot_label_dict._cache[cache_key] = label_dict
     return label_dict
 
 def load_chebi2kegg_dict() -> Dict[str, str]:
@@ -387,6 +397,149 @@ def remove_symbols(text: str) -> str:
         Text with only alphanumeric characters
     """
     return re.sub(r'[^a-zA-Z0-9]', '', text)
+
+
+def expand_lookup_synonyms(synonyms: List[str], database: str) -> List[str]:
+    """Expand composite LLM names into safe direct-lookup terms.
+
+    Gene and protein responses commonly contain a complete entry such as
+    ``MAP2K1 (MEK1), MAP2K2 (MEK2)`` in one quoted field.  Direct matching used
+    to treat that entire field as one name and therefore miss every component.
+    For NCBI Gene and UniProt we retain the original text and additionally
+    expose top-level entries, parenthetical aliases, slash-delimited aliases,
+    and versions without transcript descriptors.  Chemical punctuation is
+    intentionally left alone because commas are often meaningful in chemical
+    names.
+    """
+    raw = [str(value).strip().strip('"\'') for value in (synonyms or [])]
+    raw = [value for value in raw if value]
+    if database not in {"ncbigene", "uniprot"}:
+        return list(dict.fromkeys(raw))
+
+    expanded: List[str] = []
+
+    def add(value: str) -> None:
+        value = " ".join(value.strip().strip('"\'').strip(" ,;").split())
+        if value and value.upper() != "UNK":
+            expanded.append(value)
+
+    for value in raw:
+        add(value)
+        # Split semicolon-delimited entries and commas that introduce another
+        # symbol-with-parentheses entry.  Do not split arbitrary prose commas.
+        entries = re.split(r"\s*;\s*|\s*,\s*(?=[A-Za-z0-9_.+-]+\s*\()", value)
+        for entry in entries:
+            add(entry)
+            parenthetical = re.findall(r"\(([^()]*)\)", entry)
+            base = re.sub(r"\([^()]*\)", " ", entry)
+            add(base)
+            for aliases in parenthetical:
+                for alias in re.split(r"\s*[/|;,]\s*", aliases):
+                    add(alias)
+                    add(re.sub(
+                        r"\b(?:mRNA|messenger\s+RNA|transcript)\b", " ", alias,
+                        flags=re.IGNORECASE,
+                    ))
+
+            # Transcript/state descriptors are useful context for the LLM but
+            # are not part of gene symbols in the local lookup dictionaries.
+            without_transcript = re.sub(
+                r"\b(?:mRNA|messenger\s+RNA|transcript)\b", " ", base,
+                flags=re.IGNORECASE,
+            )
+            add(without_transcript)
+
+    deduplicated: List[str] = []
+    seen: Set[str] = set()
+    for value in expanded:
+        key = remove_symbols(value.lower())
+        if key and key not in seen:
+            seen.add(key)
+            deduplicated.append(value)
+    return deduplicated or raw
+
+
+def _identity_label_key(label: str) -> str:
+    """Return a taxon-independent comparison key for a gene/protein label."""
+    text = re.sub(r"_(?:HUMAN|MOUSE|RAT)$", "", str(label).upper())
+    return remove_symbols(text)
+
+
+def _select_taxonomic_identities(
+    records: List[Dict[str, Any]],
+    top_k: Optional[int],
+) -> Tuple[List[str], List[str], List[float], List[Optional[str]], List[str], List[int]]:
+    """Rank biological identities, then expand their taxon accessions.
+
+    Records are clustered by exact normalized canonical label. Approximate
+    symbol matching is deliberately avoided because near symbols such as
+    PDPK1/PDK1 and PXN/PXDN can denote different genes. ``top_k`` limits
+    identity clusters, not accessions.
+    """
+    if not records:
+        return [], [], [], [], [], []
+
+    parent = list(range(len(records)))
+
+    def find(index: int) -> int:
+        while parent[index] != index:
+            parent[index] = parent[parent[index]]
+            index = parent[index]
+        return index
+
+    def union(left: int, right: int) -> None:
+        root_left, root_right = find(left), find(right)
+        if root_left != root_right:
+            parent[root_right] = root_left
+
+    for left in range(len(records)):
+        left_key = _identity_label_key(records[left]["name"])
+        for right in range(left + 1, len(records)):
+            right_key = _identity_label_key(records[right]["name"])
+            if left_key == right_key:
+                union(left, right)
+
+    groups: Dict[int, List[int]] = defaultdict(list)
+    for index in range(len(records)):
+        groups[find(index)].append(index)
+
+    ranked_groups = sorted(
+        groups.values(),
+        key=lambda indexes: (
+            -max(float(records[index]["score"]) for index in indexes),
+            min(int(records[index]["order"]) for index in indexes),
+        ),
+    )
+    if top_k:
+        ranked_groups = ranked_groups[:top_k]
+
+    candidates: List[str] = []
+    names: List[str] = []
+    scores: List[float] = []
+    taxa: List[Optional[str]] = []
+    identities: List[str] = []
+    identity_ranks: List[int] = []
+    for identity_rank, indexes in enumerate(ranked_groups, start=1):
+        # Prefer a label that exactly matches a query; this keeps a misleading
+        # alias such as RAF1->RNASE3 from naming the identity cluster.
+        anchor = min(
+            indexes,
+            key=lambda index: (
+                _identity_label_key(records[index]["name"])
+                not in {str(value).upper() for value in records[index]["query_keys"]},
+                records[index]["order"],
+            ),
+        )
+        identity = str(records[anchor]["name"])
+        for index in sorted(indexes, key=lambda value: records[value]["order"]):
+            record = records[index]
+            candidates.append(str(record["id"]))
+            names.append(str(record["name"]))
+            scores.append(float(record["score"]))
+            taxa.append(record.get("tax_id"))
+            identities.append(identity)
+            identity_ranks.append(identity_rank)
+    return candidates, names, scores, taxa, identities, identity_ranks
 
 
 # def clean_synonym(synonym: str) -> str:
@@ -569,7 +722,7 @@ def _get_chebi_recommendations_direct(species_ids: List[str], synonyms_dict, top
     
     return recommendations
 
-def _get_ncbigene_recommendations_direct(species_ids: List[str], synonyms_dict, tax_id: Any = None, top_k: int = 3) -> List[Recommendation]:
+def _legacy_get_ncbigene_recommendations_direct(species_ids: List[str], synonyms_dict, tax_id: Any = None, top_k: int = 3) -> List[Recommendation]:
     """
     Find NCBI gene recommendations by directly matching against NCBI gene synonyms.
     Args:
@@ -663,7 +816,7 @@ def _get_ncbigene_recommendations_direct(species_ids: List[str], synonyms_dict, 
         recommendations.append(recommendation)
     return recommendations
 
-def _get_uniprot_recommendations_direct(species_ids: List[str], synonyms_dict, tax_id: Any = None, top_k: int = 3) -> List[Recommendation]:
+def _legacy_get_uniprot_recommendations_direct(species_ids: List[str], synonyms_dict, tax_id: Any = None, top_k: int = 3) -> List[Recommendation]:
     """
     Find UniProt recommendations by directly matching against UniProt synonyms.
     Args:
@@ -758,6 +911,133 @@ def _get_uniprot_recommendations_direct(species_ids: List[str], synonyms_dict, t
         )
         recommendations.append(recommendation)
     return recommendations
+
+
+def _get_taxonomic_recommendations_direct(
+    species_ids: List[str],
+    synonyms_dict,
+    *,
+    database: str,
+    tax_id: Any,
+    top_k: int,
+) -> List[Recommendation]:
+    """Direct lookup shared by NCBI Gene and UniProt.
+
+    Candidate IDs are first grouped into biological identities across requested
+    taxa. ``top_k`` is applied to those identities and all accessions belonging
+    to a selected identity are then emitted with explicit taxon provenance.
+    """
+    if database == "ncbigene":
+        label_dict = load_ncbigene_label_dict()
+        names_loader = load_ncbigene_names_dict
+    else:
+        label_dict = load_uniprot_label_dict(tax_id=tax_id)
+        names_loader = load_uniprot_names_dict
+
+    tax_ids = tax_id if isinstance(tax_id, list) else [tax_id]
+    tax_ids = [str(value) if value is not None else None for value in tax_ids]
+    normalized_by_taxon: Dict[Optional[str], Dict[str, List[str]]] = {}
+    for tid in tax_ids:
+        cache_key = (database, tid)
+        if cache_key in _NORMALIZED_TAXON_NAMES_CACHE:
+            normalized_by_taxon[tid] = _NORMALIZED_TAXON_NAMES_CACHE[cache_key]
+            continue
+        try:
+            names_dict = names_loader(tax_id=tid)
+        except Exception as exc:
+            logger.warning(
+                "Error loading %s names for tax_id %s: %s",
+                database.upper(), tid, exc,
+            )
+            continue
+        normalized: Dict[str, List[str]] = defaultdict(list)
+        for ref_name, database_ids in names_dict.items():
+            key = remove_symbols(str(ref_name).lower())
+            for database_id in database_ids:
+                value = str(database_id)
+                if value not in normalized[key]:
+                    normalized[key].append(value)
+        normalized_by_taxon[tid] = normalized
+        _NORMALIZED_TAXON_NAMES_CACHE[cache_key] = normalized
+
+    recommendations: List[Recommendation] = []
+    for species_id in species_ids:
+        if isinstance(synonyms_dict, dict):
+            original_synonyms = synonyms_dict.get(species_id, [species_id])
+        elif isinstance(synonyms_dict, tuple) and len(synonyms_dict) == 2:
+            original_synonyms = synonyms_dict[0].get(species_id, [species_id])
+        else:
+            original_synonyms = [species_id]
+
+        if original_synonyms == ["UNK"]:
+            recommendations.append(Recommendation(
+                id=species_id, synonyms=original_synonyms, candidates=[],
+                candidate_names=[], match_score=[],
+            ))
+            continue
+
+        search_synonyms = expand_lookup_synonyms(original_synonyms, database)
+        record_by_id: Dict[str, Dict[str, Any]] = {}
+        order = 0
+        for synonym in search_synonyms:
+            query_key = remove_symbols(synonym.lower())
+            if not query_key:
+                continue
+            for tid in tax_ids:
+                for database_id in normalized_by_taxon.get(tid, {}).get(query_key, []):
+                    if database_id not in record_by_id:
+                        label = label_dict.get(database_id, database_id)
+                        record_by_id[database_id] = {
+                            "id": database_id,
+                            "name": str(label),
+                            "tax_id": tid,
+                            "hits": 0,
+                            "query_keys": set(),
+                            "order": order,
+                        }
+                        order += 1
+                    record = record_by_id[database_id]
+                    if query_key not in record["query_keys"]:
+                        record["hits"] += 1
+                        record["query_keys"].add(query_key)
+
+        denominator = max(len(search_synonyms), 1)
+        records = list(record_by_id.values())
+        for record in records:
+            record["score"] = record["hits"] / denominator
+        candidates, names, scores, taxa, identities, identity_ranks = (
+            _select_taxonomic_identities(records, top_k)
+        )
+        recommendations.append(Recommendation(
+            id=species_id,
+            synonyms=original_synonyms,
+            candidates=candidates,
+            candidate_names=names,
+            match_score=scores,
+            candidate_taxa=taxa,
+            candidate_identities=identities,
+            candidate_identity_ranks=identity_ranks,
+            candidate_ranks=list(range(1, len(candidates) + 1)),
+        ))
+    return recommendations
+
+
+def _get_ncbigene_recommendations_direct(
+    species_ids: List[str], synonyms_dict, tax_id: Any = None, top_k: int = 3,
+) -> List[Recommendation]:
+    """Find direct NCBI Gene matches, ranking identity before taxon accessions."""
+    return _get_taxonomic_recommendations_direct(
+        species_ids, synonyms_dict, database="ncbigene", tax_id=tax_id, top_k=top_k,
+    )
+
+
+def _get_uniprot_recommendations_direct(
+    species_ids: List[str], synonyms_dict, tax_id: Any = None, top_k: int = 3,
+) -> List[Recommendation]:
+    """Find direct UniProt matches, ranking identity before taxon accessions."""
+    return _get_taxonomic_recommendations_direct(
+        species_ids, synonyms_dict, database="uniprot", tax_id=tax_id, top_k=top_k,
+    )
 
 
 def _get_kegg_recommendations_rulebased(
@@ -1797,18 +2077,16 @@ def get_species_recommendations_rag(
                 recommendations.append(recommendation)
                 continue
             
-            # # Clean synonyms for non-chemical databases
-            # search_synonyms = clean_synonyms(synonyms)
-            
-            agg_candidates = {}
-            agg_names = {}
+            search_synonyms = expand_lookup_synonyms(synonyms, database)
+            records_by_id: Dict[str, Dict[str, Any]] = {}
+            order = 0
             for tid in tax_id:
                 try:
                     collection = get_collection_for_taxid(tid)
                 except Exception as e:
                     logger.warning(f"Could not access {database.upper()} RAG collection for tax_id {tid}: {e}")
                     continue
-                for synonym in synonyms:
+                for synonym in search_synonyms:
                     try:
                         results = collection.query(
                             query_texts=[synonym],
@@ -1816,26 +2094,41 @@ def get_species_recommendations_rag(
                             include=["metadatas", "distances"]
                         )
                         for metadata, distance in zip(results['metadatas'][0], results['distances'][0]):
-                            db_id = metadata.get('ncbigene_id', 'Unknown')
+                            id_field = "ncbigene_id" if database == "ncbigene" else "uniprot_id"
+                            db_id = str(metadata.get(id_field, 'Unknown'))
                             db_name = metadata.get('name', 'Unknown')
                             similarity_score = round(1 - distance, 3)
-                            if db_id not in agg_candidates or similarity_score > agg_candidates[db_id]:
-                                agg_candidates[db_id] = similarity_score
-                                agg_names[db_id] = db_name
+                            query_key = remove_symbols(synonym.lower())
+                            if db_id not in records_by_id:
+                                records_by_id[db_id] = {
+                                    "id": db_id,
+                                    "name": db_name,
+                                    "tax_id": str(tid),
+                                    "score": similarity_score,
+                                    "query_keys": {query_key},
+                                    "order": order,
+                                }
+                                order += 1
+                            else:
+                                record = records_by_id[db_id]
+                                record["score"] = max(record["score"], similarity_score)
+                                record["query_keys"].add(query_key)
                     except Exception as e:
                         logger.warning(f"Error querying synonym '{synonym}' for species '{spec_id}' in tax_id {tid}: {e}")
                         continue
-            # Sort and select top_k
-            sorted_candidates = sorted(agg_candidates.items(), key=lambda x: x[1], reverse=True)[:top_k]
-            all_candidates = [db_id for db_id, _ in sorted_candidates]
-            all_candidate_names = [agg_names[db_id] for db_id, _ in sorted_candidates]
-            match_score_list = [agg_candidates[db_id] for db_id, _ in sorted_candidates]
+            all_candidates, all_candidate_names, match_score_list, taxa, identities, identity_ranks = (
+                _select_taxonomic_identities(list(records_by_id.values()), top_k)
+            )
             recommendation = Recommendation(
                 id=spec_id,
                 synonyms=synonyms,
                 candidates=all_candidates,
                 candidate_names=all_candidate_names,
-                match_score=match_score_list
+                match_score=match_score_list,
+                candidate_taxa=taxa,
+                candidate_identities=identities,
+                candidate_identity_ranks=identity_ranks,
+                candidate_ranks=list(range(1, len(all_candidates) + 1)),
             )
             recommendations.append(recommendation)
         return recommendations
@@ -1894,18 +2187,13 @@ def get_species_recommendations_rag(
             recommendations.append(recommendation)
             continue
         
-        # # Clean synonyms for non-chemical databases
-        # if database != "chebi":
-        #     search_synonyms = clean_synonyms(synonyms)
-        # else:
-        #     search_synonyms = synonyms
-        
+        search_synonyms = expand_lookup_synonyms(synonyms, database)
         all_candidates = []
         all_candidate_names = []
         candidate_scores = {}
         candidate_names = {}  # Keep track of candidate names separately
         
-        for synonym in synonyms:
+        for synonym in search_synonyms:
             try:
                 if database=='kegg':
                     #  model_info -> reactions
@@ -1956,12 +2244,19 @@ def get_species_recommendations_rag(
                 logger.warning(f"Error querying synonym '{synonym}' for species '{spec_id}': {e}")
                 continue
         match_score_list = [candidate_scores.get(candidate, 0.0) for candidate in all_candidates]
+        is_taxonomic = database in {"ncbigene", "uniprot"}
         recommendation = Recommendation(
             id=spec_id,
             synonyms=synonyms,
             candidates=all_candidates,
             candidate_names=all_candidate_names,
-            match_score=match_score_list
+            match_score=match_score_list,
+            candidate_taxa=[str(tax_id)] * len(all_candidates) if is_taxonomic else [],
+            candidate_identities=list(all_candidate_names) if is_taxonomic else [],
+            candidate_identity_ranks=(
+                list(range(1, len(all_candidates) + 1)) if is_taxonomic else []
+            ),
+            candidate_ranks=list(range(1, len(all_candidates) + 1)),
         )
         recommendations.append(recommendation)
     return recommendations
@@ -2291,4 +2586,4 @@ def get_organism_files_info(data_dir=None):
             'complete': names2gene_file.exists() and gene2names_file.exists()
         }
     
-    return organism_info 
+    return organism_info

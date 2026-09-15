@@ -111,6 +111,17 @@ def test_rank_species_skips_llm_when_pool_fits_n_return():
     assert list(out["annotation"]) == ["CHEBI:4167", "CHEBI:17234", "CHEBI:42758"]
 
 
+def test_rank_species_uses_retrieval_top1_when_llm_response_is_empty():
+    df = pd.DataFrame([
+        {"id": "s1", "annotation": "CHEBI:1", "annotation_label": "first", "identity": "CHEBI:1"},
+        {"id": "s1", "annotation": "CHEBI:2", "annotation_label": "second", "identity": "CHEBI:2"},
+        {"id": "s1", "annotation": "CHEBI:3", "annotation_label": "third", "identity": "CHEBI:3"},
+    ])
+    with patch("core.annotation_workflow.query_llm", return_value=""):
+        out = rank_species_annotations_with_llm("dummy.xml", df, n_return=1)
+    assert list(out["annotation"]) == ["CHEBI:1"]
+
+
 def test_reason_comment_once_per_chunk():
     df = pd.DataFrame([
         {"id": "s2", "annotation": "CHEBI:1"},
@@ -158,6 +169,14 @@ def test_format_prompt_includes_message():
     assert "// User message:" in with_msg
     assert "Prefer KEGG names." in with_msg
     assert "Prefer KEGG names." not in without
+
+
+def test_fixed_gene_prompt_requires_typed_complex_components():
+    from core.model_info import format_prompt, get_all_species_ids
+    ids = get_all_species_ids(str(MODEL_190))[:1]
+    prompt = format_prompt(str(MODEL_190), ids, entity_type="gene")
+    assert "separate semicolon-delimited typed groups" in prompt
+    assert "(gene)" in prompt
 
 
 if __name__ == "__main__":

@@ -45,11 +45,19 @@ result = annotate_model(
     entity_type="auto",               # detects chemical / gene / protein / complex
     database=["chebi", "uniprot"],    # databases to search for species
     message="This is a model for human metabolism", # optional user message to the LLM
+    top_k=3,                         # identity retrieval pool per species/component
+    n_return=1,                      # final identities kept per species/component
     verbose=False,                    # True for a short progress summary
 )
 # result.species_recommendations_df    → species
 # result.reaction_recommendations_df   → KEGG reactions (when annotate is "reactions" or "both")
 ```
+
+For parsed complexes, the species table preserves `component_id`,
+`component_name`, and `component_type`. `top_k` and `n_return` apply to each
+component independently. For multi-organism gene/protein searches, accessions
+are grouped by biological identity before ranking and emitted with a `tax_id`;
+several accession rows can therefore share `identity_rank=1`.
 
 Run the bundled example (uses a test SBML model):
 

@@ -1019,6 +1019,34 @@ def format_prompt(
             "Reason: …"
         )
 
+    def _fixed_format_instructions(limit: int, include_reason: bool = True) -> str:
+        reason_text = (
+            f" and give short reasons for all {entity_type.value}s after 'Reason:' by the end"
+            if include_reason else ""
+        )
+        if entity_type in (EntityType.GENE, EntityType.PROTEIN):
+            component_type = entity_type.value
+            return (
+                f"\nReturn up to {limit} standardized names or common synonyms for each "
+                f"{component_type}, ranked by likelihood.\n"
+                "For every physical complex, list ALL distinct molecular components as "
+                "separate semicolon-delimited typed groups. Group aliases only within a "
+                "component; do not flatten different components into one comma list. "
+                f"Tag every complex component ({component_type}).\n"
+                f"Use the below format, do not include other text except the synonyms{reason_text}.\n\n"
+                'SpeciesA: "name1", "name2", …\n'
+                f'ComplexSpecies: "component1", "alias1" ({component_type}); '
+                f'"component2", "alias2" ({component_type})\n'
+                + ("Reason: …" if include_reason else "")
+            )
+        return (
+            f"\nReturn up to {limit} standardized names or common synonyms for each "
+            f"{entity_type.value}, ranked by likelihood.\n"
+            f"Use the below format, do not include other text except the synonyms{reason_text}.\n\n"
+            'SpeciesA: "name1", "name2", …\nSpeciesB: …'
+            + ("\nReason: …" if include_reason else "")
+        )
+
     def _finish(prompt: str) -> str:
         text = (message or "").strip()
         if text:
@@ -1093,9 +1121,7 @@ def format_prompt(
             prompt += "\n"
             prompt += f'// Notes:\n"{model_info["model_notes"]}"\n'
         
-        prompt += f"\nReturn up to {top_k} standardized names or common synonyms for each {entity_type_str}, ranked by likelihood. Provide components names for complexes, which may exceed the limit of {top_k}.\n"
-        prompt += f"Use the below format, do not include any other text except the synonyms, and give short reasons for all {entity_type_str}s after 'Reason:' by the end.\n\n"
-        prompt += 'SpeciesA: "name1", "name2", …\nSpeciesB: …\nReason: …'
+        prompt += _fixed_format_instructions(top_k)
         return _finish(prompt)
 
     elif model_type == ModelType.SBML_FBC:
@@ -1164,9 +1190,7 @@ def format_prompt(
                 prompt += "\n"
                 prompt += f'// Notes:\n"{model_info["model_notes"]}"\n'
             
-            prompt += f"\nReturn up to {top_k} standardized names or common synonyms for each {entity_type_str}, ranked by likelihood. Provide components names for complexes, which may exceed the limit of {top_k}.\n"
-            prompt += f"Use the below format, do not include any other text except the synonyms, and give short reasons for all {entity_type_str}s after 'Reason:' by the end.\n\n"
-            prompt += 'SpeciesA: "name1", "name2", …\nSpeciesB: …\nReason: …'
+            prompt += _fixed_format_instructions(top_k)
             return _finish(prompt)             
     
     else:  # SBML
@@ -1247,11 +1271,7 @@ def format_prompt(
                 prompt += f'// Notes:\n"{model_info["model_notes"]}"\n'
             
             if context:
-                prompt += f"\nReturn up to {top_k} standardized names or common synonyms for each {entity_type_str}, ranked by likelihood. Provide components names for complexes, which may exceed the limit of {top_k}.\n"
-                prompt += f"Use the below format, do not include any other text except the synonyms, and give short reasons for all {entity_type_str}s after 'Reason:' by the end.\n\n"
-                prompt += 'SpeciesA: "name1", "name2", …\nSpeciesB: …\nReason: …'
+                prompt += _fixed_format_instructions(top_k)
             else:
-                prompt += f"\nReturn up to {top_k} standardized names or common synonyms for each {entity_type_str}, ranked by likelihood. Provide components names for complexes, which may exceed the limit of {top_k}.\n"
-                prompt += f"Use the below format, do not include any other text except the synonyms.\n\n"
-                prompt += 'SpeciesA: "name1", "name2", …\nSpeciesB: …'
+                prompt += _fixed_format_instructions(top_k, include_reason=False)
             return _finish(prompt)

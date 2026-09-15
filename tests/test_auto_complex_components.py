@@ -3,6 +3,8 @@
 from unittest.mock import patch
 
 from core.annotation_workflow import _search_databases, rank_species_annotations_with_llm
+from core.database_search import expand_lookup_synonyms, get_species_recommendations_direct
+from core import database_search
 from core.data_types import Recommendation
 from core.llm_interface import parse_llm_response, parse_typed_components
 from utils.constants import DatabaseID, EntityType
@@ -43,6 +45,17 @@ def test_parse_legacy_complex_has_no_components():
     assert parse_typed_components('"glucose", "ATP", "Hexokinase-1"') == []
 
 
+def test_fixed_gene_mode_preserves_typed_complex_components():
+    text = 'C: "RELA", "p65" (gene); "NFKB1", "p50" (gene)\nReason: complex\n'
+    synonyms, types, _reason, components = parse_llm_response(text, EntityType.GENE)
+    assert types["C"] == "complex"
+    assert components["C"] == [
+        ("gene", ["RELA", "p65"]),
+        ("gene", ["NFKB1", "p50"]),
+    ]
+    assert synonyms["C"] == ["RELA", "p65", "NFKB1", "p50"]
+
+
 def _fake_search(species_list, synonyms_dict, database, method, top_k, tax_id=None, model_info=None, model_type=None):
     sid = species_list[0]
     names = list(synonyms_dict[sid])
@@ -76,6 +89,9 @@ def test_complex_routes_each_component_to_one_db():
     assert dbs == ["uniprot", "chebi", "uniprot"]
     assert name_lists == [["RAS"], ["GTP"], ["RAF1"]]
     assert recs[0].candidates == ["uniprot:RAS", "chebi:GTP", "uniprot:RAF1"]
+    assert recs[0].component_ids == ["component_1", "component_2", "component_3"]
+    assert recs[0].component_names == ["RAS", "GTP", "RAF1"]
+    assert recs[0].component_types == ["protein", "chemical", "protein"]
     assert cand_dbs[("X", "chebi:GTP")] == "chebi"
     assert cand_dbs[("X", "uniprot:RAS")] == "uniprot"
 
@@ -95,18 +111,86 @@ def test_untyped_complex_still_searches_all_dbs():
     assert dbs == ["chebi", "uniprot"]
 
 
-def test_rank_skips_complex_species():
+def test_rank_complex_species_per_component_and_keeps_taxon_accessions():
     df = pd.DataFrame([
         {"id": "c1", "type": "complex", "display_name": "Ras_Raf1",
-         "annotation": "CHEBI:1", "annotation_label": "rasagiline"},
+         "component_id": "component_1", "component_name": "RAS", "component_type": "gene",
+         "annotation": "NCBIGENE:1", "annotation_label": "HRAS", "identity": "HRAS",
+         "identity_rank": 1, "tax_id": "9606"},
         {"id": "c1", "type": "complex", "display_name": "Ras_Raf1",
-         "annotation": "UNIPROT:P1", "annotation_label": "RAF1"},
+         "component_id": "component_1", "component_name": "RAS", "component_type": "gene",
+         "annotation": "NCBIGENE:2", "annotation_label": "Hras", "identity": "HRAS",
+         "identity_rank": 1, "tax_id": "10090"},
         {"id": "c1", "type": "complex", "display_name": "Ras_Raf1",
-         "annotation": "UNIPROT:P2", "annotation_label": "HRAS"},
+         "component_id": "component_1", "component_name": "RAS", "component_type": "gene",
+         "annotation": "NCBIGENE:3", "annotation_label": "KRAS", "identity": "KRAS",
+         "identity_rank": 2, "tax_id": "9606"},
         {"id": "c1", "type": "complex", "display_name": "Ras_Raf1",
-         "annotation": "UNIPROT:P3", "annotation_label": "KRAS"},
+         "component_id": "component_2", "component_name": "RAF1", "component_type": "gene",
+         "annotation": "NCBIGENE:4", "annotation_label": "RAF1", "identity": "RAF1",
+         "identity_rank": 1, "tax_id": "9606"},
+        {"id": "c1", "type": "complex", "display_name": "Ras_Raf1",
+         "component_id": "component_2", "component_name": "RAF1", "component_type": "gene",
+         "annotation": "NCBIGENE:5", "annotation_label": "BRAF", "identity": "BRAF",
+         "identity_rank": 2, "tax_id": "9606"},
     ])
-    with patch("core.annotation_workflow.query_llm") as mock_llm:
-        out = rank_species_annotations_with_llm("dummy.xml", df, n_return=2)
-    mock_llm.assert_not_called()
-    assert list(out["annotation"]) == ["CHEBI:1", "UNIPROT:P1", "UNIPROT:P2", "UNIPROT:P3"]
+    response = "c1|component_1: NCBIGENE:1\nc1|component_2: NCBIGENE:4"
+    with patch("core.annotation_workflow.query_llm", return_value=response) as mock_llm:
+        out = rank_species_annotations_with_llm("dummy.xml", df, n_return=1)
+    mock_llm.assert_called_once()
+    assert list(out["annotation"]) == ["NCBIGENE:1", "NCBIGENE:2", "NCBIGENE:4"]
+    assert list(out["component_id"]) == ["component_1", "component_1", "component_2"]
+    assert list(out["identity_rank"]) == [1, 1, 1]
+
+
+def test_expand_composite_gene_synonyms():
+    expanded = expand_lookup_synonyms(
+        ["MAP2K1 (MEK1), MAP2K2 (MEK2)", "p21 mRNA (CDKN1A transcript)"],
+        "ncbigene",
+    )
+    for expected in ("MAP2K1", "MEK1", "MAP2K2", "MEK2", "p21", "CDKN1A"):
+        assert expected in expanded
+
+
+def test_direct_top_k_limits_identity_before_taxon(monkeypatch):
+    names = {
+        "9606": {"raf1": ["h_raf", "h_wrong"]},
+        "10090": {"raf1": ["m_raf", "m_wrong"]},
+        "10116": {"raf1": ["r_raf"]},
+    }
+    labels = {
+        "h_raf": "RAF1", "m_raf": "Raf1", "r_raf": "Raf1",
+        "h_wrong": "RNASE3", "m_wrong": "Ear1",
+    }
+    monkeypatch.setattr(database_search, "load_ncbigene_names_dict", lambda tax_id=None: names[str(tax_id)])
+    monkeypatch.setattr(database_search, "load_ncbigene_label_dict", lambda: labels)
+    database_search._NORMALIZED_TAXON_NAMES_CACHE.clear()
+    rec = get_species_recommendations_direct(
+        ["x"], {"x": ["RAF1"]}, database="ncbigene",
+        tax_id=["9606", "10090", "10116"], top_k=1,
+    )[0]
+    assert rec.candidates == ["h_raf", "m_raf", "r_raf"]
+    assert rec.candidate_taxa == ["9606", "10090", "10116"]
+    assert rec.candidate_identity_ranks == [1, 1, 1]
+
+
+def test_similar_explicit_gene_symbols_are_not_merged(monkeypatch):
+    names = {
+        "9606": {"pdpk1": ["h_pdpk1"], "pdk1": ["h_pdk1"]},
+        "10090": {"pdpk1": ["m_pdpk1"], "pdk1": ["m_pdk1"]},
+    }
+    labels = {
+        "h_pdpk1": "PDPK1", "m_pdpk1": "Pdpk1",
+        "h_pdk1": "PDK1", "m_pdk1": "Pdk1",
+    }
+    monkeypatch.setattr(database_search, "load_ncbigene_names_dict", lambda tax_id=None: names[str(tax_id)])
+    monkeypatch.setattr(database_search, "load_ncbigene_label_dict", lambda: labels)
+    database_search._NORMALIZED_TAXON_NAMES_CACHE.clear()
+    rec = get_species_recommendations_direct(
+        ["x"], {"x": ["PDPK1", "PDK1"]}, database="ncbigene",
+        tax_id=["9606", "10090"], top_k=2,
+    )[0]
+    groups = {}
+    for candidate, identity_rank in zip(rec.candidates, rec.candidate_identity_ranks):
+        groups.setdefault(identity_rank, []).append(candidate)
+    assert groups == {1: ["h_pdpk1", "m_pdpk1"], 2: ["h_pdk1", "m_pdk1"]}

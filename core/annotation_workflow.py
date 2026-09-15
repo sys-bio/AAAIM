@@ -155,16 +155,58 @@ def _extend_search_hits(
     all_candidate_names: List[str],
     all_scores: List[float],
     candidate_databases: Dict[Tuple[str, str], str],
-) -> None:
+    *,
+    all_taxa: List[Optional[str]],
+    all_identities: List[str],
+    all_identity_ranks: List[int],
+    all_component_ids: List[str],
+    all_component_names: List[str],
+    all_component_types: List[str],
+    all_candidate_ranks: List[int],
+    component_id: str = "",
+    component_name: str = "",
+    component_type: str = "",
+) -> int:
     """Append one-database hits onto a complex recommendation."""
+    appended = 0
     for rec in recs:
         if rec.id != species_id:
             continue
-        all_candidates.extend(rec.candidates)
-        all_candidate_names.extend(rec.candidate_names)
-        all_scores.extend(rec.match_score)
-        for candidate in rec.candidates:
+        for index, candidate in enumerate(rec.candidates):
+            candidate_name = (
+                rec.candidate_names[index]
+                if index < len(rec.candidate_names)
+                else str(candidate)
+            )
+            all_candidates.append(candidate)
+            all_candidate_names.append(candidate_name)
+            all_scores.append(rec.match_score[index])
+            all_taxa.append(
+                rec.candidate_taxa[index]
+                if index < len(rec.candidate_taxa)
+                else None
+            )
+            all_identities.append(
+                rec.candidate_identities[index]
+                if index < len(rec.candidate_identities)
+                else candidate_name
+            )
+            all_identity_ranks.append(
+                rec.candidate_identity_ranks[index]
+                if index < len(rec.candidate_identity_ranks)
+                else index + 1
+            )
+            all_component_ids.append(component_id)
+            all_component_names.append(component_name)
+            all_component_types.append(component_type)
+            all_candidate_ranks.append(
+                rec.candidate_ranks[index]
+                if index < len(rec.candidate_ranks)
+                else index + 1
+            )
             candidate_databases[(species_id, candidate)] = database
+            appended += 1
+    return appended
 
 
 def _search_complex_species(
@@ -183,24 +225,55 @@ def _search_complex_species(
     all_candidates: List[str] = []
     all_candidate_names: List[str] = []
     all_scores: List[float] = []
+    all_taxa: List[Optional[str]] = []
+    all_identities: List[str] = []
+    all_identity_ranks: List[int] = []
+    all_component_ids: List[str] = []
+    all_component_names: List[str] = []
+    all_component_types: List[str] = []
+    all_candidate_ranks: List[int] = []
+    unmatched_components: List[Dict[str, Any]] = []
 
     if components:
-        for comp_type, names in components:
+        for component_index, (comp_type, names) in enumerate(components, start=1):
+            component_id = f"component_{component_index}"
+            component_name = ", ".join(names)
             db = get_database_for_entity_type(comp_type, allowed_names)
             if db is None:
                 logger.warning(
                     f"No database for complex component type '{comp_type}' "
                     f"in {allowed_names} ({species_id})"
                 )
+                unmatched_components.append({
+                    "component_id": component_id,
+                    "component_name": component_name,
+                    "component_type": comp_type,
+                })
                 continue
             recs = _search_one_database(
                 [species_id], {species_id: names}, db, method, top_k,
                 tax_id, model_info, model_type,
             )
-            _extend_search_hits(
+            appended = _extend_search_hits(
                 species_id, recs, db,
                 all_candidates, all_candidate_names, all_scores, candidate_databases,
+                all_taxa=all_taxa,
+                all_identities=all_identities,
+                all_identity_ranks=all_identity_ranks,
+                all_component_ids=all_component_ids,
+                all_component_names=all_component_names,
+                all_component_types=all_component_types,
+                all_candidate_ranks=all_candidate_ranks,
+                component_id=component_id,
+                component_name=component_name,
+                component_type=comp_type,
             )
+            if not appended:
+                unmatched_components.append({
+                    "component_id": component_id,
+                    "component_name": component_name,
+                    "component_type": comp_type,
+                })
     else:
         for db in allowed_names:
             recs = _search_one_database(
@@ -210,6 +283,13 @@ def _search_complex_species(
             _extend_search_hits(
                 species_id, recs, db,
                 all_candidates, all_candidate_names, all_scores, candidate_databases,
+                all_taxa=all_taxa,
+                all_identities=all_identities,
+                all_identity_ranks=all_identity_ranks,
+                all_component_ids=all_component_ids,
+                all_component_names=all_component_names,
+                all_component_types=all_component_types,
+                all_candidate_ranks=all_candidate_ranks,
             )
 
     return Recommendation(
@@ -218,6 +298,14 @@ def _search_complex_species(
         candidates=all_candidates,
         candidate_names=all_candidate_names,
         match_score=all_scores,
+        candidate_taxa=all_taxa,
+        candidate_identities=all_identities,
+        candidate_identity_ranks=all_identity_ranks,
+        component_ids=all_component_ids,
+        component_names=all_component_names,
+        component_types=all_component_types,
+        candidate_ranks=all_candidate_ranks,
+        unmatched_components=unmatched_components,
     ), candidate_databases
 
 
@@ -310,11 +398,29 @@ def _search_databases(
 
     database_name = databases[0].value
     logger.info(f">>>Step 4: Searching {database_name} database...<<<")
-    recommendations = _search_one_database(
-        entities, synonyms_dict, database_name, method, top_k, tax_id, model_info
-    )
-    for rec in recommendations:
-        species_database[rec.id] = database_name
+    structured_ids = [species_id for species_id in entities if component_dict.get(species_id)]
+    ordinary_ids = [species_id for species_id in entities if species_id not in structured_ids]
+    recommendations: List[Recommendation] = []
+    if ordinary_ids:
+        ordinary_recommendations = _search_one_database(
+            ordinary_ids, synonyms_dict, database_name, method, top_k, tax_id, model_info
+        )
+        for rec in ordinary_recommendations:
+            species_database[rec.id] = database_name
+        recommendations.extend(ordinary_recommendations)
+    for species_id in structured_ids:
+        rec, candidate_dbs = _search_complex_species(
+            species_id,
+            synonyms_dict,
+            allowed_names,
+            method,
+            top_k,
+            tax_id,
+            model_info,
+            component_dict.get(species_id),
+        )
+        candidate_databases.update(candidate_dbs)
+        recommendations.append(rec)
     return recommendations, species_database, candidate_databases
 
 
@@ -508,21 +614,115 @@ def _print_run_summary(
 
 
 def _build_species_annotation_choices(sub_df: pd.DataFrame) -> str:
+    """Build one ranking choice per biological identity.
+
+    Several taxon-specific accessions may share an identity.  Only a
+    representative accession is offered to the LLM; selecting it retains every
+    accession in that identity group.
+    """
     lines: List[str] = []
     seen: set[str] = set()
     for _, row in sub_df.iterrows():
         ann = str(row.get("annotation", "")).strip()
         if not ann or ann.lower() == "nan":
             continue
-        key = ann.upper()
+        identity = str(row.get("identity", "")).strip()
+        key = (identity or ann).upper()
         if key in seen:
             continue
         seen.add(key)
         label = row.get("annotation_label", "")
         if label is None or (isinstance(label, float) and label != label):
             label = ""
-        lines.append(f"{ann}: {label}".rstrip())
+        same_identity = sub_df[
+            sub_df.apply(
+                lambda item: (
+                    str(item.get("identity", "")).strip()
+                    or str(item.get("annotation", "")).strip()
+                ).upper() == key,
+                axis=1,
+            )
+        ]
+        taxa = [
+            str(value) for value in same_identity.get("tax_id", pd.Series(dtype=str))
+            if str(value).strip() not in {"", "nan", "None"}
+        ]
+        suffix = f" [taxa: {', '.join(dict.fromkeys(taxa))}]" if taxa else ""
+        lines.append(f"{ann}: {label}{suffix}".rstrip())
     return "\n".join(lines)
+
+
+def _row_identity_key(row: pd.Series) -> str:
+    identity = str(row.get("identity", "")).strip()
+    annotation = str(row.get("annotation", "")).strip()
+    return (identity or annotation).upper()
+
+
+def _ranking_units(work_df: pd.DataFrame) -> List[Tuple[str, pd.DataFrame]]:
+    """Split a table into species units, or per-component units for complexes."""
+    units: List[Tuple[str, pd.DataFrame]] = []
+    for species_id in work_df["id"].unique():
+        species_rows = work_df[work_df["id"] == species_id]
+        is_complex = (
+            "type" in species_rows.columns
+            and str(species_rows["type"].iloc[0]).lower() == "complex"
+        )
+        component_values = []
+        if is_complex and "component_id" in species_rows.columns:
+            component_values = [
+                str(value) for value in species_rows["component_id"].drop_duplicates()
+                if str(value).strip() not in {"", "nan"}
+            ]
+        if not component_values:
+            units.append((str(species_id), species_rows))
+            continue
+        for component_id in component_values:
+            component_rows = species_rows[
+                species_rows["component_id"].astype(str) == component_id
+            ]
+            units.append((f"{species_id}|{component_id}", component_rows))
+    return units
+
+
+def _refresh_update_actions(df: pd.DataFrame) -> pd.DataFrame:
+    """Mark the selected top identity in every species/component as addable."""
+    if df.empty or "update_annotation" not in df.columns:
+        return df
+    out = df.copy()
+    predicted = out.get("status", pd.Series(index=out.index, dtype=str)) == "predicted only"
+    out.loc[predicted, "update_annotation"] = "ignore"
+    for _unit_id, rows in _ranking_units(out[out["id"] != "Reason:"]):
+        if rows.empty or "annotation" not in rows.columns:
+            continue
+        eligible = rows["annotation"].astype(str).str.strip() != ""
+        if "identity_rank" in rows.columns:
+            eligible &= pd.to_numeric(rows["identity_rank"], errors="coerce") == 1
+        if "match_score" in rows.columns:
+            eligible &= pd.to_numeric(rows["match_score"], errors="coerce") > 0.5
+        indexes = rows.index[eligible & (rows["status"] == "predicted only")]
+        out.loc[indexes, "update_annotation"] = "add"
+    return out
+
+
+def _fallback_identity_rows(sub: pd.DataFrame, n_return: int) -> pd.DataFrame:
+    """Use retrieval order when the ranking response is absent or invalid."""
+    selected: List[pd.DataFrame] = []
+    seen: set[str] = set()
+    for _, row in sub.iterrows():
+        identity_key = _row_identity_key(row)
+        if not identity_key or identity_key in seen:
+            continue
+        seen.add(identity_key)
+        rows = sub[sub.apply(_row_identity_key, axis=1) == identity_key].copy()
+        if "identity_rank" in rows.columns:
+            rows["identity_rank"] = len(selected) + 1
+        selected.append(rows)
+        if len(selected) >= n_return:
+            break
+    if selected:
+        return pd.concat(selected, ignore_index=False)
+    empty = sub[sub.get("annotation", pd.Series(index=sub.index, dtype=str)).astype(str).str.strip() == ""]
+    return empty if not empty.empty else sub.iloc[0:0]
 
 
 def _ranking_notes_block(notes: Optional[str]) -> str:
@@ -568,6 +768,13 @@ def _species_ranking_context(species_id: str, sub_df: pd.DataFrame) -> str:
     context = f"{species_id}: {display}" if display else species_id
     if curated and curated not in (display, species_id, "nan"):
         context += f"\nSynonyms: {curated}"
+    if "component_name" in sub_df.columns and not sub_df.empty:
+        component_name = str(sub_df["component_name"].iloc[0] or "")
+        component_type = str(sub_df.get("component_type", pd.Series([""])).iloc[0] or "")
+        if component_name and component_name != "nan":
+            context += f"\nComponent: {component_name}"
+            if component_type and component_type != "nan":
+                context += f" ({component_type})"
     return context
 
 
@@ -580,10 +787,12 @@ def rank_species_annotations_with_llm(
     max_completion_tokens: Optional[int] = None,
     usage_callback: Optional[Callable[[Dict[str, Any]], None]] = None,
 ) -> pd.DataFrame:
-    """Re-rank species candidates with an LLM and keep at most *n_return* IDs per species.
+    """Re-rank biological identities and keep at most *n_return* per unit.
 
-    Species with ``n_return`` or fewer candidates are left as-is. Remaining
-    species are ranked in a single LLM call.
+    A unit is a whole ordinary species or one parsed component of a complex.
+    Taxon-specific accessions for one identity stay together. Units with
+    ``n_return`` or fewer identities are left as-is; all remaining units are
+    ranked in one LLM call.
     """
     if recommendations_df.empty or "annotation" not in recommendations_df.columns:
         return recommendations_df
@@ -594,23 +803,31 @@ def rank_species_annotations_with_llm(
     comments = _extract_reason_comments(work_df)
     notes_block = _ranking_notes_block(model_notes)
 
-    ranked_rows: List[pd.DataFrame] = []
-    to_rank: List[Tuple[str, pd.DataFrame, str]] = []
-    for species_id in work_df["id"].unique():
-        sub = work_df[work_df["id"] == species_id]
-        if "type" in sub.columns and str(sub["type"].iloc[0]).lower() == "complex":
-            ranked_rows.append(sub)
-            continue
+    ranked_by_unit: Dict[str, pd.DataFrame] = {}
+    unit_order: List[str] = []
+    to_rank: List[Tuple[str, pd.DataFrame, str, Dict[str, str]]] = []
+    for unit_id, sub in _ranking_units(work_df):
+        unit_order.append(unit_id)
         choices = _build_species_annotation_choices(sub)
-        if not choices.strip() or choices.count("\n") + 1 <= n_return:
-            ranked_rows.append(sub)
+        choice_lines = [line for line in choices.splitlines() if line.strip()]
+        if not choice_lines or len(choice_lines) <= n_return:
+            ranked_by_unit[unit_id] = sub
             continue
-        to_rank.append((str(species_id), sub, choices))
+        representative_to_identity: Dict[str, str] = {}
+        for line in choice_lines:
+            representative = line.split(":", 2)
+            # Identifiers such as CHEBI:123 contain a colon. Reconstruct the
+            # prefixed ID from the first two fields.
+            annotation = ":".join(representative[:2]).strip().upper()
+            rows = sub[sub["annotation"].astype(str).str.upper() == annotation]
+            if not rows.empty:
+                representative_to_identity[annotation] = _row_identity_key(rows.iloc[0])
+        to_rank.append((unit_id, sub, choices, representative_to_identity))
 
     if to_rank:
         entities = "\n\n".join(
             f"{_species_ranking_context(sid, sub)}\n{choices}"
-            for sid, sub, choices in to_rank
+            for sid, sub, choices, _identity_map in to_rank
         )
         prompt = SPECIES_ANNOTATION_RANKING_PROMPT.format(
             n_return=n_return,
@@ -626,21 +843,34 @@ def rank_species_annotations_with_llm(
                 usage_callback=usage_callback,
             )
         )
-        for sid, sub, _choices in to_rank:
+        for sid, sub, _choices, identity_map in to_rank:
             selected = parsed.get(sid)
             if selected is None:
-                ranked_rows.append(sub)
+                ranked_by_unit[sid] = _fallback_identity_rows(sub, n_return)
                 continue
             if not selected:
                 empty = sub[sub["annotation"].astype(str).str.strip().isin(["", "nan"])]
-                ranked_rows.append(empty if not empty.empty else sub.iloc[0:0])
+                ranked_by_unit[sid] = empty if not empty.empty else sub.iloc[0:0]
                 continue
-            ann_upper = sub["annotation"].astype(str).str.strip().str.upper()
-            for ann_id in selected[:n_return]:
-                rows = sub[ann_upper == ann_id.upper()]
+            selected_rows: List[pd.DataFrame] = []
+            for final_rank, ann_id in enumerate(selected[:n_return], start=1):
+                identity_key = identity_map.get(ann_id.upper())
+                if identity_key is None:
+                    ann_upper = sub["annotation"].astype(str).str.strip().str.upper()
+                    rows = sub[ann_upper == ann_id.upper()]
+                else:
+                    rows = sub[sub.apply(_row_identity_key, axis=1) == identity_key]
                 if not rows.empty:
-                    ranked_rows.append(rows.iloc[[0]])
+                    rows = rows.copy()
+                    if "identity_rank" in rows.columns:
+                        rows["identity_rank"] = final_rank
+                    selected_rows.append(rows)
+            ranked_by_unit[sid] = (
+                pd.concat(selected_rows, ignore_index=False)
+                if selected_rows else _fallback_identity_rows(sub, n_return)
+            )
 
+    ranked_rows = [ranked_by_unit[unit_id] for unit_id in unit_order if unit_id in ranked_by_unit]
     ranked_df = pd.concat(ranked_rows, ignore_index=True) if ranked_rows else work_df.iloc[0:0].copy()
     if comments:
         ranked_df = _apply_reason_comments(ranked_df, comments)
@@ -648,7 +878,7 @@ def rank_species_annotations_with_llm(
         ranked_df["comment"] = ""
     if not reason_df.empty:
         ranked_df = pd.concat([reason_df, ranked_df], ignore_index=True)
-    return ranked_df
+    return _refresh_update_actions(ranked_df)
 
 
 def _load_species_recommendations(model_file: str, species_recommendations_df) -> pd.DataFrame:
@@ -698,11 +928,14 @@ def annotate_single_model(
         llm_model: LLM model to use ("gpt-4o-mini" or an OpenRouter "meta-llama/..." model)
         method: Method to use for database search ("direct", "rag"); reactions use
             rule-based KEGG matching plus LLM ranking
-        top_k: Number of database candidates to retrieve per entity (direct/RAG).
-            Synonym generation is fixed at 3.
-        n_return: Number of IDs the final LLM ranking keeps per entity
-            (species and reactions). Default 3. Ranking is skipped when a
-            species or reaction has ``n_return`` or fewer candidates.
+        top_k: Number of biological identities to retrieve per ordinary species
+            or parsed complex component (direct/RAG). Taxon accessions belonging
+            to one identity do not consume extra slots. Synonym generation is
+            fixed at 3.
+        n_return: Number of identities the final LLM ranking keeps per ordinary
+            species or parsed complex component. Reactions continue to interpret
+            this as IDs per reaction. Ranking is skipped when a unit has
+            ``n_return`` or fewer identities.
         max_entities: Maximum number of entities to annotate (None for all)
         entity_type: Type of entities to annotate ("chemical", "gene", "protein",
             "auto", "reaction")
@@ -1314,34 +1547,52 @@ def _generate_recommendation_table(model_file: str,
 
     seen_pairs = set()
 
+    def candidate_value(values: Sequence[Any], index: int, default: Any) -> Any:
+        return values[index] if index < len(values) else default
+
+    def empty_row_for(
+        rec: Recommendation,
+        curated_name: str,
+        rec_type: str,
+        component: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        component = component or {}
+        if rec.id in qualifier_annotations and qualifier_annotations[rec.id]:
+            all_qualifiers = list(qualifier_annotations[rec.id].values())
+            specific_qualifier = ', '.join(all_qualifiers) if all_qualifiers else 'is'
+        else:
+            specific_qualifier = 'is'
+        rec_db = row_database(rec.id)
+        return {
+            'file': filename,
+            'type': rec_type,
+            'id': rec.id,
+            'display_name': display_names.get(rec.id, rec.id),
+            'curated_name': curated_name,
+            'component_id': component.get('component_id', ''),
+            'component_name': component.get('component_name', ''),
+            'component_type': component.get('component_type', ''),
+            'annotation': '',
+            'annotation_label': label_for(rec.id, rec_db),
+            'identity': '',
+            'identity_rank': '',
+            'retrieval_identity_rank': '',
+            'candidate_rank': '',
+            'tax_id': '',
+            'match_score': 0.0,
+            'status': '',
+            'update_annotation': 'ignore',
+            'qualifier': specific_qualifier,
+        }
+
     for rec in recommendations:
         curated_name = curated_for(rec.id)
         rec_type = row_type(rec.id)
 
         if not rec.candidates:
-            if rec.id in qualifier_annotations and qualifier_annotations[rec.id]:
-                all_qualifiers = list(qualifier_annotations[rec.id].values())
-                specific_qualifier = ', '.join(all_qualifiers) if all_qualifiers else 'is'
-            else:
-                specific_qualifier = 'is'
-
-            rec_db = row_database(rec.id)
-            label = label_for(rec.id, rec_db)
-
-            row = {
-                'file': filename,
-                'type': rec_type,
-                'id': rec.id,
-                'display_name': display_names.get(rec.id, rec.id),
-                'curated_name': curated_name,
-                'annotation': '',
-                'annotation_label': label,
-                'match_score': 0.0,
-                'status': '',
-                'update_annotation': 'ignore',
-                'qualifier': specific_qualifier
-            }
-            rows.append(row)
+            missing = rec.unmatched_components or [None]
+            for component in missing:
+                rows.append(empty_row_for(rec, curated_name, rec_type, component))
             continue
 
         for i, candidate in enumerate(rec.candidates):
@@ -1355,7 +1606,10 @@ def _generate_recommendation_table(model_file: str,
                 update_action = 'keep'
             else:
                 status = 'predicted only'
-                if i == 0 and match_score > 0.5:
+                retrieval_identity_rank = candidate_value(
+                    rec.candidate_identity_ranks, i, i + 1,
+                )
+                if retrieval_identity_rank == 1 and match_score > 0.5:
                     update_action = 'add'
                 else:
                     update_action = 'ignore'
@@ -1371,8 +1625,22 @@ def _generate_recommendation_table(model_file: str,
                 'id': rec.id,
                 'display_name': display_names.get(rec.id, rec.id),
                 'curated_name': curated_name,
+                'component_id': candidate_value(rec.component_ids, i, ''),
+                'component_name': candidate_value(rec.component_names, i, ''),
+                'component_type': candidate_value(rec.component_types, i, ''),
                 'annotation': candidate_display,
                 'annotation_label': rec.candidate_names[i] if i < len(rec.candidate_names) else candidate,
+                'identity': candidate_value(
+                    rec.candidate_identities, i, candidate_display,
+                ),
+                'identity_rank': candidate_value(
+                    rec.candidate_identity_ranks, i, i + 1,
+                ),
+                'retrieval_identity_rank': candidate_value(
+                    rec.candidate_identity_ranks, i, i + 1,
+                ),
+                'candidate_rank': candidate_value(rec.candidate_ranks, i, i + 1),
+                'tax_id': candidate_value(rec.candidate_taxa, i, ''),
                 'match_score': match_score,
                 'status': status,
                 'update_annotation': update_action,
@@ -1381,6 +1649,9 @@ def _generate_recommendation_table(model_file: str,
 
             rows.append(row)
             seen_pairs.add((rec.id, candidate))
+
+        for component in rec.unmatched_components:
+            rows.append(empty_row_for(rec, curated_name, rec_type, component))
 
     # Add rows for existing annotations not predicted
     if existing_annotations:
@@ -1402,8 +1673,16 @@ def _generate_recommendation_table(model_file: str,
                         'id': species_id,
                         'display_name': display_names.get(species_id, species_id),
                         'curated_name': curated_name,
+                        'component_id': '',
+                        'component_name': '',
+                        'component_type': '',
                         'annotation': candidate_display,
                         'annotation_label': label_for(ann, rec_db),
+                        'identity': candidate_display,
+                        'identity_rank': '',
+                        'retrieval_identity_rank': '',
+                        'candidate_rank': '',
+                        'tax_id': '',
                         'match_score': None,
                         'status': 'original only',
                         'update_annotation': 'keep',
@@ -1416,8 +1695,19 @@ def _generate_recommendation_table(model_file: str,
     if not df.empty and 'id' in df.columns:
         status_order = {'original and predicted': 0, 'original only': 1, 'predicted only': 2, '': 3}
         df['_status_order'] = df['status'].map(status_order).fillna(3)
-        df = df.sort_values(by=['id', '_status_order']).reset_index(drop=True)
-        df = df.drop(columns=['_status_order'])
+        sort_columns = ['id', '_status_order']
+        if 'component_id' in df.columns:
+            sort_columns.append('component_id')
+        for column in ('identity_rank', 'candidate_rank'):
+            if column in df.columns:
+                order_column = f'_{column}_order'
+                df[order_column] = pd.to_numeric(df[column], errors='coerce').fillna(np.inf)
+                sort_columns.append(order_column)
+        df = df.sort_values(by=sort_columns, kind='stable').reset_index(drop=True)
+        df = df.drop(columns=[
+            column for column in ('_status_order', '_identity_rank_order', '_candidate_rank_order')
+            if column in df.columns
+        ])
 
     return _apply_reason_comments(df, reason)
 

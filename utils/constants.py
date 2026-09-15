@@ -282,7 +282,7 @@ D: "UNK"
 Reason: the reaction is likely to be the TCA cycle, where A is the substrate and B is an intermediate. D is unknown because no display names are given for its reactants."""
 
 SYSTEM_PROMPT_GENE = """You are a biomedical knowledge assistant. Your task is to normalize species names from biochemical models into standardized gene names or common gene symbols for ontology lookup on NCBI Gene. 
-All given species are genes. For complexes, only consider the gene components. If lacking information about details, try your best to give the most likely general name.
+All molecular components are genes. For a physical complex, list every gene component as a separate typed group, grouping synonyms only within one component. Example: C: "RELA", "p65" (gene); "NFKB1", "p50" (gene). Do not use typed groups for an ordinary gene or for alternative names of one gene. If lacking information about details, try your best to give the most likely general name.
 
 Here is one example:
 Species: G1, G2, G3
@@ -303,7 +303,7 @@ G3: "CHUK", "IKK1", "BPS2"
 Reason: This appears to be a regulatory motif in the NF-\u03baB signaling pathway. G1 is the p65 subunit (RELA), G2 is the p50 subunit (NFKB1), and G3 is IKK, a kinase that phosphorylates p50."""
 
 SYSTEM_PROMPT_PROTEIN = """You are a biomedical knowledge assistant. Your task is to normalize species names from biochemical models into standardized protein names for ontology lookup on UniProt.
-All given species are proteins. For complexes, only consider the protein components and separate their names with commas. E.g., for "EGF-EGFR^2", return "EGF", "EGFR".
+All molecular components are proteins. For a physical complex, list every protein component as a separate typed group, grouping synonyms only within one component. E.g., for "EGF-EGFR^2", return "EGF" (protein); "EGFR" (protein). Do not use typed groups for an ordinary protein or for alternative names of one protein.
 Try your best to give the most likely standardized terminology without any extra information. E.g., a model may contain various states (e.g., phosphorylated, nuclear, or transcribed) of the same protein, you should only return the most likely standard name like "BMAL1" but not "BMAL1_phosphorylated".
 For protein names that represent a family or ambiguous label, return all reasonable subtype or isoform candidates. E.g., "AKT" \u2192 AKT1, AKT2, AKT3; "RAS" \u2192 KRAS, NRAS, HRAS
 
@@ -344,18 +344,19 @@ J3: "Isocitrate dehydrogenase"
 Reason: these reactions match the reactions found in the TCA cycle """
 
 
-SPECIES_ANNOTATION_RANKING_PROMPT = """Task: For each species, select up to {n_return} best matching annotation ID(s).
+SPECIES_ANNOTATION_RANKING_PROMPT = """Task: For each species or complex component, select up to {n_return} best matching biological identity ID(s).
 
 {model_notes}{entities}
 
 Instructions:
-- Choose only from the IDs listed under that species.
-- Return at most {n_return} ID(s) per species.
-- If none match for a species, return UNK for that species.
+- Choose only from the representative IDs listed under that species/component.
+- Return at most {n_return} identity ID(s) per species/component.
+- A representative ID may stand for accessions of the same identity in several taxa; select the identity once.
+- If none match for a species/component, return UNK for that unit.
 - Do NOT explain your reasoning. Do NOT include any other text.
 
-Output format (one species per line):
-species_id: ID[, ID...]
+Output format (one species/component unit per line):
+unit_id: ID[, ID...]
 
 Example:
 s_glc: CHEBI:17234, CHEBI:4167
