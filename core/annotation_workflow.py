@@ -236,7 +236,7 @@ def _search_complex_species(
 
     if components:
         for component_index, (comp_type, names) in enumerate(components, start=1):
-            component_id = f"component_{component_index}"
+            component_id = f"{species_id}_{component_index}"
             component_name = ", ".join(names)
             db = get_database_for_entity_type(comp_type, allowed_names)
             if db is None:

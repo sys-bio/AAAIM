@@ -89,7 +89,7 @@ def test_complex_routes_each_component_to_one_db():
     assert dbs == ["uniprot", "chebi", "uniprot"]
     assert name_lists == [["RAS"], ["GTP"], ["RAF1"]]
     assert recs[0].candidates == ["uniprot:RAS", "chebi:GTP", "uniprot:RAF1"]
-    assert recs[0].component_ids == ["component_1", "component_2", "component_3"]
+    assert recs[0].component_ids == ["X_1", "X_2", "X_3"]
     assert recs[0].component_names == ["RAS", "GTP", "RAF1"]
     assert recs[0].component_types == ["protein", "chemical", "protein"]
     assert cand_dbs[("X", "chebi:GTP")] == "chebi"
@@ -114,32 +114,32 @@ def test_untyped_complex_still_searches_all_dbs():
 def test_rank_complex_species_per_component_and_keeps_taxon_accessions():
     df = pd.DataFrame([
         {"id": "c1", "type": "complex", "display_name": "Ras_Raf1",
-         "component_id": "component_1", "component_name": "RAS", "component_type": "gene",
+         "component_id": "c1_1", "component_name": "RAS", "component_type": "gene",
          "annotation": "NCBIGENE:1", "annotation_label": "HRAS", "identity": "HRAS",
          "identity_rank": 1, "tax_id": "9606"},
         {"id": "c1", "type": "complex", "display_name": "Ras_Raf1",
-         "component_id": "component_1", "component_name": "RAS", "component_type": "gene",
+         "component_id": "c1_1", "component_name": "RAS", "component_type": "gene",
          "annotation": "NCBIGENE:2", "annotation_label": "Hras", "identity": "HRAS",
          "identity_rank": 1, "tax_id": "10090"},
         {"id": "c1", "type": "complex", "display_name": "Ras_Raf1",
-         "component_id": "component_1", "component_name": "RAS", "component_type": "gene",
+         "component_id": "c1_1", "component_name": "RAS", "component_type": "gene",
          "annotation": "NCBIGENE:3", "annotation_label": "KRAS", "identity": "KRAS",
          "identity_rank": 2, "tax_id": "9606"},
         {"id": "c1", "type": "complex", "display_name": "Ras_Raf1",
-         "component_id": "component_2", "component_name": "RAF1", "component_type": "gene",
+         "component_id": "c1_2", "component_name": "RAF1", "component_type": "gene",
          "annotation": "NCBIGENE:4", "annotation_label": "RAF1", "identity": "RAF1",
          "identity_rank": 1, "tax_id": "9606"},
         {"id": "c1", "type": "complex", "display_name": "Ras_Raf1",
-         "component_id": "component_2", "component_name": "RAF1", "component_type": "gene",
+         "component_id": "c1_2", "component_name": "RAF1", "component_type": "gene",
          "annotation": "NCBIGENE:5", "annotation_label": "BRAF", "identity": "BRAF",
          "identity_rank": 2, "tax_id": "9606"},
     ])
-    response = "c1|component_1: NCBIGENE:1\nc1|component_2: NCBIGENE:4"
+    response = "c1|c1_1: NCBIGENE:1\nc1|c1_2: NCBIGENE:4"
     with patch("core.annotation_workflow.query_llm", return_value=response) as mock_llm:
         out = rank_species_annotations_with_llm("dummy.xml", df, n_return=1)
     mock_llm.assert_called_once()
     assert list(out["annotation"]) == ["NCBIGENE:1", "NCBIGENE:2", "NCBIGENE:4"]
-    assert list(out["component_id"]) == ["component_1", "component_1", "component_2"]
+    assert list(out["component_id"]) == ["c1_1", "c1_1", "c1_2"]
     assert list(out["identity_rank"]) == [1, 1, 1]
 
 

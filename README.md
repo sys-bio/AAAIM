@@ -58,6 +58,7 @@ For parsed complexes, the species table preserves `component_id`,
 component independently. For multi-organism gene/protein searches, accessions
 are grouped by biological identity before ranking and emitted with a `tax_id`;
 several accession rows can therefore share `identity_rank=1`.
+Component IDs are species-scoped: species `X` uses `X_1`, `X_2`, and so on.
 
 Run the bundled example (uses a test SBML model):
 
