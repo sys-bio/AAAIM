@@ -1,0 +1,217 @@
+{
+  "model": {
+    "species": 47,
+    "reactions": 51
+  },
+  "ranking": "top-1 identity per species or complex component",
+  "sbml_only": {
+    "species_with_candidates": 47,
+    "complex_species": 32,
+    "component_groups": 79,
+    "reference_species_complete": 23,
+    "reference_species_total": 46,
+    "expected_identities_recovered": 90,
+    "expected_identities_total": 113,
+    "wrong_predictions": [
+      {
+        "id": "mEL",
+        "predicted_identity": "GLUGLYPHE",
+        "annotations": [
+          "CHEBI:140739"
+        ]
+      },
+      {
+        "id": "mELmEL",
+        "predicted_identity": "GLUGLYPHE",
+        "annotations": [
+          "CHEBI:140739"
+        ]
+      },
+      {
+        "id": "EG2SOS",
+        "predicted_identity": "GRB2",
+        "annotations": [
+          "UNIPROT:P62993"
+        ]
+      }
+    ],
+    "missing_identities": [
+      {
+        "id": "mEL",
+        "missing_identity": "EGF"
+      },
+      {
+        "id": "mELmEL",
+        "missing_identity": "EGF"
+      },
+      {
+        "id": "E",
+        "missing_identity": "EGF"
+      },
+      {
+        "id": "EG2",
+        "missing_identity": "EGF"
+      },
+      {
+        "id": "EG2SOS",
+        "missing_identity": "EGF"
+      },
+      {
+        "id": "Ras_RAF1",
+        "missing_identity": "GTP"
+      },
+      {
+        "id": "Ras_iRAF1",
+        "missing_identity": "GTP"
+      },
+      {
+        "id": "Ras_BRAF",
+        "missing_identity": "GTP"
+      },
+      {
+        "id": "Ras_iBRAF",
+        "missing_identity": "GTP"
+      },
+      {
+        "id": "Ras_pRaf1",
+        "missing_identity": "GTP"
+      },
+      {
+        "id": "Ras_pRaf1_Raf1_tetramer",
+        "missing_identity": "GTP"
+      },
+      {
+        "id": "Ras_Braf_Raf1_tetramer",
+        "missing_identity": "GTP"
+      },
+      {
+        "id": "Ras_iRaf1_tetramer",
+        "missing_identity": "GTP"
+      },
+      {
+        "id": "Ras_Braf_iRaf1_tetramer",
+        "missing_identity": "GTP"
+      },
+      {
+        "id": "Ras_pRaf1_tetramer",
+        "missing_identity": "GTP"
+      },
+      {
+        "id": "Ras_Braf_pRaf1_tetramer",
+        "missing_identity": "GTP"
+      },
+      {
+        "id": "Ras_Raf1_iBRaf_tetramer",
+        "missing_identity": "GTP"
+      },
+      {
+        "id": "Ras_pRaf1_iBRaf_tetramer",
+        "missing_identity": "GTP"
+      },
+      {
+        "id": "Ras_iRaf1_iBRaf1_tetramer",
+        "missing_identity": "GTP"
+      },
+      {
+        "id": "Ras_nfpRaf1",
+        "missing_identity": "GTP"
+      },
+      {
+        "id": "Ras_nfpBRaf",
+        "missing_identity": "GTP"
+      },
+      {
+        "id": "Ras_nfpiBRaf",
+        "missing_identity": "GTP"
+      },
+      {
+        "id": "Ras_nfpiRaf1",
+        "missing_identity": "GTP"
+      }
+    ],
+    "source_alignment": {
+      "table_s3_species_absent_from_sbml": [
+        "Ras_pRaf1_iRaf1_tetramer"
+      ],
+      "sbml_species_absent_from_table_s3": [
+        "GRB2"
+      ]
+    }
+  },
+  "table_s3": {
+    "species_with_candidates": 47,
+    "complex_species": 33,
+    "component_groups": 100,
+    "reference_species_complete": 41,
+    "reference_species_total": 46,
+    "expected_identities_recovered": 108,
+    "expected_identities_total": 113,
+    "wrong_predictions": [
+      {
+        "id": "mEL",
+        "predicted_identity": "GLUGLYPHE",
+        "annotations": [
+          "CHEBI:140739"
+        ]
+      },
+      {
+        "id": "mELmEL",
+        "predicted_identity": "GLUGLYPHE",
+        "annotations": [
+          "CHEBI:140739"
+        ]
+      },
+      {
+        "id": "E",
+        "predicted_identity": "GLUGLYPHE",
+        "annotations": [
+          "CHEBI:140739"
+        ]
+      },
+      {
+        "id": "EG2",
+        "predicted_identity": "GLUGLYPHE",
+        "annotations": [
+          "CHEBI:140739"
+        ]
+      },
+      {
+        "id": "EG2SOS",
+        "predicted_identity": "GLUGLYPHE",
+        "annotations": [
+          "CHEBI:140739"
+        ]
+      }
+    ],
+    "missing_identities": [
+      {
+        "id": "mEL",
+        "missing_identity": "EGF"
+      },
+      {
+        "id": "mELmEL",
+        "missing_identity": "EGF"
+      },
+      {
+        "id": "E",
+        "missing_identity": "EGF"
+      },
+      {
+        "id": "EG2",
+        "missing_identity": "EGF"
+      },
+      {
+        "id": "EG2SOS",
+        "missing_identity": "EGF"
+      }
+    ],
+    "source_alignment": {
+      "table_s3_species_absent_from_sbml": [
+        "Ras_pRaf1_iRaf1_tetramer"
+      ],
+      "sbml_species_absent_from_table_s3": [
+        "GRB2"
+      ]
+    }
+  }
+}

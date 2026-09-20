@@ -1,0 +1,583 @@
+0
+10
+20
+30
+40
+0.00 0.25 0.50 0.75 1.00
+Time
+Value
+Variable
+DNA_damage
+I2PP2A
+A TR_active
+p21
+BAX
+PUMA
+NRF2_active
+HDAC4_active
+TOPBP1_active
+A TM_active
+CHK1_active
+CHK2_active
+p53_active
+Supplementary Figure 1. Time-Course Sensitivity Analysis with Uncertainty.
+
+0.0
+0.2
+0.4
+0.6
+0.8
+ATM ATR HDAC4 NRF2 TP53
+Parameter
+Sensitivity Index
+Parametro
+ATM
+ATR
+HDAC4
+NRF2
+TP53
+Supplementary Figure 2. Bar plot representing the sensitivity index.
+
+	Parameter	 Value	Reaction	/	Role	Kinetics	Type	Biological	Activity	Biological	Rationale/	Justifications	 Parameter	Source	k_activation	 0.01	l²/(mol·s)	ATM	activation	Mass-action	Models	cooperative	activation	of	ATM	dimers	
+ATM	 signaling	 	 is	detectable	 ~5	 minutes	post-damage	.	 In	modeling	terms,	a	similar	order-of-magnitude	activation	 rate	 was	 used	by	Fedak,	 Elizabeth	 A	 et	al.,	 who	 assumed	 a	maximal	 ATM	 activation	of	 ~0.5	 per	 minute	(~0.0083	 s^-1).	 Our	value	 is	 of	 the	 same	order,	 reflecting	 a	reasonable	 estimate	 to	achieve	rapid	ATM	activation	 consistent	with	 experiments.			
+1,	2	
+k_deactivation	0.1	l/s	ATM,	ATR,	CHK	deactivation	First-order	Represents	constitutive	dephosphorylation	or	degradation	
+The	 chosen	 rate	 is	 an	intentional	simplification	to	 ensure	 these	 kinase	signals	 are	 transient.	While	 faster	 than	biological	 half-lives,	 it	effectively	 represents	robust	 phosphatase	activity	 and	 protein	turnover	that	terminates	ATM/ATR/CHK1	
+3,	4	
+
+signaling.		k_repair	 0.05	l²/(mol·s)	DNA	repair	by	ATM	 Mass-action	Simplified	representation	of	repair	enzyme	action	
+This	moderate	 rate	 was	chosen	so	that	when	ATM	is	 active,	 the	 “DNA	damage”	 species	 is	cleared	on	a	timescale	of	minutes.	 This	 is	qualitatively	 consistent	with	 experimental	observations	that	a	large	fraction	 of	 DSBs	is	repaired	 within	 tens	 of	minutes	 to	 a	 couple	 of	hours	after	damage	when	ATM	 is	 available			
+5	
+k_damage_production	0.1	mol/s	DNA	damage	production	Zeroth-order	Constant	damage	induction	(e.g.,	oxidative	stress)	The	 magnitude	0.1	 (in	model	 concentration	units	 per	 second)	 is	justified	 by	 known	cellular	damage	rates:	it’s	estimated	 human	 cells	incur	 ~10^4	spontaneous	DNA	lesions	per	day	,	which	is	on	the	order	of	 0.1	 events	 per	second	 per	 cell.	 Loft	 and	Poulsen	(1996)	reported	oxidative	 DNA	modifications	accumulating	 at	 ≈10^4	per	 cell	 per	 day	 .	 Our	
+6	
+
+value	 yields	 a	 similar	scale	 of	continuous	damage	 input.	 It	essentially	assumes	a	low	but	 steady	 induction	 of	DNA	 damage	 (e.g.	from	oxidative	 stress)	 to	 the	system,	 consistent	 with	background	 damage	 in	vivo	 .			k_p53_activation	0.02	l²/(mol·s)	p53	activation	by	ATM	 Mass-action	ATM	phosphorylates	and	stabilizes	p53	We	 assign	 a	 second-order	 rate	 for	 this	 ATM–p53	interaction.	 This	value	 is	 comparable	 to	those	 used	 in	 previous	p53	 network	 models	(typically	~0.01–0.02	for	kinase→substrate	phosphorylation	 when	exact	 data	 are	 lacking)	and	 produces	 the	expected	 behavior	 that	active	 ATM	 rapidly	elevates	 p53	 levels.		
+7	
+k_p53_deactivation	0.1	l/s	p53	degradation	First-order	p53	degradation	via	MDM2	pathway	Upon	 DNA	 damage,	ATM/ATR	phosphorylation	 extends	p53	half-life	 from	“minutes	 to	 hours”	 by	preventing	 MDM2	binding.	 Our	 model	
+8,	9	
+
+compresses	 these	dynamics	by	using	0.1	s^-1	 (t_1/2	 ~7	 s)	 to	 ensure	that	 active	 p53	 decays	quickly	 once	 ATM/ATR	input	 is	 removed.	 This	high	 rate	 effectively	simulates	 the	 potent	negative	 feedback	 by	MDM2.	 The	 model’s	faster	rate	is	a	deliberate	simplification	 to	 allow	p53	 levels	 to	 oscillate	 or	drop	on	short	timescales,	matching	 the	 pulse-like	dynamics	 seen	 in	experiments.		k_HDAC4_activation	0.02	l²/(mol·s)	HDAC4	activation	Mass-action	HDAC4	regulates	gene	expression	in	DDR	 This	 mass-action	 rate	 is	like	 other	 enzyme	activation	 steps.	 This	nominal	value	was	tuned	to	 allow	 HDAC4	 to	respond	 on	 a	 minute-timescale.	 (In	 general,	when	 specific	 rates	 are	unknown,	 modelers	 use	educated	 guesses	 in	 the	0.01–0.1	 M^-1s^-1	range;	our	choice	falls	in	that	range.)			
+2,	10	
+
+k_HDAC4_deactivation	0.05	l²/(mol·s)	HDAC4	deactivation	Mass-action	Enzymatic	feedback	or	phosphatase	activity	
+This	value	 was	 set	slightly	 higher	 than	 the	activation	 rate	 to	 ensure	HDAC4	 activity	 is	transient.		It	is	an	order-of-magnitude	 estimate	chosen	 for	 model	stability.			
+11	
+k_HDAC4_p53	 0.03	l²/(mol·s)	p53	inhibition	by	HDAC4	 Mass-action	HDAC4	deacetylates	p53,	reducing	its	activity	
+This	value	lies	in	a	typical	range	 for	 protein–protein	 enzymatic	interactions.	 It	 ensures	that	 when	 HDAC4	 is	active,	 it	 can	 noticeably	decrease	 p53	 activity.	(Notably,	 HDAC	inhibitors	 that	 block	class	 I/II	 HDACs	 lead	 to	increased	 acetyl-p53,	confirming	 that	 HDAC	mediated	 p53	deacetylation	 is	 a	significant	 regulatory	mechanism.	 Thus,	including	 HDAC4→p53	with	 a	 non-negligible	rate	 is	 biologically	reasonable,	 even	 if	 exact	kinetics	are	unknown.)			
+10,	12	
+k_I2PP2A_production	0.005	l/s	I2PP2A	synthesis	Zeroth-order	Regulatory	inhibitor	synthesis	This	value	 was	 likely	chosen	 to	 yield	 a	 low	2,	13	
+
+steady-state	 level	 of	I2PP2A	 when	 balanced	with	its	degradation.	For	context,	 many	 cellular	proteins	are	produced	at	rates	on	the	order	of	10^-3–10^-2	(arbitrary	units)	per	 second	 in	 modeling	studies	 to	 represent	basal	 gene	expression.	Our	 value	 falls	 in	 that	range.			k_I2PP2A_degradation	0.01	l/s	I2PP2A	degradation	First-order	Constitutive	turnover	We	 set	 production	 and	degradation	 such	 that	I2PP2A	reaches	a	steady-state	 around	 0.5	 “units”	(since	 0.005/0.01	 =	 0.5).	The	rationale	is	to	have	a	dynamic	 pool	 of	 I2PP2A	that	 can	 respond	 to	changes	 (e.g.	 get	sequestered	 by	 binding).	This	is	 a	 reasonable	generic	value	for	protein	turnover	 in	modeling.	It	ensures	 I2PP2A	 levels	can	 change	 over	 time	rather	 than	 being	constant.			
+2		
+k_binding	 0.1	l²/(mol·s)	PP2A	and	I2PP2A	binding	Mass-action	Protein-protein	binding	This	value	is	an	educated	guess	 to	 represent	 a	14	
+
+limited	 protein-protein	binding	affinity,	ensuring	that	 PP2A	 is	 not	completely	 sequestered	by	I2PP2A	at	baseline.			k_unbinding	 0.01	l/s	Complex	dissociation	First-order	Represents	dissociation	rate	This	 value	 is	 tuned	 so	that	 the	 inhibition	 of	PP2A	 by	 I2PP2A	 is	significant	 but	 readily	reversible,	 aligning	 with	the	 idea	 that	 PP2A	activity	 can	 be	restored	on	a	short	timescale.			
+-	
+k_TOPBP1_activation	0.02	l²/(mol·s)	TOPBP1	activation	Mass-action	TOPBP1	as	ATR	co-activator	This	 value	 is	similar	 to	ATM’s	 own	 activation	rate,	 so	that	 when	 the	upstream	 signal	 is	present,	 TOPBP1	becomes	 active	reasonably	 quickly.	 The	exact	value	is	a	modeling	assumption	 to	 integrate	known	 qualitative	behavior:	that	TopBP1	is	rapidly	 activated	 in	response	to	DSBs	to	turn	on	ATR	.			
+2		
+k_TOPBP1_deactivation	0.1	l/s	TOPBP1	inactivation	First-order	Constitutive	turnover	0.1L/s	ensures	TopBP1's	active	 state	 lasts	 around		
+
+7	 seconds,	 preventing	sustained	 ATR	hyperactivation.	 This	value	 was	 chosen	 by	analogy	 to	 ATM/ATR	dephosphorylation	rates,	reflecting	 the	 rapid	reversal	 of	 TopBP1's	activation.	k_ATR_activation	0.02	l³/(mol²·s)	ATR	activation	Higher-order	Cooperative	activation	with	TOPBP1	0.02L	 3	 /(mol	 2	 ⋅s)	reflects	 ATR's	cooperative	 activation,	requiring	 two	 ATR	molecules	and	TopBP1	to	form	 a	 complex.	 This	rate,	 set	 to	 match	 ATM	activation	 timescales,	ensures	 ATR	 is	 only	activated	 under	 specific	conditions	 consistent	with	 ATR's	 more	complex	 and	 limited	activation	in	biology.		
+	1,	2	
+k_ATR_deactivation	0.1	l/s	ATR	inactivation	First-order	Passive	decay	We	use	the	same	0.1	s^−1	as	 for	 ATM,	 effectively	assuming	 ATR	 is	deactivated	on	the	order	of	seconds	in	the	model	It	ensures	 that	 in	
+	1,	15	
+
+simulations	ATR	does	not	remain	 active	 without	ongoing	DNA	damage.		k_p53_activation_ATR	0.015	l²/(mol·s)	ATR-mediated	p53	activation	Mass-action	ATR	pathway	activates	p53	via	phosphorylation	We	 assign	 a	 second-order	 rate	 of	 0.015	M^−1s^−1,	slightly	lower	than	ATM’s	rate	(0.02)	to	reflect	 ATR’s	 somewhat	less	 prominent	 role	 in	p53	regulation.		It	is	chosen	to	allow	ATR,	when	 fully	 active,	 to	stabilize	 p53,	 consistent	with	 observations	 that	ATR	 can	 activate	 p53	 in	the	absence	of	ATM.		
+7	
+k_repair_ATR	 5e-07	l²/(mol·s)	ATR-mediated	DNA	repair	Mass-action	Very	low	efficiency	reflects	ATR's	indirect	repair	role	By	 setting	 this	 rate	 so	low,	 the	 model	acknowledges	ATR’s	role	in	DNA	repair	is	“indirect	and	 low-efficiency”,	matching	 qualitative	expectations.		The	chosen	value	 simply	 ensures	ATR	alone	cannot	rapidly	clear	DNA	damage	in	the	simulation.	
+5	
+k_CK2	 0.02	l²/(mol·s)	CK2-mediated	HDAC4	phosphorylation	Mass-action	Post-translational	regulation	by	CK2	0.02	 was	 chosen	 to	 give	CK2	 significant	regulatory	 impact	
+11	
+
+HDAC4	 without	 making	the	 reaction	instantaneous	–	consistent	 with	 a	 post-translational	modification	event.	k_dephos	 0.05	l/s	HDAC4	dephosphorylation	First-order	PP2A-like	phosphatase	effect	This	 rate,	 with	 a	 half-life	of	 ~14	 seconds,	 ensures	HDAC4’s	phosphorylation	 status	flips	 quickly,	 reflecting	the	 fast	 action	 of	phosphatases	 in	reversing	kinase	activity.	The	 value	 is	 tuned	 to	prevent	 prolonged	phosphorylation	 of	HDAC4	after	CK2	activity	drops	 and	 is	 consistent	with	 typical	 deactivation	rates	 (around	 0.1	 s⁻¹),	offering	 a	 reasonable,	generic	 rate	 for	dephosphorylation.		
+	
+alpha_spermidine	0.5	l/mol	Spermidine	effect	on	CK2-TOPBP1	Modulatory	constant	Modulates	CK2	activation	in	presence	of	spermidine	
+Zhang	et	al.	(2019)	found	that	 spermidine	increases	 CK2	 activity	 in	a	 dose-dependent	manner,	 with	 4	 μM	boosting	activity	in	cells.	
+16		
+
+We	 model	 this	 using	 a	modulatory	factor		α=0.5L/mol,	 which	enhances	CK2	activity	by	50%	 per	 unit	 of	spermidine.	 This	 factor	reflects	 experimental	observations	 that	millimolar	 spermidine	can	 roughly	 double	 CK2	activity.		k_CK2_TOPBP1	0.02	l/s	CK2-TOPBP1	mediated	activation	First-order	Simplified	catalytic	model	This	value	is	an	estimate	chosen	 so	 that	 CK2’s	presence	 significantly	speeds	up	ATR	activation	via	 TopBP1.	 The	numerical	 choice	 (0.02)	parallels	other	activation	rates	 in	 the	 model,	indicating	 consistency	 in	assuming	 moderate,	 on-the-order-of	10^−2	s^−1	kinetics	 for	 unspecified	signaling	steps.		
+-	
+k_CHK1_activation	0.02	l²/(mol·s)	CHK1	activation	Mass-action	Downstream	ATR	effector	kinase	We	model	ATR-mediated	CHK1	 phosphorylation	as	reaction	with		k=0.02	 l²/(mol·s)	Similarr	 to	 the	 rates	 for	ATM→p53	or	ATM→ATR.	This	 rate	 ensures	 a	
+1	
+
+moderate	phosphorylation	of	CHK1	by	 ATR,	 with	 activation	building	 up	 over	 tens	 of	minutes,	 consistent	 with	experimental	observations.		k_CHK1_deactivation	0.1	l/s	CHK1	inactivation	First-order	Natural	decay	=0.1L/s	 was	 chosen	 to	reflect	 the	 rapid	inactivation	 of	 phospho-CHK1	 through	 both	phosphatases	 and	proteasomal	degradation.	 	 This	 rate	ensures	 transient	 CHK1	activity,	aligning	with	the	biological	 reality	 that	CHK1	 signals	 are	typically	 brief	 to	 allow	the	cell	cycle	to	resume.		
+4	
+k_CHK2_activation	0.02	l²/(mol·s)	CHK2	activation	Mass-action	ATM-dependent	checkpoint	kinase	Experiments	 show	 that	CHK2	 phosphorylation	occurs	 within	 minutes	after	 irradiation:	 “both	ATM	 and	 CHK2	 are	activated	 as	 early	 as	 10	min	 after	 irradiation,	with	 ATM	 activity	peaking	 before	 CHK2”.	This	 fast	 timescale	justifies	 a	 relatively	 high	
+17	
+
+second-order	 rate	constant	 (0.02	l2/(mol·s))	so	that	CHK2	becomes	 active	 quickly	once	ATM	is	active		k_CHK2_deactivation	0.1	l/s	CHK2	inactivation	First-order	Natural	decay	0.1L/s	 was	 chosen	 to	reflect	 the	 moderate	deactivation	 of	 active	CHK2,	 which	 can	 persist	for	 hours	 unless	 actively	dephosphorylated.	Experimental	 evidence	shows	 CHK2	 activity	remains	detectable	up	to	16	 hours	 post-damage,	indicating	 sustained	activation.	
+17	
+k_p53_activation_CHK2	0.02	l²/(mol·s)	CHK2-mediated	p53	activation	Mass-action	Reinforces	p53	stabilization	This	 second-order	 rate	was	 set	 similar	 to	ATM→CHK2,	 assuming	CHK2	 rapidly	phosphorylates	p53	once	active.	 The	 chosen	 value	reflects	 the	 observed	timescale	 of	 p53	activation	 (tens	 of	minutes	 to	 a	 few	 hours),	consistent	 with	experimental	 findings	that	 CHK2	
+17	
+
+phosphorylation	 of	 p53	occurs	 early	 in	 the	 DNA	damage	response.		k_NRF2_activation	0.01	l²/(mol·s)	NRF2	activation	Mass-action	NRF2	release	from	KEAP1	under	stress	 0.01	 l²/(mol·s)		was	chosen	 to	 model	 NRF2	activation,	 reflecting	 its	release	 from	 Keap1	under	 oxidative	 or	electrophilic	 stress.	 In	vivo	 studies	 show	that	NRF2	 activation	 can	occur	 within	 an	 hour,	with	 peak	 nuclear	translocation	 observed	around	 1	 hour	 after	stress	 induction.	 The	chosen	 rate	 ensures	NRF2	activation	is	slower	than	 direct	 kinase	cascades	 like	 CHK2/p53,	but	 still	 rapid,	 achieving	substantial	NRF2	release	within	 1–2	 hours	 of	 a	strong	stress	signal.		
+18,	19	
+k_NRF2_deactivation	0.05	l/s	NRF2	deactivation	First-order	Return	to	basal	NRF2	levels	Our	 value	 0.05	 l/s	(interpreted	 as	 ~0.05	min^−1)	 corresponds	 to	a	 t_1/2	 in	 the	 order	 of	minutes	(~13	min	if	0.05	min^−1),	 in	 line	 with	experimental	 half-lives	
+20,	21	
+
+for	 NRF2	 (10–30	 min).	This	 ensures	 that	 once	the	 activating	 stress	 is	gone,	 NRF2	 activity	 falls	rapidly	(allowing	the	cell	to	 reset	 to	 basal	antioxidant	 levels	 within	1–2	hours).	 In	 essence,	the	 parameter	 reflects	Keap1-driven	degradation	 rate	 of	 free	NRF2.		k_NRF2_repair	0.02	l²/(mol·s)	NRF2-mediated	DNA	repair	Mass-action	Indirect	activation	of	antioxidant	repair	genes	We	assign	0.02	l²/(mol·s)	to	this	mass-action	term,	paralleling	 other	secondary	 activation	rates,	 to	 reflect	 that	NRF2’s	 induction	 of	repair	 processes	 is	 not	instantaneous	but	occurs	over	time	as	target	genes	(HO-1,	GCLC,	53BP1,	etc.)	are	 upregulated.	The	rationale	is	that	this	rate	is	 tuned	 so	 that	 NRF2’s	benefit	 to	DNA	 repair	manifests	on	the	scale	of	a	 few	 hours.	 This	 aligns	with	 observations	 that	activating	 NRF2	 before	radiation	 reduces	 DNA	damage	 and	
+22	
+
+chromosomal	aberrations	 in	 cells,	implying	 a	 measurable	repair-enhancing	 effect	within	one	cell	cycle.	k_NRF2_KEAP1	0.01	l²/(mol·s)	NRF2	degradation	via	KEAP1	Mass-action	Cytoplasmic	sequestration	&	degradation	We	use	a	relatively	large	association	 rate	 (0.01	l²/(mol·s)	in	our	units)	to	ensure	 free	 NRF2	 is	rapidly	 captured	 by	Keap1,	 keeping	 basal	NRF2	 activity	 low.	 This	choice	 is	 supported	 by	NRF2’s	 short	 basal	 half-life	 and	 the	 floodgate	model:	only	when	Keap1	pools	 are	 saturated	 free	NRF2	 escape	degradation.			
+23	
+K_omav	 1	mol/l	Omaveloxolone	EC₅₀	 Michaelis	constant	Drug	modulation	of	NRF2	pathway	Although	 omaveloxolone	has	 an	experimental	EC_50	 reported	 in	 the	low	 nanomolar	 range,	our	 choice	 of	 1	 M	 is	 a	modeling	 convenience	–	effectively	 assuming	 the	drug	 is	 at	 saturating	levels	relative	to	this	high	K	 (so	 its	 effect	 can	 be	toggled	 on).	 In	 this	 way,	the	 drug	 effect	 term	 is	mostly	in	a	linear	regime	
+24	
+
+for	 any	 realistic	concentration	 used,	simplifying	the	model.	In	the	 absence	of	 an	 exact	in-model	EC_50,	we	note	that	 the	 qualitative	behavior	 is	 that	omaveloxolone	 at	micromolar	 to	nanomolar	concentrations	 will	significantly	 activate	NRF2,	 as	 observed	experimentally.	Thus,	the	model’s	 K_omav	 =	 1	mol/L	serves	to	scale	the	drug’s	 influence	 without	limiting	 it,	 given	 the	much	 lower	 real	 EC_50	values.		k_spermidine_activation	0.05	l²/(mol·s)	Autophagy	activation	by	spermidine	Mass-action	Nutrient-sensing	activation	This	 value	reflects	a	relatively	 fast	 mass-action	 induction	 of	autophagy	 by	spermidine.	 In	 practical	terms,	 this	 means	 that	when	 spermidine	 is	present	 (modeled	 as	 a	species	 or	 input),	autophagy	 activity	 rises	rapidly	 (within	 an	 hour	or	 so)	–	consistent	 with	
+25,	26	
+
+observations	 that	autophagy	 markers	(LC3-II,	 etc.)	 increase	shortly	 after	 spermidine	treatment.	 This	parameter	 is	 chosen	 so	that	 even	 a	 moderate	spermidine	 level	 can	substantially	 activate	autophagy,	 aligning	 with	its	 role	 as	 a	 potent	caloric-restriction	mimetic	 that	 prolongs	lifespan	via	autophagy.		k_autophagy_deactivation	0.05	l/s	Autophagy	decay	First-order	Constitutive	degradation	Our	choice	of	0.05	l/s	(if	interpreted	 as	 ~0.05	min^−1)	 gives	 a	 half-life	of	~14	min	for	autophagy	activity	to	decay,	which	is	quite	 fast.	 This	 captures	the	 idea	 that	 autophagy	is	 dynamically	 regulated	and	will	not	remain	high	without	 sustained	stimuli.	 Biologically,	 this	can	 correspond	 to	constitutive	 turnover	 of	autophagy	proteins/complexes	 and	the	 action	 of	phosphatases	and	mTOR	signaling	 that	 rapidly	
+	
+
+dismantle	the	autophagic	machinery	 once	stress/nutrient	 signals	change.	 In	 summary,	 a	value	 of	 0.05	 ensures	autophagy	 activity	 falls	to	 baseline	 on	 the	 order	of	 minutes	 to	 an	 hour	after	an	inducing	signal	is	removed,	consistent	with	observations	 of	 prompt	autophagy	 termination	upon	refeeding.		k_autophagy_repair	0.001	l/s	Autophagy-mediated	DNA	repair	 Saturable	Catalytic	repair	rate	 We	 model	 autophagy’s	effect	on	DNA	repair	as	a	saturable	process	(hence	using	 Michaelis-Menten	kinetics	 with	k_autophagy_repair	 and	K_m_autophagy).		We	 set	k_autophagy_repair	 =	0.001	 l/	 s,	 a	 relatively	small	rate,	to	reflect	that	this	 is	 a	 supportive,	slower	 repair	mechanism	 compared	 to	dedicated	 DNA	 repair	enzymes.	 Autophagy’s	impact	 on	 DNA	 lesion	removal	 is	 indirect	 and	gradual	 (e.g.	 mitigating	
+27	
+
+oxidative	 damage,	recycling	components,	or	affecting	 HR	 vs	 NHEJ	balance).	No	exact	kinetic	value	is	available,	but	we	justify	 this	 choice	 by	noting	 that	autophagy’s	pro-repair	 benefits,	while	real,	manifest	over	longer	 timescales.	 For	instance,	 loss	 of	autophagy	 causes	genome	instability	that	is	evident	over	many	hours	or	multiple	cell	cycles.		Km_autophagy	10	mol/l	Autophagy	Michaelis	constant	Michaelis-Menten	Saturation	threshold	In	 the	 absence	 of	empirical	 K_m,	 we	intentionally	set	 a	 large	K_m	value	so	 that	 under	physiological	 ranges	 of	damage	 or	 autophagy	signal,	 the	 process	operates	 far	 from	saturation	 (i.e.	 first-order	 in	 the	 damage	level).	 In	 other	 words,	this	 K_m	 value	 ensures	that	autophagy’s	 repair	capacity	 is	 effectively	unsaturated	 under	normal	 conditions,	allowing	for	a	near-linear	
+	
+
+relationship	 between	autophagy	 activity	 and	repair	rate.			k_p21	 0.09	l/s	p21	production	by	p53	 First-order	Cell	cycle	arrest	mediator	We	use	a	first-order	rate	of	0.09	l/s	for	p53-driven	p21	production.	In	effect,	when	 p53	 is	 stabilized,	p21	levels	rise	with	a	rate	of	 ~0.09	 (units	 s^−1	 or	min^−1	 depending	 on	time	scale).	If	we	assume	minutes,	 0.09	 min^−1	gives	 a	 half-time	 of	 ~7.7	min	 for	p21	mRNA/protein	accumulation	 towards	 a	new	 steady	 state.	 That	might	 be	 a	 bit	 fast	 for	translation	 but	note	 that	this	 parameter	 also	subsumes	 p21	 mRNA	processing	 and	 protein	stabilization	 by	 p53.	 In	many	 cell	 types,	 p21	protein	is	detectable	by	~4–6h	after	DNA	damage.	Our	chosen	value	yields	significant	p21	 induction	 within	 a	few	 hours,	 aligning	 with	those	observations.		
+28	
+
+k_p21_deg	 0.01	l/s	p21	degradation	First-order	Protein	turnover	We	 use	0.01	 l/s	 as	 the	first-order	 degradation	rate,	 which	 (if	 taken	 as	~0.01	 min^−1)	corresponds	 to	 a	 t_1/2	~69	 min	–	within	 the	reported	 range.	 This	means	 that	 even	 as	 p53	drives	p21	up,	p21	levels	will	 drop	 relatively	quickly	once	p53	activity	falls	off.	The	value	aligns	with	 experimental	 data	showing	 that	 p21	 is	largely	gone	a	few	hours	after	 p53	 levels	 decline,	and	 that	 protein	synthesis	 inhibitors	reveal	 p21’s	 short	 half-life	(~30–	45	min,	which	can	 extend	 to	 ~2	 h	 if	stabilized	 by	 certain	interactions).	 Thus,	k_p21_deg	=	0.01	ensures	transient	 p21	accumulation,	 consistent	with	 the	 quick	 turnover	observed	in	vivo.		
+29	30	
+k_BAX	 0.05	l/s	BAX	production	by	p53	 First-order	Pro-apoptotic	gene	expression	k_BAX	 =	 0.05	 l/s	is	slightly	lower	than	p21’s	rate	but	still	a	significant	first-order	 rate.	 This	
+31	
+
+yields	 BAX	 protein	accumulation	 on	 the	timescale	 of	 a	 few	 to	several	hours	once	p53	is	active,	 accordingly	 with	the	 notion	 that	 BAX	protein	 levels	 start	 to	rise	 during	 prolonged	 or	high	 p53	 activity.	BAX	induction	 is	 a	 bit	 slower	or	 less	 immediate	 than	cell-cycle	 arrest	 signals.	Nonetheless,	the	value	is	high	enough	that	a	strong	p53	 signal	 (such	as	irreparable	damage)	will	produce	 substantial	 BAX	within	 one	 cell	 cycle	to	initiate	apoptosis.	Supporting	 this,	 BAX	transcript	 upregulation	is	 often	 observed	 within	6–12	 h	 of	 genotoxic	stress	in	experiments.		k_BAX_deg	 0.01	l/s	BAX	degradation	First-order	Apoptosis	resolution	We	 choose	 k_BAX_deg	 =	0.01	 l/s.	 It	 implies	that	BAX	 levels	 will	 remain	stable	for	multiple	hours	after	 induction,	supporting	the	apoptotic	program	 unless	 actively	inhibited.	This	
+32		
+
+parameter	 is	 set	 low	(slow	 decay)	 to	 reflect	BAX’s	stability	compared	to	p21.	Reported	 BAX	half-life	in	healthy	cells	is	on	 the	 order	 of	 8–12	hours,	 while	 in	 stressed	or	 cancer	 cells	 BAX	 can	be	 actively	degraded,	with	half-life	of	3-6h.	Our	attempt	 is	 to	balance	these	two	conditions.		k_PUMA	 0.03	l/s	PUMA	production	by	p53	 First-order	Apoptosis	promoter	We	assign	k_PUMA	=	0.03	l/s,	 a	 first-order	 rate	 for	p53-driven	 PUMA	production.	This	is	in	the	same	order	as	BAX’s	rate	(slightly	 lower	 in	 our	table),	reflecting	 that	PUMA	 induction	 is	significant	 but	 might	require	 strong	 p53	signals.	 Some	 studies	suggest	PUMA	is	induced	as	 early	 as	 4–6	 h	 after	p53	 activation	 (earlier	than	 Bax),	 consistent	with	 PUMA’s	 role	 as	 a	potent	activator	 of	the	pro-apoptotic	Bax/Bak.	Our	 chosen	 value	produces	 an	 appreciable	
+32,	33	
+
+PUMA	level	within	a	few	hours	 of	 sustained	 p53	presence.	 Since	 PUMA	 is	strictly	 p53-dependent	in	many	contexts,	having	a	 non-zero	 k_PUMA	emphasizes	 that,	even	 if	p53	 pulses,	 PUMA	 can	accumulate	over	multiple	pulses	to	a	threshold	that	triggers	 cell	 death.	 The	value	 is	 a	 compromise	–	not	 as	 high	 as	 p21’s	(since	 PUMA	 might	require	higher	p53	levels	or	 more	 sustained	stress),	 but	 high	 enough	to	 ensure	 PUMA	 can	reach	functional	levels	on	the	timescale	of	a	day	or	less,	 fitting	 experimental	induction	profiles.		k_PUMA_deg	 0.01	l/s	PUMA	degradation	First-order	Turnover	of	apoptotic	signal	We	 set	 k_PUMA_deg	 =	0.01	 l/s,	 analogous	 to	p21	and	BAX	in	our	table,	which	gives	PUMA	a	~1–2	 h	 half-life,	 consistent	with	 its	 reported	stability.	Thus,	 this	 parameter	ensures	 PUMA	 levels	drop	 relatively	 quickly	
+34	
+
+when	 p53	 signaling	abates,	 preventing	unnecessary	 apoptosis	 if	damage	 is	 repaired.	 It	also	 means	that	cells	continuously	require	p53	activity	 to	 keep	 PUMA	levels	high;	if	p53	is	only	transiently	on,	PUMA	will	be	 produced	 but	 also	degraded	on	the	order	of	hours.						References	1.	Zhao	 H,	 Li	 J,	 You	 Z,	 Lindsay	 HD,	 Yan	 S.	 Distinct	 regulation	 of	 ATM	 signaling	 by	 DNA	 single-strand	 breaks	 and	 APE1.	Nat	 Commun.	2024;15(1):6517.	Published	2024	Aug	7.	doi:10.1038/s41467-024-50836-6	2.	Fedak	EA,	Adler	FR,	Abegglen	LM,	Schiffman	JD.	ATM	and	ATR	Activation	Through	Crosstalk	Between	DNA	Damage	Response	Pathways.	Bull	Math	Biol.	2021;83(4):38.	Published	2021	Mar	11.	doi:10.1007/s11538-021-00868-6	3.	Shreeram	S,	Demidov	ON,	Hee	WK,	et	al.	Wip1	phosphatase	modulates	ATM-dependent	signaling	pathways.	Mol	Cell.	2006;23(5):757-764.	doi:10.1016/j.molcel.2006.07.010	4.	Zhang	YW,	Otterness	DM,	Chiang	GG,	et	al.	Genotoxic	stress	targets	human	Chk1	for	degradation	by	the	ubiquitin-proteasome	pathway.	Mol	Cell.	2005;19(5):607-618.	doi:10.1016/j.molcel.2005.07.019	
+
+5.	Sun	T,	Li	X,	Shen	P.	Modeling	amplified	p53	responses	under	DNA-PK	inhibition	in	DNA	damage	response.	Oncotarget.	2017;8(10):17105-17114.	doi:10.18632/oncotarget.15062	6.	Loft	S,	Poulsen	HE.	Cancer	risk	and	oxidative	DNA	damage	in	man	[published	correction	appears	in	J	Mol	Med	1997	Jan;75(1):67-8].	J	Mol	Med	(Berl).	1996;74(6):297-312.	doi:10.1007/BF00207507	7.	Khosravi	R,	Maya	R,	Gottlieb	T,	Oren	M,	Shiloh	Y,	Shkedy	D.	Rapid	ATM-dependent	phosphorylation	of	MDM2	precedes	p53	accumulation	in	response	to	DNA	damage.	Proc	Natl	Acad	Sci	U	S	A.	1999;96(26):14973-14977.	doi:10.1073/pnas.96.26.14973	8.	 Gupta	 A,	 Shah	 K,	 Oza	 MJ,	 Behl	 T.	 Reactivation	 of	 p53	 gene	 by	 MDM2	 inhibitors:	 A	 novel	 therapy	 for	 cancer	 treatment.	Biomed	Pharmacother.	2019;109:484-492.	doi:10.1016/j.biopha.2018.10.155	9.	Moll	UM,	Petrenko	O.	The	MDM2-p53	interaction.	Mol	Cancer	Res.	2003;1(14):1001-1008.	10.	Basile	V,	Mantovani	R,	Imbriano	C.	DNA	damage	promotes	histone	deacetylase	4	nuclear	localization	and	repression	of	G2/M	promoters,	via	p53	C-terminal	lysines.	J	Biol	Chem.	2006;281(4):2347-2357.	doi:10.1074/jbc.M507712200	11.	Intracellular	 Signaling	 to	 Histone	 Deacetylases	-	Cayman	 Chemical	https://www.caymanchem.com/news/intracellular-signaling-to-histone-deacetylases	12.	Roy	S,	Packman	K,	Jeffrey	R,	Tenniswood	M.	Histone	deacetylase	inhibitors	differentially	stabilize	acetylated	p53	and	induce	cell	cycle	arrest	or	apoptosis	in	prostate	cancer	cells.	Cell	Death	Differ.	2005;12(5):482-491.	doi:10.1038/sj.cdd.4401581	13.	Wei	Y,	Maximov	V,	Morrissy	SA,	Taylor	MD,	Pallas	DC,	Kenney	AM.	p53	Function	Is	Compromised	by	Inhibitor	2	of	Phosphatase	2A	in	Sonic	Hedgehog	Medulloblastoma.	Mol	Cancer	Res.	2019;17(1):186-198.	doi:10.1158/1541-7786.MCR-18-0485	14.	Alsallaq	R,	 Zhou	 HX.	 Prediction	 of	 protein-protein	 association	 rates	 from	 a	 transition-state	 theory.	Structure.	 2007;15(2):215-224.	doi:10.1016/j.str.2007.01.005	15.	Choi	BK,	Fujiwara	K,	Dayaram	T,	et	al.	WIP1	dephosphorylation	of	p27Kip1	Serine	140	destabilizes	p27Kip1	and	reverses	anti-proliferative	effects	of	ATM	phosphorylation.	Cell	Cycle.	2020;19(4):479-491.	doi:10.1080/15384101.2020.1717025	
+
+16.	Ao	Y,	Zhang	J,	Liu	Z,	et	al.	Lamin	A	buffers	CK2	kinase	activity	to	modulate	aging	in	a	progeria	mouse	model.	Sci	Adv.	2019;5(3):eaav5078.	Published	2019	Mar	20.	doi:10.1126/sciadv.aav5078	17.	García-Santisteban	I,	Llopis	A,	Krenning	L,	et	al.	Sustained	CHK2	activity,	but	not	ATM	activity,	is	critical	to	maintain	a	G1	arrest	after	DNA	damage	in	untransformed	cells.	BMC	Biol.	2021;19(1):35.	Published	2021	Feb	19.	doi:10.1186/s12915-021-00965-x	18.	Goldring	 CE,	 Kitteringham	 NR,	 Elsby	 R,	 et	 al.	 Activation	 of	 hepatic	 Nrf2	 in	 vivo	 by	 acetaminophen	 in	 CD-1	 mice.	Hepatology.	2004;39(5):1267-1276.	doi:10.1002/hep.20183	19.	Ulasov	AV,	Rosenkranz	AA,	Georgiev	GP,	Sobolev	AS.	Nrf2/Keap1/ARE	signaling:	Towards	specific	regulation.	Life	Sci.	2022;291:120111.	doi:10.1016/j.lfs.2021.120111	
+20.	Ngo	V,	Duennwald	ML.	Nrf2	and	Oxidative	Stress:	A	General	Overview	of	Mechanisms	and	Implications	in	Human	Disease.	Antioxidants	(Basel).	2022;11(12):2345.	Published	2022	Nov	27.	doi:10.3390/antiox11122345	21.	Nguyen	 T,	 Sherratt	 PJ,	 Huang	 HC,	 Yang	 CS,	 Pickett	 CB.	 Increased	 protein	 stability	 as	 a	 mechanism	 that	 enhances	 Nrf2-mediated	transcriptional	activation	of	the	antioxidant	response	element.	Degradation	of	Nrf2	by	the	26	S	proteasome.	J	Biol	Chem.	2003;278(7):4536-4541.	doi:10.1074/jbc.M207293200	22.	Kim	SB,	Pandita	RK,	Eskiocak	U,	et	al.	Targeting	of	Nrf2	induces	DNA	damage	signaling	and	protects	colonic	epithelial	cells	from	ionizing	radiation.	Proc	Natl	Acad	Sci	U	S	A.	2012;109(43):E2949-E2955.	doi:10.1073/pnas.1207718109	23.		Liu	 S,	 Pi	 J,	 Zhang	 Q.	 Mathematical	 modeling	 reveals	 quantitative	 properties	 of	 KEAP1-NRF2	 signaling.	Redox	 Biol.	 2021;47:102139.	doi:10.1016/j.redox.2021.102139	24.	Reisman	SA,	Gahir	SS,	Lee	CY,	Proksch	JW,	Sakamoto	M,	Ward	KW.	Pharmacokinetics	and	pharmacodynamics	of	the	novel	Nrf2	activator	omaveloxolone	in	primates.	Drug	Des	Devel	Ther.	2019;13:1259-1270.	doi:10.2147/DDDT.S193889	25.		Madeo	F,	Bauer	MA,	Carmona-Gutierrez	D,	Kroemer	G.	Spermidine:	a	physiological	autophagy	inducer	acting	as	an	anti-aging	vitamin	in	humans?.	Autophagy.	2019;15(1):165-168.	doi:10.1080/15548627.2018.1530929	
+
+26.		Morselli	 E,	 Mariño	 G,	 Bennetzen	 MV,	 et	 al.	Spermidine	 and	 resveratrol	 induce	 autophagy	 by	 distinct	 pathways	 converging	 on	 the	acetylproteome.	J	Cell	Biol.	2011;192(4):615-629.	doi:10.1083/jcb.201008167	27.	Gillespie	 DA,	 Ryan	 KM.	 Autophagy	 is	 critically	 required	 for	 DNA	 repair	 by	 homologous	 recombination.	Mol	 Cell	 Oncol.	2015;3(1):e1030538.	Published	2015	Oct	2.	doi:10.1080/23723556.2015.1030538	28.	Wu	L,	Levine	AJ.	Differential	regulation	of	the	p21/WAF-1	and	mdm2	genes	after	high-dose	UV	irradiation:	p53-dependent	and	p53-independent	regulation	of	the	mdm2	gene.	Mol	Med.	1997;3(7):441-451.	29.	Chang	LJ,	Eastman	A.	Differential	regulation	of	p21	(waf1)	protein	half-life	by	DNA	damage	and	Nutlin-3	in	p53	wild-type	tumors	and	its	therapeutic	implications.	Cancer	Biol	Ther.	2012;13(11):1047-1057.	doi:10.4161/cbt.21047.	30.	Abbas	T,	Dutta	A.	p21	in	cancer:	intricate	networks	and	multiple	activities.	Nat	Rev	Cancer.	2009;9(6):400-414.	doi:10.1038/nrc2657	31.	Nakano	 K,	 Vousden	 KH.	 PUMA,	 a	 novel	 proapoptotic	 gene,	 is	 induced	 by	 p53.	Mol	 Cell.	 2001;7(3):683-694.	 doi:10.1016/s1097-2765(01)00214-3	32.	Xin	M,	Deng	X.	Nicotine	inactivation	of	the	proapoptotic	function	of	Bax	through	phosphorylation.	J	Biol	Chem.	2005;280(11):10781-10789.	doi:10.1074/jbc.M500084200	33.	Yu	J,	Zhang	L.	PUMA,	a	potent	killer	with	or	without	p53.	Oncogene.	2008;27	Suppl	1(Suppl	1):S71-S83.	doi:10.1038/onc.2009.45	34.	Xie	 W,	 Zhang	 L,	 Jiao	 H,	 et	 al.	 Chaperone-mediated	 autophagy	 prevents	 apoptosis	 by	 degrading	 BBC3/PUMA.	Autophagy.	2015;11(9):1623-1635.	doi:10.1080/15548627.2015.1075688					
+
+Analysis Key Settings (Problem & Method) Output Report 
+Time‐Course 
+Sensitivity Analysis 
+Problem: Duration = 1 s; StepSize = 0.01 s; 
+StepNumber = 100; list of parameter CN identifiers 
+(e.g., ModelValue_0 = k_activation) in 
+ListOfParameters; list of species CN identifiers 
+(e.g., Metabolite_4 = DNA_damage) in 
+ListOfTargets.  
+ 
+Method: LSODA with sensitivities enabled; 
+Relative Tolerance = 1×10⁻⁶; Absolute Tolerance = 
+1×10⁻¹²; Max Internal Steps = 10000. 
+Tab‐delimited file containing time 
+points and ∂(target)/∂(parameter) 
+values at each integration step. 
+Steady‐State 
+Sensitivity Analysis 
+Problem: SubtaskType = 1 (steady‐state); 
+TargetFunctions = list of species (e.g., 
+Metabolite_28 = p21, Metabolite_29 = BAX); 
+ListOfVariables = list of parameter CN identifiers 
+(e.g., ModelValue_39 = k_p53_activation_ATR).  
+ 
+Method: Finite‐difference Sensitivities Method; 
+Delta factor = 0.001; Delta minimum = 1×10⁻⁶; 
+tolerances inherited from LSODA 
+(≈1×10⁻⁶,1×10⁻¹²); Max Internal Steps = 10000. 
+Tab‐delimited file listing each 
+parameter, each target species, and 
+the sensitivity 
+∂(target)/∂(parameter) at steady 
+state. 
+Lyapunov Exponent 
+Analysis 
+Problem: ExponentNumber = 3; 
+DivergenceRequested = true; TransientTime = 0 s.  
+ 
+Method: Wolf’s algorithm; Orthonormalization 
+Interval = 1 s; Overall Integration Time = 1000 s; 
+Relative Tolerance = 1×10⁻⁶; Absolute Tolerance = 
+1×10⁻¹²; Max Internal Steps = 10000. 
+Tab‐delimited file reporting the 
+first three Lyapunov exponents 
+(λ₁, λ₂, λ₃) and divergence values if 
+requested. 
+ 
+Supplementary Table 2. Sensitivity and stability analysis protocol
+
+ 
+ 
+• Model file: AT_ATM_ATR_forDR_v1.cps 
+• Software: COPASI version 4.44 (build 295) 
+(A) Time-Course Sensitivity Analysis 
+• Task: Time Course 
+• Duration: 1000 seconds; intervals: 100 
+• Sensitivity: Enabled 
+• Perturbed parameters: k_ATM, k_ATR, k_p53, etc. 
+• Output: Time-series CSV exported and visualized in R (Supplementary Figures 1 and 2) 
+(B) Steady-State Sensitivity Analysis 
+• Task: Steady-State 
+• Sensitivity: Enabled 
+• Global method: Central Difference 
+• Perturbation size: 1e-4 
+• Output: Sensitivity matrix exported as .txt and visualized in heatmap (Figure 6) 
+(C) Lyapunov Exponents (Wolf Method) 
+• Task: Lyapunov Exponents 
+• Method: Wolf 
+• Number of exponents: 3 
+• Time: 1000 
+• Tolerance: 1e-6 
+• Result: 3 negative exponents + average divergence reported in manuscript 
+Other specific details about the protocol are reported in Supplementary Table 2. 
+ 
+Supplementary Note  1. Supplementary reproducibility information.
+
+d ([ATM_inactive]·V Cell)
+d t
+=- V Cell·
+(
+k_activation·[DNA_damage]·(1 + [TOPBP1_active]) ·[ATM_inactive]
+V Cell )
++V Cell·
+(
+k_deactivation·[ATM_active]
+V Cell )
+d ([ATM_active]·V Cell)
+d t
+=+ V Cell·
+(
+k_activation·[DNA_damage]·(1 + [TOPBP1_active]) ·[ATM_inactive]
+V Cell )
+-V Cell·
+(
+k_deactivation·[ATM_active]
+V Cell )
+d ([ATR_inactive]·V Cell)
+d t
+=- V Cell·(
+k_ATR_activation·[DNA_damage]·[TOPBP1_active]· 1
+1+[ H D A C 4 _ a c t i v e ]
+·[ATR_inactive]
+V Cell
+)
++V Cell·
+(
+k_ATR_deactivation·[ATR_active]
+V Cell )
+d ([ATR_active]·V Cell)
+d t
+=+ V Cell·(
+k_ATR_activation·[DNA_damage]·[TOPBP1_active]· 1
+1+[ H D A C 4 _ a c t i v e ]
+·[ATR_inactive]
+V Cell
+)
+-V Cell·
+(
+k_ATR_deactivation·[ATR_active]
+V Cell )
+d ([DNA_damage]·V Cell)
+d t
+=- V Cell·
+(
+k_repair_ATR ·[ATR_active]·[DNA_damage]·(1 + [CHK1_active])
+V Cell )
+-V Cell·
+(
+k_repair ·[ATM_active]·[DNA_damage]
+V Cell )
+-V Cell·
+(
+k_NRF2_repair ·[NRF2_active]·[DNA_damage]
+V Cell )
+-V Cell·(
+k_autophagy_repair ·[Autophagy_active]·[DNA_damage]
+Km_autophagy + [DNA_damage]
+V Cell
+)
++V Cell·
+(
+k_damage_production
+V Cell )
+d ([p53_inactive]·V Cell)
+d t
+=- V Cell·
+(
+k_p53_activation_ATR ·[ATR_active]·[p53_inactive]
+V Cell )
+-V Cell·
+(
+k_p53_activation_CHK2 ·[CHK2_active]·[p53_inactive]
+V Cell )
+-V Cell·
+(
+k_p53_activation·[ATM_active]·[p53_inactive]
+V Cell )
++V Cell·
+(
+k_p53_deactivation·[p53_active]
+V Cell )
++V Cell·
+(
+k_HDAC4_p53 ·[HDAC4_active]·[p53_active]
+V Cell )
+d ([p53_active]·V Cell)
+d t
+=+ V Cell·
+(
+k_p53_activation_ATR ·[ATR_active]·[p53_inactive]
+V Cell )
++V Cell·
+(
+k_p53_activation_CHK2 ·[CHK2_active]·[p53_inactive]
+V Cell )
++V Cell·
+(
+k_p53_activation·[ATM_active]·[p53_inactive]
+V Cell )
+-V Cell·
+(
+k_p53_deactivation·[p53_active]
+V Cell )
+-V Cell·
+(
+k_HDAC4_p53 ·[HDAC4_active]·[p53_active]
+V Cell )
+d ([HDAC4_inactive]·V Cell)
+d t
+=+ V Cell·
+(
+k_dephos ·[HDAC4_phospho]
+V Cell )
+-V Cell·
+(
+k_HDAC4_activation·[PP2A]·[HDAC4_inactive]
+V Cell )
++V Cell·
+(
+k_HDAC4_deactivation·[ATM_active]·[HDAC4_active]
+V Cell )
+d ([HDAC4_active]·V Cell)
+d t
+=- V Cell·
+(
+k_CK2 ·[CK2]·[HDAC4_active]
+V Cell )
++V Cell·
+(
+k_HDAC4_activation·[PP2A]·[HDAC4_inactive]
+V Cell )
+-V Cell·
+(
+k_HDAC4_deactivation·[ATM_active]·[HDAC4_active]
+V Cell )
+d ([HDAC4_phospho]·V Cell)
+d t
+=+ V Cell·
+(
+k_CK2 ·[CK2]·[HDAC4_active]
+V Cell )
+-V Cell·
+(
+k_dephos ·[HDAC4_phospho]
+V Cell )
+d ([PP2A]·V Cell)
+d t
+=- V Cell·
+(
+k_binding·[PP2A]·[I2PP2A]
+V Cell )
++V Cell·
+(
+k_unbinding·[PP2A_I2PP2A]
+V Cell )
+d ([I2PP2A]·V Cell)
+d t
+=- V Cell·
+(
+k_binding·[PP2A]·[I2PP2A]
+V Cell )
++V Cell·
+(
+k_unbinding·[PP2A_I2PP2A]
+V Cell )
++V Cell·
+(
+k_I2PP2A_production·[ATM_active]
+V Cell )
+-V Cell·
+(
+k_I2PP2A_degradation·[I2PP2A]
+V Cell )
+d ([PP2A_I2PP2A]· V Cell)
+d t
+=+ V Cell·
+(
+k_binding·[PP2A]·[I2PP2A]
+V Cell )
+-V Cell·
+(
+k_unbinding·[PP2A_I2PP2A]
+V Cell )
+d ([TOPBP1_inactive]·V Cell)
+d t
+=- V Cell·
+(
+k_TOPBP1_activation·[DNA_damage]·[TOPBP1_inactive]
+V Cell )
++V Cell·
+(
+k_TOPBP1_deactivation·[TOPBP1_active]
+V Cell )
+-V Cell·
+(
+k_CK2_TOPBP1 ·(1 + alpha_spermidine ·[Spermidine]) ·[TOPBP1_inactive]
+V Cell )
+d ([TOPBP1_active]·V Cell)
+d t
+=+ V Cell·
+(
+k_TOPBP1_activation·[DNA_damage]·[TOPBP1_inactive]
+V Cell )
+-V Cell·
+(
+k_TOPBP1_deactivation·[TOPBP1_active]
+V Cell )
++V Cell·
+(
+k_CK2_TOPBP1 ·(1 + alpha_spermidine ·[Spermidine]) ·[TOPBP1_inactive]
+V Cell )
+d ([CHK1_inactive]·V Cell)
+d t
+=- V Cell·
+(
+k_CHK1_activation·[ATR_active]·[CHK1_inactive]
+V Cell )
++V Cell·
+(
+k_CHK1_deactivation·[CHK1_active]
+V Cell )
+d ([CHK1_active]·V Cell)
+d t
+=+ V Cell·
+(
+k_CHK1_activation·[ATR_active]·[CHK1_inactive]
+V Cell )
+-V Cell·
+(
+k_CHK1_deactivation·[CHK1_active]
+V Cell )
+d ([CHK2_inactive]·V Cell)
+d t
+=- V Cell·
+(
+k_CHK2_activation·[ATM_active]·[CHK2_inactive]
+V Cell )
++V Cell·
+(
+k_CHK2_deactivation·[CHK2_active]
+V Cell )
+d ([CHK2_active]·V Cell)
+d t
+=+ V Cell·
+(
+k_CHK2_activation·[ATM_active]·[CHK2_inactive]
+V Cell )
+-V Cell·
+(
+k_CHK2_deactivation·[CHK2_active]
+V Cell )
+d ([NRF2_inactive]·V Cell)
+d t
+=- V Cell·
+(
+k_NRF2_activation·[DNA_damage]·[NRF2_inactive]
+V Cell )
++V Cell·
+(
+k_NRF2_deactivation·[NRF2_active]
+V Cell )
+-V Cell·(
+k_NRF2_KEAP1 ·
+1
+1+ [Omaveloxolone]
+K_omav
+·[KEAP1]·[NRF2_inactive]
+V Cell
+)
+d ([NRF2_active]·V Cell)
+d t
+=+ V Cell·
+(
+k_NRF2_activation·[DNA_damage]·[NRF2_inactive]
+V Cell )
+-V Cell·
+(
+k_NRF2_deactivation·[NRF2_active]
+V Cell )
+d ([NRF2_degraded]·V Cell)
+d t
+=+ V Cell·(
+k_NRF2_KEAP1 ·
+1
+1+ [Omaveloxolone]
+K_omav
+·[KEAP1]·[NRF2_inactive]
+V Cell
+)
+d ([Autophagy_inactive]·V Cell)
+d t
+=- V Cell·
+(
+k_spermidine_activation·[Spermidine]·[Autophagy_inactive]
+V Cell )
++V Cell·
+(
+k_autophagy_deactivation·[Autophagy_active]
+V Cell )
+d ([Autophagy_active]·V Cell)
+d t
+=+ V Cell·
+(
+k_spermidine_activation·[Spermidine]·[Autophagy_inactive]
+V Cell )
+-V Cell·
+(
+k_autophagy_deactivation·[Autophagy_active]
+V Cell )
+d ([p21]·V Cell)
+d t
+=+ V Cell·
+(
+k_p21 ·[p53_active]
+V Cell )
+-V Cell·
+(
+k_p21_deg·[p21]
+V Cell )
+d ([BAX]·V Cell)
+d t
+=+ V Cell·
+(
+k_BAX ·[p53_active]
+V Cell )
+-V Cell·
+(
+k_BAX_deg·[BAX]
+V Cell )
+d ([PUMA]·V Cell)
+d t
+=+ V Cell·
+(
+k_PUMA ·[p53_active]
+V Cell )
+-V Cell·
+(
+k_PUMA_deg·[PUMA]
+V Cell )
+Supplementary Note 2. Complete list of the ordinary differential equations implemented in the ATM model.

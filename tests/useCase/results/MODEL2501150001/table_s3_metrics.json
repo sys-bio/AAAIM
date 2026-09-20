@@ -1,0 +1,42 @@
+{
+  "model": "MODEL2501150001",
+  "condition": "table_s3",
+  "configuration": {
+    "llm_model": "gpt-5-mini-2025-08-07",
+    "method": "direct",
+    "top_k": 3,
+    "n_return": 1,
+    "max_entities": null,
+    "entity_type": "auto",
+    "database": [
+      "chebi",
+      "uniprot"
+    ],
+    "tax_id": "9606",
+    "chunk_size": 50,
+    "max_completion_tokens": 12000,
+    "supplementary_context": "/Users/luna/Desktop/CRBM/AMAS_proj/AAAIM/tests/useCase/context/MODEL2501150001_TableS3.txt"
+  },
+  "metrics": {
+    "total_entities": 47,
+    "entities_with_predictions": 47,
+    "annotation_rate": 1.0,
+    "total_predictions": 114,
+    "matches": 0,
+    "accuracy": null,
+    "total_time": 257.3466041088104,
+    "llm_time": 256.0805661678314,
+    "search_time": 1.0754168033599854,
+    "llm_usage": {
+      "input_tokens": 8009,
+      "output_tokens": 14431,
+      "total_tokens": 22440,
+      "reasoning_tokens": 10304,
+      "cached_input_tokens": 1664,
+      "requests": 2,
+      "models": [
+        "gpt-5-mini-2025-08-07"
+      ]
+    }
+  }
+}

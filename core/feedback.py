@@ -74,6 +74,7 @@ class AnnotationResult:
         qualifier_annotations: Optional[Dict[str, List[str]]] = None,
         model_info: Optional[Dict[str, Any]] = None,
         csv_path: str = None,
+        validation: bool = False,
     ):
         self.recommendations_df = recommendations_df
         self.species_recommendations_df = None
@@ -95,6 +96,7 @@ class AnnotationResult:
         self._qualifier_annotations = qualifier_annotations or {}
         self._model_info = model_info
         self._csv_path = csv_path
+        self._validation = validation
         self._revision_count = 0
         self._revision_history: List[Dict[str, Any]] = []
 
@@ -134,6 +136,7 @@ class AnnotationResult:
             existing_annotations=self._existing_annotations,
             qualifier_annotations=self._qualifier_annotations,
             model_info=self._model_info,
+            validation=self._validation,
         )
 
         revision_metrics["iteration"] = self._revision_count
@@ -257,6 +260,7 @@ def _revise_recommendations(
     existing_annotations: Optional[Dict[str, List[str]]] = None,
     qualifier_annotations: Optional[Dict[str, List[str]]] = None,
     model_info: Optional[Dict[str, Any]] = None,
+    validation: bool = False,
 ) -> Tuple[pd.DataFrame, Dict[str, Any], List[Dict[str, Any]]]:
     """Single feedback revision round (internal implementation)."""
     start_time = time.time()
@@ -284,9 +288,14 @@ def _revise_recommendations(
 
     logger.info("Querying LLM with feedback (revision round)...")
     llm_start = time.time()
+    response_format = None
+    if validation:
+        from core.annotation_workflow import _normalization_response_format, _normalize_entity_type
+        response_format = _normalization_response_format(_normalize_entity_type(entity_type))
     assistant_message = query_llm_message_with_history(
         history,
         model=llm_model,
+        response_format=response_format,
     )
     llm_response = assistant_message.get("content") if assistant_message else ""
     llm_time = time.time() - llm_start
@@ -297,9 +306,23 @@ def _revise_recommendations(
 
     history.append(assistant_message)
 
-    synonyms_dict, entity_type_dict, reason, component_dict = parse_llm_response(
-        llm_response, entity_type
-    )
+    if validation:
+        from core.annotation_workflow import _normalize_entity_type, _parse_structured_normalization
+        try:
+            synonyms_dict, entity_type_dict, reason, component_dict = (
+                _parse_structured_normalization(
+                    llm_response,
+                    entities_to_evaluate,
+                    _normalize_entity_type(entity_type),
+                )
+            )
+        except ValueError as exc:
+            logger.warning("Structured feedback response failed validation: %s", exc)
+            return previous_recommendations_df, {"error": str(exc)}, history
+    else:
+        synonyms_dict, entity_type_dict, reason, component_dict = parse_llm_response(
+            llm_response, entity_type
+        )
 
     if reason:
         print(f"LLM Reason: {reason}")
@@ -334,6 +357,8 @@ def _revise_recommendations(
         entity_type_dict=entity_type_dict,
         model_info=model_info,
         component_dict=component_dict,
+        validation=validation,
+        model_file=model_file,
     )
     search_time = time.time() - search_start
 
@@ -353,6 +378,7 @@ def _revise_recommendations(
             llm_model=llm_model,
             n_return=n_return,
             model_notes=(model_info or {}).get("model_notes", "") or "",
+            validation=validation,
         )
         if not ranked_df.empty:
             updated_df = ranked_df

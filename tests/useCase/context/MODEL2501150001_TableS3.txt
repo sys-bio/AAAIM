@@ -1,0 +1,49 @@
+Species labels and names in the EGFR-ERK model (Table S3).
+
+mE: EGFR monomer
+mEL: EGF-bound EGFR monomer
+mELmEL: EGF-bound EGFR dimer
+E: EGF-bound pEGFR dimer
+SOS: SOS1/2
+GRB2_SOS: GRB2 bound to SOS
+EG2: EGF-bound pEGFR dimer bound to GRB2
+EG2SOS: EGF-bound pEGFR dimer bound to SOS
+RAS_GDP: GDP-bound RAS
+RAS_GTP: GTP-bound RAS
+BRAF: BRAF monomer
+BRAF_dimer: BRAF dimer
+iBRAF: BRAF inhibited by sorafenib
+iBRAF_dimer: iBRAF dimer
+BRAF_iBRAF_dimer: BRAF : iBRAF dimer
+RAF1: RAF1
+pRAF1: Phosphorylated RAF1
+iRAF1: RAF1 inhibited by sorafenib
+Ras_RAF1: RAS-GTP-bound RAF1
+Ras_iRAF1: RAS-GTP-bound iRAF1
+Ras_BRAF: RAS-GTP-bound BRAF
+Ras_iBRAF: RAS-GTP-bound iBRAF
+Ras_pRaf1: RAS-GTP-bound phosphorylated RAF1
+Ras_pRaf1_Raf1_tetramer: RAS-GTP-bound RAF1 : RAS-GTP-bound phosphorylated RAF1 homodimer
+Ras_pRaf1_iRaf1_tetramer: RAS-GTP-bound iRAF1 : RAS-GTP-bound phosphorylated RAF1 homodimer
+Ras_Braf_Raf1_tetramer: RAS-GTP-bound BRAF : RAS-GTP-bound RAF1 heterodimer
+Ras_iRaf1_tetramer: RAS-GTP-bound iRAF1 homodimer
+Ras_Braf_iRaf1_tetramer: RAS-GTP-bound BRAF : RAS-GTP-bound iRAF1 heterodimer
+Ras_pRaf1_tetramer: RAS-GTP-bound phosphorylated pRAF1 homodimer
+Ras_Braf_pRaf1_tetramer: RAS-GTP-bound BRAF : RAS-GTP-bound phosphorylated RAF1 heterodimer
+Ras_Raf1_iBRaf_tetramer: RAS-GTP-bound RAF1 : RAS-GTP-bound iBRAF heterodimer
+Ras_pRaf1_iBRaf_tetramer: RAS-GTP-bound phosphorylated iBRAF : RAS-GTP-bound phosphorylated RAF1 heterodimer
+Ras_iRaf1_iBRaf1_tetramer: RAS-GTP-bound iRAF1 : RAS-GTP-bound iBRAF heterodimer
+MEK: MEK1/2
+pMEK: Phosphorylated MEK1/2
+ERK: ERK1/2
+pERK: Phosphorylated ERK1/2
+nfpSOS: negative feedback phosphorylated SOS
+nfpRaf1: negative feedback phosphorylated RAF1
+nfpiRaf1: negative feedback phosphorylated iRAF1
+nfpBRaf: negative feedback phosphorylated BRAF
+nfpiBRaf: negative feedback phosphorylated iBRAF
+Ras_nfpRaf1: RAS-GTP-bound, negative feedback phosphorylated RAF1
+Ras_nfpBRaf: RAS-GTP-bound, negative feedback phosphorylated BRAF
+Ras_nfpiBRaf: RAS-GTP-bound, negative feedback phosphorylated iBRAF
+Ras_nfpiRaf1: RAS-GTP-bound, negative feedback phosphorylated iRAF1
+sorafenib: RAF1/BRAF inhibitor

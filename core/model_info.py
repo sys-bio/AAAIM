@@ -971,6 +971,36 @@ def extract_model_info(model_file: str, species_ids: List[str], entity_type: str
         "model_notes": model_notes
     }
 
+
+def get_species_chemical_properties(
+    model_file: str,
+    species_ids: Optional[List[str]] = None,
+) -> Dict[str, Dict[str, Any]]:
+    """Read FBC chemical formula and charge metadata for SBML species.
+
+    Only explicitly supplied values are returned. Models without the FBC
+    species extension therefore produce an empty mapping.
+    """
+    document = libsbml.readSBMLFromFile(model_file)
+    model = document.getModel()
+    if model is None:
+        return {}
+
+    selected = set(species_ids) if species_ids is not None else None
+    properties: Dict[str, Dict[str, Any]] = {}
+    for species in model.getListOfSpecies():
+        species_id = species.getId()
+        if selected is not None and species_id not in selected:
+            continue
+        plugin = species.getPlugin("fbc")
+        if plugin is None:
+            continue
+        formula = plugin.getChemicalFormula() if plugin.isSetChemicalFormula() else None
+        charge = int(plugin.getCharge()) if plugin.isSetCharge() else None
+        if formula is not None or charge is not None:
+            properties[species_id] = {"formula": formula, "charge": charge}
+    return properties
+
 def format_prompt(
     model_file: str,
     species_ids: List[str],
@@ -978,6 +1008,7 @@ def format_prompt(
     top_k: int = 3,
     context: bool = True,
     message: str = "",
+    structured_output: bool = False,
 ) -> str:
     """
     Format the information for the LLM prompt.
@@ -1006,6 +1037,17 @@ def format_prompt(
 
     def _auto_format_instructions(limit: int) -> str:
         options = _get_entity_type_options()
+        if structured_output:
+            return (
+                f"\nFor each species, determine its entity type ({options}).\n"
+                f"Return up to {limit} standardized names or common synonyms, ranked by likelihood.\n"
+                "For an ordinary entity, put its aliases in `names` and leave `components` empty. "
+                "For a physical complex, set `entity_type` to `complex`, leave `names` empty, "
+                "and list every distinct component in `components`, grouping aliases only within "
+                "one component and assigning each component chemical, protein, or gene type. "
+                "Return every requested species ID exactly once. Use `unknown` rather than guessing "
+                "when the model context does not support a molecular identity."
+            )
         return (
             f"\nFor each species, determine its entity type ({options}).\n"
             f"Return up to {limit} standardized names or common synonyms for each species, ranked by likelihood.\n"
@@ -1026,6 +1068,15 @@ def format_prompt(
         )
         if entity_type in (EntityType.GENE, EntityType.PROTEIN):
             component_type = entity_type.value
+            if structured_output:
+                return (
+                    f"\nReturn up to {limit} standardized names or common synonyms for each "
+                    f"{component_type}, ranked by likelihood. For an ordinary entity, put aliases "
+                    "in `names` and leave `components` empty. For a physical complex, set "
+                    "`entity_type` to `complex`, leave `names` empty, and list every distinct "
+                    f"component in `components` with component type `{component_type}`. Group aliases "
+                    "only within one component. Return every requested species ID exactly once."
+                )
             return (
                 f"\nReturn up to {limit} standardized names or common synonyms for each "
                 f"{component_type}, ranked by likelihood.\n"
@@ -1038,6 +1089,13 @@ def format_prompt(
                 f'ComplexSpecies: "component1", "alias1" ({component_type}); '
                 f'"component2", "alias2" ({component_type})\n'
                 + ("Reason: …" if include_reason else "")
+            )
+        if structured_output:
+            return (
+                f"\nReturn up to {limit} standardized names or common synonyms for each "
+                f"{entity_type.value}, ranked by likelihood. Put them in `names`, leave "
+                "`components` empty, and return every requested species ID exactly once. "
+                "Use an empty names list rather than guessing when no molecular identity is supported."
             )
         return (
             f"\nReturn up to {limit} standardized names or common synonyms for each "

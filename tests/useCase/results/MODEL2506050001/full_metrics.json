@@ -1,0 +1,119 @@
+{
+  "model": "MODEL2506050001",
+  "condition": "full",
+  "configuration": {
+    "llm_model": "gpt-5-mini-2025-08-07",
+    "method": "direct",
+    "top_k": 3,
+    "n_return": 1,
+    "max_entities": null,
+    "entity_type": "gene",
+    "database": [
+      "ncbigene"
+    ],
+    "tax_id": [
+      "9606",
+      "10090",
+      "10116"
+    ],
+    "chunk_size": 50
+  },
+  "metrics": {
+    "total_entities": 165,
+    "entities_with_predictions": 160,
+    "annotation_rate": 0.9696969696969697,
+    "total_predictions": 532,
+    "matches": 0,
+    "accuracy": null,
+    "total_time": 521.7346518039703,
+    "llm_time": 520.4181411266327,
+    "search_time": 0.3476431369781494,
+    "llm_usage": {
+      "input_tokens": 17339,
+      "output_tokens": 32205,
+      "total_tokens": 49544,
+      "reasoning_tokens": 25664,
+      "cached_input_tokens": 0,
+      "requests": 5,
+      "models": [
+        "gpt-5-mini-2025-08-07"
+      ]
+    }
+  },
+  "postprocessing": {
+    "reason": "Exact-label identity validation after tightening cross-taxon clustering.",
+    "removed_accessions": [
+      {
+        "id": "node_125",
+        "annotation": "NCBIGENE:11459",
+        "annotation_label": "Acta1",
+        "identity": "ACTA2",
+        "tax_id": "10090"
+      },
+      {
+        "id": "node_43",
+        "annotation": "NCBIGENE:50689",
+        "annotation_label": "Mapk3",
+        "identity": "MAPK1",
+        "tax_id": "10116"
+      },
+      {
+        "id": "node_43",
+        "annotation": "NCBIGENE:5595",
+        "annotation_label": "MAPK3",
+        "identity": "MAPK1",
+        "tax_id": "9606"
+      },
+      {
+        "id": "node_43",
+        "annotation": "NCBIGENE:26417",
+        "annotation_label": "Mapk3",
+        "identity": "MAPK1",
+        "tax_id": "10090"
+      },
+      {
+        "id": "node_51",
+        "annotation": "NCBIGENE:7837",
+        "annotation_label": "PXDN",
+        "identity": "PXN",
+        "tax_id": "9606"
+      },
+      {
+        "id": "node_93",
+        "annotation": "NCBIGENE:5163",
+        "annotation_label": "PDK1",
+        "identity": "PDPK1",
+        "tax_id": "9606"
+      },
+      {
+        "id": "node_93",
+        "annotation": "NCBIGENE:228026",
+        "annotation_label": "Pdk1",
+        "identity": "PDPK1",
+        "tax_id": "10090"
+      },
+      {
+        "id": "node_93",
+        "annotation": "NCBIGENE:116551",
+        "annotation_label": "Pdk1",
+        "identity": "PDPK1",
+        "tax_id": "10116"
+      },
+      {
+        "id": "node_98",
+        "annotation": "NCBIGENE:24654",
+        "annotation_label": "Plcb1",
+        "identity": "PLCG1",
+        "tax_id": "10116"
+      },
+      {
+        "id": "node_98",
+        "annotation": "NCBIGENE:24655",
+        "annotation_label": "Plcd1",
+        "identity": "PLCG1",
+        "tax_id": "10116"
+      }
+    ],
+    "rows_after": 537
+  }
+}

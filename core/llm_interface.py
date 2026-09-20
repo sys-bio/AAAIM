@@ -9,7 +9,7 @@ import re
 import time
 import requests
 from typing import Callable, Dict, List, Tuple, Any, Optional
-from openai import OpenAI, RateLimitError, APIError
+from openai import OpenAI, RateLimitError, APIError, APIConnectionError
 import logging
 from utils.constants import (
     EntityType,
@@ -73,6 +73,7 @@ def _make_api_call_with_retry(client, model: str, messages: list,
                                max_delay: float = DEFAULT_MAX_DELAY,
                                api_name: str = "API",
                                max_completion_tokens: Optional[int] = None,
+                               response_format: Optional[Dict[str, Any]] = None,
                                usage_callback: Optional[Callable[[Dict[str, Any]], None]] = None):
     """
     Make an API call with retry logic for rate limit errors (429).
@@ -97,6 +98,8 @@ def _make_api_call_with_retry(client, model: str, messages: list,
             request_kwargs = {"model": model, "messages": messages}
             if max_completion_tokens is not None:
                 request_kwargs["max_completion_tokens"] = max_completion_tokens
+            if response_format is not None:
+                request_kwargs["response_format"] = response_format
             response = client.chat.completions.create(**request_kwargs)
             if usage_callback is not None:
                 usage_callback(_extract_usage(response))
@@ -137,7 +140,8 @@ def _make_api_call_with_retry(client, model: str, messages: list,
             # Handle other API errors (500, 502, 503, etc.)
             last_exception = e
             status_code = getattr(e, "status_code", None)
-            if status_code in [500, 502, 503, 504] and attempt < max_retries:
+            retryable = status_code in [500, 502, 503, 504] or isinstance(e, APIConnectionError)
+            if retryable and attempt < max_retries:
                 wait_time = min(delay, max_delay)
                 print(f"API error ({status_code}) from {api_name}. Attempt {attempt + 1}/{max_retries + 1}. "
                       f"Waiting {wait_time:.1f}s before retry...")
@@ -165,6 +169,7 @@ def _make_openrouter_api_call_with_retry(
     initial_delay: float = DEFAULT_INITIAL_DELAY,
     max_delay: float = DEFAULT_MAX_DELAY,
     max_completion_tokens: Optional[int] = None,
+    response_format: Optional[Dict[str, Any]] = None,
     usage_callback: Optional[Callable[[Dict[str, Any]], None]] = None,
 ):
     """
@@ -184,6 +189,8 @@ def _make_openrouter_api_call_with_retry(
     }
     if max_completion_tokens is not None:
         payload["max_tokens"] = max_completion_tokens
+    if response_format is not None:
+        payload["response_format"] = response_format
 
     delay = initial_delay
     last_exception = None
@@ -350,6 +357,7 @@ def query_llm_message(
     max_retries: int = DEFAULT_MAX_RETRIES,
     initial_delay: float = DEFAULT_INITIAL_DELAY,
     max_completion_tokens: Optional[int] = None,
+    response_format: Optional[Dict[str, Any]] = None,
     usage_callback: Optional[Callable[[Dict[str, Any]], None]] = None,
 ) -> Dict[str, Any]:
     """
@@ -373,6 +381,7 @@ def query_llm_message(
         max_retries=max_retries,
         initial_delay=initial_delay,
         max_completion_tokens=max_completion_tokens,
+        response_format=response_format,
         usage_callback=usage_callback,
     )
 
@@ -380,6 +389,7 @@ def query_llm_message(
 def query_llm(prompt: str, developer_prompt: str = None, model=GPT_MINI_MODEL, entity_type: str = "chemical",
               max_retries: int = DEFAULT_MAX_RETRIES, initial_delay: float = DEFAULT_INITIAL_DELAY,
               max_completion_tokens: Optional[int] = None,
+              response_format: Optional[Dict[str, Any]] = None,
               usage_callback: Optional[Callable[[Dict[str, Any]], None]] = None):
     """
     Query the configured LLM with the formatted prompt.
@@ -405,6 +415,7 @@ def query_llm(prompt: str, developer_prompt: str = None, model=GPT_MINI_MODEL, e
         max_retries=max_retries,
         initial_delay=initial_delay,
         max_completion_tokens=max_completion_tokens,
+        response_format=response_format,
         usage_callback=usage_callback,
     )
     text = assistant_message.get("content") if assistant_message else None
@@ -420,6 +431,7 @@ def query_llm_message_with_history(
     max_retries: int = DEFAULT_MAX_RETRIES,
     initial_delay: float = DEFAULT_INITIAL_DELAY,
     max_completion_tokens: Optional[int] = None,
+    response_format: Optional[Dict[str, Any]] = None,
     usage_callback: Optional[Callable[[Dict[str, Any]], None]] = None,
 ) -> Dict[str, Any]:
     """Query the LLM with full history and return the assistant message dict."""
@@ -431,6 +443,7 @@ def query_llm_message_with_history(
             max_retries=max_retries, initial_delay=initial_delay,
             api_name="OpenAI",
             max_completion_tokens=max_completion_tokens,
+            response_format=response_format,
             usage_callback=usage_callback,
         )
     elif _is_openrouter_model(model):
@@ -440,6 +453,7 @@ def query_llm_message_with_history(
             max_retries=max_retries,
             initial_delay=initial_delay,
             max_completion_tokens=max_completion_tokens,
+            response_format=response_format,
             usage_callback=usage_callback,
         )
     else:
@@ -455,6 +469,7 @@ def query_llm_with_history(messages: list, model: str = GPT_MINI_MODEL,
                            max_retries: int = DEFAULT_MAX_RETRIES,
                            initial_delay: float = DEFAULT_INITIAL_DELAY,
                            max_completion_tokens: Optional[int] = None,
+                           response_format: Optional[Dict[str, Any]] = None,
                            usage_callback: Optional[Callable[[Dict[str, Any]], None]] = None) -> str:
     """
     Query the LLM with a full conversation history (multi-turn).
@@ -480,6 +495,7 @@ def query_llm_with_history(messages: list, model: str = GPT_MINI_MODEL,
         max_retries=max_retries,
         initial_delay=initial_delay,
         max_completion_tokens=max_completion_tokens,
+        response_format=response_format,
         usage_callback=usage_callback,
     )
     text = assistant_message.get("content") if assistant_message else None

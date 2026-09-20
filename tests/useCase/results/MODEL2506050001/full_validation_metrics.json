@@ -1,0 +1,89 @@
+{
+  "model": "MODEL2506050001",
+  "condition": "full_validation",
+  "configuration": {
+    "llm_model": "gpt-5-mini-2025-08-07",
+    "method": "direct",
+    "top_k": 3,
+    "n_return": 1,
+    "max_entities": null,
+    "entity_type": "gene",
+    "database": [
+      "ncbigene"
+    ],
+    "tax_id": [
+      "9606",
+      "10090",
+      "10116"
+    ],
+    "chunk_size": 50,
+    "validation": true
+  },
+  "metrics": {
+    "total_entities": 165,
+    "entities_with_predictions": 154,
+    "annotation_rate": 0.9333333333333333,
+    "total_predictions": 529,
+    "matches": 0,
+    "accuracy": null,
+    "total_time": 558.2808058261871,
+    "llm_time": 557.0857520103455,
+    "search_time": 0.31763291358947754,
+    "llm_usage": {
+      "input_tokens": 20040,
+      "output_tokens": 38755,
+      "total_tokens": 58795,
+      "reasoning_tokens": 25088,
+      "cached_input_tokens": 2304,
+      "requests": 6,
+      "models": [
+        "gpt-5-mini-2025-08-07"
+      ]
+    },
+    "validation": {
+      "enabled": true,
+      "event_counts": {
+        "structured_output_repair": 1,
+        "structured_output_valid": 5
+      },
+      "events": [
+        {
+          "kind": "structured_output_repair",
+          "stage": "normalization",
+          "attempt": 1,
+          "error": "entity ID mismatch; missing=['node_95', 'node_69'], unexpected=[], duplicates=['node_149']"
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "normalization",
+          "attempt": 2,
+          "entity_count": 50
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "normalization",
+          "attempt": 1,
+          "entity_count": 50
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "normalization",
+          "attempt": 1,
+          "entity_count": 50
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "normalization",
+          "attempt": 1,
+          "entity_count": 15
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "ranking",
+          "attempt": 1,
+          "entity_count": 78
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "model": "MODEL2507280001",
+  "condition": "full",
+  "configuration": {
+    "llm_model": "gpt-5-mini-2025-08-07",
+    "method": "direct",
+    "top_k": 3,
+    "n_return": 1,
+    "max_entities": null,
+    "entity_type": "chemical",
+    "database": [
+      "chebi"
+    ],
+    "tax_id": null,
+    "chunk_size": 50
+  },
+  "metrics": {
+    "total_entities": 593,
+    "entities_with_predictions": 552,
+    "annotation_rate": 0.9308600337268128,
+    "total_predictions": 552,
+    "matches": 0,
+    "accuracy": null,
+    "total_time": 1189.3415491580963,
+    "llm_time": 1141.4727153778076,
+    "search_time": 35.08277869224548,
+    "llm_usage": {
+      "input_tokens": 139750,
+      "output_tokens": 68279,
+      "total_tokens": 208029,
+      "reasoning_tokens": 46992,
+      "cached_input_tokens": 0,
+      "requests": 13,
+      "models": [
+        "gpt-5-mini-2025-08-07"
+      ]
+    }
+  },
+  "postprocessing": {
+    "reason": "The final LLM ranking response was empty.",
+    "fallback": "Deterministic retrieval-rank top 1 per species/component.",
+    "rows_before": 1222,
+    "rows_after": 593
+  }
+}

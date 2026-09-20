@@ -7,6 +7,8 @@ Currently supports ChEBI, extensible to other databases.
 
 import os
 import re
+import gzip
+import json
 import lzma
 import pickle
 from typing import Any, Dict, List, Mapping, Optional, Set, Tuple
@@ -18,7 +20,16 @@ from itertools import product
 import sys
 import chromadb
 from chromadb.utils import embedding_functions
-from utils.constants import REF_CHEBI2LABEL, REF_NAMES2CHEBI, REF_NCBIGENE2LABEL, REF_NAMES2NCBIGENE, REF_UNIPROT2LABEL, REF_NAMES2UNIPROT
+from utils.constants import (
+    REF_CHEBI2FORMULA,
+    REF_CHEBI2LABEL,
+    REF_CHEBI_STRUCTURE,
+    REF_NAMES2CHEBI,
+    REF_NCBIGENE2LABEL,
+    REF_NAMES2NCBIGENE,
+    REF_UNIPROT2LABEL,
+    REF_NAMES2UNIPROT,
+)
 from utils.constants import REF_CHEBI2KEGG_COMPOUND, REF_KEGG_REACTION2NAME, REF_KEGG2EC, REF_KEGG_REACTION_FEATURES, REF_KEGG_PARSED_REACTIONS
 # from utils.constants import SYNONYM_WORDS_TO_REMOVE
 from core.data_types import Recommendation, ReactionRecommendation
@@ -42,6 +53,8 @@ _CHROMADB_CLIENTS = {}
 # Cache for loaded dictionaries
 _CHEBI_CLEANNAMES_DICT: Optional[Dict[str, List[str]]] = None
 _CHEBI_LABEL_DICT: Optional[Dict[str, str]] = None
+_CHEBI_FORMULA_DICT: Optional[Dict[str, str]] = None
+_CHEBI_STRUCTURE_DICT: Optional[Dict[str, Dict[str, Optional[str]]]] = None
 _NCBIGENE_NAMES_DICT: Optional[Dict[str, List[str]]] = None
 _NCBIGENE_LABEL_DICT: Optional[Dict[str, str]] = None
 _UNIPROT_NAMES_DICT: Optional[Dict[str, List[str]]] = None
@@ -97,6 +110,32 @@ def load_chebi_label_dict() -> Dict[str, str]:
             _CHEBI_LABEL_DICT = pickle.load(f)
     
     return _CHEBI_LABEL_DICT
+
+
+def load_chebi_formula_dict() -> Dict[str, str]:
+    """Load ChEBI identifiers mapped to hydrogen-independent formulas."""
+    global _CHEBI_FORMULA_DICT
+
+    if _CHEBI_FORMULA_DICT is None:
+        data_file = get_data_dir() / "chebi" / REF_CHEBI2FORMULA
+        if not data_file.exists():
+            raise FileNotFoundError(f"ChEBI formula data file not found: {data_file}")
+        with lzma.open(data_file, "rb") as handle:
+            _CHEBI_FORMULA_DICT = pickle.load(handle)
+    return _CHEBI_FORMULA_DICT
+
+
+def load_chebi_structure_dict() -> Dict[str, Dict[str, Optional[str]]]:
+    """Load ChEBI structure metadata, including canonical SMILES when known."""
+    global _CHEBI_STRUCTURE_DICT
+
+    if _CHEBI_STRUCTURE_DICT is None:
+        data_file = get_data_dir() / "chebi" / REF_CHEBI_STRUCTURE
+        if not data_file.exists():
+            raise FileNotFoundError(f"ChEBI structure data file not found: {data_file}")
+        with gzip.open(data_file, "rt", encoding="utf-8") as handle:
+            _CHEBI_STRUCTURE_DICT = json.load(handle)
+    return _CHEBI_STRUCTURE_DICT
 
 def load_ncbigene_names_dict(tax_id: str = None) -> Dict[str, List[str]]:
     """

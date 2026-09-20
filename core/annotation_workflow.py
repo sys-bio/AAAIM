@@ -6,9 +6,12 @@ Provides the primary function that users will call to get recommendation tables
 for all species in a model.
 """
 
+import json
 import logging
+import re
 import time
 import warnings
+from collections import Counter
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
@@ -20,7 +23,9 @@ from core.database_search import (
     extract_classifications,
     get_species_recommendations_direct,
     get_species_recommendations_rag,
+    load_chebi_formula_dict,
     load_chebi_label_dict,
+    load_chebi_structure_dict,
     load_kegg_label_dict,
     load_ncbigene_label_dict,
     load_uniprot_label_dict,
@@ -48,6 +53,7 @@ from core.model_info import (
     get_all_reaction_ids,
     get_all_species_ids,
     get_species_display_names,
+    get_species_chemical_properties,
 )
 
 
@@ -62,6 +68,271 @@ SUPPORTED_SEARCH_DATABASES = {
     DatabaseID.UNIPROT.value,
     DatabaseID.KEGG.value,
 }
+
+DATABASE_ENTITY_TYPES = {
+    DatabaseID.CHEBI.value: EntityType.CHEMICAL.value,
+    DatabaseID.NCBIGENE.value: EntityType.GENE.value,
+    DatabaseID.UNIPROT.value: EntityType.PROTEIN.value,
+}
+
+
+def _json_schema_response_format(name: str, schema: Dict[str, Any]) -> Dict[str, Any]:
+    """Build the Chat Completions Structured Outputs request shape."""
+    return {
+        "type": "json_schema",
+        "json_schema": {"name": name, "strict": True, "schema": schema},
+    }
+
+
+def _normalization_response_format(
+    entity_type: EntityType = EntityType.AUTO,
+) -> Dict[str, Any]:
+    component_types = ["chemical", "protein", "gene"]
+    entity_types = ["chemical", "protein", "gene", "complex", "unknown"]
+    if entity_type not in (EntityType.AUTO, EntityType.COMPLEX):
+        component_types = [entity_type.value]
+        entity_types = [entity_type.value, "complex"]
+    component_schema = {
+        "type": "object",
+        "properties": {
+            "type": {"type": "string", "enum": component_types},
+            "names": {"type": "array", "items": {"type": "string"}},
+        },
+        "required": ["type", "names"],
+        "additionalProperties": False,
+    }
+    entity_schema = {
+        "type": "object",
+        "properties": {
+            "id": {"type": "string"},
+            "entity_type": {
+                "type": "string",
+                "enum": entity_types,
+            },
+            "names": {"type": "array", "items": {"type": "string"}},
+            "components": {"type": "array", "items": component_schema},
+        },
+        "required": ["id", "entity_type", "names", "components"],
+        "additionalProperties": False,
+    }
+    return _json_schema_response_format(
+        "aaaim_entity_normalization",
+        {
+            "type": "object",
+            "properties": {
+                "entities": {"type": "array", "items": entity_schema},
+                "reason": {"type": "string"},
+            },
+            "required": ["entities", "reason"],
+            "additionalProperties": False,
+        },
+    )
+
+
+def _ranking_response_format(n_return: int) -> Dict[str, Any]:
+    return _json_schema_response_format(
+        "aaaim_candidate_ranking",
+        {
+            "type": "object",
+            "properties": {
+                "units": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {"type": "string"},
+                            "selected_ids": {
+                                "type": "array",
+                                "items": {"type": "string"},
+                                "maxItems": max(0, int(n_return)),
+                            },
+                        },
+                        "required": ["id", "selected_ids"],
+                        "additionalProperties": False,
+                    },
+                }
+            },
+            "required": ["units"],
+            "additionalProperties": False,
+        },
+    )
+
+
+def _parse_structured_normalization(
+    response_text: str,
+    expected_ids: Sequence[str],
+    entity_type: EntityType,
+) -> Tuple[
+    Dict[str, List[str]],
+    Dict[str, str],
+    str,
+    Dict[str, List[Tuple[str, List[str]]]],
+]:
+    """Parse and semantically validate one structured normalization response."""
+    try:
+        payload = json.loads(response_text)
+    except (TypeError, json.JSONDecodeError) as exc:
+        raise ValueError(f"response is not valid JSON: {exc}") from exc
+    if not isinstance(payload, dict):
+        raise ValueError("normalization response must be a JSON object")
+
+    items = payload.get("entities")
+    if not isinstance(items, list):
+        raise ValueError("`entities` must be an array")
+    expected = list(expected_ids)
+    returned = [str(item.get("id", "")) for item in items if isinstance(item, dict)]
+    duplicates = sorted({item for item in returned if returned.count(item) > 1})
+    missing = [item for item in expected if item not in returned]
+    unexpected = [item for item in returned if item not in expected]
+    if duplicates or missing or unexpected or len(returned) != len(items):
+        raise ValueError(
+            f"entity ID mismatch; missing={missing}, unexpected={unexpected}, duplicates={duplicates}"
+        )
+
+    synonyms: Dict[str, List[str]] = {}
+    detected_types: Dict[str, str] = {}
+    components: Dict[str, List[Tuple[str, List[str]]]] = {}
+    for item in items:
+        species_id = str(item["id"])
+        names = [str(name).strip() for name in item.get("names", []) if str(name).strip()]
+        raw_components = item.get("components", [])
+        parsed_components: List[Tuple[str, List[str]]] = []
+        for component in raw_components:
+            component_names = [
+                str(name).strip()
+                for name in component.get("names", [])
+                if str(name).strip()
+            ]
+            if not component_names:
+                raise ValueError(f"component without names for {species_id}")
+            if (
+                entity_type not in (EntityType.AUTO, EntityType.COMPLEX)
+                and str(component["type"]) != entity_type.value
+            ):
+                raise ValueError(
+                    f"component type {component['type']} violates forced {entity_type.value} mode"
+                )
+            parsed_components.append((str(component["type"]), component_names))
+
+        if parsed_components:
+            components[species_id] = parsed_components
+            synonyms[species_id] = [
+                name for _component_type, component_names in parsed_components for name in component_names
+            ]
+            detected_types[species_id] = EntityType.COMPLEX.value
+        else:
+            raw_type = str(item.get("entity_type", "unknown"))
+            detected_types[species_id] = (
+                raw_type if entity_type == EntityType.AUTO else entity_type.value
+            )
+            if names:
+                synonyms[species_id] = names
+            else:
+                # An explicit per-entity abstention is valid. Preserve the ID so
+                # one uncertain entity cannot invalidate and discard its chunk.
+                synonyms[species_id] = ["UNK"]
+
+    return synonyms, detected_types, str(payload.get("reason", "")), components
+
+
+def _parse_structured_ranking(
+    response_text: str,
+    expected_units: Sequence[str],
+    allowed_ids: Dict[str, set[str]],
+    n_return: int,
+) -> Dict[str, List[str]]:
+    """Parse ranking JSON and ensure every selected identifier was offered."""
+    try:
+        payload = json.loads(response_text)
+    except (TypeError, json.JSONDecodeError) as exc:
+        raise ValueError(f"ranking response is not valid JSON: {exc}") from exc
+    if not isinstance(payload, dict):
+        raise ValueError("ranking response must be a JSON object")
+    units = payload.get("units")
+    if not isinstance(units, list):
+        raise ValueError("`units` must be an array")
+    returned = [str(item.get("id", "")) for item in units if isinstance(item, dict)]
+    expected = list(expected_units)
+    if sorted(returned) != sorted(expected) or len(returned) != len(set(returned)):
+        raise ValueError(f"ranking unit mismatch; expected={expected}, returned={returned}")
+    parsed: Dict[str, List[str]] = {}
+    for item in units:
+        unit_id = str(item["id"])
+        selected = [str(value).upper() for value in item.get("selected_ids", [])]
+        if len(selected) > n_return:
+            raise ValueError(f"too many selected IDs for {unit_id}")
+        invalid = [value for value in selected if value not in allowed_ids[unit_id]]
+        if invalid:
+            raise ValueError(f"IDs not present in candidate pool for {unit_id}: {invalid}")
+        parsed[unit_id] = selected
+    return parsed
+
+
+def _query_structured_normalization(
+    prompt: str,
+    system_prompt: str,
+    expected_ids: Sequence[str],
+    entity_type: EntityType,
+    llm_model: str,
+    max_completion_tokens: Optional[int],
+    usage_callback: Optional[Callable[[Dict[str, Any]], None]],
+    validation_events: Optional[List[Dict[str, Any]]] = None,
+) -> Tuple[
+    Dict[str, Any],
+    Tuple[
+        Dict[str, List[str]],
+        Dict[str, str],
+        str,
+        Dict[str, List[Tuple[str, List[str]]]],
+    ],
+]:
+    """Request structured normalization with one bounded semantic repair."""
+    response_format = _normalization_response_format(entity_type)
+    last_error = "empty response"
+    for attempt in range(2):
+        attempt_prompt = prompt
+        if attempt:
+            attempt_prompt += (
+                "\n\nThe prior structured response failed application validation: "
+                f"{last_error}. Return every requested ID exactly once and obey the schema."
+            )
+        assistant_message = query_llm_message(
+            attempt_prompt,
+            system_prompt,
+            model=llm_model,
+            entity_type=entity_type,
+            max_completion_tokens=max_completion_tokens,
+            response_format=response_format,
+            max_retries=2,
+            usage_callback=usage_callback,
+        )
+        response_text = assistant_message.get("content", "") if assistant_message else ""
+        try:
+            parsed = _parse_structured_normalization(
+                response_text, expected_ids, entity_type
+            )
+            if validation_events is not None:
+                validation_events.append(
+                    {
+                        "kind": "structured_output_valid",
+                        "stage": "normalization",
+                        "attempt": attempt + 1,
+                        "entity_count": len(expected_ids),
+                    }
+                )
+            return assistant_message, parsed
+        except ValueError as exc:
+            last_error = str(exc)
+            if validation_events is not None:
+                validation_events.append(
+                    {
+                        "kind": "structured_output_repair",
+                        "stage": "normalization",
+                        "attempt": attempt + 1,
+                        "error": last_error,
+                    }
+                )
+    raise ValueError(f"structured normalization failed after one repair: {last_error}")
 
 
 def _normalize_entity_type(entity_type: str | EntityType) -> EntityType:
@@ -147,6 +418,252 @@ def _search_one_database(
     return []
 
 
+def _recommendation_for(
+    recommendations: Sequence[Recommendation], species_id: str
+) -> Recommendation:
+    return next(
+        (rec for rec in recommendations if rec.id == species_id),
+        _empty_recommendation(species_id, {}),
+    )
+
+
+def _top_match_score(recommendation: Recommendation) -> float:
+    return max((float(score) for score in recommendation.match_score), default=0.0)
+
+
+def _top_candidate_summary(recommendation: Recommendation) -> Dict[str, Any]:
+    if not recommendation.candidates:
+        return {"candidate": None, "label": None, "score": 0.0}
+    scores = [float(value) for value in recommendation.match_score]
+    index = max(range(len(scores)), key=scores.__getitem__)
+    return {
+        "candidate": recommendation.candidates[index],
+        "label": (
+            recommendation.candidate_names[index]
+            if index < len(recommendation.candidate_names)
+            else recommendation.candidates[index]
+        ),
+        "score": scores[index],
+    }
+
+
+def _search_with_entity_type_validation(
+    species_id: str,
+    synonyms_dict: Dict[str, List[str]],
+    primary_database: str,
+    allowed_names: Sequence[str],
+    method: str,
+    top_k: int,
+    tax_id: str = None,
+    model_info: Dict[str, Any] = None,
+    model_type: str = None,
+    validation_events: Optional[List[Dict[str, Any]]] = None,
+    component_id: str = "",
+) -> Tuple[List[Recommendation], str, str]:
+    """Search allowed databases and conservatively correct a weak LLM route.
+
+    The LLM-selected database wins ties. An alternative route is accepted only
+    when its top retrieval score is 1.0 and strictly exceeds the selected
+    route's score.
+    """
+    by_database: Dict[str, List[Recommendation]] = {}
+    for database in allowed_names:
+        by_database[database] = _search_one_database(
+            [species_id],
+            {species_id: synonyms_dict.get(species_id, [species_id])},
+            database,
+            method,
+            top_k,
+            tax_id,
+            model_info,
+            model_type,
+        )
+
+    selected_database = primary_database
+    selected_rec = _recommendation_for(by_database.get(primary_database, []), species_id)
+    selected_score = _top_match_score(selected_rec)
+    for database in allowed_names:
+        if database == primary_database:
+            continue
+        alternative_rec = _recommendation_for(by_database[database], species_id)
+        alternative_score = _top_match_score(alternative_rec)
+        if alternative_score >= 1.0 - 1e-12 and alternative_score > selected_score + 1e-12:
+            selected_database = database
+            selected_rec = alternative_rec
+            selected_score = alternative_score
+
+    if selected_database != primary_database and validation_events is not None:
+        validation_events.append(
+            {
+                "kind": "entity_type_route_correction",
+                "species_id": species_id,
+                "component_id": component_id,
+                "from_database": primary_database,
+                "from_type": DATABASE_ENTITY_TYPES.get(primary_database, "unknown"),
+                "from_top": _top_candidate_summary(
+                    _recommendation_for(by_database.get(primary_database, []), species_id)
+                ),
+                "to_database": selected_database,
+                "to_type": DATABASE_ENTITY_TYPES.get(selected_database, "unknown"),
+                "to_top": _top_candidate_summary(selected_rec),
+            }
+        )
+    return by_database[selected_database], selected_database, DATABASE_ENTITY_TYPES.get(
+        selected_database, "unknown"
+    )
+
+
+def _formula_counter(formula: Optional[str]) -> Optional[Counter]:
+    """Parse a simple molecular formula after removing H/D protonation detail."""
+    if not formula:
+        return None
+    compact = re.sub(r"\s+", "", str(formula))
+    tokens = list(re.finditer(r"([A-Z][a-z]?)(\d*)", compact))
+    if not tokens or "".join(match.group(0) for match in tokens) != compact:
+        return None
+    result: Counter = Counter()
+    for match in tokens:
+        element = match.group(1)
+        if element in {"R", "X", "Y", "Z", "M"}:
+            # Generic substituents are not molecular formulas precise enough
+            # to establish a conflicting chemical identity.
+            return None
+        if element in {"H", "D"}:
+            continue
+        result[element] += int(match.group(2) or 1)
+    return result
+
+
+def _formal_charge_from_smiles(smiles: Optional[str]) -> Optional[int]:
+    """Read explicit formal charges from bracket atoms in a canonical SMILES."""
+    if not smiles:
+        return None
+    total = 0
+    for bracket in re.findall(r"\[([^\]]+)\]", smiles):
+        for sign, digits in re.findall(r"([+-]+)(\d*)", bracket):
+            magnitude = int(digits) if digits else len(sign)
+            total += magnitude if sign[0] == "+" else -magnitude
+    return total
+
+
+def _filter_recommendations_by_chemistry(
+    recommendations: List[Recommendation],
+    species_database: Dict[str, str],
+    candidate_databases: Dict[Tuple[str, str], str],
+    chemical_properties: Dict[str, Dict[str, Any]],
+    validation_events: Optional[List[Dict[str, Any]]] = None,
+) -> List[Recommendation]:
+    """Prefer FBC-consistent ChEBI candidates without erasing uncertain matches.
+
+    Formula/charge disagreement is decisive only when the same retrieval pool
+    contains a fully specified candidate matching heavy atoms and charge. ChEBI
+    often stores a neutral parent beside a charged child, and model formulas
+    may contain generic groups; a conflict alone is not evidence of a wrong
+    molecular identity.
+    """
+    if not chemical_properties:
+        return recommendations
+    formulas = load_chebi_formula_dict()
+    structures = load_chebi_structure_dict()
+    parallel_fields = (
+        "candidates",
+        "candidate_names",
+        "match_score",
+        "candidate_taxa",
+        "candidate_identities",
+        "candidate_identity_ranks",
+        "component_ids",
+        "component_names",
+        "component_types",
+        "candidate_ranks",
+    )
+
+    for recommendation in recommendations:
+        model_chemistry = chemical_properties.get(recommendation.id)
+        if not model_chemistry or not recommendation.candidates:
+            continue
+        model_formula = _formula_counter(model_chemistry.get("formula"))
+        model_charge = model_chemistry.get("charge")
+        candidate_assessments: List[Tuple[int, int, List[str], Optional[str], Optional[int]]] = []
+        for index, candidate in enumerate(recommendation.candidates):
+            component_id = (
+                recommendation.component_ids[index]
+                if index < len(recommendation.component_ids)
+                else ""
+            )
+            database = candidate_databases.get(
+                (recommendation.id, candidate), species_database.get(recommendation.id, "")
+            )
+            # A whole-species FBC formula cannot validate one component of a complex.
+            if database != DatabaseID.CHEBI.value or component_id:
+                candidate_assessments.append((2, index, [], None, None))
+                continue
+
+            candidate_formula_raw = formulas.get(str(candidate))
+            candidate_formula = _formula_counter(candidate_formula_raw)
+            structure = structures.get(f"CHEBI:{candidate}", {})
+            candidate_charge = _formal_charge_from_smiles(structure.get("smiles"))
+            conflicts: List[str] = []
+            quality = 2
+            if model_formula is not None and candidate_formula is not None:
+                if model_formula != candidate_formula:
+                    conflicts.append("formula")
+                else:
+                    quality = 0
+            elif model_formula is not None:
+                quality = 1
+            if model_charge is not None and candidate_charge is not None:
+                if int(model_charge) != int(candidate_charge):
+                    conflicts.append("charge")
+                elif quality > 0:
+                    quality = 1
+
+            candidate_assessments.append(
+                (quality, index, conflicts, candidate_formula_raw, candidate_charge)
+            )
+
+        exact_alternative = any(
+            quality == 0 and not conflicts
+            and model_formula is not None and model_charge is not None
+            and candidate_charge is not None
+            for quality, _index, conflicts, _formula, candidate_charge in candidate_assessments
+        )
+        keep_with_quality: List[Tuple[int, int]] = []
+        for quality, index, conflicts, candidate_formula_raw, candidate_charge in candidate_assessments:
+            if conflicts and exact_alternative:
+                if validation_events is not None:
+                    validation_events.append(
+                        {
+                            "kind": "chemical_candidate_rejected",
+                            "species_id": recommendation.id,
+                            "candidate": f"CHEBI:{recommendation.candidates[index]}",
+                            "label": (
+                                recommendation.candidate_names[index]
+                                if index < len(recommendation.candidate_names)
+                                else str(candidate)
+                            ),
+                            "conflicts": conflicts,
+                            "model_formula": model_chemistry.get("formula"),
+                            "candidate_formula": candidate_formula_raw,
+                            "model_charge": model_charge,
+                            "candidate_charge": candidate_charge,
+                        }
+                    )
+                continue
+            keep_with_quality.append((quality, index))
+
+        ordered_indexes = [index for _quality, index in sorted(keep_with_quality)]
+        for field in parallel_fields:
+            values = getattr(recommendation, field)
+            if values:
+                setattr(
+                    recommendation,
+                    field,
+                    [values[index] for index in ordered_indexes if index < len(values)],
+                )
+    return recommendations
+
+
 def _extend_search_hits(
     species_id: str,
     recs: List[Recommendation],
@@ -219,6 +736,8 @@ def _search_complex_species(
     model_info: Dict[str, Any] = None,
     components: Optional[List[Tuple[str, List[str]]]] = None,
     model_type: str = None,
+    validation: bool = False,
+    validation_events: Optional[List[Dict[str, Any]]] = None,
 ) -> Tuple[Recommendation, Dict[Tuple[str, str], str]]:
     """Search a complex: per-component DB if typed, else every allowed database."""
     candidate_databases: Dict[Tuple[str, str], str] = {}
@@ -250,10 +769,28 @@ def _search_complex_species(
                     "component_type": comp_type,
                 })
                 continue
-            recs = _search_one_database(
-                [species_id], {species_id: names}, db, method, top_k,
-                tax_id, model_info, model_type,
-            )
+            selected_type = comp_type
+            if validation and len(allowed_names) > 1:
+                recs, db, selected_type = _search_with_entity_type_validation(
+                    species_id,
+                    {species_id: names},
+                    db,
+                    allowed_names,
+                    method,
+                    top_k,
+                    tax_id,
+                    model_info,
+                    model_type,
+                    validation_events,
+                    component_id,
+                )
+                if selected_type != comp_type:
+                    components[component_index - 1] = (selected_type, names)
+            else:
+                recs = _search_one_database(
+                    [species_id], {species_id: names}, db, method, top_k,
+                    tax_id, model_info, model_type,
+                )
             appended = _extend_search_hits(
                 species_id, recs, db,
                 all_candidates, all_candidate_names, all_scores, candidate_databases,
@@ -266,7 +803,7 @@ def _search_complex_species(
                 all_candidate_ranks=all_candidate_ranks,
                 component_id=component_id,
                 component_name=component_name,
-                component_type=comp_type,
+                component_type=selected_type,
             )
             if not appended:
                 unmatched_components.append({
@@ -320,6 +857,9 @@ def _search_databases(
     entity_type_dict: Optional[Dict[str, str]] = None,
     model_info: Dict[str, Any] = None,
     component_dict: Optional[Dict[str, List[Tuple[str, List[str]]]]] = None,
+    validation: bool = False,
+    model_file: Optional[str] = None,
+    validation_events: Optional[List[Dict[str, Any]]] = None,
 ) -> Tuple[List[Recommendation], Dict[str, str], Dict[Tuple[str, str], str]]:
     """Search the appropriate database(s) for each entity.
 
@@ -363,6 +903,8 @@ def _search_databases(
                     rec, cand_dbs = _search_complex_species(
                         species_id, synonyms_dict, allowed_names, method, top_k,
                         tax_id, model_info, component_dict.get(species_id),
+                        validation=validation,
+                        validation_events=validation_events,
                     )
                     candidate_databases.update(cand_dbs)
                     all_recommendations.append(rec)
@@ -381,13 +923,38 @@ def _search_databases(
             logger.info(
                 f"Searching {target_database} for {len(species_list)} {detected_type} entities"
             )
-            group_recs = _search_one_database(
-                species_list, synonyms_dict, target_database, method, top_k, tax_id, model_info
-            )
-            for rec in group_recs:
-                species_database[rec.id] = target_database
-            all_recommendations.extend(group_recs)
+            if validation and len(allowed_names) > 1:
+                for species_id in species_list:
+                    recs, selected_database, selected_type = _search_with_entity_type_validation(
+                        species_id,
+                        synonyms_dict,
+                        target_database,
+                        allowed_names,
+                        method,
+                        top_k,
+                        tax_id,
+                        model_info,
+                        validation_events=validation_events,
+                    )
+                    entity_type_dict[species_id] = selected_type
+                    species_database[species_id] = selected_database
+                    all_recommendations.extend(recs)
+            else:
+                group_recs = _search_one_database(
+                    species_list, synonyms_dict, target_database, method, top_k, tax_id, model_info
+                )
+                for rec in group_recs:
+                    species_database[rec.id] = target_database
+                all_recommendations.extend(group_recs)
 
+        if validation and model_file:
+            all_recommendations = _filter_recommendations_by_chemistry(
+                all_recommendations,
+                species_database,
+                candidate_databases,
+                get_species_chemical_properties(model_file, entities),
+                validation_events,
+            )
         return all_recommendations, species_database, candidate_databases
 
     if len(databases) > 1:
@@ -418,9 +985,19 @@ def _search_databases(
             tax_id,
             model_info,
             component_dict.get(species_id),
+            validation=validation,
+            validation_events=validation_events,
         )
         candidate_databases.update(candidate_dbs)
         recommendations.append(rec)
+    if validation and model_file:
+        recommendations = _filter_recommendations_by_chemistry(
+            recommendations,
+            species_database,
+            candidate_databases,
+            get_species_chemical_properties(model_file, entities),
+            validation_events,
+        )
     return recommendations, species_database, candidate_databases
 
 
@@ -786,6 +1363,8 @@ def rank_species_annotations_with_llm(
     model_notes: str = "",
     max_completion_tokens: Optional[int] = None,
     usage_callback: Optional[Callable[[Dict[str, Any]], None]] = None,
+    validation: bool = False,
+    validation_events: Optional[List[Dict[str, Any]]] = None,
 ) -> pd.DataFrame:
     """Re-rank biological identities and keep at most *n_return* per unit.
 
@@ -829,20 +1408,87 @@ def rank_species_annotations_with_llm(
             f"{_species_ranking_context(sid, sub)}\n{choices}"
             for sid, sub, choices, _identity_map in to_rank
         )
-        prompt = SPECIES_ANNOTATION_RANKING_PROMPT.format(
-            n_return=n_return,
-            model_notes=notes_block,
-            entities=entities,
-        )
-        parsed = _parse_ranked_id_lines(
-            query_llm(
-                prompt,
-                model=llm_model,
-                entity_type=EntityType.CHEMICAL,
-                max_completion_tokens=max_completion_tokens,
-                usage_callback=usage_callback,
+        if validation:
+            prompt = (
+                f"Task: For each species or complex component, select up to {n_return} "
+                "best matching biological identity IDs.\n\n"
+                f"{notes_block}{entities}\n\n"
+                "Choose only representative IDs listed for that unit. A representative ID "
+                "may stand for accessions of the same identity in several taxa. Return an "
+                "empty selected_ids array when none match. Do not invent identifiers."
             )
-        )
+            expected_units = [sid for sid, _sub, _choices, _identity_map in to_rank]
+            allowed_ids = {
+                sid: set(identity_map)
+                for sid, _sub, _choices, identity_map in to_rank
+            }
+            parsed: Dict[str, List[str]] = {}
+            last_error = "empty response"
+            for attempt in range(2):
+                attempt_prompt = prompt
+                if attempt:
+                    attempt_prompt += (
+                        "\n\nThe prior structured response failed application validation: "
+                        f"{last_error}. Return every unit exactly once and choose only offered IDs."
+                    )
+                response_text = query_llm(
+                    attempt_prompt,
+                    model=llm_model,
+                    entity_type=EntityType.CHEMICAL,
+                    max_completion_tokens=max_completion_tokens,
+                    response_format=_ranking_response_format(n_return),
+                    max_retries=2,
+                    usage_callback=usage_callback,
+                )
+                try:
+                    parsed = _parse_structured_ranking(
+                        response_text, expected_units, allowed_ids, n_return
+                    )
+                    if validation_events is not None:
+                        validation_events.append(
+                            {
+                                "kind": "structured_output_valid",
+                                "stage": "ranking",
+                                "attempt": attempt + 1,
+                                "entity_count": len(expected_units),
+                            }
+                        )
+                    break
+                except ValueError as exc:
+                    last_error = str(exc)
+                    if validation_events is not None:
+                        validation_events.append(
+                            {
+                                "kind": "structured_output_repair",
+                                "stage": "ranking",
+                                "attempt": attempt + 1,
+                                "error": last_error,
+                            }
+                        )
+            else:
+                if validation_events is not None:
+                    validation_events.append(
+                        {
+                            "kind": "structured_output_fallback",
+                            "stage": "ranking",
+                            "error": last_error,
+                        }
+                    )
+        else:
+            prompt = SPECIES_ANNOTATION_RANKING_PROMPT.format(
+                n_return=n_return,
+                model_notes=notes_block,
+                entities=entities,
+            )
+            parsed = _parse_ranked_id_lines(
+                query_llm(
+                    prompt,
+                    model=llm_model,
+                    entity_type=EntityType.CHEMICAL,
+                    max_completion_tokens=max_completion_tokens,
+                    usage_callback=usage_callback,
+                )
+            )
         for sid, sub, _choices, identity_map in to_rank:
             selected = parsed.get(sid)
             if selected is None:
@@ -914,6 +1560,7 @@ def annotate_single_model(
     em_max_iterations: int = 5,
     message: str = "",
     max_completion_tokens: Optional[int] = None,
+    validation: bool = False,
 ) -> Tuple[pd.DataFrame, Dict[str, Any]]:
     """
     Annotate a single model that has no or limited existing annotations.
@@ -956,6 +1603,9 @@ def annotate_single_model(
         message: Optional user note included in LLM prompts.
         max_completion_tokens: Optional per-request output-token ceiling passed
             to the LLM provider. Token usage is recorded in ``metrics['llm_usage']``.
+        validation: Enable structured LLM responses with one bounded repair,
+            conservative cross-database entity-type correction in ``auto`` mode,
+            and FBC formula/charge filtering for ChEBI candidates. Default False.
 
     Returns:
         AnnotationResult. Species tables are on ``species_recommendations_df``;
@@ -971,6 +1621,7 @@ def annotate_single_model(
     all_responses: List[str] = []
     assistant_messages: List[Dict[str, Any]] = []
     llm_usage_records: List[Dict[str, Any]] = []
+    validation_events: List[Dict[str, Any]] = []
     system_prompt: str = ""
 
     # logger.info(f"Starting annotation for model: {model_file}")
@@ -1019,6 +1670,7 @@ def annotate_single_model(
             verbose=verbose,
             message=message,
             max_completion_tokens=max_completion_tokens,
+            validation=validation,
         )
         if not hasattr(species_result, "species_recommendations_df"):
             return species_result
@@ -1046,6 +1698,7 @@ def annotate_single_model(
             em_max_iterations=em_max_iterations,
             message=message,
             max_completion_tokens=max_completion_tokens,
+            validation=validation,
         )
         if hasattr(reaction_result, "recommendations_df"):
             reaction_result.species_recommendations_df = species_df
@@ -1198,7 +1851,13 @@ def annotate_single_model(
                 logger.info(f"Processing chunk {chunk_idx + 1}/{len(species_chunks)} ({len(chunk)} entities)")
 
                 # Format prompt for this chunk
-                prompt = format_prompt(model_file, chunk, entity_type, message=message)
+                prompt = format_prompt(
+                    model_file,
+                    chunk,
+                    entity_type,
+                    message=message,
+                    structured_output=validation,
+                )
 
                 if not prompt:
                     logger.error(f"Failed to format prompt for chunk {chunk_idx + 1}")
@@ -1208,14 +1867,26 @@ def annotate_single_model(
 
                 llm_start = time.time()
                 try:
-                    assistant_message = query_llm_message(
-                        prompt,
-                        system_prompt,
-                        model=llm_model,
-                        entity_type=entity_type,
-                        max_completion_tokens=max_completion_tokens,
-                        usage_callback=llm_usage_records.append,
-                    )
+                    if validation:
+                        assistant_message, parsed_chunk = _query_structured_normalization(
+                            prompt,
+                            system_prompt,
+                            chunk,
+                            entity_type,
+                            llm_model,
+                            max_completion_tokens,
+                            llm_usage_records.append,
+                            validation_events,
+                        )
+                    else:
+                        assistant_message = query_llm_message(
+                            prompt,
+                            system_prompt,
+                            model=llm_model,
+                            entity_type=entity_type,
+                            max_completion_tokens=max_completion_tokens,
+                            usage_callback=llm_usage_records.append,
+                        )
                     result = assistant_message.get("content") if assistant_message else ""
                     chunk_llm_time = time.time() - llm_start
                     total_llm_time += chunk_llm_time
@@ -1233,7 +1904,15 @@ def annotate_single_model(
                     continue
 
                 # Parse LLM response
-                chunk_synonyms_dict, chunk_entity_type_dict, chunk_reason, chunk_component_dict = parse_llm_response(result, entity_type)
+                if validation:
+                    (
+                        chunk_synonyms_dict,
+                        chunk_entity_type_dict,
+                        chunk_reason,
+                        chunk_component_dict,
+                    ) = parsed_chunk
+                else:
+                    chunk_synonyms_dict, chunk_entity_type_dict, chunk_reason, chunk_component_dict = parse_llm_response(result, entity_type)
 
                 # Accumulate synonyms and detected entity types
                 all_synonyms_dict.update(chunk_synonyms_dict)
@@ -1254,7 +1933,13 @@ def annotate_single_model(
 
         else:
             # Single prompt for all entities
-            prompt = format_prompt(model_file, entities_to_evaluate, entity_type, message=message)
+            prompt = format_prompt(
+                model_file,
+                entities_to_evaluate,
+                entity_type,
+                message=message,
+                structured_output=validation,
+            )
 
             if not prompt:
                 logger.error("Failed to format prompt")
@@ -1264,14 +1949,26 @@ def annotate_single_model(
 
             llm_start = time.time()
             try:
-                assistant_message = query_llm_message(
-                    prompt,
-                    system_prompt,
-                    model=llm_model,
-                    entity_type=entity_type,
-                    max_completion_tokens=max_completion_tokens,
-                    usage_callback=llm_usage_records.append,
-                )
+                if validation:
+                    assistant_message, parsed_single = _query_structured_normalization(
+                        prompt,
+                        system_prompt,
+                        entities_to_evaluate,
+                        entity_type,
+                        llm_model,
+                        max_completion_tokens,
+                        llm_usage_records.append,
+                        validation_events,
+                    )
+                else:
+                    assistant_message = query_llm_message(
+                        prompt,
+                        system_prompt,
+                        model=llm_model,
+                        entity_type=entity_type,
+                        max_completion_tokens=max_completion_tokens,
+                        usage_callback=llm_usage_records.append,
+                    )
                 result = assistant_message.get("content") if assistant_message else ""
                 llm_time = time.time() - llm_start
 
@@ -1288,7 +1985,10 @@ def annotate_single_model(
                 return pd.DataFrame(), {"error": f"LLM query failed: {e}"}
 
             # Parse LLM response
-            synonyms_dict, entity_type_dict, reason, component_dict = parse_llm_response(result, entity_type)
+            if validation:
+                synonyms_dict, entity_type_dict, reason, component_dict = parsed_single
+            else:
+                synonyms_dict, entity_type_dict, reason, component_dict = parse_llm_response(result, entity_type)
 
         if not synonyms_dict:
             logger.error("Failed to parse LLM response")
@@ -1316,6 +2016,9 @@ def annotate_single_model(
             entity_type_dict=entity_type_dict,
             model_info=model_info,
             component_dict=component_dict,
+            validation=validation,
+            model_file=model_file,
+            validation_events=validation_events,
         )
         search_time = time.time() - search_start
         logger.info(f"Database search completed in {search_time:.2f}s")
@@ -1346,6 +2049,8 @@ def annotate_single_model(
                 ),
                 max_completion_tokens=max_completion_tokens,
                 usage_callback=llm_usage_records.append,
+                validation=validation,
+                validation_events=validation_events,
             )
             llm_time += time.time() - rank_start
             if not ranked_df.empty:
@@ -1360,6 +2065,11 @@ def annotate_single_model(
         recommendations_df, existing_annotations, max_entities, len(all_entity_ids), total_time, llm_time, search_time
     )
     metrics["llm_usage"] = summarize_usage_records(llm_usage_records)
+    metrics["validation"] = {
+        "enabled": validation,
+        "event_counts": dict(Counter(event["kind"] for event in validation_events)),
+        "events": validation_events,
+    }
 
     if not recommendations_df.empty and "id" in recommendations_df.columns:
         recommendations_df = recommendations_df[recommendations_df["id"] != "Reason:"].reset_index(drop=True)
@@ -1399,6 +2109,7 @@ def annotate_single_model(
         qualifier_annotations=qualifier_annotations,
         model_info=model_info,
         csv_path=csv_path,
+        validation=validation,
     )
     if annotate == "reactions":
         result.reaction_recommendations_df = recommendations_df

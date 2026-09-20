@@ -73,6 +73,20 @@ Set `annotate` to choose what to annotate:
 
 Species annotation uses two size knobs. `top_k` is the number of biological identities retained by direct/RAG retrieval per ordinary species or per parsed complex component (default 3). `n_return` is the number of identities retained by the final LLM ranking (default 3). Taxon-specific accessions belonging to one identity do not consume additional identity slots. Synonym generation is fixed at 3 and is not controlled by either parameter. The LLM ranking step runs only when a unit has more identities than `n_return`, and all such units are ranked in one LLM call. For example, `top_k=3, n_return=1` retrieves three identities and reports the top identity; a three-component complex reports one identity for each component. Reactions retain their existing candidate-based interpretation of these parameters.
 
+Optional `validation=True` changes the species workflow; it is off by default.
+It requests structured JSON for name normalization and candidate ranking,
+checks that every requested species/component is represented, and disallows
+ranked identifiers outside the retrieved pool. A malformed response gets one
+repair request; ranking then falls back to retrieval order if still invalid.
+For automatic entity typing, a perfect direct match in an allowed alternative
+database can override the LLM's route when it scores strictly higher than the
+selected route. Forced entity types are not changed. For ChEBI candidates,
+SBML FBC formula and charge are compared with local ChEBI data. Mismatched
+candidates are removed only if the same retrieval pool contains a fully
+specified heavy-atom-formula-and-charge match; otherwise the conflict is inconclusive and
+the pool remains available for review. These checks do not establish biological
+correctness and are recorded under `result.metrics["validation"]`.
+
 #### Chemical Annotation (ChEBI)
 
 ```python
@@ -351,6 +365,7 @@ result = annotate_model(
     method = "direct",					 # species search: "direct" or "rag"; reactions always use rule-based matching + LLM ranking
     top_k = 3,						 # identity pool per species or complex component
     n_return = 1,					 # final identities kept per species/component
+    validation = False,             # optional species validation guards
     chunk_size = 50,					 # split large models into chunks of 50 entities (None for no chunking)
     species_recommendations_df = None,			 # species table or CSV; used when annotate="reactions"
     save_to = None,					 # output prefix; writes <save_to>_species.csv / <save_to>_reactions.csv
@@ -432,6 +447,12 @@ print_evaluation_results(
 After LLM name normalization, direct matching expands composite gene/protein fields into lookup-safe forms. For example, `MAP2K1 (MEK1), MAP2K2 (MEK2)` contributes the original text plus `MAP2K1`, `MEK1`, `MAP2K2`, and `MEK2`; transcript descriptors are removed from additional lookup variants. Chemical punctuation is preserved.
 
 Retrieval ranks `top_k` biological identities per ordinary species or parsed complex component. NCBI Gene and UniProt candidates are grouped across requested taxa before accessions are expanded. The LLM then retains up to `n_return` identities per unit. Output columns preserve `component_id`, `component_name`, `component_type`, `identity`, `identity_rank`, `retrieval_identity_rank`, `candidate_rank`, and `tax_id`. An unmatched parsed component receives its own empty row so complex completeness can be evaluated.
+
+When `validation=True`, the ranking LLM is also a constrained selection check:
+it must choose from retrieved IDs. This is not an independent validation of
+entity type or molecular identity; cross-database matching and FBC chemistry
+checks supply separate evidence before ranking. The validation mode applies
+to species annotation, not the reaction ranking method.
 
 Cross-taxon identity grouping uses exact normalized canonical labels, not fuzzy
 symbol similarity. This keeps ortholog labels together while preventing distinct

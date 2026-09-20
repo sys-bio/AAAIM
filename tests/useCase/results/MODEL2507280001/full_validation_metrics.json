@@ -1,0 +1,5386 @@
+{
+  "model": "MODEL2507280001",
+  "condition": "full_validation",
+  "configuration": {
+    "llm_model": "gpt-5-mini-2025-08-07",
+    "method": "direct",
+    "top_k": 3,
+    "n_return": 1,
+    "max_entities": null,
+    "entity_type": "chemical",
+    "database": [
+      "chebi"
+    ],
+    "tax_id": null,
+    "chunk_size": 50,
+    "validation": true
+  },
+  "metrics": {
+    "total_entities": 593,
+    "entities_with_predictions": 540,
+    "annotation_rate": 0.9106239460370995,
+    "total_predictions": 540,
+    "matches": 0,
+    "accuracy": null,
+    "total_time": 922.7980968952179,
+    "llm_time": 874.7169237136841,
+    "search_time": 35.26599073410034,
+    "llm_usage": {
+      "input_tokens": 150630,
+      "output_tokens": 88224,
+      "total_tokens": 238854,
+      "reasoning_tokens": 49024,
+      "cached_input_tokens": 21888,
+      "requests": 15,
+      "models": [
+        "gpt-5-mini-2025-08-07"
+      ]
+    },
+    "validation": {
+      "enabled": true,
+      "event_counts": {
+        "structured_output_valid": 13,
+        "structured_output_repair": 2,
+        "chemical_candidate_rejected": 400
+      },
+      "events": [
+        {
+          "kind": "structured_output_valid",
+          "stage": "normalization",
+          "attempt": 1,
+          "entity_count": 50
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "normalization",
+          "attempt": 1,
+          "entity_count": 50
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "normalization",
+          "attempt": 1,
+          "entity_count": 50
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "normalization",
+          "attempt": 1,
+          "entity_count": 50
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "normalization",
+          "attempt": 1,
+          "entity_count": 50
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "normalization",
+          "attempt": 1,
+          "entity_count": 50
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "normalization",
+          "attempt": 1,
+          "entity_count": 50
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "normalization",
+          "attempt": 1,
+          "entity_count": 50
+        },
+        {
+          "kind": "structured_output_repair",
+          "stage": "normalization",
+          "attempt": 1,
+          "error": "entity ID mismatch; missing=['M_fum_s', 'M_din_c', 'M_3php_c', 'M_pg181_s', 'M_pg181_p', 'M_tdec2eACP_c', 'M_aspsa_c', 'M_2obut_p', 'M_dpcoa_c', 'M_k_p', 'M_2obut_s', 'M_k_s', 'M_23dhdp_c', 'M_thmpp_e', 'M_5mta_c', 'M_thmpp_c', 'M_1_g_AA_for_senescent_adult_e', 'M_amp_c', 'M_dcdp_c'], unexpected=[], duplicates=[]"
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "normalization",
+          "attempt": 2,
+          "entity_count": 50
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "normalization",
+          "attempt": 1,
+          "entity_count": 50
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "normalization",
+          "attempt": 1,
+          "entity_count": 50
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "normalization",
+          "attempt": 1,
+          "entity_count": 43
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_xu5p__D_c",
+          "candidate": "CHEBI:16332",
+          "label": "D-xylulose 5-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H9O8P",
+          "candidate_formula": "C5O8P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_dgdp_c",
+          "candidate": "CHEBI:28862",
+          "label": "dGDP",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H12N5O10P2",
+          "candidate_formula": "C10N5O10P2",
+          "model_charge": -3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_hisp_c",
+          "candidate": "CHEBI:16996",
+          "label": "L-histidinol phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H11N3O4P",
+          "candidate_formula": "C6N3O4P",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cobalt2_s",
+          "candidate": "CHEBI:16526",
+          "label": "carbon dioxide",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "Co",
+          "candidate_formula": "CO2",
+          "model_charge": 2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cobalt2_s",
+          "candidate": "CHEBI:29325",
+          "label": "oxidooxomethyl",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "Co",
+          "candidate_formula": "CO2",
+          "model_charge": 2,
+          "candidate_charge": -1
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_chor_c",
+          "candidate": "CHEBI:17333",
+          "label": "chorismic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H8O6",
+          "candidate_formula": "C10O6",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_dcamp_c",
+          "candidate": "CHEBI:15919",
+          "label": "N(6)-(1,2-dicarboxyethyl)-AMP",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C14H14N5O11P",
+          "candidate_formula": "C14N5O11P",
+          "model_charge": -4,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_octa_p",
+          "candidate": "CHEBI:28837",
+          "label": "octanoic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C8H15O2",
+          "candidate_formula": "C8O2",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_fprica_c",
+          "candidate": "CHEBI:18381",
+          "label": "5-formamido-1-(5-phospho-D-ribosyl)imidazole-4-carboxamide",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H13N4O9P",
+          "candidate_formula": "C10N4O9P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_octa_s",
+          "candidate": "CHEBI:28837",
+          "label": "octanoic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C8H15O2",
+          "candidate_formula": "C8O2",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ppi_c",
+          "candidate": "CHEBI:18361",
+          "label": "diphosphate(4-)",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "HO7P2",
+          "candidate_formula": "O7P2",
+          "model_charge": -3,
+          "candidate_charge": -4
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ppi_c",
+          "candidate": "CHEBI:29888",
+          "label": "diphosphoric acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "HO7P2",
+          "candidate_formula": "O7P2",
+          "model_charge": -3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_met__L_e",
+          "candidate": "CHEBI:16044",
+          "label": "L-methionine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C5H11NO2S",
+          "candidate_formula": "C5NOS",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_octa_e",
+          "candidate": "CHEBI:28837",
+          "label": "octanoic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C8H15O2",
+          "candidate_formula": "C8O2",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cobalt2_c",
+          "candidate": "CHEBI:16526",
+          "label": "carbon dioxide",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "Co",
+          "candidate_formula": "CO2",
+          "model_charge": 2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cobalt2_c",
+          "candidate": "CHEBI:29325",
+          "label": "oxidooxomethyl",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "Co",
+          "candidate_formula": "CO2",
+          "model_charge": 2,
+          "candidate_charge": -1
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_atp_c",
+          "candidate": "CHEBI:15422",
+          "label": "ATP",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H12N5O13P3",
+          "candidate_formula": "C10N5O13P3",
+          "model_charge": -4,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_btn_e",
+          "candidate": "CHEBI:15956",
+          "label": "biotin",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H15N2O3S",
+          "candidate_formula": "C10N2O3S",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cobalt2_e",
+          "candidate": "CHEBI:16526",
+          "label": "carbon dioxide",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "Co",
+          "candidate_formula": "CO2",
+          "model_charge": 2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cobalt2_e",
+          "candidate": "CHEBI:29325",
+          "label": "oxidooxomethyl",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "Co",
+          "candidate_formula": "CO2",
+          "model_charge": 2,
+          "candidate_charge": -1
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_btn_s",
+          "candidate": "CHEBI:15956",
+          "label": "biotin",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H15N2O3S",
+          "candidate_formula": "C10N2O3S",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cobalt2_p",
+          "candidate": "CHEBI:16526",
+          "label": "carbon dioxide",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "Co",
+          "candidate_formula": "CO2",
+          "model_charge": 2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cobalt2_p",
+          "candidate": "CHEBI:29325",
+          "label": "oxidooxomethyl",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "Co",
+          "candidate_formula": "CO2",
+          "model_charge": 2,
+          "candidate_charge": -1
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_octa_c",
+          "candidate": "CHEBI:28837",
+          "label": "octanoic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C8H15O2",
+          "candidate_formula": "C8O2",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_met__L_c",
+          "candidate": "CHEBI:16044",
+          "label": "L-methionine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C5H11NO2S",
+          "candidate_formula": "C5NOS",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_btn_p",
+          "candidate": "CHEBI:15956",
+          "label": "biotin",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H15N2O3S",
+          "candidate_formula": "C10N2O3S",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pphn_c",
+          "candidate": "CHEBI:16666",
+          "label": "prephenic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H8O6",
+          "candidate_formula": "C10O6",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cmp_e",
+          "candidate": "CHEBI:17361",
+          "label": "cytidine 5'-monophosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H12N3O8P",
+          "candidate_formula": "C9N3O8P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cmp_e",
+          "candidate": "CHEBI:233489",
+          "label": "cytidine monophosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H12N3O8P",
+          "candidate_formula": "C9N3O8P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_co2_e",
+          "candidate": "CHEBI:48828",
+          "label": "cobalt(2+)",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "CO2",
+          "candidate_formula": "Co",
+          "model_charge": 0,
+          "candidate_charge": 2
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_co2_e",
+          "candidate": "CHEBI:29325",
+          "label": "oxidooxomethyl",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "CO2",
+          "candidate_formula": "CO2",
+          "model_charge": 0,
+          "candidate_charge": -1
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_met__L_p",
+          "candidate": "CHEBI:16044",
+          "label": "L-methionine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C5H11NO2S",
+          "candidate_formula": "C5NOS",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_btn_c",
+          "candidate": "CHEBI:15956",
+          "label": "biotin",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H15N2O3S",
+          "candidate_formula": "C10N2O3S",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_co2_c",
+          "candidate": "CHEBI:48828",
+          "label": "cobalt(2+)",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "CO2",
+          "candidate_formula": "Co",
+          "model_charge": 0,
+          "candidate_charge": 2
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_co2_c",
+          "candidate": "CHEBI:29325",
+          "label": "oxidooxomethyl",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "CO2",
+          "candidate_formula": "CO2",
+          "model_charge": 0,
+          "candidate_charge": -1
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cmp_c",
+          "candidate": "CHEBI:17361",
+          "label": "cytidine 5'-monophosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H12N3O8P",
+          "candidate_formula": "C9N3O8P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cmp_c",
+          "candidate": "CHEBI:233489",
+          "label": "cytidine monophosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H12N3O8P",
+          "candidate_formula": "C9N3O8P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_met__L_s",
+          "candidate": "CHEBI:16044",
+          "label": "L-methionine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C5H11NO2S",
+          "candidate_formula": "C5NOS",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_2me4p_c",
+          "candidate": "CHEBI:17764",
+          "label": "2-C-methyl-D-erythritol 4-(dihydrogen phosphate)",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H11O7P",
+          "candidate_formula": "C5O7P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_2me4p_c",
+          "candidate": "CHEBI:42383",
+          "label": "ethyl dihydrogen phosphate",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "C5H11O7P",
+          "candidate_formula": "C2O4P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_asn__L_s",
+          "candidate": "CHEBI:50347",
+          "label": "L-asparagine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C4H8N2O3",
+          "candidate_formula": "C4N2O2",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_asn__L_p",
+          "candidate": "CHEBI:50347",
+          "label": "L-asparagine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C4H8N2O3",
+          "candidate_formula": "C4N2O2",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cmp_p",
+          "candidate": "CHEBI:17361",
+          "label": "cytidine 5'-monophosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H12N3O8P",
+          "candidate_formula": "C9N3O8P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cmp_p",
+          "candidate": "CHEBI:233489",
+          "label": "cytidine monophosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H12N3O8P",
+          "candidate_formula": "C9N3O8P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_co2_p",
+          "candidate": "CHEBI:48828",
+          "label": "cobalt(2+)",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "CO2",
+          "candidate_formula": "Co",
+          "model_charge": 0,
+          "candidate_charge": 2
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_co2_p",
+          "candidate": "CHEBI:29325",
+          "label": "oxidooxomethyl",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "CO2",
+          "candidate_formula": "CO2",
+          "model_charge": 0,
+          "candidate_charge": -1
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cmp_s",
+          "candidate": "CHEBI:17361",
+          "label": "cytidine 5'-monophosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H12N3O8P",
+          "candidate_formula": "C9N3O8P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cmp_s",
+          "candidate": "CHEBI:233489",
+          "label": "cytidine monophosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H12N3O8P",
+          "candidate_formula": "C9N3O8P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_co2_s",
+          "candidate": "CHEBI:48828",
+          "label": "cobalt(2+)",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "CO2",
+          "candidate_formula": "Co",
+          "model_charge": 0,
+          "candidate_charge": 2
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_co2_s",
+          "candidate": "CHEBI:29325",
+          "label": "oxidooxomethyl",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "CO2",
+          "candidate_formula": "CO2",
+          "model_charge": 0,
+          "candidate_charge": -1
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_3c3hmp_c",
+          "candidate": "CHEBI:35128",
+          "label": "(2S)-2-isopropylmalic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C7H10O5",
+          "candidate_formula": "C7O5",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_8aonn_c",
+          "candidate": "CHEBI:12266",
+          "label": "8-amino-7-oxononanoate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H17NO3",
+          "candidate_formula": "C9NO3",
+          "model_charge": 0,
+          "candidate_charge": -1
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_asn__L_c",
+          "candidate": "CHEBI:50347",
+          "label": "L-asparagine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C4H8N2O3",
+          "candidate_formula": "C4N2O2",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_fol_c",
+          "candidate": "CHEBI:27470",
+          "label": "folic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C19H17N7O6",
+          "candidate_formula": "C19N7O6",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_dhf_e",
+          "candidate": "CHEBI:15633",
+          "label": "dihydrofolic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C19H19N7O6",
+          "candidate_formula": "C19N7O6",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_dhf_c",
+          "candidate": "CHEBI:15633",
+          "label": "dihydrofolic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C19H19N7O6",
+          "candidate_formula": "C19N7O6",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_fol_e",
+          "candidate": "CHEBI:27470",
+          "label": "folic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C19H17N7O6",
+          "candidate_formula": "C19N7O6",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ppbng_c",
+          "candidate": "CHEBI:17381",
+          "label": "porphobilinogen",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H13N2O4",
+          "candidate_formula": "C10N2O4",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ppbng_c",
+          "candidate": "CHEBI:75377",
+          "label": "phenyl biguanide",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "C10H13N2O4",
+          "candidate_formula": "C8N5",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_uamr_c",
+          "candidate": "CHEBI:88385",
+          "label": "UDP-N-acetylmuraminate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C20H28N3O19P2",
+          "candidate_formula": "C20N3O19P2",
+          "model_charge": -3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_uamr_c",
+          "candidate": "CHEBI:70765",
+          "label": "UDP-N-acetyl-alpha-D-muramic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C20H28N3O19P2",
+          "candidate_formula": "C20N3O19P2",
+          "model_charge": -3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_asn__L_e",
+          "candidate": "CHEBI:50347",
+          "label": "L-asparagine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C4H8N2O3",
+          "candidate_formula": "C4N2O2",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_gmhep1p_c",
+          "candidate": "CHEBI:28137",
+          "label": "D-glycero-D-manno-heptose 1-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C7H13O10P",
+          "candidate_formula": "C7O10P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_dhf_s",
+          "candidate": "CHEBI:15633",
+          "label": "dihydrofolic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C19H19N7O6",
+          "candidate_formula": "C19N7O6",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_dhf_p",
+          "candidate": "CHEBI:15633",
+          "label": "dihydrofolic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C19H19N7O6",
+          "candidate_formula": "C19N7O6",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_acglu_c",
+          "candidate": "CHEBI:17533",
+          "label": "N-acetyl-L-glutamic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C7H9NO5",
+          "candidate_formula": "C7NO5",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_dump_c",
+          "candidate": "CHEBI:17622",
+          "label": "dUMP",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H11N2O8P",
+          "candidate_formula": "C9N2O8P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ac_s",
+          "candidate": "CHEBI:47622",
+          "label": "acetate ester",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C2H3O2",
+          "candidate_formula": "C2O2R",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ac_s",
+          "candidate": "CHEBI:15366",
+          "label": "acetic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C2H3O2",
+          "candidate_formula": "C2O2",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ac_p",
+          "candidate": "CHEBI:47622",
+          "label": "acetate ester",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C2H3O2",
+          "candidate_formula": "C2O2R",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ac_p",
+          "candidate": "CHEBI:15366",
+          "label": "acetic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C2H3O2",
+          "candidate_formula": "C2O2",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_thf_c",
+          "candidate": "CHEBI:15635",
+          "label": "(6S)-5,6,7,8-tetrahydrofolic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C19H21N7O6",
+          "candidate_formula": "C19N7O6",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_thf_c",
+          "candidate": "CHEBI:20506",
+          "label": "5,6,7,8-tetrahydrofolic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C19H21N7O6",
+          "candidate_formula": "C19N7O6",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_g3p_c",
+          "candidate": "CHEBI:29052",
+          "label": "D-glyceraldehyde 3-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C3H5O6P",
+          "candidate_formula": "C3O6P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_g3p_c",
+          "candidate": "CHEBI:17138",
+          "label": "glyceraldehyde 3-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C3H5O6P",
+          "candidate_formula": "C3O6P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_mi1p__D_c",
+          "candidate": "CHEBI:18297",
+          "label": "1D-myo-inositol 1-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H11O9P",
+          "candidate_formula": "C6O9P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_10fthf_c",
+          "candidate": "CHEBI:15637",
+          "label": "10-formyltetrahydrofolic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C20H21N7O7",
+          "candidate_formula": "C20N7O7",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_coa_c",
+          "candidate": "CHEBI:15346",
+          "label": "coenzyme A",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C21H32N7O16P3S",
+          "candidate_formula": "C21N7O16P3S",
+          "model_charge": -4,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_skm_c",
+          "candidate": "CHEBI:16119",
+          "label": "shikimic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C7H9O5",
+          "candidate_formula": "C7O5",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_val__L_s",
+          "candidate": "CHEBI:30015",
+          "label": "L-valine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C5H11NO2",
+          "candidate_formula": "C5NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ru5p__D_c",
+          "candidate": "CHEBI:17363",
+          "label": "D-ribulose 5-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H9O8P",
+          "candidate_formula": "C5O8P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_fol_s",
+          "candidate": "CHEBI:27470",
+          "label": "folic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C19H17N7O6",
+          "candidate_formula": "C19N7O6",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_3psme_c",
+          "candidate": "CHEBI:16257",
+          "label": "5-O-(1-carboxyvinyl)-3-phosphoshikimic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H9O10P",
+          "candidate_formula": "C10O10P",
+          "model_charge": -4,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_fol_p",
+          "candidate": "CHEBI:27470",
+          "label": "folic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C19H17N7O6",
+          "candidate_formula": "C19N7O6",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_amob_c",
+          "candidate": "CHEBI:8944",
+          "label": "S-adenosyl-4-methylthio-2-oxobutanoic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C15H19N5O6S",
+          "candidate_formula": "C15N5O6S",
+          "model_charge": 0,
+          "candidate_charge": 1
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_val__L_c",
+          "candidate": "CHEBI:30015",
+          "label": "L-valine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C5H11NO2",
+          "candidate_formula": "C5NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_val__L_e",
+          "candidate": "CHEBI:30015",
+          "label": "L-valine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C5H11NO2",
+          "candidate_formula": "C5NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_lys__L_p",
+          "candidate": "CHEBI:18019",
+          "label": "L-lysine",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H15N2O2",
+          "candidate_formula": "C6N2O2",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_lys__L_p",
+          "candidate": "CHEBI:133538",
+          "label": "L-lysine zwitterion",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H15N2O2",
+          "candidate_formula": "C6N2O2",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_val__L_p",
+          "candidate": "CHEBI:30015",
+          "label": "L-valine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C5H11NO2",
+          "candidate_formula": "C5NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_lys__L_s",
+          "candidate": "CHEBI:18019",
+          "label": "L-lysine",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H15N2O2",
+          "candidate_formula": "C6N2O2",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_lys__L_s",
+          "candidate": "CHEBI:133538",
+          "label": "L-lysine zwitterion",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H15N2O2",
+          "candidate_formula": "C6N2O2",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_anth_c",
+          "candidate": "CHEBI:30754",
+          "label": "anthranilic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C7H6NO2",
+          "candidate_formula": "C7NO2",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_anth_c",
+          "candidate": "CHEBI:135974",
+          "label": "meradimate",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "C7H6NO2",
+          "candidate_formula": "C17NO2",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ser__L_p",
+          "candidate": "CHEBI:29999",
+          "label": "L-serine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C3H7NO3",
+          "candidate_formula": "C3NO2",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ser__L_c",
+          "candidate": "CHEBI:29999",
+          "label": "L-serine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C3H7NO3",
+          "candidate_formula": "C3NO2",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ser__L_e",
+          "candidate": "CHEBI:29999",
+          "label": "L-serine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C3H7NO3",
+          "candidate_formula": "C3NO2",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_lys__L_c",
+          "candidate": "CHEBI:18019",
+          "label": "L-lysine",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H15N2O2",
+          "candidate_formula": "C6N2O2",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_lys__L_c",
+          "candidate": "CHEBI:133538",
+          "label": "L-lysine zwitterion",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H15N2O2",
+          "candidate_formula": "C6N2O2",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_lys__L_e",
+          "candidate": "CHEBI:18019",
+          "label": "L-lysine",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H15N2O2",
+          "candidate_formula": "C6N2O2",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_lys__L_e",
+          "candidate": "CHEBI:133538",
+          "label": "L-lysine zwitterion",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H15N2O2",
+          "candidate_formula": "C6N2O2",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ribflv_s",
+          "candidate": "CHEBI:57986",
+          "label": "riboflavin(1-)",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C17H20N4O6",
+          "candidate_formula": "C17N4O6",
+          "model_charge": 0,
+          "candidate_charge": -1
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_amet_c",
+          "candidate": "CHEBI:67040",
+          "label": "S-adenosyl-L-methioninate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C15H23N6O5S",
+          "candidate_formula": "C15N6O5S",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_tyr__L_e",
+          "candidate": "CHEBI:46858",
+          "label": "L-tyrosine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C9H11NO3",
+          "candidate_formula": "C9NO2",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_tyr__L_c",
+          "candidate": "CHEBI:46858",
+          "label": "L-tyrosine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C9H11NO3",
+          "candidate_formula": "C9NO2",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ribflv_p",
+          "candidate": "CHEBI:57986",
+          "label": "riboflavin(1-)",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C17H20N4O6",
+          "candidate_formula": "C17N4O6",
+          "model_charge": 0,
+          "candidate_charge": -1
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ser__L_s",
+          "candidate": "CHEBI:29999",
+          "label": "L-serine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C3H7NO3",
+          "candidate_formula": "C3NO2",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_dudp_c",
+          "candidate": "CHEBI:28850",
+          "label": "dUDP",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H11N2O11P2",
+          "candidate_formula": "C9N2O11P2",
+          "model_charge": -3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_h2mb4p_c",
+          "candidate": "CHEBI:15664",
+          "label": "(2E)-4-hydroxy-3-methylbut-2-en-1-yl diphosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H9O8P2",
+          "candidate_formula": "C5O8P2",
+          "model_charge": -3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_utp_c",
+          "candidate": "CHEBI:15713",
+          "label": "UTP",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H11N2O15P3",
+          "candidate_formula": "C9N2O15P3",
+          "model_charge": -4,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ribflv_c",
+          "candidate": "CHEBI:57986",
+          "label": "riboflavin(1-)",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C17H20N4O6",
+          "candidate_formula": "C17N4O6",
+          "model_charge": 0,
+          "candidate_charge": -1
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_tyr__L_s",
+          "candidate": "CHEBI:46858",
+          "label": "L-tyrosine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C9H11NO3",
+          "candidate_formula": "C9NO2",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_tyr__L_p",
+          "candidate": "CHEBI:46858",
+          "label": "L-tyrosine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C9H11NO3",
+          "candidate_formula": "C9NO2",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ribflv_e",
+          "candidate": "CHEBI:57986",
+          "label": "riboflavin(1-)",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C17H20N4O6",
+          "candidate_formula": "C17N4O6",
+          "model_charge": 0,
+          "candidate_charge": -1
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_4mop_p",
+          "candidate": "CHEBI:48430",
+          "label": "4-methyl-2-oxopentanoic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H9O3",
+          "candidate_formula": "C6O3",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_4mop_e",
+          "candidate": "CHEBI:48430",
+          "label": "4-methyl-2-oxopentanoic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H9O3",
+          "candidate_formula": "C6O3",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_dctp_c",
+          "candidate": "CHEBI:16311",
+          "label": "dCTP",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H12N3O13P3",
+          "candidate_formula": "C9N3O13P3",
+          "model_charge": -4,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_4mop_c",
+          "candidate": "CHEBI:48430",
+          "label": "4-methyl-2-oxopentanoic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H9O3",
+          "candidate_formula": "C6O3",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_gtp_c",
+          "candidate": "CHEBI:15996",
+          "label": "GTP",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H12N5O14P3",
+          "candidate_formula": "C10N5O14P3",
+          "model_charge": -4,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_so3_c",
+          "candidate": "CHEBI:48854",
+          "label": "sulfurous acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "O3S",
+          "candidate_formula": "O3S",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_dtmp_c",
+          "candidate": "CHEBI:17013",
+          "label": "dTMP",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H13N2O8P",
+          "candidate_formula": "C10N2O8P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_dtmp_c",
+          "candidate": "CHEBI:46960",
+          "label": "dTMP(-)",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H13N2O8P",
+          "candidate_formula": "C10N2O8P",
+          "model_charge": -2,
+          "candidate_charge": -1
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ac_c",
+          "candidate": "CHEBI:47622",
+          "label": "acetate ester",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C2H3O2",
+          "candidate_formula": "C2O2R",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ac_c",
+          "candidate": "CHEBI:15366",
+          "label": "acetic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C2H3O2",
+          "candidate_formula": "C2O2",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ac_e",
+          "candidate": "CHEBI:47622",
+          "label": "acetate ester",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C2H3O2",
+          "candidate_formula": "C2O2R",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ac_e",
+          "candidate": "CHEBI:15366",
+          "label": "acetic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C2H3O2",
+          "candidate_formula": "C2O2",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ala__D_c",
+          "candidate": "CHEBI:29949",
+          "label": "D-alanine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C3H7NO2",
+          "candidate_formula": "C3NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_eig3p_c",
+          "candidate": "CHEBI:17805",
+          "label": "D-erythro-1-(imidazol-4-yl)glycerol 3-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H9N2O6P",
+          "candidate_formula": "C6N2O6P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cbasp_c",
+          "candidate": "CHEBI:15859",
+          "label": "N-carbamoyl-L-aspartic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H6N2O5",
+          "candidate_formula": "C5N2O5",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pser__L_c",
+          "candidate": "CHEBI:15811",
+          "label": "O-phospho-L-serine",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C3H6NO6P",
+          "candidate_formula": "C3NO6P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pser__L_c",
+          "candidate": "CHEBI:37712",
+          "label": "O-phosphoserine",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C3H6NO6P",
+          "candidate_formula": "C3NO6P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_spmd_e",
+          "candidate": "CHEBI:16610",
+          "label": "spermidine",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C7H22N3",
+          "candidate_formula": "C7N3",
+          "model_charge": 3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_spmd_e",
+          "candidate": "CHEBI:16841",
+          "label": "bis(3-aminopropyl)amine",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "C7H22N3",
+          "candidate_formula": "C6N3",
+          "model_charge": 3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_acg5sa_c",
+          "candidate": "CHEBI:16319",
+          "label": "2-acetamido-5-oxopentanoic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C7H10NO4",
+          "candidate_formula": "C7NO4",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_udp_c",
+          "candidate": "CHEBI:17659",
+          "label": "UDP",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H11N2O12P2",
+          "candidate_formula": "C9N2O12P2",
+          "model_charge": -3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_spmd_c",
+          "candidate": "CHEBI:16610",
+          "label": "spermidine",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C7H22N3",
+          "candidate_formula": "C7N3",
+          "model_charge": 3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_spmd_c",
+          "candidate": "CHEBI:16841",
+          "label": "bis(3-aminopropyl)amine",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "C7H22N3",
+          "candidate_formula": "C6N3",
+          "model_charge": 3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_orot_c",
+          "candidate": "CHEBI:16742",
+          "label": "orotic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H3N2O4",
+          "candidate_formula": "C5N2O4",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_spmd_p",
+          "candidate": "CHEBI:16610",
+          "label": "spermidine",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C7H22N3",
+          "candidate_formula": "C7N3",
+          "model_charge": 3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_spmd_p",
+          "candidate": "CHEBI:16841",
+          "label": "bis(3-aminopropyl)amine",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "C7H22N3",
+          "candidate_formula": "C6N3",
+          "model_charge": 3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_mnl1p_c",
+          "candidate": "CHEBI:16298",
+          "label": "D-mannitol 1-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H13O9P",
+          "candidate_formula": "C6O9P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_dtbt_c",
+          "candidate": "CHEBI:42280",
+          "label": "(4R,5S)-dethiobiotin",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H17N2O3",
+          "candidate_formula": "C10N2O3",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_dtbt_c",
+          "candidate": "CHEBI:16691",
+          "label": "dethiobiotin",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H17N2O3",
+          "candidate_formula": "C10N2O3",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cdp_c",
+          "candidate": "CHEBI:17239",
+          "label": "CDP",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H12N3O11P2",
+          "candidate_formula": "C9N3O11P2",
+          "model_charge": -3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cdp_c",
+          "candidate": "CHEBI:3611",
+          "label": "chlordiazepoxide",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "C9H12N3O11P2",
+          "candidate_formula": "C16ClN3O",
+          "model_charge": -3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_spmd_s",
+          "candidate": "CHEBI:16610",
+          "label": "spermidine",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C7H22N3",
+          "candidate_formula": "C7N3",
+          "model_charge": 3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_spmd_s",
+          "candidate": "CHEBI:16841",
+          "label": "bis(3-aminopropyl)amine",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "C7H22N3",
+          "candidate_formula": "C6N3",
+          "model_charge": 3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pro__L_e",
+          "candidate": "CHEBI:50342",
+          "label": "L-proline residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C5H9NO2",
+          "candidate_formula": "C5NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pro__L_c",
+          "candidate": "CHEBI:50342",
+          "label": "L-proline residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C5H9NO2",
+          "candidate_formula": "C5NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_nadph_c",
+          "candidate": "CHEBI:16474",
+          "label": "NADPH",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C21H26N7O17P3",
+          "candidate_formula": "C21N7O17P3",
+          "model_charge": -4,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_h2s_c",
+          "candidate": "CHEBI:29919",
+          "label": "hydrosulfide",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "H2S",
+          "candidate_formula": "S",
+          "model_charge": 0,
+          "candidate_charge": -1
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_h2s_c",
+          "candidate": "CHEBI:29324",
+          "label": "dihydridosulfur(.1+)",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "H2S",
+          "candidate_formula": "S",
+          "model_charge": 0,
+          "candidate_charge": 1
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_dxyl5p_c",
+          "candidate": "CHEBI:16493",
+          "label": "1-deoxy-D-xylulose 5-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H9O7P",
+          "candidate_formula": "C5O7P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_6pgc_c",
+          "candidate": "CHEBI:16863",
+          "label": "6-phospho-D-gluconate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H10O10P",
+          "candidate_formula": "C6O10P",
+          "model_charge": -3,
+          "candidate_charge": -1
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_6pgc_c",
+          "candidate": "CHEBI:48928",
+          "label": "6-phospho-D-gluconic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H10O10P",
+          "candidate_formula": "C6O10P",
+          "model_charge": -3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_dttp_c",
+          "candidate": "CHEBI:18077",
+          "label": "dTTP",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H13N2O14P3",
+          "candidate_formula": "C10N2O14P3",
+          "model_charge": -4,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_fdp_c",
+          "candidate": "CHEBI:16905",
+          "label": "keto-D-fructose 1,6-bisphosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H10O12P2",
+          "candidate_formula": "C6O12P2",
+          "model_charge": -4,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_o2_p",
+          "candidate": "CHEBI:18421",
+          "label": "superoxide",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "O2",
+          "candidate_formula": "O2",
+          "model_charge": 0,
+          "candidate_charge": -1
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_3dhsk_c",
+          "candidate": "CHEBI:30918",
+          "label": "3-dehydroshikimic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C7H7O5",
+          "candidate_formula": "C7O5",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_phom_c",
+          "candidate": "CHEBI:15961",
+          "label": "O-phospho-L-homoserine",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H8NO6P",
+          "candidate_formula": "C4NO6P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_o2_s",
+          "candidate": "CHEBI:18421",
+          "label": "superoxide",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "O2",
+          "candidate_formula": "O2",
+          "model_charge": 0,
+          "candidate_charge": -1
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pheme_e",
+          "candidate": "CHEBI:26355",
+          "label": "heme b",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C34H30FeN4O4",
+          "candidate_formula": "C34FeN4O4",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pheme_e",
+          "candidate": "CHEBI:17627",
+          "label": "ferroheme b",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C34H30FeN4O4",
+          "candidate_formula": "C34FeN4O4",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_glucys_c",
+          "candidate": "CHEBI:17515",
+          "label": "L-gamma-glutamyl-L-cysteine",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C8H13N2O5S",
+          "candidate_formula": "C8N2O5S",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_2dr5p_c",
+          "candidate": "CHEBI:16132",
+          "label": "2-deoxy-D-ribose 5-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H9O7P",
+          "candidate_formula": "C5O7P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pheme_c",
+          "candidate": "CHEBI:26355",
+          "label": "heme b",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C34H30FeN4O4",
+          "candidate_formula": "C34FeN4O4",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pheme_c",
+          "candidate": "CHEBI:17627",
+          "label": "ferroheme b",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C34H30FeN4O4",
+          "candidate_formula": "C34FeN4O4",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_uppg3_e",
+          "candidate": "CHEBI:15437",
+          "label": "uroporphyrinogen III",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C40H36N4O16",
+          "candidate_formula": "C40N4O16",
+          "model_charge": -8,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_uppg3_c",
+          "candidate": "CHEBI:15437",
+          "label": "uroporphyrinogen III",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C40H36N4O16",
+          "candidate_formula": "C40N4O16",
+          "model_charge": -8,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_gly_p",
+          "candidate": "CHEBI:29947",
+          "label": "glycine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C2H5NO2",
+          "candidate_formula": "C2NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_gly_s",
+          "candidate": "CHEBI:29947",
+          "label": "glycine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C2H5NO2",
+          "candidate_formula": "C2NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_glu__D_c",
+          "candidate": "CHEBI:29989",
+          "label": "D-glutamate(2-)",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H8NO4",
+          "candidate_formula": "C5NO4",
+          "model_charge": -1,
+          "candidate_charge": -2
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_glu__D_c",
+          "candidate": "CHEBI:15966",
+          "label": "D-glutamic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H8NO4",
+          "candidate_formula": "C5NO4",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_hmbil_c",
+          "candidate": "CHEBI:16645",
+          "label": "preuroporphyrinogen",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C40H38N4O17",
+          "candidate_formula": "C40N4O17",
+          "model_charge": -8,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_gly_e",
+          "candidate": "CHEBI:29947",
+          "label": "glycine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C2H5NO2",
+          "candidate_formula": "C2NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_2cpr5p_c",
+          "candidate": "CHEBI:29112",
+          "label": "1-(2-carboxyphenylamino)-1-deoxy-D-ribulose 5-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C12H13NO9P",
+          "candidate_formula": "C12NO9P",
+          "model_charge": -3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_gly_c",
+          "candidate": "CHEBI:29947",
+          "label": "glycine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C2H5NO2",
+          "candidate_formula": "C2NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pheme_p",
+          "candidate": "CHEBI:26355",
+          "label": "heme b",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C34H30FeN4O4",
+          "candidate_formula": "C34FeN4O4",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pheme_p",
+          "candidate": "CHEBI:17627",
+          "label": "ferroheme b",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C34H30FeN4O4",
+          "candidate_formula": "C34FeN4O4",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pheme_s",
+          "candidate": "CHEBI:26355",
+          "label": "heme b",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C34H30FeN4O4",
+          "candidate_formula": "C34FeN4O4",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pheme_s",
+          "candidate": "CHEBI:17627",
+          "label": "ferroheme b",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C34H30FeN4O4",
+          "candidate_formula": "C34FeN4O4",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pydx5p_c",
+          "candidate": "CHEBI:18405",
+          "label": "pyridoxal 5'-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C8H8NO6P",
+          "candidate_formula": "C8NO6P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_thr__L_s",
+          "candidate": "CHEBI:30013",
+          "label": "L-threonine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C4H9NO3",
+          "candidate_formula": "C4NO2",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_o2_e",
+          "candidate": "CHEBI:25805",
+          "label": "oxygen atom",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "O2",
+          "candidate_formula": "O",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_o2_e",
+          "candidate": "CHEBI:18421",
+          "label": "superoxide",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "O2",
+          "candidate_formula": "O2",
+          "model_charge": 0,
+          "candidate_charge": -1
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_o2_c",
+          "candidate": "CHEBI:25805",
+          "label": "oxygen atom",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "O2",
+          "candidate_formula": "O",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_o2_c",
+          "candidate": "CHEBI:18421",
+          "label": "superoxide",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "O2",
+          "candidate_formula": "O2",
+          "model_charge": 0,
+          "candidate_charge": -1
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_mlthf_e",
+          "candidate": "CHEBI:1989",
+          "label": "(6R)-5,10-methylenetetrahydrofolic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C20H21N7O6",
+          "candidate_formula": "C20N7O6",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_thr__L_p",
+          "candidate": "CHEBI:30013",
+          "label": "L-threonine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C4H9NO3",
+          "candidate_formula": "C4NO2",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_mlthf_c",
+          "candidate": "CHEBI:1989",
+          "label": "(6R)-5,10-methylenetetrahydrofolic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C20H21N7O6",
+          "candidate_formula": "C20N7O6",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pydx5p_p",
+          "candidate": "CHEBI:18405",
+          "label": "pyridoxal 5'-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C8H8NO6P",
+          "candidate_formula": "C8NO6P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_uppg3_s",
+          "candidate": "CHEBI:15437",
+          "label": "uroporphyrinogen III",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C40H36N4O16",
+          "candidate_formula": "C40N4O16",
+          "model_charge": -8,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pydx5p_s",
+          "candidate": "CHEBI:18405",
+          "label": "pyridoxal 5'-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C8H8NO6P",
+          "candidate_formula": "C8NO6P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_uppg3_p",
+          "candidate": "CHEBI:15437",
+          "label": "uroporphyrinogen III",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C40H36N4O16",
+          "candidate_formula": "C40N4O16",
+          "model_charge": -8,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_thr__L_c",
+          "candidate": "CHEBI:30013",
+          "label": "L-threonine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C4H9NO3",
+          "candidate_formula": "C4NO2",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_mlthf_p",
+          "candidate": "CHEBI:1989",
+          "label": "(6R)-5,10-methylenetetrahydrofolic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C20H21N7O6",
+          "candidate_formula": "C20N7O6",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_thr__L_e",
+          "candidate": "CHEBI:30013",
+          "label": "L-threonine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C4H9NO3",
+          "candidate_formula": "C4NO2",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pydx5p_e",
+          "candidate": "CHEBI:18405",
+          "label": "pyridoxal 5'-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C8H8NO6P",
+          "candidate_formula": "C8NO6P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_accoa_c",
+          "candidate": "CHEBI:15351",
+          "label": "acetyl-CoA",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C23H34N7O17P3S",
+          "candidate_formula": "C23N7O17P3S",
+          "model_charge": -4,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_mlthf_s",
+          "candidate": "CHEBI:1989",
+          "label": "(6R)-5,10-methylenetetrahydrofolic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C20H21N7O6",
+          "candidate_formula": "C20N7O6",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pro__L_s",
+          "candidate": "CHEBI:50342",
+          "label": "L-proline residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C5H9NO2",
+          "candidate_formula": "C5NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_datp_c",
+          "candidate": "CHEBI:16284",
+          "label": "dATP",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H12N5O12P3",
+          "candidate_formula": "C10N5O12P3",
+          "model_charge": -4,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pro__L_p",
+          "candidate": "CHEBI:50342",
+          "label": "L-proline residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C5H9NO2",
+          "candidate_formula": "C5NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pant__R_c",
+          "candidate": "CHEBI:14737",
+          "label": "pantoic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H11O4",
+          "candidate_formula": "C6O4",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pant__R_c",
+          "candidate": "CHEBI:18697",
+          "label": "(R)-pantoic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H11O4",
+          "candidate_formula": "C6O4",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cbp_c",
+          "candidate": "CHEBI:17672",
+          "label": "carbamoyl phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "CH2NO5P",
+          "candidate_formula": "CNO5P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_phpyr_p",
+          "candidate": "CHEBI:30851",
+          "label": "keto-phenylpyruvic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H7O3",
+          "candidate_formula": "C9O3",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_phpyr_s",
+          "candidate": "CHEBI:30851",
+          "label": "keto-phenylpyruvic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H7O3",
+          "candidate_formula": "C9O3",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_actp_c",
+          "candidate": "CHEBI:15350",
+          "label": "acetyl dihydrogen phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C2H3O5P",
+          "candidate_formula": "C2O5P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_sheme_c",
+          "candidate": "CHEBI:28599",
+          "label": "siroheme",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C42H36FeN4O16",
+          "candidate_formula": "C42FeN4O16",
+          "model_charge": -8,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_phpyr_c",
+          "candidate": "CHEBI:30851",
+          "label": "keto-phenylpyruvic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H7O3",
+          "candidate_formula": "C9O3",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_phpyr_e",
+          "candidate": "CHEBI:30851",
+          "label": "keto-phenylpyruvic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H7O3",
+          "candidate_formula": "C9O3",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cl_s",
+          "candidate": "CHEBI:23116",
+          "label": "chlorine atom",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "Cl",
+          "candidate_formula": "Cl",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cl_s",
+          "candidate": "CHEBI:29311",
+          "label": "chlorine(.)",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "Cl",
+          "candidate_formula": "Cl",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cl_p",
+          "candidate": "CHEBI:23116",
+          "label": "chlorine atom",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "Cl",
+          "candidate_formula": "Cl",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cl_p",
+          "candidate": "CHEBI:29311",
+          "label": "chlorine(.)",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "Cl",
+          "candidate_formula": "Cl",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_3mop_s",
+          "candidate": "CHEBI:15614",
+          "label": "(S)-3-methyl-2-oxovaleric acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H9O3",
+          "candidate_formula": "C6O3",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_gmp_c",
+          "candidate": "CHEBI:17345",
+          "label": "guanosine 5'-monophosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H12N5O8P",
+          "candidate_formula": "C10N5O8P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_gmp_c",
+          "candidate": "CHEBI:50324",
+          "label": "guanosine 5'-monophosphate residue",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "C10H12N5O8P",
+          "candidate_formula": "C10N5O7P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cl_e",
+          "candidate": "CHEBI:23116",
+          "label": "chlorine atom",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "Cl",
+          "candidate_formula": "Cl",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cl_e",
+          "candidate": "CHEBI:29311",
+          "label": "chlorine(.)",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "Cl",
+          "candidate_formula": "Cl",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_e4p_c",
+          "candidate": "CHEBI:48153",
+          "label": "D-erythrose 4-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H7O7P",
+          "candidate_formula": "C4O7P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_paps_c",
+          "candidate": "CHEBI:17980",
+          "label": "3'-phospho-5'-adenylyl sulfate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H11N5O13P2S",
+          "candidate_formula": "C10N5O13P2S",
+          "model_charge": -4,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_paps_c",
+          "candidate": "CHEBI:168165",
+          "label": "PA-PS",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "C10H11N5O13P2S",
+          "candidate_formula": "C31NO12P",
+          "model_charge": -4,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_lac__D_c",
+          "candidate": "CHEBI:42111",
+          "label": "(R)-lactic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C3H5O3",
+          "candidate_formula": "C3O3",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_dgtp_c",
+          "candidate": "CHEBI:16497",
+          "label": "dGTP",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H12N5O13P3",
+          "candidate_formula": "C10N5O13P3",
+          "model_charge": -4,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pg160_e",
+          "candidate": "CHEBI:85783",
+          "label": "1,2-dihexadecanoyl-sn-glycero-3-phosphoglycerol",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C38H74O10P1",
+          "candidate_formula": "C38O10P",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_leu__L_s",
+          "candidate": "CHEBI:30006",
+          "label": "L-leucine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C6H13NO2",
+          "candidate_formula": "C6NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_leu__L_p",
+          "candidate": "CHEBI:30006",
+          "label": "L-leucine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C6H13NO2",
+          "candidate_formula": "C6NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_orot5p_c",
+          "candidate": "CHEBI:15842",
+          "label": "orotidine 5'-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H10N2O11P",
+          "candidate_formula": "C10N2O11P",
+          "model_charge": -3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_3mop_c",
+          "candidate": "CHEBI:15614",
+          "label": "(S)-3-methyl-2-oxovaleric acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H9O3",
+          "candidate_formula": "C6O3",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_leu__L_e",
+          "candidate": "CHEBI:30006",
+          "label": "L-leucine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C6H13NO2",
+          "candidate_formula": "C6NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_3mop_e",
+          "candidate": "CHEBI:15614",
+          "label": "(S)-3-methyl-2-oxovaleric acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H9O3",
+          "candidate_formula": "C6O3",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_leu__L_c",
+          "candidate": "CHEBI:30006",
+          "label": "L-leucine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C6H13NO2",
+          "candidate_formula": "C6NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_r1p_c",
+          "candidate": "CHEBI:16300",
+          "label": "alpha-D-ribose 1-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H9O8P",
+          "candidate_formula": "C5O8P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_r1p_c",
+          "candidate": "CHEBI:35425",
+          "label": "D-ribose 1-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H9O8P",
+          "candidate_formula": "C5O8P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_3mop_p",
+          "candidate": "CHEBI:15614",
+          "label": "(S)-3-methyl-2-oxovaleric acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H9O3",
+          "candidate_formula": "C6O3",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_adp_c",
+          "candidate": "CHEBI:16761",
+          "label": "ADP",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H12N5O10P2",
+          "candidate_formula": "C10N5O10P2",
+          "model_charge": -3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_adp_c",
+          "candidate": "CHEBI:73342",
+          "label": "Ala-Asp-Pro",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "C10H12N5O10P2",
+          "candidate_formula": "C12N3O6",
+          "model_charge": -3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_fum_c",
+          "candidate": "CHEBI:18012",
+          "label": "fumaric acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H2O4",
+          "candidate_formula": "C4O4",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_f6p_c",
+          "candidate": "CHEBI:15946",
+          "label": "keto-D-fructose 6-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H11O9P",
+          "candidate_formula": "C6O9P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pan4p_e",
+          "candidate": "CHEBI:16858",
+          "label": "pantetheine 4'-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C11H21N2O7PS",
+          "candidate_formula": "C11N2O7PS",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pan4p_e",
+          "candidate": "CHEBI:4222",
+          "label": "D-pantetheine 4'-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C11H21N2O7PS",
+          "candidate_formula": "C11N2O7PS",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_fum_e",
+          "candidate": "CHEBI:18012",
+          "label": "fumaric acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H2O4",
+          "candidate_formula": "C4O4",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pan4p_c",
+          "candidate": "CHEBI:16858",
+          "label": "pantetheine 4'-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C11H21N2O7PS",
+          "candidate_formula": "C11N2O7PS",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pan4p_c",
+          "candidate": "CHEBI:4222",
+          "label": "D-pantetheine 4'-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C11H21N2O7PS",
+          "candidate_formula": "C11N2O7PS",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ump_c",
+          "candidate": "CHEBI:16695",
+          "label": "uridine 5'-monophosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H11N2O9P",
+          "candidate_formula": "C9N2O9P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ump_c",
+          "candidate": "CHEBI:46470",
+          "label": "uridine 5'-monophosphate residue",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "C9H11N2O9P",
+          "candidate_formula": "C9N2O8P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_fum_p",
+          "candidate": "CHEBI:18012",
+          "label": "fumaric acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H2O4",
+          "candidate_formula": "C4O4",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pan4p_p",
+          "candidate": "CHEBI:16858",
+          "label": "pantetheine 4'-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C11H21N2O7PS",
+          "candidate_formula": "C11N2O7PS",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pan4p_p",
+          "candidate": "CHEBI:4222",
+          "label": "D-pantetheine 4'-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C11H21N2O7PS",
+          "candidate_formula": "C11N2O7PS",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pan4p_s",
+          "candidate": "CHEBI:16858",
+          "label": "pantetheine 4'-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C11H21N2O7PS",
+          "candidate_formula": "C11N2O7PS",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pan4p_s",
+          "candidate": "CHEBI:4222",
+          "label": "D-pantetheine 4'-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C11H21N2O7PS",
+          "candidate_formula": "C11N2O7PS",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_2ahbut_c",
+          "candidate": "CHEBI:982",
+          "label": "2-Aceto-2-hydroxybutanoate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H9O4",
+          "candidate_formula": "C6O4",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cys__L_e",
+          "candidate": "CHEBI:29950",
+          "label": "L-cysteine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C3H7NO2S",
+          "candidate_formula": "C3NOS",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cys__L_c",
+          "candidate": "CHEBI:29950",
+          "label": "L-cysteine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C3H7NO2S",
+          "candidate_formula": "C3NOS",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_aps_c",
+          "candidate": "CHEBI:17709",
+          "label": "5'-adenylyl sulfate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H12N5O10PS",
+          "candidate_formula": "C10N5O10PS",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_aps_c",
+          "candidate": "CHEBI:156543",
+          "label": "ammonium persulfate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H12N5O10PS",
+          "candidate_formula": "O6S2.N.H4N",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cl_c",
+          "candidate": "CHEBI:23116",
+          "label": "chlorine atom",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "Cl",
+          "candidate_formula": "Cl",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cl_c",
+          "candidate": "CHEBI:29311",
+          "label": "chlorine(.)",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "Cl",
+          "candidate_formula": "Cl",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cys__L_s",
+          "candidate": "CHEBI:29950",
+          "label": "L-cysteine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C3H7NO2S",
+          "candidate_formula": "C3NOS",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_cys__L_p",
+          "candidate": "CHEBI:29950",
+          "label": "L-cysteine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C3H7NO2S",
+          "candidate_formula": "C3NOS",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pep_c",
+          "candidate": "CHEBI:18021",
+          "label": "phosphoenolpyruvate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C3H2O6P",
+          "candidate_formula": "C3O6P",
+          "model_charge": -3,
+          "candidate_charge": -1
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pep_c",
+          "candidate": "CHEBI:44897",
+          "label": "phosphoenolpyruvic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C3H2O6P",
+          "candidate_formula": "C3O6P",
+          "model_charge": -3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_asp__L_c",
+          "candidate": "CHEBI:29993",
+          "label": "L-aspartate(2-)",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H6NO4",
+          "candidate_formula": "C4NO4",
+          "model_charge": -1,
+          "candidate_charge": -2
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_asp__L_c",
+          "candidate": "CHEBI:22660",
+          "label": "aspartic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H6NO4",
+          "candidate_formula": "C4NO4",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_asp__L_e",
+          "candidate": "CHEBI:29993",
+          "label": "L-aspartate(2-)",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H6NO4",
+          "candidate_formula": "C4NO4",
+          "model_charge": -1,
+          "candidate_charge": -2
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_asp__L_e",
+          "candidate": "CHEBI:22660",
+          "label": "aspartic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H6NO4",
+          "candidate_formula": "C4NO4",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_phe__L_p",
+          "candidate": "CHEBI:29997",
+          "label": "L-phenylalanine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C9H11NO2",
+          "candidate_formula": "C9NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_phe__L_s",
+          "candidate": "CHEBI:29997",
+          "label": "L-phenylalanine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C9H11NO2",
+          "candidate_formula": "C9NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_histd_c",
+          "candidate": "CHEBI:16255",
+          "label": "L-histidinol",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H12N3O",
+          "candidate_formula": "C6N3O",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_asp__L_p",
+          "candidate": "CHEBI:29993",
+          "label": "L-aspartate(2-)",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H6NO4",
+          "candidate_formula": "C4NO4",
+          "model_charge": -1,
+          "candidate_charge": -2
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_asp__L_p",
+          "candidate": "CHEBI:22660",
+          "label": "aspartic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H6NO4",
+          "candidate_formula": "C4NO4",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_asp__L_s",
+          "candidate": "CHEBI:29993",
+          "label": "L-aspartate(2-)",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H6NO4",
+          "candidate_formula": "C4NO4",
+          "model_charge": -1,
+          "candidate_charge": -2
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_asp__L_s",
+          "candidate": "CHEBI:22660",
+          "label": "aspartic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H6NO4",
+          "candidate_formula": "C4NO4",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_2ippm_c",
+          "candidate": "CHEBI:17275",
+          "label": "2-isopropylmaleic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C7H8O4",
+          "candidate_formula": "C7O4",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_nadh_c",
+          "candidate": "CHEBI:16908",
+          "label": "NADH",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C21H27N7O14P2",
+          "candidate_formula": "C21N7O14P2",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_damp_c",
+          "candidate": "CHEBI:17713",
+          "label": "2'-deoxyadenosine 5'-monophosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H12N5O6P",
+          "candidate_formula": "C10N5O6P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_fum_s",
+          "candidate": "CHEBI:18012",
+          "label": "fumaric acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H2O4",
+          "candidate_formula": "C4O4",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_aspsa_c",
+          "candidate": "CHEBI:13086",
+          "label": "L-aspartate 4-semialdehyde",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H7NO3",
+          "candidate_formula": "C4NO3",
+          "model_charge": 0,
+          "candidate_charge": -1
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_aspsa_c",
+          "candidate": "CHEBI:15365",
+          "label": "acetylsalicylic acid",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C4H7NO3",
+          "candidate_formula": "C9O4",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_2obut_p",
+          "candidate": "CHEBI:30831",
+          "label": "2-oxobutanoic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H5O3",
+          "candidate_formula": "C4O3",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_k_p",
+          "candidate": "CHEBI:26216",
+          "label": "potassium atom",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "K",
+          "candidate_formula": "K",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_k_p",
+          "candidate": "CHEBI:18019",
+          "label": "L-lysine",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "K",
+          "candidate_formula": "C6N2O2",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_2obut_s",
+          "candidate": "CHEBI:30831",
+          "label": "2-oxobutanoic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H5O3",
+          "candidate_formula": "C4O3",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_k_s",
+          "candidate": "CHEBI:26216",
+          "label": "potassium atom",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "K",
+          "candidate_formula": "K",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_k_s",
+          "candidate": "CHEBI:18019",
+          "label": "L-lysine",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "K",
+          "candidate_formula": "C6N2O2",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_amp_c",
+          "candidate": "CHEBI:16027",
+          "label": "adenosine 5'-monophosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H12N5O7P",
+          "candidate_formula": "C10N5O7P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_amp_c",
+          "candidate": "CHEBI:28971",
+          "label": "ampicillin",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "C10H12N5O7P",
+          "candidate_formula": "C16N3O4S",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_dcdp_c",
+          "candidate": "CHEBI:28846",
+          "label": "dCDP",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H12N3O10P2",
+          "candidate_formula": "C9N3O10P2",
+          "model_charge": -3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_for_e",
+          "candidate": "CHEBI:30751",
+          "label": "formic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "CH1O2",
+          "candidate_formula": "CO2",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_gdp_c",
+          "candidate": "CHEBI:17552",
+          "label": "GDP",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H12N5O11P2",
+          "candidate_formula": "C10N5O11P2",
+          "model_charge": -3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ctp_c",
+          "candidate": "CHEBI:17677",
+          "label": "CTP",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H12N3O14P3",
+          "candidate_formula": "C9N3O14P3",
+          "model_charge": -4,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ctp_c",
+          "candidate": "CHEBI:58231",
+          "label": "CTP(3-)",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H12N3O14P3",
+          "candidate_formula": "C9N3O14P3",
+          "model_charge": -4,
+          "candidate_charge": -3
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_dutp_c",
+          "candidate": "CHEBI:17625",
+          "label": "dUTP",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H11N2O14P3",
+          "candidate_formula": "C9N2O14P3",
+          "model_charge": -4,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_for_c",
+          "candidate": "CHEBI:30751",
+          "label": "formic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "CH1O2",
+          "candidate_formula": "CO2",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_prpp_c",
+          "candidate": "CHEBI:17111",
+          "label": "5-O-phosphono-alpha-D-ribofuranosyl diphosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H8O14P3",
+          "candidate_formula": "C5O14P3",
+          "model_charge": -5,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_succ_e",
+          "candidate": "CHEBI:15741",
+          "label": "succinic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H4O4",
+          "candidate_formula": "C4O4",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_succ_c",
+          "candidate": "CHEBI:15741",
+          "label": "succinic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H4O4",
+          "candidate_formula": "C4O4",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ala__L_s",
+          "candidate": "CHEBI:46217",
+          "label": "L-alanine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C3H7NO2",
+          "candidate_formula": "C3NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_succ_p",
+          "candidate": "CHEBI:15741",
+          "label": "succinic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H4O4",
+          "candidate_formula": "C4O4",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ala__L_p",
+          "candidate": "CHEBI:46217",
+          "label": "L-alanine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C3H7NO2",
+          "candidate_formula": "C3NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_lgt__S_c",
+          "candidate": "CHEBI:15694",
+          "label": "(R)-S-lactoylglutathione",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C13H20N3O8S",
+          "candidate_formula": "C13N3O8S",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pnto__R_c",
+          "candidate": "CHEBI:46905",
+          "label": "(R)-pantothenic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H16NO5",
+          "candidate_formula": "C9NO5",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pnto__R_e",
+          "candidate": "CHEBI:46905",
+          "label": "(R)-pantothenic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H16NO5",
+          "candidate_formula": "C9NO5",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_succ_s",
+          "candidate": "CHEBI:15741",
+          "label": "succinic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H4O4",
+          "candidate_formula": "C4O4",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ala__L_c",
+          "candidate": "CHEBI:46217",
+          "label": "L-alanine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C3H7NO2",
+          "candidate_formula": "C3NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ala__L_e",
+          "candidate": "CHEBI:46217",
+          "label": "L-alanine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C3H7NO2",
+          "candidate_formula": "C3NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_k_c",
+          "candidate": "CHEBI:26216",
+          "label": "potassium atom",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "K",
+          "candidate_formula": "K",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_k_c",
+          "candidate": "CHEBI:18019",
+          "label": "L-lysine",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "K",
+          "candidate_formula": "C6N2O2",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_2obut_c",
+          "candidate": "CHEBI:30831",
+          "label": "2-oxobutanoic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H5O3",
+          "candidate_formula": "C4O3",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_k_e",
+          "candidate": "CHEBI:26216",
+          "label": "potassium atom",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "K",
+          "candidate_formula": "K",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_k_e",
+          "candidate": "CHEBI:18019",
+          "label": "L-lysine",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "K",
+          "candidate_formula": "C6N2O2",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pnto__R_p",
+          "candidate": "CHEBI:46905",
+          "label": "(R)-pantothenic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H16NO5",
+          "candidate_formula": "C9NO5",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ipdp_c",
+          "candidate": "CHEBI:16584",
+          "label": "isopentenyl diphosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H9O7P2",
+          "candidate_formula": "C5O7P2",
+          "model_charge": -3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ipdp_c",
+          "candidate": "CHEBI:233648",
+          "label": "isopentenyl pyrophosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H9O7P2",
+          "candidate_formula": "C5O7P2",
+          "model_charge": -3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_2obut_e",
+          "candidate": "CHEBI:30831",
+          "label": "2-oxobutanoic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H5O3",
+          "candidate_formula": "C4O3",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pnto__R_s",
+          "candidate": "CHEBI:46905",
+          "label": "(R)-pantothenic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H16NO5",
+          "candidate_formula": "C9NO5",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_phe__L_c",
+          "candidate": "CHEBI:29997",
+          "label": "L-phenylalanine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C9H11NO2",
+          "candidate_formula": "C9NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_phe__L_e",
+          "candidate": "CHEBI:29997",
+          "label": "L-phenylalanine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C9H11NO2",
+          "candidate_formula": "C9NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_arg__L_s",
+          "candidate": "CHEBI:16467",
+          "label": "L-arginine",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H15N4O2",
+          "candidate_formula": "C6N4O2",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_arg__L_s",
+          "candidate": "CHEBI:29952",
+          "label": "L-arginine residue",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "C6H15N4O2",
+          "candidate_formula": "C6N4O",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_h_s",
+          "candidate": "CHEBI:15971",
+          "label": "L-histidine",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "H",
+          "candidate_formula": "C6N3O2",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_pyr_c",
+          "candidate": "CHEBI:32816",
+          "label": "pyruvic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C3H3O3",
+          "candidate_formula": "C3O3",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_acg5p_c",
+          "candidate": "CHEBI:16878",
+          "label": "N-acetyl-L-gamma-glutamyl phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C7H9NO8P",
+          "candidate_formula": "C7NO8P",
+          "model_charge": -3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_nac_s",
+          "candidate": "CHEBI:15940",
+          "label": "nicotinic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H4NO2",
+          "candidate_formula": "C6NO2",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_nac_s",
+          "candidate": "CHEBI:17154",
+          "label": "nicotinamide",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "C6H4NO2",
+          "candidate_formula": "C6N2O",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_arg__L_p",
+          "candidate": "CHEBI:16467",
+          "label": "L-arginine",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H15N4O2",
+          "candidate_formula": "C6N4O2",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_arg__L_p",
+          "candidate": "CHEBI:29952",
+          "label": "L-arginine residue",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "C6H15N4O2",
+          "candidate_formula": "C6N4O",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ile__L_s",
+          "candidate": "CHEBI:30009",
+          "label": "L-isoleucine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C6H13NO2",
+          "candidate_formula": "C6NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_h_p",
+          "candidate": "CHEBI:15971",
+          "label": "L-histidine",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "H",
+          "candidate_formula": "C6N3O2",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_arg__L_e",
+          "candidate": "CHEBI:16467",
+          "label": "L-arginine",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H15N4O2",
+          "candidate_formula": "C6N4O2",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_arg__L_e",
+          "candidate": "CHEBI:29952",
+          "label": "L-arginine residue",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "C6H15N4O2",
+          "candidate_formula": "C6N4O",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_arg__L_c",
+          "candidate": "CHEBI:16467",
+          "label": "L-arginine",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H15N4O2",
+          "candidate_formula": "C6N4O2",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_arg__L_c",
+          "candidate": "CHEBI:29952",
+          "label": "L-arginine residue",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "C6H15N4O2",
+          "candidate_formula": "C6N4O",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_nac_e",
+          "candidate": "CHEBI:15940",
+          "label": "nicotinic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H4NO2",
+          "candidate_formula": "C6NO2",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_nac_e",
+          "candidate": "CHEBI:17154",
+          "label": "nicotinamide",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "C6H4NO2",
+          "candidate_formula": "C6N2O",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ile__L_p",
+          "candidate": "CHEBI:30009",
+          "label": "L-isoleucine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C6H13NO2",
+          "candidate_formula": "C6NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_nac_c",
+          "candidate": "CHEBI:15940",
+          "label": "nicotinic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H4NO2",
+          "candidate_formula": "C6NO2",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_nac_c",
+          "candidate": "CHEBI:17154",
+          "label": "nicotinamide",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "C6H4NO2",
+          "candidate_formula": "C6N2O",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_h_m_p",
+          "candidate": "CHEBI:15971",
+          "label": "L-histidine",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "H",
+          "candidate_formula": "C6N3O2",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_nac_p",
+          "candidate": "CHEBI:15940",
+          "label": "nicotinic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H4NO2",
+          "candidate_formula": "C6NO2",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_nac_p",
+          "candidate": "CHEBI:17154",
+          "label": "nicotinamide",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "C6H4NO2",
+          "candidate_formula": "C6N2O",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ile__L_c",
+          "candidate": "CHEBI:30009",
+          "label": "L-isoleucine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C6H13NO2",
+          "candidate_formula": "C6NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_4mop_s",
+          "candidate": "CHEBI:48430",
+          "label": "4-methyl-2-oxopentanoic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H9O3",
+          "candidate_formula": "C6O3",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ile__L_e",
+          "candidate": "CHEBI:30009",
+          "label": "L-isoleucine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C6H13NO2",
+          "candidate_formula": "C6NO",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_dmpp_c",
+          "candidate": "CHEBI:16057",
+          "label": "prenyl diphosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H9O7P2",
+          "candidate_formula": "C5O7P2",
+          "model_charge": -3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_dhor__S_c",
+          "candidate": "CHEBI:17025",
+          "label": "(S)-dihydroorotic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H5N2O4",
+          "candidate_formula": "C5N2O4",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_6pgl_c",
+          "candidate": "CHEBI:16938",
+          "label": "6-O-phosphono-D-glucono-1,5-lactone",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H9O9P",
+          "candidate_formula": "C6O9P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_4pasp_c",
+          "candidate": "CHEBI:30407",
+          "label": "4-phospho-L-aspartate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H6NO7P",
+          "candidate_formula": "C4NO7P",
+          "model_charge": -2,
+          "candidate_charge": -3
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_gln__L_e",
+          "candidate": "CHEBI:30011",
+          "label": "L-glutamine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C5H10N2O3",
+          "candidate_formula": "C5N2O2",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_gln__L_c",
+          "candidate": "CHEBI:30011",
+          "label": "L-glutamine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C5H10N2O3",
+          "candidate_formula": "C5N2O2",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_dmlz_c",
+          "candidate": "CHEBI:58201",
+          "label": "6,7-dimethyl-8-(1-D-ribityl)lumazine(1-)",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C13H18N4O6",
+          "candidate_formula": "C13N4O6",
+          "model_charge": 0,
+          "candidate_charge": -1
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_h_c",
+          "candidate": "CHEBI:15971",
+          "label": "L-histidine",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "H",
+          "candidate_formula": "C6N3O2",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_zn2_e",
+          "candidate": "CHEBI:27363",
+          "label": "zinc atom",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "Zn",
+          "candidate_formula": "Zn",
+          "model_charge": 2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_zn2_e",
+          "candidate": "CHEBI:37256",
+          "label": "dizinc",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "Zn",
+          "candidate_formula": "Zn2",
+          "model_charge": 2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_h_e",
+          "candidate": "CHEBI:15971",
+          "label": "L-histidine",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "H",
+          "candidate_formula": "C6N3O2",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_zn2_c",
+          "candidate": "CHEBI:27363",
+          "label": "zinc atom",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "Zn",
+          "candidate_formula": "Zn",
+          "model_charge": 2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_zn2_c",
+          "candidate": "CHEBI:37256",
+          "label": "dizinc",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "Zn",
+          "candidate_formula": "Zn2",
+          "model_charge": 2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_zn2_p",
+          "candidate": "CHEBI:27363",
+          "label": "zinc atom",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "Zn",
+          "candidate_formula": "Zn",
+          "model_charge": 2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_zn2_p",
+          "candidate": "CHEBI:37256",
+          "label": "dizinc",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "Zn",
+          "candidate_formula": "Zn2",
+          "model_charge": 2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_imacp_c",
+          "candidate": "CHEBI:16426",
+          "label": "3-(imidazol-4-yl)-2-oxopropyl dihydrogen phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H7N2O5P",
+          "candidate_formula": "C6N2O5P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_dgmp_c",
+          "candidate": "CHEBI:16192",
+          "label": "2'-deoxyguanosine 5'-monophosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H12N5O7P",
+          "candidate_formula": "C10N5O7P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_dtdp_c",
+          "candidate": "CHEBI:18075",
+          "label": "dTDP",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H13N2O11P2",
+          "candidate_formula": "C10N2O11P2",
+          "model_charge": -3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_succoa_c",
+          "candidate": "CHEBI:15380",
+          "label": "succinyl-CoA",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C25H35N7O19P3S",
+          "candidate_formula": "C25N7O19P3S",
+          "model_charge": -5,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_gmhep17bp_c",
+          "candidate": "CHEBI:4188",
+          "label": "D-glycero-D-manno-heptose 1,7-bisphosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C7H12O13P2",
+          "candidate_formula": "C7O13P2",
+          "model_charge": -4,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_imp_c",
+          "candidate": "CHEBI:17202",
+          "label": "IMP",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H11N4O8P",
+          "candidate_formula": "C10N4O8P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_grdp_c",
+          "candidate": "CHEBI:17211",
+          "label": "geranyl diphosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H17O7P2",
+          "candidate_formula": "C10O7P2",
+          "model_charge": -3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_dann_c",
+          "candidate": "CHEBI:2247",
+          "label": "7,8-diaminononanoic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H21N2O2",
+          "candidate_formula": "C9N2O2",
+          "model_charge": 1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_dann_c",
+          "candidate": "CHEBI:17830",
+          "label": "7,8-diaminononanoate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C9H21N2O2",
+          "candidate_formula": "C9N2O2",
+          "model_charge": 1,
+          "candidate_charge": -1
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_glu__L_e",
+          "candidate": "CHEBI:29988",
+          "label": "L-glutamate(2-)",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H8NO4",
+          "candidate_formula": "C5NO4",
+          "model_charge": -1,
+          "candidate_charge": -2
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_glu__L_c",
+          "candidate": "CHEBI:29988",
+          "label": "L-glutamate(2-)",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H8NO4",
+          "candidate_formula": "C5NO4",
+          "model_charge": -1,
+          "candidate_charge": -2
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_23dhmp_c",
+          "candidate": "CHEBI:882",
+          "label": "2,3-Dihydroxy-3-methylpentanoate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H11O4",
+          "candidate_formula": "C6O4",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_glu__L_p",
+          "candidate": "CHEBI:29988",
+          "label": "L-glutamate(2-)",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H8NO4",
+          "candidate_formula": "C5NO4",
+          "model_charge": -1,
+          "candidate_charge": -2
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_glu__L_p",
+          "candidate": "CHEBI:16015",
+          "label": "L-glutamic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H8NO4",
+          "candidate_formula": "C5NO4",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_3mob_e",
+          "candidate": "CHEBI:16530",
+          "label": "3-methyl-2-oxobutanoic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H7O3",
+          "candidate_formula": "C5O3",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_gmhep7p_c",
+          "candidate": "CHEBI:28723",
+          "label": "D-glycero-D-manno-heptose 7-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C7H13O10P",
+          "candidate_formula": "C7O10P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_3mob_c",
+          "candidate": "CHEBI:16530",
+          "label": "3-methyl-2-oxobutanoic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H7O3",
+          "candidate_formula": "C5O3",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_glu__L_s",
+          "candidate": "CHEBI:29988",
+          "label": "L-glutamate(2-)",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H8NO4",
+          "candidate_formula": "C5NO4",
+          "model_charge": -1,
+          "candidate_charge": -2
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_glu__L_s",
+          "candidate": "CHEBI:16015",
+          "label": "L-glutamic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H8NO4",
+          "candidate_formula": "C5NO4",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_his__L_p",
+          "candidate": "CHEBI:29979",
+          "label": "L-histidine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C6H9N3O2",
+          "candidate_formula": "C6N3O",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_3mob_p",
+          "candidate": "CHEBI:16530",
+          "label": "3-methyl-2-oxobutanoic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H7O3",
+          "candidate_formula": "C5O3",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_3mob_s",
+          "candidate": "CHEBI:16530",
+          "label": "3-methyl-2-oxobutanoic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H7O3",
+          "candidate_formula": "C5O3",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_his__L_c",
+          "candidate": "CHEBI:29979",
+          "label": "L-histidine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C6H9N3O2",
+          "candidate_formula": "C6N3O",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_his__L_e",
+          "candidate": "CHEBI:29979",
+          "label": "L-histidine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C6H9N3O2",
+          "candidate_formula": "C6N3O",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_2dhp_c",
+          "candidate": "CHEBI:17094",
+          "label": "2-dehydropantoic acid",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H9O4",
+          "candidate_formula": "C6O4",
+          "model_charge": -1,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_dhap_c",
+          "candidate": "CHEBI:16108",
+          "label": "dihydroxyacetone phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C3H5O6P",
+          "candidate_formula": "C3O6P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ap4a_c",
+          "candidate": "CHEBI:17422",
+          "label": "P(1),P(4)-bis(5'-adenosyl) tetraphosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C20H24N10O19P4",
+          "candidate_formula": "C20N10O19P4",
+          "model_charge": -4,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_zn2_s",
+          "candidate": "CHEBI:27363",
+          "label": "zinc atom",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "Zn",
+          "candidate_formula": "Zn",
+          "model_charge": 2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_zn2_s",
+          "candidate": "CHEBI:37256",
+          "label": "dizinc",
+          "conflicts": [
+            "formula",
+            "charge"
+          ],
+          "model_formula": "Zn",
+          "candidate_formula": "Zn2",
+          "model_charge": 2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_his__L_s",
+          "candidate": "CHEBI:29979",
+          "label": "L-histidine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C6H9N3O2",
+          "candidate_formula": "C6N3O",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_dadp_c",
+          "candidate": "CHEBI:16174",
+          "label": "dADP",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C10H12N5O9P2",
+          "candidate_formula": "C10N5O9P2",
+          "model_charge": -3,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_2dr1p_c",
+          "candidate": "CHEBI:28542",
+          "label": "2-deoxy-D-ribofuranose 1-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C5H9O7P",
+          "candidate_formula": "C5O7P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_gln__L_p",
+          "candidate": "CHEBI:30011",
+          "label": "L-glutamine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C5H10N2O3",
+          "candidate_formula": "C5N2O2",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_gln__L_s",
+          "candidate": "CHEBI:30011",
+          "label": "L-glutamine residue",
+          "conflicts": [
+            "formula"
+          ],
+          "model_formula": "C5H10N2O3",
+          "candidate_formula": "C5N2O2",
+          "model_charge": 0,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ptrc_c",
+          "candidate": "CHEBI:17148",
+          "label": "putrescine",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H14N2",
+          "candidate_formula": "C4N2",
+          "model_charge": 2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ptrc_e",
+          "candidate": "CHEBI:17148",
+          "label": "putrescine",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H14N2",
+          "candidate_formula": "C4N2",
+          "model_charge": 2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_g6p_c",
+          "candidate": "CHEBI:4170",
+          "label": "D-glucopyranose 6-phosphate",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C6H11O9P",
+          "candidate_formula": "C6O9P",
+          "model_charge": -2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ptrc_p",
+          "candidate": "CHEBI:17148",
+          "label": "putrescine",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H14N2",
+          "candidate_formula": "C4N2",
+          "model_charge": 2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "chemical_candidate_rejected",
+          "species_id": "M_ptrc_s",
+          "candidate": "CHEBI:17148",
+          "label": "putrescine",
+          "conflicts": [
+            "charge"
+          ],
+          "model_formula": "C4H14N2",
+          "candidate_formula": "C4N2",
+          "model_charge": 2,
+          "candidate_charge": 0
+        },
+        {
+          "kind": "structured_output_repair",
+          "stage": "ranking",
+          "attempt": 1,
+          "error": "ranking unit mismatch; expected=['M_13dpg_c', 'M_2dr1p_c', 'M_2dr5p_c', 'M_2fe2s_c', 'M_3hddecACP_c', 'M_3mop_c', 'M_3mop_e', 'M_3mop_p', 'M_3mop_s', 'M_5mthf_c', 'M_5mtr_c', 'M_5mtr_e', 'M_5mtr_p', 'M_5mtr_s', 'M_ACP_c', 'M_acgam1p_c', 'M_acorn_c', 'M_acser_c', 'M_ahcys_c', 'M_ahcys_e', 'M_ahcys_p', 'M_ahcys_s', 'M_aicar_c', 'M_ala_B_c', 'M_ala_B_e', 'M_ala_B_p', 'M_ala_B_s', 'M_ala__D_c', 'M_ala__L_c', 'M_ala__L_e', 'M_ala__L_p', 'M_ala__L_s', 'M_alaala_c', 'M_amet_c', 'M_asn__L_c', 'M_asn__L_e', 'M_asn__L_p', 'M_asn__L_s', 'M_btn_c', 'M_btn_e', 'M_btn_p', 'M_btn_s', 'M_ca2_c', 'M_ca2_e', 'M_ca2_p', 'M_ca2_s', 'M_citr__L_c', 'M_clpn161_p', 'M_clpn181_p', 'M_cys__L_c', 'M_cys__L_e', 'M_cys__L_p', 'M_cys__L_s', 'M_db4p_c', 'M_ddcaACP_c|M_ddcaACP_c_1', 'M_dhf_c', 'M_dhf_e', 'M_dhf_p', 'M_dhf_s', 'M_dhor__S_c', 'M_f6p_c', 'M_fad_c', 'M_fdp_c', 'M_fdxo_22_c', 'M_fdxr_22_c', 'M_fmn_c', 'M_fol_c', 'M_fol_e', 'M_fol_p', 'M_fol_s', 'M_for_c', 'M_for_e', 'M_for_p', 'M_for_s', 'M_frdp_c', 'M_g6p_c', 'M_gam6p_c', 'M_glc__D_e', 'M_glc__D_p', 'M_glc__D_s', 'M_gln__L_c', 'M_gln__L_e', 'M_gln__L_p', 'M_gln__L_s', 'M_glu__L_c', 'M_glu__L_e', 'M_glucys_c', 'M_gly_c', 'M_gly_e', 'M_gly_p', 'M_gly_s', 'M_h_c', 'M_h_e', 'M_h_m_p', 'M_h_p', 'M_h_s', 'M_hcys__L_c', 'M_hcys__L_e', 'M_hcys__L_p', 'M_hcys__L_s', 'M_hemeO_c', 'M_his__L_c', 'M_his__L_e', 'M_his__L_p', 'M_his__L_s', 'M_hom__L_c', 'M_hpglu_c', 'M_ile__L_c', 'M_ile__L_e', 'M_ile__L_p', 'M_ile__L_s', 'M_indole_c', 'M_inost_c', 'M_iscssh_c', 'M_iscu_2fe2s2_c|M_iscu_2fe2s2_c_1', 'M_iscu_2fe2s_c', 'M_leu__L_c', 'M_leu__L_e', 'M_leu__L_p', 'M_leu__L_s', 'M_lipopb_c', 'M_met_L_ala__L_c', 'M_met__L_c', 'M_met__L_e', 'M_met__L_p', 'M_met__L_s', 'M_mg2_c', 'M_mg2_e', 'M_mg2_p', 'M_mg2_s', 'M_mhpglu_c', 'M_mlhpglu_c', 'M_mnl_e', 'M_mnl_p', 'M_mnl_s', 'M_myrsACP_c', 'M_nadp_c', 'M_nadph_c', 'M_o2_p', 'M_o2_s', 'M_orn_c', 'M_phe__L_c', 'M_phe__L_e', 'M_phe__L_p', 'M_phe__L_s', 'M_phpyr_c', 'M_phpyr_e', 'M_phpyr_p', 'M_phpyr_s', 'M_pi_c', 'M_pi_e', 'M_pi_p', 'M_pi_s', 'M_pnto__R_c', 'M_pnto__R_e', 'M_pnto__R_p', 'M_pnto__R_s', 'M_pphn_c', 'M_pppi_c', 'M_pro__L_c', 'M_pro__L_e', 'M_pro__L_p', 'M_pro__L_s', 'M_ribflv_c', 'M_ribflv_e', 'M_ribflv_p', 'M_ribflv_s', 'M_s7p_c', 'M_scl_c', 'M_ser__L_c', 'M_ser__L_e', 'M_ser__L_p', 'M_ser__L_s', 'M_so3_c', 'M_succ_c', 'M_succ_e', 'M_succ_p', 'M_succ_s', 'M_thmpp_c', 'M_thmpp_e', 'M_thmpp_p', 'M_thmpp_s', 'M_thr__L_c', 'M_thr__L_e', 'M_thr__L_p', 'M_thr__L_s', 'M_trdrd_c', 'M_trp__L_c', 'M_trp__L_e', 'M_trp__L_p', 'M_trp__L_s', 'M_tyr__L_c', 'M_tyr__L_e', 'M_tyr__L_p', 'M_tyr__L_s', 'M_uaccg_c', 'M_uama_c', 'M_udcpdp_c', 'M_udcpp_c', 'M_val__L_c', 'M_val__L_e', 'M_val__L_p', 'M_val__L_s', 'M_xu5p__D_c'], returned=['M_13dpg_c', 'M_2dr1p_c', 'M_2dr5p_c', 'M_2fe2s_c', 'M_3hddecACP_c', 'M_3mop_c', 'M_3mop_e', 'M_3mop_p', 'M_3mop_s', 'M_5mthf_c', 'M_5mtr_c', 'M_5mtr_e', 'M_5mtr_p', 'M_5mtr_s', 'M_ACP_c', 'M_acgam1p_c', 'M_acorn_c', 'M_acser_c', 'M_ahcys_c', 'M_ahcys_e', 'M_ahcys_p', 'M_ahcys_s', 'M_aicar_c', 'M_ala_B_c', 'M_ala_B_e', 'M_ala_B_p', 'M_ala_B_s', 'M_ala__D_c', 'M_ala__L_c', 'M_ala__L_e', 'M_ala__L_p', 'M_ala__L_s', 'M_alaala_c', 'M_amet_c', 'M_asn__L_c', 'M_asn__L_e', 'M_asn__L_p', 'M_asn__L_s', 'M_btn_c', 'M_btn_e', 'M_btn_p', 'M_btn_s', 'M_ca2_c', 'M_ca2_e', 'M_ca2_p', 'M_ca2_s', 'M_citr__L_c', 'M_clpn161_p', 'M_clpn181_p', 'M_cys__L_c', 'M_cys__L_e', 'M_cys__L_p', 'M_cys__L_s', 'M_db4p_c', 'M_ddcaACP_c|M_ddcaACP_c_1', 'M_dhf_c', 'M_dhf_e', 'M_dhf_p', 'M_dhf_s', 'M_dhor__S_c', 'M_f6p_c', 'M_fad_c', 'M_fdp_c', 'M_fdxo_22_c', 'M_fdxr_22_c', 'M_fmn_c', 'M_fol_c', 'M_fol_e', 'M_fol_p', 'M_fol_s', 'M_for_c', 'M_for_e', 'M_for_p', 'M_for_s', 'M_frdp_c', 'M_g6p_c', 'M_gam6p_c', 'M_glc__D_e', 'M_glc__D_p', 'M_glc__D_s', 'M_gln__L_c', 'M_gln__L_e', 'M_gln__L_p', 'M_gln__L_s', 'M_glu__L_c', 'M_glu__L_e', 'M_glucys_c', 'M_gly_c', 'M_gly_e', 'M_gly_p', 'M_gly_s', 'M_h_c', 'M_h_e', 'M_h_m_p', 'M_h_p', 'M_h_s', 'M_hcys__L_c', 'M_hcys__L_e', 'M_hcys__L_p', 'M_hcys__L_s', 'M_hemeO_c', 'M_his__L_c', 'M_his__L_e', 'M_his__L_p', 'M_his__L_s', 'M_hom__L_c', 'M_hpglu_c', 'M_ile__L_c', 'M_ile__L_e', 'M_ile__L_p', 'M_ile__L_s', 'M_indole_c', 'M_inost_c', 'M_iscssh_c', 'M_iscu_2fe2s2_c|M_iscu_2fe2s2_c_1', 'M_iscu_2fe2s_c', 'M_leu__L_c', 'M_leu__L_e', 'M_leu__L_p', 'M_leu__L_s', 'M_lipopb_c', 'M_met_L_ala__L_c', 'M_met__L_c', 'M_met__L_e', 'M_met__L_p', 'M_met__L_s', 'M_mg2_c', 'M_mg2_e', 'M_mg2_p', 'M_mg2_s', 'M_mhpglu_c', 'M_mnl_e', 'M_mnl_p', 'M_mnl_s', 'M_myrsACP_c', 'M_nadp_c', 'M_nadph_c', 'M_o2_p', 'M_o2_s', 'M_orn_c', 'M_phe__L_c', 'M_phe__L_e', 'M_phe__L_p', 'M_phe__L_s', 'M_phpyr_c', 'M_phpyr_e', 'M_phpyr_p', 'M_phpyr_s', 'M_pi_c', 'M_pi_e', 'M_pi_p', 'M_pi_s', 'M_pnto__R_c', 'M_pnto__R_e', 'M_pnto__R_p', 'M_pnto__R_s', 'M_pphn_c', 'M_pppi_c', 'M_pro__L_c', 'M_pro__L_e', 'M_pro__L_p', 'M_pro__L_s', 'M_ribflv_c', 'M_ribflv_e', 'M_ribflv_p', 'M_ribflv_s', 'M_s7p_c', 'M_scl_c', 'M_ser__L_c', 'M_ser__L_e', 'M_ser__L_p', 'M_ser__L_s', 'M_so3_c', 'M_succ_c', 'M_succ_e', 'M_succ_p', 'M_succ_s', 'M_thmpp_c', 'M_thmpp_e', 'M_thmpp_p', 'M_thmpp_s', 'M_thr__L_c', 'M_thr__L_e', 'M_thr__L_p', 'M_thr__L_s', 'M_trdrd_c', 'M_trp__L_c', 'M_trp__L_e', 'M_trp__L_p', 'M_trp__L_s', 'M_tyr__L_c', 'M_tyr__L_e', 'M_tyr__L_p', 'M_tyr__L_s', 'M_uaccg_c', 'M_uama_c', 'M_udcpdp_c', 'M_udcpp_c', 'M_val__L_c', 'M_val__L_e', 'M_val__L_p', 'M_val__L_s', 'M_xu5p__D_c']"
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "ranking",
+          "attempt": 2,
+          "entity_count": 204
+        }
+      ]
+    }
+  }
+}

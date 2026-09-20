@@ -47,6 +47,7 @@ result = annotate_model(
     message="This is a model for human metabolism", # optional user message to the LLM
     top_k=3,                         # identity retrieval pool per species/component
     n_return=1,                      # final identities kept per species/component
+    validation=True,                 # optional structured output and candidate checks
     verbose=False,                    # True for a short progress summary
 )
 # result.species_recommendations_df    → species
@@ -59,6 +60,10 @@ component independently. For multi-organism gene/protein searches, accessions
 are grouped by biological identity before ranking and emitted with a `tax_id`;
 several accession rows can therefore share `identity_rank=1`.
 Component IDs are species-scoped: species `X` uses `X_1`, `X_2`, and so on.
+With `validation=True`, species normalization and ranking use structured LLM
+responses, and applicable entity-type and chemical-property checks run before
+the final top-one selection. The default is `False` for reproducibility with
+earlier AAAIM runs.
 
 Run the bundled example (uses a test SBML model):
 
