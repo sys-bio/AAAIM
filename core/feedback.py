@@ -75,6 +75,7 @@ class AnnotationResult:
         model_info: Optional[Dict[str, Any]] = None,
         csv_path: str = None,
         validation: bool = False,
+        source_fidelity: bool = False,
     ):
         self.recommendations_df = recommendations_df
         self.species_recommendations_df = None
@@ -97,6 +98,7 @@ class AnnotationResult:
         self._model_info = model_info
         self._csv_path = csv_path
         self._validation = validation
+        self._source_fidelity = source_fidelity
         self._revision_count = 0
         self._revision_history: List[Dict[str, Any]] = []
 
@@ -137,6 +139,7 @@ class AnnotationResult:
             qualifier_annotations=self._qualifier_annotations,
             model_info=self._model_info,
             validation=self._validation,
+            source_fidelity=self._source_fidelity,
         )
 
         revision_metrics["iteration"] = self._revision_count
@@ -261,6 +264,7 @@ def _revise_recommendations(
     qualifier_annotations: Optional[Dict[str, List[str]]] = None,
     model_info: Optional[Dict[str, Any]] = None,
     validation: bool = False,
+    source_fidelity: bool = False,
 ) -> Tuple[pd.DataFrame, Dict[str, Any], List[Dict[str, Any]]]:
     """Single feedback revision round (internal implementation)."""
     start_time = time.time()
@@ -340,12 +344,28 @@ def _revise_recommendations(
         _generate_recommendation_table,
         _normalize_databases,
         _normalize_entity_type,
+        _preserve_source_names,
         _search_databases,
         rank_species_annotations_with_llm,
     )
+    from core.model_info import get_species_display_names
+    from utils.constants import EntityType
 
     entity_type = _normalize_entity_type(entity_type)
     databases = _normalize_databases(database)
+    if source_fidelity:
+        chemical_ids = [
+            sid for sid in entities_to_evaluate
+            if not component_dict.get(sid)
+            and (entity_type == EntityType.CHEMICAL
+                 or (entity_type == EntityType.AUTO
+                     and entity_type_dict.get(sid) == EntityType.CHEMICAL.value))
+        ]
+        _preserve_source_names(
+            synonyms_dict,
+            get_species_display_names(model_file, EntityType.CHEMICAL),
+            chemical_ids,
+        )
     recommendations, species_database, candidate_databases = _search_databases(
         entities_to_evaluate,
         synonyms_dict,
@@ -359,6 +379,7 @@ def _revise_recommendations(
         component_dict=component_dict,
         validation=validation,
         model_file=model_file,
+        source_fidelity=source_fidelity,
     )
     search_time = time.time() - search_start
 
@@ -379,6 +400,7 @@ def _revise_recommendations(
             n_return=n_return,
             model_notes=(model_info or {}).get("model_notes", "") or "",
             validation=validation,
+            source_fidelity=source_fidelity,
         )
         if not ranked_df.empty:
             updated_df = ranked_df

@@ -48,6 +48,7 @@ result = annotate_model(
     top_k=3,                         # identity retrieval pool per species/component
     n_return=1,                      # final identities kept per species/component
     validation=True,                 # optional structured output and candidate checks
+    source_fidelity=True,            # optional exact SBML chemical-name priority
     verbose=False,                    # True for a short progress summary
 )
 # result.species_recommendations_df    → species
@@ -64,6 +65,12 @@ With `validation=True`, species normalization and ranking use structured LLM
 responses, and applicable entity-type and chemical-property checks run before
 the final top-one selection. The default is `False` for reproducibility with
 earlier AAAIM runs.
+With `source_fidelity=True` (requires `validation=True`), ordinary chemical
+species retain their literal SBML display name alongside generated synonyms.
+Exact source-name ChEBI matches enter the retrieval pool first; explicit
+stereochemistry and ACP conjugation are preserved, and a unique exact match
+remaining after chemistry checks is selected without another LLM decision.
+Complex components and gene/protein identities are not changed by this option.
 
 Run the bundled example (uses a test SBML model):
 

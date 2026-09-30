@@ -1,0 +1,174 @@
+{
+  "model": "MODEL2501150001",
+  "condition": "table_s3_source_fidelity",
+  "configuration": {
+    "llm_model": "gpt-5-mini-2025-08-07",
+    "method": "direct",
+    "top_k": 3,
+    "n_return": 1,
+    "max_entities": null,
+    "entity_type": "auto",
+    "database": [
+      "chebi",
+      "uniprot"
+    ],
+    "tax_id": "9606",
+    "chunk_size": 50,
+    "max_completion_tokens": 12000,
+    "supplementary_context": "/Users/luna/Desktop/CRBM/AMAS_proj/AAAIM/tests/useCase/context/MODEL2501150001_TableS3.txt",
+    "validation": true,
+    "source_fidelity": true
+  },
+  "metrics": {
+    "total_entities": 47,
+    "entities_with_predictions": 47,
+    "annotation_rate": 1.0,
+    "total_predictions": 121,
+    "matches": 0,
+    "accuracy": null,
+    "total_time": 259.7017960548401,
+    "llm_time": 253.09937191009521,
+    "search_time": 6.396247148513794,
+    "llm_usage": {
+      "input_tokens": 20959,
+      "output_tokens": 32352,
+      "total_tokens": 53311,
+      "reasoning_tokens": 24096,
+      "cached_input_tokens": 12160,
+      "requests": 4,
+      "models": [
+        "gpt-5-mini-2025-08-07"
+      ]
+    },
+    "validation": {
+      "enabled": true,
+      "source_fidelity": true,
+      "event_counts": {
+        "structured_output_repair": 2,
+        "structured_output_valid": 2,
+        "entity_type_route_correction": 5
+      },
+      "events": [
+        {
+          "kind": "structured_output_repair",
+          "stage": "normalization",
+          "attempt": 1,
+          "error": "response is not valid JSON: Expecting value: line 1 column 1 (char 0)"
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "normalization",
+          "attempt": 2,
+          "entity_count": 47
+        },
+        {
+          "kind": "entity_type_route_correction",
+          "species_id": "mEL",
+          "component_id": "mEL_2",
+          "from_database": "chebi",
+          "from_type": "chemical",
+          "from_top": {
+            "candidate": "140739",
+            "label": "Glu-Gly-Phe",
+            "score": 0.5
+          },
+          "to_database": "uniprot",
+          "to_type": "protein",
+          "to_top": {
+            "candidate": "P01133",
+            "label": "EGF",
+            "score": 1.0
+          }
+        },
+        {
+          "kind": "entity_type_route_correction",
+          "species_id": "mELmEL",
+          "component_id": "mELmEL_2",
+          "from_database": "chebi",
+          "from_type": "chemical",
+          "from_top": {
+            "candidate": "140739",
+            "label": "Glu-Gly-Phe",
+            "score": 0.5
+          },
+          "to_database": "uniprot",
+          "to_type": "protein",
+          "to_top": {
+            "candidate": "P01133",
+            "label": "EGF",
+            "score": 1.0
+          }
+        },
+        {
+          "kind": "entity_type_route_correction",
+          "species_id": "E",
+          "component_id": "E_2",
+          "from_database": "chebi",
+          "from_type": "chemical",
+          "from_top": {
+            "candidate": "140739",
+            "label": "Glu-Gly-Phe",
+            "score": 0.5
+          },
+          "to_database": "uniprot",
+          "to_type": "protein",
+          "to_top": {
+            "candidate": "P01133",
+            "label": "EGF",
+            "score": 1.0
+          }
+        },
+        {
+          "kind": "entity_type_route_correction",
+          "species_id": "EG2SOS",
+          "component_id": "EG2SOS_2",
+          "from_database": "chebi",
+          "from_type": "chemical",
+          "from_top": {
+            "candidate": "140739",
+            "label": "Glu-Gly-Phe",
+            "score": 0.5
+          },
+          "to_database": "uniprot",
+          "to_type": "protein",
+          "to_top": {
+            "candidate": "P01133",
+            "label": "EGF",
+            "score": 1.0
+          }
+        },
+        {
+          "kind": "entity_type_route_correction",
+          "species_id": "EG2",
+          "component_id": "EG2_2",
+          "from_database": "chebi",
+          "from_type": "chemical",
+          "from_top": {
+            "candidate": "140739",
+            "label": "Glu-Gly-Phe",
+            "score": 0.5
+          },
+          "to_database": "uniprot",
+          "to_type": "protein",
+          "to_top": {
+            "candidate": "P01133",
+            "label": "EGF",
+            "score": 1.0
+          }
+        },
+        {
+          "kind": "structured_output_repair",
+          "stage": "ranking",
+          "attempt": 1,
+          "error": "ranking unit mismatch; expected=['BRaf_dimer|BRaf_dimer_2', 'BRaf_dimer|BRaf_dimer_3', 'BRaf_iBRaf_dimer|BRaf_iBRaf_dimer_2', 'BRaf_iBRaf_dimer|BRaf_iBRaf_dimer_3', 'EG2SOS|EG2SOS_4', 'ERK', 'GRB2_SOS|GRB2_SOS_2', 'MEK', 'Ras_BRaf|Ras_BRaf_1', 'Ras_BRaf|Ras_BRaf_2', 'Ras_BRaf_Raf1_tetramer|Ras_BRaf_Raf1_tetramer_1', 'Ras_BRaf_Raf1_tetramer|Ras_BRaf_Raf1_tetramer_2', 'Ras_BRaf_pRaf1_tetramer|Ras_BRaf_pRaf1_tetramer_1', 'Ras_BRaf_pRaf1_tetramer|Ras_BRaf_pRaf1_tetramer_2', 'Ras_Braf_iRaf1_tetramer|Ras_Braf_iRaf1_tetramer_1', 'Ras_Braf_iRaf1_tetramer|Ras_Braf_iRaf1_tetramer_2', 'Ras_GDP|Ras_GDP_1', 'Ras_GDP|Ras_GDP_2', 'Ras_GTP|Ras_GTP_1', 'Ras_GTP|Ras_GTP_2', 'Ras_Raf1|Ras_Raf1_1', 'Ras_Raf1|Ras_Raf1_2', 'Ras_Raf1_iBRaf_tetramer|Ras_Raf1_iBRaf_tetramer_1', 'Ras_Raf1_iBRaf_tetramer|Ras_Raf1_iBRaf_tetramer_2', 'Ras_iBRaf|Ras_iBRaf_1', 'Ras_iBRaf|Ras_iBRaf_2', 'Ras_iRaf1|Ras_iRaf1_1', 'Ras_iRaf1|Ras_iRaf1_2', 'Ras_iRaf1_iBRaf1_tetramer|Ras_iRaf1_iBRaf1_tetramer_1', 'Ras_iRaf1_iBRaf1_tetramer|Ras_iRaf1_iBRaf1_tetramer_2', 'Ras_iRaf1_tetramer|Ras_iRaf1_tetramer_1', 'Ras_iRaf1_tetramer|Ras_iRaf1_tetramer_2', 'Ras_nfpBRaf|Ras_nfpBRaf_1', 'Ras_nfpBRaf|Ras_nfpBRaf_2', 'Ras_nfpRaf1|Ras_nfpRaf1_1', 'Ras_nfpRaf1|Ras_nfpRaf1_2', 'Ras_nfpiBRaf|Ras_nfpiBRaf_1', 'Ras_nfpiBRaf|Ras_nfpiBRaf_2', 'Ras_nfpiRaf1|Ras_nfpiRaf1_1', 'Ras_nfpiRaf1|Ras_nfpiRaf1_2', 'Ras_pRaf1|Ras_pRaf1_1', 'Ras_pRaf1|Ras_pRaf1_2', 'Ras_pRaf1_Raf1_tetramer|Ras_pRaf1_Raf1_tetramer_1', 'Ras_pRaf1_Raf1_tetramer|Ras_pRaf1_Raf1_tetramer_2', 'Ras_pRaf1_iBRaf_tetramer|Ras_pRaf1_iBRaf_tetramer_1', 'Ras_pRaf1_iBRaf_tetramer|Ras_pRaf1_iBRaf_tetramer_2', 'Ras_pRaf1_tetramer|Ras_pRaf1_tetramer_1', 'Ras_pRaf1_tetramer|Ras_pRaf1_tetramer_2', 'SOS', 'iBRaf_dimer|iBRaf_dimer_2', 'iBRaf_dimer|iBRaf_dimer_3', 'nfpSOS', 'pERK', 'pMEK', 'sorafenib'], returned=['mE', 'mEL', 'mELmEL', 'E', 'SOS', 'GRB2_SOS', 'EG2', 'EG2SOS', 'RAS_GDP', 'RAS_GTP', 'BRAF', 'BRAF_dimer', 'iBRAF', 'iBRAF_dimer', 'BRAF_iBRAF_dimer', 'RAF1', 'pRAF1', 'iRAF1', 'Ras_RAF1', 'Ras_iRAF1', 'Ras_BRAF', 'Ras_iBRAF', 'Ras_pRaf1', 'Ras_pRaf1_Raf1_tetramer', 'Ras_pRaf1_iRaf1_tetramer', 'Ras_Braf_Raf1_tetramer', 'Ras_iRaf1_tetramer', 'Ras_Braf_iRaf1_tetramer', 'Ras_pRaf1_tetramer', 'Ras_Braf_pRaf1_tetramer', 'Ras_Raf1_iBRaf_tetramer', 'Ras_pRaf1_iBRaf_tetramer', 'Ras_iRaf1_iBRaf1_tetramer', 'MEK', 'pMEK', 'ERK', 'pERK', 'nfpSOS', 'nfpRaf1', 'nfpiRaf1', 'nfpBRaf', 'nfpiBRaf', 'Ras_nfpRaf1', 'Ras_nfpBRaf', 'Ras_nfpiBRaf', 'Ras_nfpiRaf1', 'sorafenib']"
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "ranking",
+          "attempt": 2,
+          "entity_count": 55
+        }
+      ]
+    }
+  }
+}

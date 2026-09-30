@@ -1,0 +1,64 @@
+{
+  "model": "MODEL2503190002",
+  "condition": "full_source_fidelity_repeat02",
+  "configuration": {
+    "llm_model": "gpt-5-mini-2025-08-07",
+    "method": "direct",
+    "top_k": 3,
+    "n_return": 1,
+    "max_entities": null,
+    "entity_type": "auto",
+    "database": [
+      "chebi",
+      "uniprot"
+    ],
+    "tax_id": "9606",
+    "chunk_size": 50,
+    "validation": true,
+    "source_fidelity": true,
+    "repeat_id": 2
+  },
+  "metrics": {
+    "total_entities": 31,
+    "entities_with_predictions": 28,
+    "annotation_rate": 0.9032258064516129,
+    "total_predictions": 30,
+    "matches": 0,
+    "accuracy": null,
+    "total_time": 116.7138319015503,
+    "llm_time": 113.86857724189758,
+    "search_time": 2.666689872741699,
+    "llm_usage": {
+      "input_tokens": 5183,
+      "output_tokens": 5478,
+      "total_tokens": 10661,
+      "reasoning_tokens": 3456,
+      "cached_input_tokens": 0,
+      "requests": 2,
+      "models": [
+        "gpt-5-mini-2025-08-07"
+      ]
+    },
+    "validation": {
+      "enabled": true,
+      "source_fidelity": true,
+      "event_counts": {
+        "structured_output_valid": 2
+      },
+      "events": [
+        {
+          "kind": "structured_output_valid",
+          "stage": "normalization",
+          "attempt": 1,
+          "entity_count": 31
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "ranking",
+          "attempt": 1,
+          "entity_count": 4
+        }
+      ]
+    }
+  }
+}

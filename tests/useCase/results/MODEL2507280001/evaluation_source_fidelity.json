@@ -1,0 +1,1704 @@
+{
+  "model": {
+    "species": 593,
+    "reactions": 541
+  },
+  "ranking": "top-1 identity per species",
+  "species_with_candidates": 563,
+  "supplement_kegg_references": 556,
+  "locally_scorable_kegg_references": 539,
+  "exact_top1_hits": 321,
+  "exact_top1_rate": 0.5955473098330241,
+  "two_hop_top1_hits": 330,
+  "two_hop_top1_rate": 0.6122448979591837,
+  "charge_normalized_exact_name_hits": 93,
+  "chebi_reference_name_synonym_hits": 60,
+  "manually_supported_validation_pairs": 6,
+  "reviewed_identity_matches_outside_automated_mapping": [
+    {
+      "id": "M_g6p_c",
+      "predicted_annotation": "CHEBI:14314",
+      "predicted_label": "D-glucose 6-phosphate",
+      "reference_name": "D-Glucose 6-phosphate",
+      "reference_kegg": "C00092",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_f6p_c",
+      "predicted_annotation": "CHEBI:78697",
+      "predicted_label": "D-fructose 6-phosphate",
+      "reference_name": "D-Fructose 6-phosphate",
+      "reference_kegg": "C00085",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_atp_c",
+      "predicted_annotation": "CHEBI:30616",
+      "predicted_label": "ATP(4-)",
+      "reference_name": "ATP",
+      "reference_kegg": "C00002",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_adp_c",
+      "predicted_annotation": "CHEBI:456216",
+      "predicted_label": "ADP(3-)",
+      "reference_name": "ADP",
+      "reference_kegg": "C00008",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_fdp_c",
+      "predicted_annotation": "CHEBI:78682",
+      "predicted_label": "D-fructose 1,6-bisphosphate",
+      "reference_name": "D-Fructose 1,6-bisphosphate",
+      "reference_kegg": "C00354",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_g3p_c",
+      "predicted_annotation": "CHEBI:58027",
+      "predicted_label": "glyceraldehyde 3-phosphate(2-)",
+      "reference_name": "Glyceraldehyde 3-phosphate",
+      "reference_kegg": "C00661",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_dhap_c",
+      "predicted_annotation": "CHEBI:57642",
+      "predicted_label": "glycerone phosphate(2-)",
+      "reference_name": "Dihydroxyacetone phosphate",
+      "reference_kegg": "C00111",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_nadh_c",
+      "predicted_annotation": "CHEBI:57945",
+      "predicted_label": "NADH(2-)",
+      "reference_name": "Nicotinamide adenine dinucleotide - reduced",
+      "reference_kegg": "C00004",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_pep_c",
+      "predicted_annotation": "CHEBI:58702",
+      "predicted_label": "phosphonatoenolpyruvate",
+      "reference_name": "Phosphoenolpyruvate",
+      "reference_kegg": "C00074",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_coa_c",
+      "predicted_annotation": "CHEBI:57287",
+      "predicted_label": "coenzyme A(4-)",
+      "reference_name": "Coenzyme A",
+      "reference_kegg": "C00010",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_accoa_c",
+      "predicted_annotation": "CHEBI:57288",
+      "predicted_label": "acetyl-CoA(4-)",
+      "reference_name": "Acetyl-CoA",
+      "reference_kegg": "C00024",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_succoa_c",
+      "predicted_annotation": "CHEBI:57292",
+      "predicted_label": "succinyl-CoA(5-)",
+      "reference_name": "Succinyl-CoA",
+      "reference_kegg": "C00091",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_actp_c",
+      "predicted_annotation": "CHEBI:22191",
+      "predicted_label": "acetyl phosphate(2-)",
+      "reference_name": "Acetyl phosphate",
+      "reference_kegg": "C00227",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_6pgl_c",
+      "predicted_annotation": "CHEBI:57955",
+      "predicted_label": "6-O-phosphonato-D-glucono-1,5-lactone(2-)",
+      "reference_name": "6-phospho-D-glucono-1,5-lactone",
+      "reference_kegg": "C01236",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_6pgc_c",
+      "predicted_annotation": "CHEBI:58759",
+      "predicted_label": "6-phosphonatooxy-D-gluconate",
+      "reference_name": "6-Phospho-D-gluconate",
+      "reference_kegg": "C00345",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_ru5p__D_c",
+      "predicted_annotation": "CHEBI:58121",
+      "predicted_label": "D-ribulose 5-phosphate(2-)",
+      "reference_name": "D-Ribulose 5-phosphate",
+      "reference_kegg": "C00199",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_xu5p__D_c",
+      "predicted_annotation": "CHEBI:57737",
+      "predicted_label": "D-xylulose 5-phosphate(2-)",
+      "reference_name": "D-Xylulose 5-phosphate",
+      "reference_kegg": "C00231",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_e4p_c",
+      "predicted_annotation": "CHEBI:16897",
+      "predicted_label": "D-erythrose 4-phosphate(2-)",
+      "reference_name": "D-Erythrose 4-phosphate",
+      "reference_kegg": "C00279",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_cbp_c",
+      "predicted_annotation": "CHEBI:58228",
+      "predicted_label": "carbamoyl phosphate(2-)",
+      "reference_name": "Carbamoyl phosphate",
+      "reference_kegg": "C00169",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_glu__L_c",
+      "predicted_annotation": "CHEBI:29985",
+      "predicted_label": "L-glutamate(1-)",
+      "reference_name": "L-Glutamate",
+      "reference_kegg": "C00025",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_acg5p_c",
+      "predicted_annotation": "CHEBI:57936",
+      "predicted_label": "N-acetyl-L-gamma-glutamyl phosphate(3-)",
+      "reference_name": "N-Acetyl-L-glutamyl 5-phosphate",
+      "reference_kegg": "C04133",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_asp__L_c",
+      "predicted_annotation": "CHEBI:29991",
+      "predicted_label": "L-aspartate(1-)",
+      "reference_name": "L-Aspartate",
+      "reference_kegg": "C00049",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_ppi_c",
+      "predicted_annotation": "CHEBI:33019",
+      "predicted_label": "diphosphate(3-)",
+      "reference_name": "Diphosphate",
+      "reference_kegg": "C00013",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_amp_c",
+      "predicted_annotation": "CHEBI:456215",
+      "predicted_label": "adenosine 5'-monophosphate(2-)",
+      "reference_name": "AMP",
+      "reference_kegg": "C00020",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_arg__L_c",
+      "predicted_annotation": "CHEBI:32682",
+      "predicted_label": "L-argininium(1+)",
+      "reference_name": "L-Arginine",
+      "reference_kegg": "C00062",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_thf_c",
+      "predicted_annotation": "CHEBI:68437",
+      "predicted_label": "5,6,7,8-tetrahydrofolate(2-)",
+      "reference_name": "5,6,7,8-Tetrahydrofolate",
+      "reference_kegg": "C00101",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_mlthf_c",
+      "predicted_annotation": "CHEBI:12071",
+      "predicted_label": "5,10-methylenetetrahydrofolate(2-)",
+      "reference_name": "5,10-Methylenetetrahydrofolate",
+      "reference_kegg": "C00143",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_aps_c",
+      "predicted_annotation": "CHEBI:58243",
+      "predicted_label": "5'-adenylyl sulfate(2-)",
+      "reference_name": "Adenosine 5-phosphosulfate",
+      "reference_kegg": "C00224",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_paps_c",
+      "predicted_annotation": "CHEBI:58339",
+      "predicted_label": "3'-phosphonato-5'-adenylyl sulfate(4-)",
+      "reference_name": "3-Phosphoadenylyl sulfate",
+      "reference_kegg": "C00053",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_so3_c",
+      "predicted_annotation": "CHEBI:17359",
+      "predicted_label": "sulfite",
+      "reference_name": "Sulfite",
+      "reference_kegg": "C00094",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_pap_c",
+      "predicted_annotation": "CHEBI:37240",
+      "predicted_label": "adenosine 3',5'-bisphosphate",
+      "reference_name": "Adenosine 3,5-bisphosphate",
+      "reference_kegg": "C00054",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_hpglu_c",
+      "predicted_annotation": "CHEBI:26920",
+      "predicted_label": "tetrahydropteroyltri-L-glutamate",
+      "reference_name": "Tetrahydropteroyltri L glutamate",
+      "reference_kegg": "C04144",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_prpp_c",
+      "predicted_annotation": "CHEBI:58017",
+      "predicted_label": "5-O-phosphonato-alpha-D-ribofuranosyl diphosphate(5-)",
+      "reference_name": "5-Phospho-alpha-D-ribose 1-diphosphate",
+      "reference_kegg": "C00119",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_eig3p_c",
+      "predicted_annotation": "CHEBI:58278",
+      "predicted_label": "D-erythro-1-(imidazol-4-yl)glycerol 3-phosphate(2-)",
+      "reference_name": "D-erythro-1-(Imidazol-4-yl)glycerol 3-phosphate",
+      "reference_kegg": "C04666",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_imacp_c",
+      "predicted_annotation": "CHEBI:57766",
+      "predicted_label": "3-(imidazol-4-yl)-2-oxopropyl phosphate(2-)",
+      "reference_name": "3-(Imidazol-4-yl)-2-oxopropyl phosphate",
+      "reference_kegg": "C01267",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_hisp_c",
+      "predicted_annotation": "CHEBI:57980",
+      "predicted_label": "L-histidinol phosphate(1-)",
+      "reference_name": "L-Histidinol phosphate",
+      "reference_kegg": "C01100",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_histd_c",
+      "predicted_annotation": "CHEBI:57699",
+      "predicted_label": "L-histidinol(1+)",
+      "reference_name": "L-Histidinol",
+      "reference_kegg": "C00860",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_skm_c",
+      "predicted_annotation": "CHEBI:36208",
+      "predicted_label": "shikimate",
+      "reference_name": "Shikimate",
+      "reference_kegg": "C00493",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_3psme_c",
+      "predicted_annotation": "CHEBI:57701",
+      "predicted_label": "5-O-(1-carboxylatovinyl)-3-phosphonatoshikimate",
+      "reference_name": "5-O-(1-Carboxyvinyl)-3-phosphoshikimate",
+      "reference_kegg": "C01269",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_chor_c",
+      "predicted_annotation": "CHEBI:29748",
+      "predicted_label": "chorismate(2-)",
+      "reference_name": "chorismate",
+      "reference_kegg": "C00251",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_2cpr5p_c",
+      "predicted_annotation": "CHEBI:58613",
+      "predicted_label": "1-(2-carboxylatophenylamino)-1-deoxy-D-ribulose 5-phosphate(3-)",
+      "reference_name": "1-(2-Carboxyphenylamino)-1-deoxy-D-ribulose 5-phosphate",
+      "reference_kegg": "C01302",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_phpyr_c",
+      "predicted_annotation": "CHEBI:26008",
+      "predicted_label": "phenylpyruvate",
+      "reference_name": "Phenylpyruvate",
+      "reference_kegg": "C00166",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_3c3hmp_c",
+      "predicted_annotation": "CHEBI:28107",
+      "predicted_label": "2-isopropylmalate(2-)",
+      "reference_name": "3-Carboxy-3-hydroxy-4-methylpentanoate",
+      "reference_kegg": "C02504",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_2ippm_c",
+      "predicted_annotation": "CHEBI:58085",
+      "predicted_label": "2-isopropylmaleate(2-)",
+      "reference_name": "2-Isopropylmaleate",
+      "reference_kegg": "C02631",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_aspsa_c",
+      "predicted_annotation": "CHEBI:537519",
+      "predicted_label": "L-aspartic acid 4-semialdehyde zwitterion",
+      "reference_name": "L-Aspartate 4-semialdehyde",
+      "reference_kegg": "C00441",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_phom_c",
+      "predicted_annotation": "CHEBI:57590",
+      "predicted_label": "O-phosphonato-L-homoserine(2-)",
+      "reference_name": "O-Phospho-L-homoserine",
+      "reference_kegg": "C01102",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_4pasp_c",
+      "predicted_annotation": "CHEBI:57535",
+      "predicted_label": "4-phosphonato-L-aspartic acid(2-)",
+      "reference_name": "4-Phospho-L-aspartate",
+      "reference_kegg": "C03082",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_thdp_c",
+      "predicted_annotation": "CHEBI:11408",
+      "predicted_label": "2,3,4,5-tetrahydrodipicolinate(2-)",
+      "reference_name": "2,3,4,5-Tetrahydrodipicolinate",
+      "reference_kegg": "C03972",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_succ_c",
+      "predicted_annotation": "CHEBI:26806",
+      "predicted_label": "succinate",
+      "reference_name": "Succinate",
+      "reference_kegg": "C00042",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_26dap__M_c",
+      "predicted_annotation": "CHEBI:57791",
+      "predicted_label": "meso-2,6-diaminopimelic acid dizwitterion",
+      "reference_name": "Meso-2,6-Diaminoheptanedioate",
+      "reference_kegg": "C00680",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_lys__L_c",
+      "predicted_annotation": "CHEBI:32551",
+      "predicted_label": "L-lysinium(1+)",
+      "reference_name": "L-Lysine",
+      "reference_kegg": "C00047",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_ptrc_c",
+      "predicted_annotation": "CHEBI:326268",
+      "predicted_label": "1,4-butanediammonium",
+      "reference_name": "Putrescine",
+      "reference_kegg": "C00134",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_spmd_c",
+      "predicted_annotation": "CHEBI:57834",
+      "predicted_label": "spermidine(3+)",
+      "reference_name": "Spermidine",
+      "reference_kegg": "C00315",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_5mtr_c",
+      "predicted_annotation": "CHEBI:16895",
+      "predicted_label": "S-methyl-5-thio-D-ribose",
+      "reference_name": "5-Methylthio-D-ribose",
+      "reference_kegg": "C03089",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_pser__L_c",
+      "predicted_annotation": "CHEBI:57524",
+      "predicted_label": "O-phosphonato-L-serine(2-)",
+      "reference_name": "O-Phospho-L-serine",
+      "reference_kegg": "C01005",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_glu__D_c",
+      "predicted_annotation": "CHEBI:29986",
+      "predicted_label": "D-glutamate(1-)",
+      "reference_name": "D-Glutamate",
+      "reference_kegg": "C00217",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_glucys_c",
+      "predicted_annotation": "CHEBI:58173",
+      "predicted_label": "L-gamma-glutamyl-L-cysteinate(1-)",
+      "reference_name": "gamma-L-Glutamyl-L-cysteine",
+      "reference_kegg": "C00669",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_ACP_c",
+      "predicted_annotation": "CHEBI:13534",
+      "predicted_label": "acyl-carrier protein",
+      "reference_name": "acyl carrier protein",
+      "reference_kegg": "C00229",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_fe2_c",
+      "predicted_annotation": "CHEBI:29033",
+      "predicted_label": "iron(2+)",
+      "reference_name": "Fe2+",
+      "reference_kegg": "C00023",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_10fthf_c",
+      "predicted_annotation": "CHEBI:57454",
+      "predicted_label": "10-formyltetrahydrofolate(2-)",
+      "reference_name": "10-Formyltetrahydrofolate",
+      "reference_kegg": "C00234",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_fprica_c",
+      "predicted_annotation": "CHEBI:58467",
+      "predicted_label": "5-formamido-1-(5-phospho-D-ribosyl)imidazole-4-carboxamide(2-)",
+      "reference_name": "5-Formamido-1-(5-phospho-D-ribosyl)imidazole-4-carboxamide",
+      "reference_kegg": "C04734",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_imp_c",
+      "predicted_annotation": "CHEBI:58053",
+      "predicted_label": "IMP(2-)",
+      "reference_name": "IMP",
+      "reference_kegg": "C00130",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_gmp_c",
+      "predicted_annotation": "CHEBI:58115",
+      "predicted_label": "guanosine 5'-monophosphate(2-)",
+      "reference_name": "GMP",
+      "reference_kegg": "C00144",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_gdp_c",
+      "predicted_annotation": "CHEBI:58189",
+      "predicted_label": "GDP(3-)",
+      "reference_name": "GDP",
+      "reference_kegg": "C00035",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_gtp_c",
+      "predicted_annotation": "CHEBI:37565",
+      "predicted_label": "GTP(4-)",
+      "reference_name": "GTP",
+      "reference_kegg": "C00044",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_dgdp_c",
+      "predicted_annotation": "CHEBI:58595",
+      "predicted_label": "dGDP(3-)",
+      "reference_name": "dGDP",
+      "reference_kegg": "C00361",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_dgtp_c",
+      "predicted_annotation": "CHEBI:61429",
+      "predicted_label": "dGTP(4-)",
+      "reference_name": "dGTP",
+      "reference_kegg": "C00286",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_dgmp_c",
+      "predicted_annotation": "CHEBI:57673",
+      "predicted_label": "2'-deoxyguanosine 5'-monophosphate(2-)",
+      "reference_name": "dGMP",
+      "reference_kegg": "C00362",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_dcamp_c",
+      "predicted_annotation": "CHEBI:57567",
+      "predicted_label": "N(6)-(1,2-dicarboxylatoethyl)-AMP(4-)",
+      "reference_name": "N6-(1,2-Dicarboxyethyl)-AMP",
+      "reference_kegg": "C03794",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_dadp_c",
+      "predicted_annotation": "CHEBI:57667",
+      "predicted_label": "dADP(3-)",
+      "reference_name": "dADP",
+      "reference_kegg": "C00206",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_datp_c",
+      "predicted_annotation": "CHEBI:61404",
+      "predicted_label": "dATP(4-)",
+      "reference_name": "dATP",
+      "reference_kegg": "C00131",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_damp_c",
+      "predicted_annotation": "CHEBI:58245",
+      "predicted_label": "2'-deoxyadenosine 5'-monophosphate(2-)",
+      "reference_name": "dAMP",
+      "reference_kegg": "C00360",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_ap4a_c",
+      "predicted_annotation": "CHEBI:58141",
+      "predicted_label": "P(1),P(4)-bis(5'-adenosyl) tetraphosphate(4-)",
+      "reference_name": "P1,P4-Bis(5-adenosyl) tetraphosphate",
+      "reference_kegg": "C01260",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_2dr1p_c",
+      "predicted_annotation": "CHEBI:58576",
+      "predicted_label": "2-deoxy-D-ribofuranose 1-phosphate(2-)",
+      "reference_name": "2-Deoxy-D-ribose 1-phosphate",
+      "reference_kegg": "C00672",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_cbasp_c",
+      "predicted_annotation": "CHEBI:32814",
+      "predicted_label": "N-carbamoyl-L-aspartate(2-)",
+      "reference_name": "N-Carbamoyl-L-aspartate",
+      "reference_kegg": "C00438",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_dhor__S_c",
+      "predicted_annotation": "CHEBI:30864",
+      "predicted_label": "(S)-dihydroorotate",
+      "reference_name": "(S)-Dihydroorotate",
+      "reference_kegg": "C00337",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_orot_c",
+      "predicted_annotation": "CHEBI:30839",
+      "predicted_label": "orotate",
+      "reference_name": "Orotate",
+      "reference_kegg": "C00295",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_orot5p_c",
+      "predicted_annotation": "CHEBI:57538",
+      "predicted_label": "orotidine 5'-phosphate(3-)",
+      "reference_name": "Orotidine 5-phosphate",
+      "reference_kegg": "C01103",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_ump_c",
+      "predicted_annotation": "CHEBI:57865",
+      "predicted_label": "uridine 5'-monophosphate(2-)",
+      "reference_name": "UMP",
+      "reference_kegg": "C00105",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_udp_c",
+      "predicted_annotation": "CHEBI:58223",
+      "predicted_label": "UDP(3-)",
+      "reference_name": "UDP",
+      "reference_kegg": "C00015",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_utp_c",
+      "predicted_annotation": "CHEBI:46398",
+      "predicted_label": "UTP(4-)",
+      "reference_name": "UTP",
+      "reference_kegg": "C00075",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_ctp_c",
+      "predicted_annotation": "CHEBI:37563",
+      "predicted_label": "CTP(4-)",
+      "reference_name": "CTP",
+      "reference_kegg": "C00063",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_cdp_c",
+      "predicted_annotation": "CHEBI:58069",
+      "predicted_label": "CDP(3-)",
+      "reference_name": "CDP",
+      "reference_kegg": "C00112",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_dcdp_c",
+      "predicted_annotation": "CHEBI:58593",
+      "predicted_label": "dCDP(3-)",
+      "reference_name": "dCDP",
+      "reference_kegg": "C00705",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_dctp_c",
+      "predicted_annotation": "CHEBI:61481",
+      "predicted_label": "dCTP(4-)",
+      "reference_name": "dCTP",
+      "reference_kegg": "C00458",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_dutp_c",
+      "predicted_annotation": "CHEBI:61555",
+      "predicted_label": "dUTP(4-)",
+      "reference_name": "dUTP",
+      "reference_kegg": "C00460",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_dudp_c",
+      "predicted_annotation": "CHEBI:60471",
+      "predicted_label": "dUDP(3-)",
+      "reference_name": "dUDP",
+      "reference_kegg": "C01346",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_dump_c",
+      "predicted_annotation": "CHEBI:246422",
+      "predicted_label": "dUMP(2-)",
+      "reference_name": "dUMP",
+      "reference_kegg": "C00365",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_dhf_c",
+      "predicted_annotation": "CHEBI:57451",
+      "predicted_label": "dihydrofolate(2-)",
+      "reference_name": "7,8-Dihydrofolate",
+      "reference_kegg": "C00415",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_dtmp_c",
+      "predicted_annotation": "CHEBI:63528",
+      "predicted_label": "dTMP(2-)",
+      "reference_name": "dTMP",
+      "reference_kegg": "C00364",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_dtdp_c",
+      "predicted_annotation": "CHEBI:58369",
+      "predicted_label": "dTDP(3-)",
+      "reference_name": "dTDP",
+      "reference_kegg": "C00363",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_dttp_c",
+      "predicted_annotation": "CHEBI:37568",
+      "predicted_label": "dTTP(4-)",
+      "reference_name": "dTTP",
+      "reference_kegg": "C00459",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_mi1p__D_c",
+      "predicted_annotation": "CHEBI:58433",
+      "predicted_label": "1D-myo-inositol 1-phosphate(2-)",
+      "reference_name": "1D-myo-Inositol 1-phosphate",
+      "reference_kegg": "C01177",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_mnl1p_c",
+      "predicted_annotation": "CHEBI:61381",
+      "predicted_label": "D-mannitol 1-phosphate(2-)",
+      "reference_name": "D-Mannitol 1-phosphate",
+      "reference_kegg": "C00644",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_dxyl5p_c",
+      "predicted_annotation": "CHEBI:57792",
+      "predicted_label": "1-deoxy-D-xylulose 5-phosphate(2-)",
+      "reference_name": "1-deoxy-D-xylulose 5-phosphate",
+      "reference_kegg": "C11437",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_2me4p_c",
+      "predicted_annotation": "CHEBI:58262",
+      "predicted_label": "2-C-methyl-D-erythritol 4-phosphate(2-)",
+      "reference_name": "2-C-methyl-D-erythritol 4-phosphate",
+      "reference_kegg": "C11434",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_cmp_c",
+      "predicted_annotation": "CHEBI:60377",
+      "predicted_label": "cytidine 5'-monophosphate(2-)",
+      "reference_name": "CMP",
+      "reference_kegg": "C00055",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_h2mb4p_c",
+      "predicted_annotation": "CHEBI:128753",
+      "predicted_label": "(2E)-4-hydroxy-3-methylbut-2-enyl diphosphate(3-)",
+      "reference_name": "1-hydroxy-2-methyl-2-(E)-butenyl 4-diphosphate",
+      "reference_kegg": "C11811",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_dmpp_c",
+      "predicted_annotation": "CHEBI:57623",
+      "predicted_label": "prenyl diphosphate(3-)",
+      "reference_name": "Dimethylallyl diphosphate",
+      "reference_kegg": "C00235",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_ipdp_c",
+      "predicted_annotation": "CHEBI:128769",
+      "predicted_label": "isopentenyl diphosphate(3-)",
+      "reference_name": "Isopentenyl diphosphate",
+      "reference_kegg": "C00129",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_grdp_c",
+      "predicted_annotation": "CHEBI:58057",
+      "predicted_label": "geranyl diphosphate(3-)",
+      "reference_name": "Geranyl diphosphate",
+      "reference_kegg": "C00341",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_frdp_c",
+      "predicted_annotation": "CHEBI:50277",
+      "predicted_label": "farnesyl diphosphate",
+      "reference_name": "Farnesyl diphosphate",
+      "reference_kegg": "C00448",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_pnto__R_c",
+      "predicted_annotation": "CHEBI:29032",
+      "predicted_label": "(R)-pantothenate",
+      "reference_name": "(R)-Pantothenate",
+      "reference_kegg": "C00864",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_pan4p_c",
+      "predicted_annotation": "CHEBI:47942",
+      "predicted_label": "pantetheine 4'-phosphate(2-)",
+      "reference_name": "Pantetheine 4-phosphate",
+      "reference_kegg": "C01134",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_dpcoa_c",
+      "predicted_annotation": "CHEBI:57328",
+      "predicted_label": "3'-dephospho-CoA(2-)",
+      "reference_name": "Dephospho-CoA",
+      "reference_kegg": "C00882",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_thmpp_c",
+      "predicted_annotation": "CHEBI:58937",
+      "predicted_label": "thiamine(1+) diphosphate(3-)",
+      "reference_name": "Thiamine diphosphate",
+      "reference_kegg": "C00068",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_fol_c",
+      "predicted_annotation": "CHEBI:37445",
+      "predicted_label": "folic acids",
+      "reference_name": "Folate",
+      "reference_kegg": "C00504",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_8aonn_c",
+      "predicted_annotation": "CHEBI:57532",
+      "predicted_label": "8-amino-7-oxononanoic acid zwitterion",
+      "reference_name": "8-Amino-7-oxononanoate",
+      "reference_kegg": "C01092",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_amob_c",
+      "predicted_annotation": "CHEBI:16490",
+      "predicted_label": "S-adenosyl-4-methylthio-2-oxobutanoate",
+      "reference_name": "S-Adenosyl-4-methylthio-2-oxobutanoate",
+      "reference_kegg": "C04425",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_dann_c",
+      "predicted_annotation": "CHEBI:58500",
+      "predicted_label": "7,8-diaminononanoate cation",
+      "reference_name": "7,8-Diaminononanoate",
+      "reference_kegg": "C01037",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_dtbt_c",
+      "predicted_annotation": "CHEBI:57861",
+      "predicted_label": "dethiobiotin(1-)",
+      "reference_name": "Dethiobiotin",
+      "reference_kegg": "C01909",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_btn_c",
+      "predicted_annotation": "CHEBI:57586",
+      "predicted_label": "biotinate",
+      "reference_name": "Biotin",
+      "reference_kegg": "C00120",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_5mthf_c",
+      "predicted_annotation": "CHEBI:20612",
+      "predicted_label": "5-methyltetrahydrofolate",
+      "reference_name": "5-Methyltetrahydrofolate",
+      "reference_kegg": "C00440",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_uppg3_c",
+      "predicted_annotation": "CHEBI:57308",
+      "predicted_label": "uroporphyrinogen III(8-)",
+      "reference_name": "Uroporphyrinogen III",
+      "reference_kegg": "C01051",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_sheme_c",
+      "predicted_annotation": "CHEBI:60052",
+      "predicted_label": "siroheme(8-)",
+      "reference_name": "Siroheme",
+      "reference_kegg": "C00748",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_ppbng_c",
+      "predicted_annotation": "CHEBI:58126",
+      "predicted_label": "porphobilinogen(1-)",
+      "reference_name": "Porphobilinogen",
+      "reference_kegg": "C00931",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_hmbil_c",
+      "predicted_annotation": "CHEBI:57845",
+      "predicted_label": "preuroporphyrinogen(8-)",
+      "reference_name": "Hydroxymethylbilane",
+      "reference_kegg": "C01024",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_udcpp_c",
+      "predicted_annotation": "CHEBI:27193",
+      "predicted_label": "undecaprenyl phosphate",
+      "reference_name": "Undecaprenyl phosphate",
+      "reference_kegg": "C00348",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_gam6p_c",
+      "predicted_annotation": "CHEBI:12962",
+      "predicted_label": "D-glucosamine 6-phosphate",
+      "reference_name": "D-Glucosamine 6-phosphate",
+      "reference_kegg": "C00352",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_acgam1p_c",
+      "predicted_annotation": "CHEBI:21519",
+      "predicted_label": "N-acetyl-D-glucosamine 1-phosphate",
+      "reference_name": "N-Acetyl-D-glucosamine 1-phosphate",
+      "reference_kegg": "C04256",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_uaccg_c",
+      "predicted_annotation": "CHEBI:16435",
+      "predicted_label": "UDP-N-acetyl-3-O-(1-carboxyvinyl)-D-glucosamine",
+      "reference_name": "UDP-N-acetyl-3-O-(1-carboxyvinyl)-D-glucosamine",
+      "reference_kegg": "C04631",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_uamr_c",
+      "predicted_annotation": "CHEBI:58309",
+      "predicted_label": "UDP-N-acetylmuramate(3-)",
+      "reference_name": "UDP-N-acetylmuramate",
+      "reference_kegg": "C01050",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_uama_c",
+      "predicted_annotation": "CHEBI:16932",
+      "predicted_label": "UDP-N-acetylmuramoyl-L-alanine",
+      "reference_name": "UDP-N-acetylmuramoyl-L-alanine",
+      "reference_kegg": "C01212",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_gmhep7p_c",
+      "predicted_annotation": "CHEBI:59955",
+      "predicted_label": "D-glycero-D-manno-heptose 7-phosphate(2-)",
+      "reference_name": "D-Glycero-D-manno-heptose 7-phosphate",
+      "reference_kegg": "C07836",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_gmhep17bp_c",
+      "predicted_annotation": "CHEBI:59957",
+      "predicted_label": "D-glycero-D-manno-heptose 1,7-bisphosphate(4-)",
+      "reference_name": "D-Glycero-D-manno-heptose 1,7-bisphosphate",
+      "reference_kegg": "C11472",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_gmhep1p_c",
+      "predicted_annotation": "CHEBI:60002",
+      "predicted_label": "D-glycero-D-manno-heptose 1-phosphate(2-)",
+      "reference_name": "D-Glycero-D-manno-heptose 1-phosphate",
+      "reference_kegg": "C07838",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_2dr5p_c",
+      "predicted_annotation": "CHEBI:62877",
+      "predicted_label": "2-deoxy-D-ribofuranose 5-phosphate(2-)",
+      "reference_name": "2-Deoxy-D-ribose 5-phosphate",
+      "reference_kegg": "C00673",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_lgt__S_c",
+      "predicted_annotation": "CHEBI:57474",
+      "predicted_label": "(R)-S-lactoylglutathionate(1-)",
+      "reference_name": "(R)-S-Lactoylglutathione",
+      "reference_kegg": "C03451",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_cu2_c",
+      "predicted_annotation": "CHEBI:29036",
+      "predicted_label": "copper(2+)",
+      "reference_name": "Copper",
+      "reference_kegg": "C00070",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_mn2_c",
+      "predicted_annotation": "CHEBI:29035",
+      "predicted_label": "manganese(2+)",
+      "reference_name": "Mn2+",
+      "reference_kegg": "C00034",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_pydx5p_c",
+      "predicted_annotation": "CHEBI:597326",
+      "predicted_label": "pyridoxal 5'-phosphate(2-)",
+      "reference_name": "Pyridoxal 5'-phosphate",
+      "reference_kegg": "C00018",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_arg__L_e",
+      "predicted_annotation": "CHEBI:32682",
+      "predicted_label": "L-argininium(1+)",
+      "reference_name": "L-Arginine",
+      "reference_kegg": "C00062",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_lys__L_e",
+      "predicted_annotation": "CHEBI:32551",
+      "predicted_label": "L-lysinium(1+)",
+      "reference_name": "L-Lysine",
+      "reference_kegg": "C00047",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_phpyr_e",
+      "predicted_annotation": "CHEBI:26008",
+      "predicted_label": "phenylpyruvate",
+      "reference_name": "Phenylpyruvate",
+      "reference_kegg": "C00166",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_pnto__R_e",
+      "predicted_annotation": "CHEBI:29032",
+      "predicted_label": "(R)-pantothenate",
+      "reference_name": "(R)-Pantothenate",
+      "reference_kegg": "C00864",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_pan4p_e",
+      "predicted_annotation": "CHEBI:47942",
+      "predicted_label": "pantetheine 4'-phosphate(2-)",
+      "reference_name": "Pantetheine 4-phosphate",
+      "reference_kegg": "C01134",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_phpyr_p",
+      "predicted_annotation": "CHEBI:26008",
+      "predicted_label": "phenylpyruvate",
+      "reference_name": "Phenylpyruvate",
+      "reference_kegg": "C00166",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_phpyr_s",
+      "predicted_annotation": "CHEBI:26008",
+      "predicted_label": "phenylpyruvate",
+      "reference_name": "Phenylpyruvate",
+      "reference_kegg": "C00166",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_pan4p_p",
+      "predicted_annotation": "CHEBI:47942",
+      "predicted_label": "pantetheine 4'-phosphate(2-)",
+      "reference_name": "Pantetheine 4-phosphate",
+      "reference_kegg": "C01134",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_pan4p_s",
+      "predicted_annotation": "CHEBI:47942",
+      "predicted_label": "pantetheine 4'-phosphate(2-)",
+      "reference_name": "Pantetheine 4-phosphate",
+      "reference_kegg": "C01134",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_pnto__R_p",
+      "predicted_annotation": "CHEBI:29032",
+      "predicted_label": "(R)-pantothenate",
+      "reference_name": "(R)-Pantothenate",
+      "reference_kegg": "C00864",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_pnto__R_s",
+      "predicted_annotation": "CHEBI:29032",
+      "predicted_label": "(R)-pantothenate",
+      "reference_name": "(R)-Pantothenate",
+      "reference_kegg": "C00864",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_asp__L_p",
+      "predicted_annotation": "CHEBI:29991",
+      "predicted_label": "L-aspartate(1-)",
+      "reference_name": "L-Aspartate",
+      "reference_kegg": "C00049",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_glu__L_p",
+      "predicted_annotation": "CHEBI:29985",
+      "predicted_label": "L-glutamate(1-)",
+      "reference_name": "L-Glutamate",
+      "reference_kegg": "C00025",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_ptrc_p",
+      "predicted_annotation": "CHEBI:326268",
+      "predicted_label": "1,4-butanediammonium",
+      "reference_name": "Putrescine",
+      "reference_kegg": "C00134",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_arg__L_p",
+      "predicted_annotation": "CHEBI:32682",
+      "predicted_label": "L-argininium(1+)",
+      "reference_name": "L-Arginine",
+      "reference_kegg": "C00062",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_lys__L_p",
+      "predicted_annotation": "CHEBI:32551",
+      "predicted_label": "L-lysinium(1+)",
+      "reference_name": "L-Lysine",
+      "reference_kegg": "C00047",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_spmd_p",
+      "predicted_annotation": "CHEBI:57834",
+      "predicted_label": "spermidine(3+)",
+      "reference_name": "Spermidine",
+      "reference_kegg": "C00315",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_btn_p",
+      "predicted_annotation": "CHEBI:57586",
+      "predicted_label": "biotinate",
+      "reference_name": "Biotin",
+      "reference_kegg": "C00120",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_cmp_p",
+      "predicted_annotation": "CHEBI:60377",
+      "predicted_label": "cytidine 5'-monophosphate(2-)",
+      "reference_name": "CMP",
+      "reference_kegg": "C00055",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_5mtr_p",
+      "predicted_annotation": "CHEBI:16895",
+      "predicted_label": "S-methyl-5-thio-D-ribose",
+      "reference_name": "5-Methylthio-D-ribose",
+      "reference_kegg": "C03089",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_mlthf_p",
+      "predicted_annotation": "CHEBI:12071",
+      "predicted_label": "5,10-methylenetetrahydrofolate(2-)",
+      "reference_name": "5,10-Methylenetetrahydrofolate",
+      "reference_kegg": "C00143",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_succ_p",
+      "predicted_annotation": "CHEBI:26806",
+      "predicted_label": "succinate",
+      "reference_name": "Succinate",
+      "reference_kegg": "C00042",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_glc__D_p",
+      "predicted_annotation": "CHEBI:17634",
+      "predicted_label": "D-glucose",
+      "reference_name": "D-Glucose",
+      "reference_kegg": "C00031",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_fe2_p",
+      "predicted_annotation": "CHEBI:29033",
+      "predicted_label": "iron(2+)",
+      "reference_name": "Fe2+",
+      "reference_kegg": "C00023",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_cu2_p",
+      "predicted_annotation": "CHEBI:29036",
+      "predicted_label": "copper(2+)",
+      "reference_name": "Copper",
+      "reference_kegg": "C00070",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_mn2_p",
+      "predicted_annotation": "CHEBI:29035",
+      "predicted_label": "manganese(2+)",
+      "reference_name": "Mn2+",
+      "reference_kegg": "C00034",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_uppg3_p",
+      "predicted_annotation": "CHEBI:57308",
+      "predicted_label": "uroporphyrinogen III(8-)",
+      "reference_name": "Uroporphyrinogen III",
+      "reference_kegg": "C01051",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_pydx5p_p",
+      "predicted_annotation": "CHEBI:597326",
+      "predicted_label": "pyridoxal 5'-phosphate(2-)",
+      "reference_name": "Pyridoxal 5'-phosphate",
+      "reference_kegg": "C00018",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_thmpp_p",
+      "predicted_annotation": "CHEBI:58937",
+      "predicted_label": "thiamine(1+) diphosphate(3-)",
+      "reference_name": "Thiamine diphosphate",
+      "reference_kegg": "C00068",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_pheme_p",
+      "predicted_annotation": "CHEBI:60344",
+      "predicted_label": "ferroheme b(2-)",
+      "reference_name": "Protoheme",
+      "reference_kegg": "C00032",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_fol_p",
+      "predicted_annotation": "CHEBI:37445",
+      "predicted_label": "folic acids",
+      "reference_name": "Folate",
+      "reference_kegg": "C00504",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_dhf_p",
+      "predicted_annotation": "CHEBI:57451",
+      "predicted_label": "dihydrofolate(2-)",
+      "reference_name": "7,8-Dihydrofolate",
+      "reference_kegg": "C00415",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_asp__L_s",
+      "predicted_annotation": "CHEBI:29991",
+      "predicted_label": "L-aspartate(1-)",
+      "reference_name": "L-Aspartate",
+      "reference_kegg": "C00049",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_glu__L_s",
+      "predicted_annotation": "CHEBI:29985",
+      "predicted_label": "L-glutamate(1-)",
+      "reference_name": "L-Glutamate",
+      "reference_kegg": "C00025",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_ptrc_s",
+      "predicted_annotation": "CHEBI:326268",
+      "predicted_label": "1,4-butanediammonium",
+      "reference_name": "Putrescine",
+      "reference_kegg": "C00134",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_arg__L_s",
+      "predicted_annotation": "CHEBI:32682",
+      "predicted_label": "L-argininium(1+)",
+      "reference_name": "L-Arginine",
+      "reference_kegg": "C00062",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_lys__L_s",
+      "predicted_annotation": "CHEBI:32551",
+      "predicted_label": "L-lysinium(1+)",
+      "reference_name": "L-Lysine",
+      "reference_kegg": "C00047",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_spmd_s",
+      "predicted_annotation": "CHEBI:57834",
+      "predicted_label": "spermidine(3+)",
+      "reference_name": "Spermidine",
+      "reference_kegg": "C00315",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_btn_s",
+      "predicted_annotation": "CHEBI:57586",
+      "predicted_label": "biotinate",
+      "reference_name": "Biotin",
+      "reference_kegg": "C00120",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_cmp_s",
+      "predicted_annotation": "CHEBI:60377",
+      "predicted_label": "cytidine 5'-monophosphate(2-)",
+      "reference_name": "CMP",
+      "reference_kegg": "C00055",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_5mtr_s",
+      "predicted_annotation": "CHEBI:16895",
+      "predicted_label": "S-methyl-5-thio-D-ribose",
+      "reference_name": "5-Methylthio-D-ribose",
+      "reference_kegg": "C03089",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_mlthf_s",
+      "predicted_annotation": "CHEBI:12071",
+      "predicted_label": "5,10-methylenetetrahydrofolate(2-)",
+      "reference_name": "5,10-Methylenetetrahydrofolate",
+      "reference_kegg": "C00143",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_succ_s",
+      "predicted_annotation": "CHEBI:26806",
+      "predicted_label": "succinate",
+      "reference_name": "Succinate",
+      "reference_kegg": "C00042",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_glc__D_s",
+      "predicted_annotation": "CHEBI:17634",
+      "predicted_label": "D-glucose",
+      "reference_name": "D-Glucose",
+      "reference_kegg": "C00031",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_fe2_s",
+      "predicted_annotation": "CHEBI:29033",
+      "predicted_label": "iron(2+)",
+      "reference_name": "Fe2+",
+      "reference_kegg": "C00023",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_cu2_s",
+      "predicted_annotation": "CHEBI:29036",
+      "predicted_label": "copper(2+)",
+      "reference_name": "Copper",
+      "reference_kegg": "C00070",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_mn2_s",
+      "predicted_annotation": "CHEBI:29035",
+      "predicted_label": "manganese(2+)",
+      "reference_name": "Mn2+",
+      "reference_kegg": "C00034",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_uppg3_s",
+      "predicted_annotation": "CHEBI:57308",
+      "predicted_label": "uroporphyrinogen III(8-)",
+      "reference_name": "Uroporphyrinogen III",
+      "reference_kegg": "C01051",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_pydx5p_s",
+      "predicted_annotation": "CHEBI:597326",
+      "predicted_label": "pyridoxal 5'-phosphate(2-)",
+      "reference_name": "Pyridoxal 5'-phosphate",
+      "reference_kegg": "C00018",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_thmpp_s",
+      "predicted_annotation": "CHEBI:58937",
+      "predicted_label": "thiamine(1+) diphosphate(3-)",
+      "reference_name": "Thiamine diphosphate",
+      "reference_kegg": "C00068",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_pheme_s",
+      "predicted_annotation": "CHEBI:60344",
+      "predicted_label": "ferroheme b(2-)",
+      "reference_name": "Protoheme",
+      "reference_kegg": "C00032",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_fol_s",
+      "predicted_annotation": "CHEBI:37445",
+      "predicted_label": "folic acids",
+      "reference_name": "Folate",
+      "reference_kegg": "C00504",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_dhf_s",
+      "predicted_annotation": "CHEBI:57451",
+      "predicted_label": "dihydrofolate(2-)",
+      "reference_name": "7,8-Dihydrofolate",
+      "reference_kegg": "C00415",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_asp__L_e",
+      "predicted_annotation": "CHEBI:29991",
+      "predicted_label": "L-aspartate(1-)",
+      "reference_name": "L-Aspartate",
+      "reference_kegg": "C00049",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_glu__L_e",
+      "predicted_annotation": "CHEBI:29985",
+      "predicted_label": "L-glutamate(1-)",
+      "reference_name": "L-Glutamate",
+      "reference_kegg": "C00025",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_ptrc_e",
+      "predicted_annotation": "CHEBI:326268",
+      "predicted_label": "1,4-butanediammonium",
+      "reference_name": "Putrescine",
+      "reference_kegg": "C00134",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_spmd_e",
+      "predicted_annotation": "CHEBI:57834",
+      "predicted_label": "spermidine(3+)",
+      "reference_name": "Spermidine",
+      "reference_kegg": "C00315",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_btn_e",
+      "predicted_annotation": "CHEBI:57586",
+      "predicted_label": "biotinate",
+      "reference_name": "Biotin",
+      "reference_kegg": "C00120",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_cmp_e",
+      "predicted_annotation": "CHEBI:60377",
+      "predicted_label": "cytidine 5'-monophosphate(2-)",
+      "reference_name": "CMP",
+      "reference_kegg": "C00055",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_5mtr_e",
+      "predicted_annotation": "CHEBI:16895",
+      "predicted_label": "S-methyl-5-thio-D-ribose",
+      "reference_name": "5-Methylthio-D-ribose",
+      "reference_kegg": "C03089",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_mlthf_e",
+      "predicted_annotation": "CHEBI:12071",
+      "predicted_label": "5,10-methylenetetrahydrofolate(2-)",
+      "reference_name": "5,10-Methylenetetrahydrofolate",
+      "reference_kegg": "C00143",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_succ_e",
+      "predicted_annotation": "CHEBI:26806",
+      "predicted_label": "succinate",
+      "reference_name": "Succinate",
+      "reference_kegg": "C00042",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_glc__D_e",
+      "predicted_annotation": "CHEBI:17634",
+      "predicted_label": "D-glucose",
+      "reference_name": "D-Glucose",
+      "reference_kegg": "C00031",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_fe2_e",
+      "predicted_annotation": "CHEBI:29033",
+      "predicted_label": "iron(2+)",
+      "reference_name": "Fe2+",
+      "reference_kegg": "C00023",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_cu2_e",
+      "predicted_annotation": "CHEBI:29036",
+      "predicted_label": "copper(2+)",
+      "reference_name": "Copper",
+      "reference_kegg": "C00070",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_mn2_e",
+      "predicted_annotation": "CHEBI:29035",
+      "predicted_label": "manganese(2+)",
+      "reference_name": "Mn2+",
+      "reference_kegg": "C00034",
+      "basis": "manual_identity_review"
+    },
+    {
+      "id": "M_uppg3_e",
+      "predicted_annotation": "CHEBI:57308",
+      "predicted_label": "uroporphyrinogen III(8-)",
+      "reference_name": "Uroporphyrinogen III",
+      "reference_kegg": "C01051",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_pydx5p_e",
+      "predicted_annotation": "CHEBI:597326",
+      "predicted_label": "pyridoxal 5'-phosphate(2-)",
+      "reference_name": "Pyridoxal 5'-phosphate",
+      "reference_kegg": "C00018",
+      "basis": "charge_normalized_exact_label"
+    },
+    {
+      "id": "M_thmpp_e",
+      "predicted_annotation": "CHEBI:58937",
+      "predicted_label": "thiamine(1+) diphosphate(3-)",
+      "reference_name": "Thiamine diphosphate",
+      "reference_kegg": "C00068",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_fol_e",
+      "predicted_annotation": "CHEBI:37445",
+      "predicted_label": "folic acids",
+      "reference_name": "Folate",
+      "reference_kegg": "C00504",
+      "basis": "chebi_reference_name_synonym"
+    },
+    {
+      "id": "M_dhf_e",
+      "predicted_annotation": "CHEBI:57451",
+      "predicted_label": "dihydrofolate(2-)",
+      "reference_name": "7,8-Dihydrofolate",
+      "reference_kegg": "C00415",
+      "basis": "chebi_reference_name_synonym"
+    }
+  ],
+  "reviewed_supported_top1": 532,
+  "reviewed_supported_top1_rate": 0.987012987012987,
+  "wrong_predictions": [
+    {
+      "id": "M_nadph_c",
+      "predicted_annotation": "CHEBI:13392",
+      "predicted_label": "NAD(P)H",
+      "reference_name": "Nicotinamide adenine dinucleotide phosphate - reduced",
+      "reference_kegg": "C00005",
+      "assessment": "incomplete_identity"
+    }
+  ],
+  "unresolved_predictions": [],
+  "no_candidate_reference_species": [
+    {
+      "id": "M_sl2a6o_c",
+      "reference_name": "N-Succinyl-2-L-amino-6-oxoheptanedioate",
+      "reference_kegg": "C04462"
+    },
+    {
+      "id": "M_3hoctaACP_c",
+      "reference_name": "(R)-3-Hydroxyoctadecanoyl-[acyl-carrier protein]",
+      "reference_kegg": "C16220"
+    },
+    {
+      "id": "M_4r5au_c",
+      "reference_name": "4-(1-D-Ribitylamino)-5-aminouracil",
+      "reference_kegg": "C04732"
+    },
+    {
+      "id": "M_apoACP_c",
+      "reference_name": "apoprotein [acyl carrier protein]",
+      "reference_kegg": "C03688"
+    },
+    {
+      "id": "M_ugmd_c",
+      "reference_name": "UDP-N-acetylmuramoyl-L-alanyl-D-gamma-glutamyl-meso-2,6-diaminopimelate",
+      "reference_kegg": "C04877"
+    },
+    {
+      "id": "M_uaagmda_c",
+      "reference_name": "Undecaprenyl-diphospho-N-acetylmuramoyl-(N-acetylglucosamine)-L-ala-D-glu-meso-2,6-diaminopimeloyl-D-ala-D-ala",
+      "reference_kegg": "C05898"
+    }
+  ],
+  "unscorable_reference_kegg_ids": {
+    "C00442": 1,
+    "C03539": 1,
+    "C01271": 1,
+    "C04246": 1,
+    "C04620": 1,
+    "C05751": 1,
+    "C04619": 1,
+    "C05223": 1,
+    "C04688": 1,
+    "CPD-195": 4,
+    "C04633": 1,
+    "C04088": 1,
+    "C05928": 1,
+    "C05897": 1
+  },
+  "supplement_rows": 592,
+  "literal_sbml_id_matches": 589,
+  "source_alignment_notes": {
+    "normalized_biomass_pool_ids": 3,
+    "sbml_species_without_supplement_row": [
+      "M_h_m_p"
+    ]
+  }
+}

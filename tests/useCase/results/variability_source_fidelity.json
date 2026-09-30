@@ -1,0 +1,974 @@
+{
+  "design": "Three complete independent runs per condition; repeat 1 is the saved source-fidelity run.",
+  "snapshot": "gpt-5-mini-2025-08-07",
+  "input_sha256": {
+    "MODEL2501150001": "18ab3c87df282a3ac8d0124a73b67c0b2ba15ed8a9848e9afdae9cc3a3555d5e",
+    "MODEL2503190002": "816d0fb1963f142859218e8473dffb9ac1a0a107a5f2988515541173ce399b56",
+    "MODEL2506050001": "da74b10a459bf6f765f2a1dd35691f4fb55c12760d7bc9b06649405fae985286",
+    "MODEL2501150001_TableS3": "cf7c8a5aa85c90078059449c1809646e89699bd3f1c45e7100c5a921c135784d"
+  },
+  "conditions": [
+    {
+      "model_id": "MODEL2501150001",
+      "condition": "sbml_only",
+      "configuration": {
+        "llm_model": "gpt-5-mini-2025-08-07",
+        "method": "direct",
+        "top_k": 3,
+        "n_return": 1,
+        "max_entities": null,
+        "entity_type": "auto",
+        "database": [
+          "chebi",
+          "uniprot"
+        ],
+        "tax_id": "9606",
+        "chunk_size": 50,
+        "max_completion_tokens": 12000,
+        "supplementary_context": null,
+        "validation": true,
+        "source_fidelity": true
+      },
+      "runs": [
+        {
+          "repeat": 1,
+          "candidate_species": 44,
+          "expected_components_recovered": 105,
+          "expected_components_total": 113,
+          "species_with_all_expected": 40,
+          "reference_species_total": 46,
+          "extra_component_predictions": 1,
+          "missing_components": 8,
+          "ranking_abstention_rows_omitted": []
+        },
+        {
+          "repeat": 2,
+          "candidate_species": 44,
+          "expected_components_recovered": 83,
+          "expected_components_total": 113,
+          "species_with_all_expected": 20,
+          "reference_species_total": 46,
+          "extra_component_predictions": 1,
+          "missing_components": 30,
+          "ranking_abstention_rows_omitted": []
+        },
+        {
+          "repeat": 3,
+          "candidate_species": 44,
+          "expected_components_recovered": 82,
+          "expected_components_total": 113,
+          "species_with_all_expected": 20,
+          "reference_species_total": 46,
+          "extra_component_predictions": 1,
+          "missing_components": 31,
+          "ranking_abstention_rows_omitted": []
+        }
+      ],
+      "unstable_identity_species": [
+        "EG2",
+        "Ras_BRaf",
+        "Ras_BRaf_Raf1_tetramer",
+        "Ras_BRaf_pRaf1_tetramer",
+        "Ras_Braf_iRaf1_tetramer",
+        "Ras_Raf1",
+        "Ras_Raf1_iBRaf_tetramer",
+        "Ras_iBRaf",
+        "Ras_iRaf1",
+        "Ras_iRaf1_iBRaf1_tetramer",
+        "Ras_iRaf1_tetramer",
+        "Ras_nfpBRaf",
+        "Ras_nfpRaf1",
+        "Ras_nfpiBRaf",
+        "Ras_nfpiRaf1",
+        "Ras_pRaf1",
+        "Ras_pRaf1_Raf1_tetramer",
+        "Ras_pRaf1_iBRaf_tetramer",
+        "Ras_pRaf1_tetramer",
+        "nfpiBRaf",
+        "nfpiRaf1"
+      ],
+      "unstable_accession_species": [
+        "EG2",
+        "ERK",
+        "Ras_BRaf",
+        "Ras_BRaf_Raf1_tetramer",
+        "Ras_BRaf_pRaf1_tetramer",
+        "Ras_Braf_iRaf1_tetramer",
+        "Ras_GDP",
+        "Ras_GTP",
+        "Ras_Raf1",
+        "Ras_Raf1_iBRaf_tetramer",
+        "Ras_iBRaf",
+        "Ras_iRaf1",
+        "Ras_iRaf1_iBRaf1_tetramer",
+        "Ras_iRaf1_tetramer",
+        "Ras_nfpBRaf",
+        "Ras_nfpRaf1",
+        "Ras_nfpiBRaf",
+        "Ras_nfpiRaf1",
+        "Ras_pRaf1",
+        "Ras_pRaf1_Raf1_tetramer",
+        "Ras_pRaf1_iBRaf_tetramer",
+        "Ras_pRaf1_tetramer",
+        "nfpiBRaf",
+        "nfpiRaf1",
+        "pERK"
+      ],
+      "wrong_identity_frequencies": [
+        {
+          "species_id": "EG2SOS",
+          "name": "",
+          "extra_or_wrong_identity": "GRB2",
+          "runs_observed": 3
+        }
+      ],
+      "missing_identity_frequencies": [
+        {
+          "species_id": "E",
+          "missing_identity": "EGF",
+          "runs_observed": 3
+        },
+        {
+          "species_id": "EG2",
+          "missing_identity": "EGF",
+          "runs_observed": 3
+        },
+        {
+          "species_id": "EG2",
+          "missing_identity": "GRB2",
+          "runs_observed": 2
+        },
+        {
+          "species_id": "EG2SOS",
+          "missing_identity": "EGF",
+          "runs_observed": 3
+        },
+        {
+          "species_id": "Ras_BRAF",
+          "missing_identity": "GTP",
+          "runs_observed": 2
+        },
+        {
+          "species_id": "Ras_Braf_Raf1_tetramer",
+          "missing_identity": "GTP",
+          "runs_observed": 2
+        },
+        {
+          "species_id": "Ras_Braf_iRaf1_tetramer",
+          "missing_identity": "GTP",
+          "runs_observed": 2
+        },
+        {
+          "species_id": "Ras_Braf_pRaf1_tetramer",
+          "missing_identity": "GTP",
+          "runs_observed": 2
+        },
+        {
+          "species_id": "Ras_RAF1",
+          "missing_identity": "GTP",
+          "runs_observed": 2
+        },
+        {
+          "species_id": "Ras_Raf1_iBRaf_tetramer",
+          "missing_identity": "GTP",
+          "runs_observed": 2
+        },
+        {
+          "species_id": "Ras_iBRAF",
+          "missing_identity": "GTP",
+          "runs_observed": 2
+        },
+        {
+          "species_id": "Ras_iRAF1",
+          "missing_identity": "GTP",
+          "runs_observed": 2
+        },
+        {
+          "species_id": "Ras_iRaf1_iBRaf1_tetramer",
+          "missing_identity": "GTP",
+          "runs_observed": 2
+        },
+        {
+          "species_id": "Ras_iRaf1_tetramer",
+          "missing_identity": "GTP",
+          "runs_observed": 2
+        },
+        {
+          "species_id": "Ras_nfpBRaf",
+          "missing_identity": "GTP",
+          "runs_observed": 2
+        },
+        {
+          "species_id": "Ras_nfpRaf1",
+          "missing_identity": "GTP",
+          "runs_observed": 2
+        },
+        {
+          "species_id": "Ras_nfpiBRaf",
+          "missing_identity": "GTP",
+          "runs_observed": 2
+        },
+        {
+          "species_id": "Ras_nfpiBRaf",
+          "missing_identity": "SORAFENIB",
+          "runs_observed": 1
+        },
+        {
+          "species_id": "Ras_nfpiRaf1",
+          "missing_identity": "GTP",
+          "runs_observed": 2
+        },
+        {
+          "species_id": "Ras_nfpiRaf1",
+          "missing_identity": "SORAFENIB",
+          "runs_observed": 2
+        },
+        {
+          "species_id": "Ras_pRaf1",
+          "missing_identity": "GTP",
+          "runs_observed": 2
+        },
+        {
+          "species_id": "Ras_pRaf1_Raf1_tetramer",
+          "missing_identity": "GTP",
+          "runs_observed": 2
+        },
+        {
+          "species_id": "Ras_pRaf1_iBRaf_tetramer",
+          "missing_identity": "GTP",
+          "runs_observed": 2
+        },
+        {
+          "species_id": "Ras_pRaf1_tetramer",
+          "missing_identity": "GTP",
+          "runs_observed": 2
+        },
+        {
+          "species_id": "mE",
+          "missing_identity": "EGFR",
+          "runs_observed": 3
+        },
+        {
+          "species_id": "mEL",
+          "missing_identity": "EGF",
+          "runs_observed": 3
+        },
+        {
+          "species_id": "mEL",
+          "missing_identity": "EGFR",
+          "runs_observed": 3
+        },
+        {
+          "species_id": "mELmEL",
+          "missing_identity": "EGF",
+          "runs_observed": 3
+        },
+        {
+          "species_id": "mELmEL",
+          "missing_identity": "EGFR",
+          "runs_observed": 3
+        },
+        {
+          "species_id": "nfpiBRaf",
+          "missing_identity": "SORAFENIB",
+          "runs_observed": 2
+        },
+        {
+          "species_id": "nfpiRaf1",
+          "missing_identity": "SORAFENIB",
+          "runs_observed": 2
+        }
+      ],
+      "stage_comparison": {
+        "compared_repeats": [
+          2,
+          3
+        ],
+        "normalization_changed_species": [
+          "BRaf_iBRaf_dimer",
+          "E",
+          "EG2SOS",
+          "ERK",
+          "GRB2_SOS",
+          "MEK",
+          "Raf1",
+          "Ras_BRaf_Raf1_tetramer",
+          "Ras_BRaf_pRaf1_tetramer",
+          "Ras_Braf_iRaf1_tetramer",
+          "Ras_Raf1",
+          "Ras_Raf1_iBRaf_tetramer",
+          "Ras_iBRaf",
+          "Ras_iRaf1",
+          "Ras_iRaf1_iBRaf1_tetramer",
+          "Ras_iRaf1_tetramer",
+          "Ras_nfpRaf1",
+          "Ras_nfpiBRaf",
+          "Ras_nfpiRaf1",
+          "Ras_pRaf1",
+          "Ras_pRaf1_Raf1_tetramer",
+          "Ras_pRaf1_iBRaf_tetramer",
+          "Ras_pRaf1_tetramer",
+          "SOS",
+          "iBRaf",
+          "iBRaf_dimer",
+          "iRaf1",
+          "mE",
+          "mEL",
+          "mELmEL",
+          "nfpRaf1",
+          "nfpSOS",
+          "nfpiRaf1",
+          "pERK",
+          "pMEK",
+          "pRaf1"
+        ],
+        "retrieval_pool_changed_species": [
+          "BRaf_iBRaf_dimer",
+          "Ras_Braf_iRaf1_tetramer",
+          "Ras_Raf1_iBRaf_tetramer",
+          "Ras_iBRaf",
+          "Ras_iRaf1",
+          "Ras_iRaf1_iBRaf1_tetramer",
+          "Ras_iRaf1_tetramer",
+          "Ras_nfpiBRaf",
+          "Ras_pRaf1_iBRaf_tetramer",
+          "iBRaf",
+          "iBRaf_dimer",
+          "iRaf1"
+        ],
+        "interpretation": "Normalization and retrieved-pool comparisons use repeats 2 and 3 only; the saved first run predates optional trace capture."
+      }
+    },
+    {
+      "model_id": "MODEL2501150001",
+      "condition": "table_s3",
+      "configuration": {
+        "llm_model": "gpt-5-mini-2025-08-07",
+        "method": "direct",
+        "top_k": 3,
+        "n_return": 1,
+        "max_entities": null,
+        "entity_type": "auto",
+        "database": [
+          "chebi",
+          "uniprot"
+        ],
+        "tax_id": "9606",
+        "chunk_size": 50,
+        "max_completion_tokens": 12000,
+        "supplementary_context": "/Users/luna/Desktop/CRBM/AMAS_proj/AAAIM/tests/useCase/context/MODEL2501150001_TableS3.txt",
+        "validation": true,
+        "source_fidelity": true
+      },
+      "runs": [
+        {
+          "repeat": 1,
+          "candidate_species": 47,
+          "expected_components_recovered": 113,
+          "expected_components_total": 113,
+          "species_with_all_expected": 46,
+          "reference_species_total": 46,
+          "extra_component_predictions": 7,
+          "missing_components": 0,
+          "ranking_abstention_rows_omitted": []
+        },
+        {
+          "repeat": 2,
+          "candidate_species": 47,
+          "expected_components_recovered": 113,
+          "expected_components_total": 113,
+          "species_with_all_expected": 46,
+          "reference_species_total": 46,
+          "extra_component_predictions": 1,
+          "missing_components": 0,
+          "ranking_abstention_rows_omitted": []
+        },
+        {
+          "repeat": 3,
+          "candidate_species": 47,
+          "expected_components_recovered": 113,
+          "expected_components_total": 113,
+          "species_with_all_expected": 46,
+          "reference_species_total": 46,
+          "extra_component_predictions": 1,
+          "missing_components": 0,
+          "ranking_abstention_rows_omitted": []
+        }
+      ],
+      "unstable_identity_species": [
+        "BRaf_dimer",
+        "BRaf_iBRaf_dimer",
+        "iBRaf_dimer"
+      ],
+      "unstable_accession_species": [
+        "BRaf_dimer",
+        "BRaf_iBRaf_dimer",
+        "iBRaf_dimer",
+        "pERK"
+      ],
+      "wrong_identity_frequencies": [
+        {
+          "species_id": "BRAF_dimer",
+          "name": "",
+          "extra_or_wrong_identity": "GTP",
+          "runs_observed": 1
+        },
+        {
+          "species_id": "BRAF_dimer",
+          "name": "",
+          "extra_or_wrong_identity": "RAS",
+          "runs_observed": 1
+        },
+        {
+          "species_id": "BRAF_iBRAF_dimer",
+          "name": "",
+          "extra_or_wrong_identity": "GTP",
+          "runs_observed": 1
+        },
+        {
+          "species_id": "BRAF_iBRAF_dimer",
+          "name": "",
+          "extra_or_wrong_identity": "RAS",
+          "runs_observed": 1
+        },
+        {
+          "species_id": "EG2SOS",
+          "name": "",
+          "extra_or_wrong_identity": "GRB2",
+          "runs_observed": 3
+        },
+        {
+          "species_id": "iBRAF_dimer",
+          "name": "",
+          "extra_or_wrong_identity": "GTP",
+          "runs_observed": 1
+        },
+        {
+          "species_id": "iBRAF_dimer",
+          "name": "",
+          "extra_or_wrong_identity": "RAS",
+          "runs_observed": 1
+        }
+      ],
+      "missing_identity_frequencies": [],
+      "stage_comparison": {
+        "compared_repeats": [
+          2,
+          3
+        ],
+        "normalization_changed_species": [
+          "E",
+          "EG2",
+          "EG2SOS",
+          "ERK",
+          "GRB2_SOS",
+          "Raf1",
+          "Ras_BRaf_Raf1_tetramer",
+          "Ras_BRaf_pRaf1_tetramer",
+          "Ras_Braf_iRaf1_tetramer",
+          "Ras_Raf1",
+          "Ras_Raf1_iBRaf_tetramer",
+          "Ras_iRaf1",
+          "Ras_iRaf1_iBRaf1_tetramer",
+          "Ras_iRaf1_tetramer",
+          "Ras_nfpRaf1",
+          "Ras_nfpiRaf1",
+          "Ras_pRaf1",
+          "Ras_pRaf1_Raf1_tetramer",
+          "Ras_pRaf1_iBRaf_tetramer",
+          "Ras_pRaf1_tetramer",
+          "iRaf1",
+          "mE",
+          "mEL",
+          "mELmEL",
+          "nfpRaf1",
+          "nfpiRaf1",
+          "pERK",
+          "pRaf1"
+        ],
+        "retrieval_pool_changed_species": [],
+        "interpretation": "Normalization and retrieved-pool comparisons use repeats 2 and 3 only; the saved first run predates optional trace capture."
+      }
+    },
+    {
+      "model_id": "MODEL2503190002",
+      "condition": "full",
+      "configuration": {
+        "llm_model": "gpt-5-mini-2025-08-07",
+        "method": "direct",
+        "top_k": 3,
+        "n_return": 1,
+        "max_entities": null,
+        "entity_type": "auto",
+        "database": [
+          "chebi",
+          "uniprot"
+        ],
+        "tax_id": "9606",
+        "chunk_size": 50,
+        "validation": true,
+        "source_fidelity": true
+      },
+      "runs": [
+        {
+          "repeat": 1,
+          "candidate_species": 28,
+          "exact_complete_species": 27,
+          "reference_species_total": 28,
+          "extra_identities": 2,
+          "missing_identities": 0,
+          "ranking_abstention_rows_omitted": []
+        },
+        {
+          "repeat": 2,
+          "candidate_species": 28,
+          "exact_complete_species": 28,
+          "reference_species_total": 28,
+          "extra_identities": 0,
+          "missing_identities": 0,
+          "ranking_abstention_rows_omitted": []
+        },
+        {
+          "repeat": 3,
+          "candidate_species": 28,
+          "exact_complete_species": 28,
+          "reference_species_total": 28,
+          "extra_identities": 0,
+          "missing_identities": 0,
+          "ranking_abstention_rows_omitted": []
+        }
+      ],
+      "unstable_identity_species": [
+        "CK2"
+      ],
+      "unstable_accession_species": [
+        "CK2"
+      ],
+      "wrong_identity_frequencies": [
+        {
+          "species_id": "CK2",
+          "name": "",
+          "extra_or_wrong_identity": "CSNK2A2",
+          "runs_observed": 1
+        },
+        {
+          "species_id": "CK2",
+          "name": "",
+          "extra_or_wrong_identity": "CSNK2B",
+          "runs_observed": 1
+        }
+      ],
+      "missing_identity_frequencies": [],
+      "stage_comparison": {
+        "compared_repeats": [
+          2,
+          3
+        ],
+        "normalization_changed_species": [
+          "ATR_active",
+          "ATR_inactive",
+          "Autophagy_active",
+          "Autophagy_inactive",
+          "DNA_damage",
+          "HDAC4_active",
+          "HDAC4_inactive",
+          "NRF2_active",
+          "NRF2_degraded",
+          "NRF2_inactive",
+          "Omaveloxolone",
+          "Spermidine",
+          "TOPBP1_active",
+          "TOPBP1_inactive",
+          "p21"
+        ],
+        "retrieval_pool_changed_species": [
+          "Spermidine",
+          "p21"
+        ],
+        "interpretation": "Normalization and retrieved-pool comparisons use repeats 2 and 3 only; the saved first run predates optional trace capture."
+      }
+    },
+    {
+      "model_id": "MODEL2506050001",
+      "condition": "full",
+      "configuration": {
+        "llm_model": "gpt-5-mini-2025-08-07",
+        "method": "direct",
+        "top_k": 3,
+        "n_return": 1,
+        "max_entities": null,
+        "entity_type": "gene",
+        "database": [
+          "ncbigene"
+        ],
+        "tax_id": [
+          "9606",
+          "10090",
+          "10116"
+        ],
+        "chunk_size": 50,
+        "validation": true,
+        "source_fidelity": true
+      },
+      "runs": [
+        {
+          "repeat": 1,
+          "candidate_species": 154,
+          "exact_deposited_entrez_hits": 163,
+          "deposited_entrez_total": 245,
+          "supported_entrez_predictions": 171,
+          "predicted_entrez_on_mapped_nodes": 183,
+          "wrong_entrez_predictions": 12,
+          "ranking_abstention_rows_omitted": []
+        },
+        {
+          "repeat": 2,
+          "candidate_species": 147,
+          "exact_deposited_entrez_hits": 140,
+          "deposited_entrez_total": 245,
+          "supported_entrez_predictions": 147,
+          "predicted_entrez_on_mapped_nodes": 160,
+          "wrong_entrez_predictions": 13,
+          "ranking_abstention_rows_omitted": [
+            "node_16",
+            "node_38"
+          ]
+        },
+        {
+          "repeat": 3,
+          "candidate_species": 153,
+          "exact_deposited_entrez_hits": 150,
+          "deposited_entrez_total": 245,
+          "supported_entrez_predictions": 156,
+          "predicted_entrez_on_mapped_nodes": 168,
+          "wrong_entrez_predictions": 6,
+          "ranking_abstention_rows_omitted": []
+        }
+      ],
+      "unstable_identity_species": [
+        "node_103",
+        "node_105",
+        "node_109",
+        "node_110",
+        "node_115",
+        "node_124",
+        "node_125",
+        "node_128",
+        "node_135",
+        "node_14",
+        "node_147",
+        "node_151",
+        "node_16",
+        "node_162",
+        "node_26",
+        "node_29",
+        "node_30",
+        "node_37",
+        "node_38",
+        "node_39",
+        "node_4",
+        "node_40",
+        "node_42",
+        "node_50",
+        "node_51",
+        "node_55",
+        "node_56",
+        "node_57",
+        "node_60",
+        "node_63",
+        "node_64",
+        "node_66",
+        "node_69",
+        "node_73",
+        "node_74",
+        "node_76",
+        "node_78",
+        "node_82",
+        "node_83",
+        "node_90",
+        "node_91",
+        "node_92",
+        "node_97"
+      ],
+      "unstable_accession_species": [
+        "node_103",
+        "node_105",
+        "node_109",
+        "node_110",
+        "node_115",
+        "node_124",
+        "node_125",
+        "node_128",
+        "node_135",
+        "node_14",
+        "node_147",
+        "node_151",
+        "node_16",
+        "node_162",
+        "node_26",
+        "node_29",
+        "node_30",
+        "node_37",
+        "node_38",
+        "node_39",
+        "node_4",
+        "node_40",
+        "node_42",
+        "node_50",
+        "node_51",
+        "node_55",
+        "node_56",
+        "node_57",
+        "node_60",
+        "node_63",
+        "node_64",
+        "node_66",
+        "node_69",
+        "node_73",
+        "node_74",
+        "node_76",
+        "node_78",
+        "node_82",
+        "node_83",
+        "node_90",
+        "node_91",
+        "node_92",
+        "node_97"
+      ],
+      "wrong_identity_frequencies": [
+        {
+          "species_id": "node_162",
+          "name": "pAPC",
+          "extra_or_wrong_identity": "CDC20",
+          "runs_observed": 1
+        },
+        {
+          "species_id": "node_162",
+          "name": "pAPC",
+          "extra_or_wrong_identity": "CDC27",
+          "runs_observed": 1
+        },
+        {
+          "species_id": "node_26",
+          "name": "Cdh1",
+          "extra_or_wrong_identity": "CDH1",
+          "runs_observed": 2
+        },
+        {
+          "species_id": "node_31",
+          "name": "CyclinA",
+          "extra_or_wrong_identity": "CCNA2",
+          "runs_observed": 3
+        },
+        {
+          "species_id": "node_32",
+          "name": "CyclinA_mRNA",
+          "extra_or_wrong_identity": "CCNA2",
+          "runs_observed": 3
+        },
+        {
+          "species_id": "node_56",
+          "name": "GF_High",
+          "extra_or_wrong_identity": "PODXL2",
+          "runs_observed": 1
+        }
+      ],
+      "missing_identity_frequencies": [],
+      "stage_comparison": {
+        "compared_repeats": [
+          2,
+          3
+        ],
+        "normalization_changed_species": [
+          "node_0",
+          "node_1",
+          "node_10",
+          "node_100",
+          "node_101",
+          "node_102",
+          "node_103",
+          "node_104",
+          "node_105",
+          "node_106",
+          "node_107",
+          "node_108",
+          "node_109",
+          "node_11",
+          "node_110",
+          "node_111",
+          "node_112",
+          "node_115",
+          "node_116",
+          "node_117",
+          "node_119",
+          "node_120",
+          "node_121",
+          "node_122",
+          "node_123",
+          "node_124",
+          "node_125",
+          "node_126",
+          "node_127",
+          "node_128",
+          "node_129",
+          "node_13",
+          "node_130",
+          "node_131",
+          "node_132",
+          "node_133",
+          "node_134",
+          "node_135",
+          "node_136",
+          "node_137",
+          "node_138",
+          "node_139",
+          "node_14",
+          "node_140",
+          "node_141",
+          "node_142",
+          "node_143",
+          "node_144",
+          "node_146",
+          "node_147",
+          "node_148",
+          "node_149",
+          "node_15",
+          "node_150",
+          "node_151",
+          "node_152",
+          "node_156",
+          "node_157",
+          "node_158",
+          "node_159",
+          "node_16",
+          "node_160",
+          "node_162",
+          "node_17",
+          "node_19",
+          "node_2",
+          "node_21",
+          "node_22",
+          "node_23",
+          "node_24",
+          "node_25",
+          "node_26",
+          "node_28",
+          "node_29",
+          "node_3",
+          "node_30",
+          "node_31",
+          "node_32",
+          "node_33",
+          "node_35",
+          "node_37",
+          "node_38",
+          "node_39",
+          "node_4",
+          "node_40",
+          "node_41",
+          "node_42",
+          "node_45",
+          "node_46",
+          "node_48",
+          "node_5",
+          "node_50",
+          "node_51",
+          "node_52",
+          "node_53",
+          "node_54",
+          "node_55",
+          "node_56",
+          "node_57",
+          "node_58",
+          "node_59",
+          "node_6",
+          "node_60",
+          "node_61",
+          "node_62",
+          "node_63",
+          "node_64",
+          "node_66",
+          "node_67",
+          "node_68",
+          "node_69",
+          "node_70",
+          "node_72",
+          "node_73",
+          "node_74",
+          "node_75",
+          "node_76",
+          "node_77",
+          "node_78",
+          "node_8",
+          "node_80",
+          "node_81",
+          "node_82",
+          "node_83",
+          "node_85",
+          "node_88",
+          "node_89",
+          "node_9",
+          "node_90",
+          "node_91",
+          "node_92",
+          "node_93",
+          "node_94",
+          "node_95",
+          "node_96",
+          "node_97",
+          "node_98",
+          "node_99"
+        ],
+        "retrieval_pool_changed_species": [
+          "node_0",
+          "node_1",
+          "node_103",
+          "node_104",
+          "node_105",
+          "node_106",
+          "node_109",
+          "node_110",
+          "node_115",
+          "node_121",
+          "node_122",
+          "node_123",
+          "node_125",
+          "node_128",
+          "node_129",
+          "node_130",
+          "node_135",
+          "node_142",
+          "node_144",
+          "node_147",
+          "node_151",
+          "node_157",
+          "node_162",
+          "node_2",
+          "node_37",
+          "node_4",
+          "node_5",
+          "node_50",
+          "node_51",
+          "node_55",
+          "node_56",
+          "node_61",
+          "node_63",
+          "node_64",
+          "node_66",
+          "node_77",
+          "node_78",
+          "node_79",
+          "node_82",
+          "node_83",
+          "node_9",
+          "node_90",
+          "node_91",
+          "node_92",
+          "node_94",
+          "node_95"
+        ],
+        "interpretation": "Normalization and retrieved-pool comparisons use repeats 2 and 3 only; the saved first run predates optional trace capture."
+      }
+    }
+  ]
+}

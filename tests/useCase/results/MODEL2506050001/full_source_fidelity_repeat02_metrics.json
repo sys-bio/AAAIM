@@ -1,0 +1,92 @@
+{
+  "model": "MODEL2506050001",
+  "condition": "full_source_fidelity_repeat02",
+  "configuration": {
+    "llm_model": "gpt-5-mini-2025-08-07",
+    "method": "direct",
+    "top_k": 3,
+    "n_return": 1,
+    "max_entities": null,
+    "entity_type": "gene",
+    "database": [
+      "ncbigene"
+    ],
+    "tax_id": [
+      "9606",
+      "10090",
+      "10116"
+    ],
+    "chunk_size": 50,
+    "validation": true,
+    "source_fidelity": true,
+    "repeat_id": 2
+  },
+  "metrics": {
+    "total_entities": 165,
+    "entities_with_predictions": 147,
+    "annotation_rate": 0.8909090909090909,
+    "total_predictions": 481,
+    "matches": 0,
+    "accuracy": null,
+    "total_time": 407.7036771774292,
+    "llm_time": 406.22247338294983,
+    "search_time": 0.49125075340270996,
+    "llm_usage": {
+      "input_tokens": 19484,
+      "output_tokens": 42277,
+      "total_tokens": 61761,
+      "reasoning_tokens": 32336,
+      "cached_input_tokens": 2944,
+      "requests": 6,
+      "models": [
+        "gpt-5-mini-2025-08-07"
+      ]
+    },
+    "validation": {
+      "enabled": true,
+      "source_fidelity": true,
+      "event_counts": {
+        "structured_output_valid": 5,
+        "structured_output_repair": 1
+      },
+      "events": [
+        {
+          "kind": "structured_output_valid",
+          "stage": "normalization",
+          "attempt": 1,
+          "entity_count": 50
+        },
+        {
+          "kind": "structured_output_repair",
+          "stage": "normalization",
+          "attempt": 1,
+          "error": "response is not valid JSON: Expecting value: line 1 column 1 (char 0)"
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "normalization",
+          "attempt": 2,
+          "entity_count": 50
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "normalization",
+          "attempt": 1,
+          "entity_count": 50
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "normalization",
+          "attempt": 1,
+          "entity_count": 15
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "ranking",
+          "attempt": 1,
+          "entity_count": 67
+        }
+      ]
+    }
+  }
+}

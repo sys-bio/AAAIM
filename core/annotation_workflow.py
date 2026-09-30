@@ -23,12 +23,14 @@ from core.database_search import (
     extract_classifications,
     get_species_recommendations_direct,
     get_species_recommendations_rag,
+    load_chebi_cleannames_dict,
     load_chebi_formula_dict,
     load_chebi_label_dict,
     load_chebi_structure_dict,
     load_kegg_label_dict,
     load_ncbigene_label_dict,
     load_uniprot_label_dict,
+    remove_symbols,
 )
 from core.feedback import AnnotationResult, build_initial_conversation
 from core.llm_interface import (
@@ -74,6 +76,80 @@ DATABASE_ENTITY_TYPES = {
     DatabaseID.NCBIGENE.value: EntityType.GENE.value,
     DatabaseID.UNIPROT.value: EntityType.PROTEIN.value,
 }
+
+
+def _source_name_variants(display_name: str, species_id: str = "") -> List[str]:
+    """Keep the literal SBML label and expand only an unambiguous ACP acronym."""
+    literal = str(display_name or "").strip()
+    if not literal or literal == species_id:
+        return []
+    variants = [literal]
+    # A trailing alternate notation is not part of the chemical name. Keep the
+    # literal too, and never strip leading (R)/(S) stereochemistry.
+    without_alias = re.sub(r"\s+\([^()]+\)$", "", literal).strip()
+    if without_alias != literal:
+        variants.append(without_alias)
+    for name in list(variants):
+        expanded = re.sub(r"\bACP\b", "[acyl-carrier protein]", name, flags=re.I)
+        if expanded != name:
+            variants.append(expanded)
+    return list(dict.fromkeys(variants))
+
+
+def _exact_source_chebi_ids(display_name: str, species_id: str = "") -> List[str]:
+    """Return ChEBI IDs indexed under the SBML name or conservative variants."""
+    names = load_chebi_cleannames_dict()
+    found: List[str] = []
+    for variant in _source_name_variants(display_name, species_id):
+        found.extend(names.get(remove_symbols(variant.lower()), []))
+    return list(dict.fromkeys(str(candidate) for candidate in found))
+
+
+def _preserve_source_names(
+    synonyms_dict: Dict[str, List[str]],
+    display_names: Dict[str, str],
+    chemical_ids: Sequence[str],
+    events: Optional[List[Dict[str, Any]]] = None,
+) -> None:
+    """Prepend source labels without discarding LLM-proposed search terms."""
+    for species_id in chemical_ids:
+        variants = _source_name_variants(display_names.get(species_id, ""), species_id)
+        if not variants:
+            continue
+        original = synonyms_dict.get(species_id, [])
+        if original == ["UNK"]:
+            original = []
+        synonyms_dict[species_id] = list(dict.fromkeys(variants + original))
+        if events is not None:
+            events.append({"kind": "source_name_preserved", "species_id": species_id})
+
+
+def _prioritize_source_chebi_candidates(
+    recommendations: List[Recommendation],
+    species_database: Dict[str, str],
+    display_names: Dict[str, str],
+    top_k: int,
+    events: Optional[List[Dict[str, Any]]] = None,
+) -> None:
+    """Reserve retrieval slots for exact SBML-name hits before generated aliases."""
+    labels = load_chebi_label_dict()
+    for rec in recommendations:
+        if species_database.get(rec.id) != DatabaseID.CHEBI.value or rec.component_ids:
+            continue
+        source_ids = _exact_source_chebi_ids(display_names.get(rec.id, ""), rec.id)
+        if not source_ids:
+            continue
+        old_ids = [str(value) for value in rec.candidates]
+        ordered = list(dict.fromkeys(source_ids + old_ids))[:top_k]
+        old_names = dict(zip(old_ids, rec.candidate_names))
+        old_scores = dict(zip(old_ids, rec.match_score))
+        rec.candidates = ordered
+        rec.candidate_names = [old_names.get(cid, labels.get(cid, cid)) for cid in ordered]
+        rec.match_score = [old_scores.get(cid, 1.0) for cid in ordered]
+        rec.candidate_ranks = list(range(1, len(ordered) + 1))
+        if events is not None and ordered != old_ids:
+            events.append({"kind": "source_candidate_prioritized", "species_id": rec.id,
+                           "source_ids": source_ids, "candidates": ordered})
 
 
 def _json_schema_response_format(name: str, schema: Dict[str, Any]) -> Dict[str, Any]:
@@ -860,6 +936,7 @@ def _search_databases(
     validation: bool = False,
     model_file: Optional[str] = None,
     validation_events: Optional[List[Dict[str, Any]]] = None,
+    source_fidelity: bool = False,
 ) -> Tuple[List[Recommendation], Dict[str, str], Dict[Tuple[str, str], str]]:
     """Search the appropriate database(s) for each entity.
 
@@ -947,6 +1024,12 @@ def _search_databases(
                     species_database[rec.id] = target_database
                 all_recommendations.extend(group_recs)
 
+        if source_fidelity and model_file:
+            _prioritize_source_chebi_candidates(
+                all_recommendations, species_database,
+                get_species_display_names(model_file, EntityType.CHEMICAL),
+                top_k, validation_events,
+            )
         if validation and model_file:
             all_recommendations = _filter_recommendations_by_chemistry(
                 all_recommendations,
@@ -990,6 +1073,12 @@ def _search_databases(
         )
         candidate_databases.update(candidate_dbs)
         recommendations.append(rec)
+    if source_fidelity and model_file:
+        _prioritize_source_chebi_candidates(
+            recommendations, species_database,
+            get_species_display_names(model_file, EntityType.CHEMICAL),
+            top_k, validation_events,
+        )
     if validation and model_file:
         recommendations = _filter_recommendations_by_chemistry(
             recommendations,
@@ -1365,6 +1454,7 @@ def rank_species_annotations_with_llm(
     usage_callback: Optional[Callable[[Dict[str, Any]], None]] = None,
     validation: bool = False,
     validation_events: Optional[List[Dict[str, Any]]] = None,
+    source_fidelity: bool = False,
 ) -> pd.DataFrame:
     """Re-rank biological identities and keep at most *n_return* per unit.
 
@@ -1387,6 +1477,27 @@ def rank_species_annotations_with_llm(
     to_rank: List[Tuple[str, pd.DataFrame, str, Dict[str, str]]] = []
     for unit_id, sub in _ranking_units(work_df):
         unit_order.append(unit_id)
+        if source_fidelity and "|" not in unit_id and not sub.empty:
+            is_chemical = str(sub.get("type", pd.Series([""])).iloc[0]).lower() == "chemical"
+            display = str(sub.get("display_name", pd.Series([""])).iloc[0])
+            if is_chemical:
+                source_ids = {f"CHEBI:{cid}" for cid in _exact_source_chebi_ids(display, unit_id)}
+                matched = sub[sub["annotation"].astype(str).str.upper().isin(source_ids)]
+                # Explicit stereo/ACP labels must not be displaced by a generic
+                # free acid or an unspecified stereoisomer.
+                specific = bool(re.search(r"\bACP\b|acyl-carrier protein|^\([RS]\)", display, re.I))
+                if specific and not matched.empty:
+                    sub = matched
+                if len(matched["annotation"].dropna().unique()) == 1:
+                    chosen = matched.copy()
+                    if "identity_rank" in chosen.columns:
+                        chosen["identity_rank"] = 1
+                    ranked_by_unit[unit_id] = chosen
+                    if validation_events is not None:
+                        validation_events.append({"kind": "source_exact_match_selected",
+                                                  "species_id": unit_id,
+                                                  "candidate": str(chosen["annotation"].iloc[0])})
+                    continue
         choices = _build_species_annotation_choices(sub)
         choice_lines = [line for line in choices.splitlines() if line.strip()]
         if not choice_lines or len(choice_lines) <= n_return:
@@ -1404,8 +1515,24 @@ def rank_species_annotations_with_llm(
         to_rank.append((unit_id, sub, choices, representative_to_identity))
 
     if to_rank:
+        chemical_rank_units = {
+            sid for sid, sub, _choices, _identity_map in to_rank
+            if "|" not in sid and not sub.empty
+            and str(sub.get("type", pd.Series([""])).iloc[0]).lower() == "chemical"
+        }
+        chemical_guidance = (
+            "Treat the literal SBML display name as stronger evidence than generated "
+            "synonyms. Preserve explicit (R)/(S) stereochemistry and ACP conjugation; "
+            "a free acid is not an ACP-bound metabolite. When an exact source-name "
+            "candidate remains ambiguous, use formula and charge where available."
+        )
         entities = "\n\n".join(
-            f"{_species_ranking_context(sid, sub)}\n{choices}"
+            f"{_species_ranking_context(sid, sub)}"
+            + (f"\nChemical source-label guidance: {chemical_guidance}"
+               if source_fidelity and chemical_rank_units
+               and len(chemical_rank_units) != len(to_rank)
+               and sid in chemical_rank_units else "")
+            + f"\n{choices}"
             for sid, sub, choices, _identity_map in to_rank
         )
         if validation:
@@ -1417,6 +1544,8 @@ def rank_species_annotations_with_llm(
                 "may stand for accessions of the same identity in several taxa. Return an "
                 "empty selected_ids array when none match. Do not invent identifiers."
             )
+            if source_fidelity and len(chemical_rank_units) == len(to_rank):
+                prompt += " " + chemical_guidance
             expected_units = [sid for sid, _sub, _choices, _identity_map in to_rank]
             allowed_ids = {
                 sid: set(identity_map)
@@ -1561,6 +1690,8 @@ def annotate_single_model(
     message: str = "",
     max_completion_tokens: Optional[int] = None,
     validation: bool = False,
+    source_fidelity: bool = False,
+    audit_to: Optional[str] = None,
 ) -> Tuple[pd.DataFrame, Dict[str, Any]]:
     """
     Annotate a single model that has no or limited existing annotations.
@@ -1606,6 +1737,11 @@ def annotate_single_model(
         validation: Enable structured LLM responses with one bounded repair,
             conservative cross-database entity-type correction in ``auto`` mode,
             and FBC formula/charge filtering for ChEBI candidates. Default False.
+        source_fidelity: With validation, preserve literal SBML chemical names,
+            prioritize their exact ChEBI hits, and protect explicit stereo/ACP
+            specificity at top-one ranking. Default False.
+        audit_to: Optional JSON path for species normalization, retrieved
+            candidates before ranking, and final rows. Does not change decisions.
 
     Returns:
         AnnotationResult. Species tables are on ``species_recommendations_df``;
@@ -1622,12 +1758,15 @@ def annotate_single_model(
     assistant_messages: List[Dict[str, Any]] = []
     llm_usage_records: List[Dict[str, Any]] = []
     validation_events: List[Dict[str, Any]] = []
+    audit_trace: Dict[str, Any] = {}
     system_prompt: str = ""
 
     # logger.info(f"Starting annotation for model: {model_file}")
     # logger.info(f"Using LLM model: {llm_model}")
     # logger.info(f"Using method: {method} for database search")
     entity_type = _normalize_entity_type(entity_type)
+    if source_fidelity and not validation:
+        raise ValueError("source_fidelity requires validation=True")
     databases = _normalize_databases(database)
     if entity_type != EntityType.AUTO and len(databases) > 1:
         logger.warning(
@@ -1994,6 +2133,31 @@ def annotate_single_model(
             logger.error("Failed to parse LLM response")
             return pd.DataFrame(), {"error": "Failed to parse LLM response"}
 
+        if source_fidelity:
+            chemical_ids = [
+                sid for sid in entities_to_evaluate
+                if not component_dict.get(sid)
+                and (entity_type == EntityType.CHEMICAL
+                     or (entity_type == EntityType.AUTO
+                         and entity_type_dict.get(sid) == EntityType.CHEMICAL.value))
+            ]
+            _preserve_source_names(
+                synonyms_dict,
+                get_species_display_names(model_file, EntityType.CHEMICAL),
+                chemical_ids,
+                validation_events,
+            )
+
+        if audit_to:
+            audit_trace["normalization"] = {
+                sid: {
+                    "names": synonyms_dict.get(sid, []),
+                    "entity_type": entity_type_dict.get(sid, entity_type.value),
+                    "components": component_dict.get(sid, []),
+                }
+                for sid in entities_to_evaluate
+            }
+
         logger.info(f"Parsed synonyms for {len(synonyms_dict)} entities")
 
         # Step 4: Search database
@@ -2019,6 +2183,7 @@ def annotate_single_model(
             validation=validation,
             model_file=model_file,
             validation_events=validation_events,
+            source_fidelity=source_fidelity,
         )
         search_time = time.time() - search_start
         logger.info(f"Database search completed in {search_time:.2f}s")
@@ -2035,6 +2200,17 @@ def annotate_single_model(
             existing_annotation_databases=existing_annotation_databases,
             component_dict=component_dict,
         )
+        if audit_to:
+            audit_columns = [
+                column for column in (
+                    "id", "type", "display_name", "component_id", "component_name",
+                    "component_type", "annotation", "annotation_label", "identity",
+                    "tax_id", "candidate_rank", "match_score",
+                ) if column in recommendations_df.columns
+            ]
+            audit_trace["retrieval_rows"] = (
+                recommendations_df[audit_columns].fillna("").to_dict("records")
+            )
 
         if top_k > n_return:
             logger.info(">>>Step 6: Ranking species candidates with LLM...<<<")
@@ -2051,6 +2227,7 @@ def annotate_single_model(
                 usage_callback=llm_usage_records.append,
                 validation=validation,
                 validation_events=validation_events,
+                source_fidelity=source_fidelity,
             )
             llm_time += time.time() - rank_start
             if not ranked_df.empty:
@@ -2067,6 +2244,7 @@ def annotate_single_model(
     metrics["llm_usage"] = summarize_usage_records(llm_usage_records)
     metrics["validation"] = {
         "enabled": validation,
+        "source_fidelity": source_fidelity,
         "event_counts": dict(Counter(event["kind"] for event in validation_events)),
         "events": validation_events,
     }
@@ -2075,6 +2253,13 @@ def annotate_single_model(
         recommendations_df = recommendations_df[recommendations_df["id"] != "Reason:"].reset_index(drop=True)
 
     recommendations_df.to_csv(csv_path, index=False)
+    if audit_to:
+        audit_trace["final_rows"] = (
+            recommendations_df.fillna("").to_dict("records")
+        )
+        Path(audit_to).write_text(
+            json.dumps(audit_trace, indent=2, default=str) + "\n", encoding="utf-8"
+        )
     print(f"Saved {len(recommendations_df)} recommendations to {csv_path}")
     _print_run_summary(
         recommendations_df,
@@ -2110,6 +2295,7 @@ def annotate_single_model(
         model_info=model_info,
         csv_path=csv_path,
         validation=validation,
+        source_fidelity=source_fidelity,
     )
     if annotate == "reactions":
         result.reaction_recommendations_df = recommendations_df

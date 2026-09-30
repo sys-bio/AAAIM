@@ -87,6 +87,29 @@ specified heavy-atom-formula-and-charge match; otherwise the conflict is inconcl
 the pool remains available for review. These checks do not establish biological
 correctness and are recorded under `result.metrics["validation"]`.
 
+Optional `source_fidelity=True` requires `validation=True` and applies to
+ordinary ChEBI chemical species only. The literal SBML display name is kept
+ahead of LLM-generated synonyms; a trailing alternate-name parenthetical may
+also be omitted and standalone `ACP` expanded to `[acyl-carrier protein]` for
+exact lookup. Leading `(R)`/`(S)` stereochemistry is never discarded. Exact
+SBML-name hits reserve retrieval slots before generated aliases. After the
+formula/charge guard, a unique exact source-name candidate is selected
+deterministically; explicit stereo/ACP names exclude generic alternatives if
+an exact source-name candidate remains. Other ambiguous pools still use the
+structured ranking LLM, which is instructed to prefer the SBML name. This is
+source-specific lexical evidence, not an independent ontology validation.
+Complex components, gene/protein searches, and reaction ranking are unchanged.
+
+For a three-run variability check of the BioModels use cases, the bundled
+`run_model250115_calibration.py` and `run_biomodel_usecase.py` scripts accept
+`--source-fidelity --repeat-id 2` or `3`. Each repeat uses a separate output
+prefix and saves a `*_trace.json` file with normalization, candidates before
+ranking, and final rows. The original source-fidelity result is repeat 1.
+`tests/useCase/evaluate_variability.py` writes a combined variability JSON;
+the per-model publication-backed evaluators are reused unchanged. An empty
+ranking selection can currently omit a species row, so the combined result
+records those omissions separately as abstentions.
+
 #### Chemical Annotation (ChEBI)
 
 ```python

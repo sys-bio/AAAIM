@@ -560,6 +560,10 @@ def evaluate_model2507280001(suffix: str = "") -> None:
         ("M_pheme_s", "CHEBI:60344"),
         ("M_pheme_e", "CHEBI:60344"),
         ("M_pg160_e", "CHEBI:85270"),
+        # ChEBI:57791 is a tautomer of meso-DAP (ChEBI:16488);
+        # ChEBI:57328 is the conjugate base of dephospho-CoA (ChEBI:15468).
+        ("M_26dap__M_c", "CHEBI:57791"),
+        ("M_dpcoa_c", "CHEBI:57328"),
     }
     manual_validation_hits = sorted(
         species_id for species_id in scorable
@@ -575,6 +579,7 @@ def evaluate_model2507280001(suffix: str = "") -> None:
         ("M_3ooctACP_c", "CHEBI:44680"),
         ("M_3hddecACP_c", "CHEBI:76616"),
         ("M_myrsACP_c", "CHEBI:28875"),
+        ("M_nadph_c", "CHEBI:13392"),  # NAD(P)H also includes NADH, not just NADPH.
     }
     reviewed_predictions = []
     wrong = []
@@ -683,8 +688,11 @@ def main() -> None:
         action="store_true",
         help="Evaluate *_validation_species.csv and save evaluation_validation.json.",
     )
+    parser.add_argument("--source-fidelity", action="store_true",
+                        help="Evaluate *_source_fidelity_species.csv separately.")
     args = parser.parse_args()
-    suffix = "_validation" if args.validation else ""
+    suffix = ("_source_fidelity" if args.source_fidelity else
+              "_validation" if args.validation else "")
     evaluate_model2501150001(suffix)
     evaluate_model2503190002(suffix)
     evaluate_model2506050001(suffix)

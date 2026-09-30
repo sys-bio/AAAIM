@@ -1,0 +1,26 @@
+{
+  "model": {
+    "species": 31,
+    "reactions": 40
+  },
+  "ranking": "top-1 identity per species or complex component",
+  "species_with_candidates": 28,
+  "molecular_species_complete": 27,
+  "molecular_species_total": 28,
+  "wrong_predictions": [
+    {
+      "id": "CK2",
+      "predicted_identity": "CSNK2A2"
+    },
+    {
+      "id": "CK2",
+      "predicted_identity": "CSNK2B"
+    }
+  ],
+  "missing_identities": [],
+  "process_state_abstentions": [
+    "DNA_damage",
+    "Autophagy_active",
+    "Autophagy_inactive"
+  ]
+}

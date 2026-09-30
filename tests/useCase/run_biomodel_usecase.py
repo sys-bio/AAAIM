@@ -56,12 +56,18 @@ def _json_safe(value):
     return value
 
 
-def run(model_id: str, condition: str, *, validation: bool = False) -> None:
+def run(model_id: str, condition: str, *, validation: bool = False,
+        source_fidelity: bool = False, repeat_id: int | None = None) -> None:
     config = MODEL_CONFIGS[model_id]
     output_dir = OUTPUT_ROOT / model_id
     output_dir.mkdir(parents=True, exist_ok=True)
-    output_name = f"{condition}_validation" if validation else condition
+    output_name = (f"{condition}_source_fidelity" if source_fidelity else
+                   f"{condition}_validation" if validation else condition)
+    if repeat_id is not None:
+        output_name += f"_repeat{repeat_id:02d}"
     output_prefix = output_dir / output_name
+    if repeat_id is not None and (output_dir / f"{output_name}_species.csv").exists():
+        raise FileExistsError(f"Repeat output already exists: {output_prefix}")
     max_entities = 5 if condition == "smoke" else None
 
     result = annotate_model(
@@ -84,6 +90,8 @@ def run(model_id: str, condition: str, *, validation: bool = False) -> None:
             else config["max_completion_tokens"]
         ),
         validation=validation,
+        source_fidelity=source_fidelity,
+        audit_to=str(output_dir / f"{output_name}_trace.json") if repeat_id is not None else None,
     )
     metadata = {
         "model": model_id,
@@ -99,6 +107,8 @@ def run(model_id: str, condition: str, *, validation: bool = False) -> None:
             "tax_id": config["tax_id"],
             "chunk_size": 50,
             "validation": validation,
+            "source_fidelity": source_fidelity,
+            "repeat_id": repeat_id,
         },
         "metrics": result.metrics,
     }
@@ -108,6 +118,18 @@ def run(model_id: str, condition: str, *, validation: bool = False) -> None:
         encoding="utf-8",
     )
     print(f"Saved metrics to {metrics_path}")
+    observed = result.recommendations_df["id"].nunique()
+    expected = result.metrics["total_entities"]
+    if observed != expected:
+        trace_path = output_dir / f"{output_name}_trace.json"
+        trace = json.loads(trace_path.read_text()) if trace_path.exists() else {}
+        normalized = set(trace.get("normalization", {}))
+        retrieved = {row["id"] for row in trace.get("retrieval_rows", [])}
+        if len(normalized) == expected and normalized == retrieved:
+            omitted = sorted(normalized - set(result.recommendations_df["id"]))
+            print(f"Ranking abstained and omitted {len(omitted)} rows: {omitted}")
+        else:
+            raise RuntimeError(f"Incomplete run: {observed}/{expected} species emitted")
 
 
 def main() -> None:
@@ -119,8 +141,14 @@ def main() -> None:
         action="store_true",
         help="Enable structured output and deterministic validation guards.",
     )
+    parser.add_argument("--source-fidelity", action="store_true",
+                        help="Preserve and prioritize literal SBML chemical names (implies validation).")
+    parser.add_argument("--repeat-id", type=int, choices=(2, 3),
+                        help="Save an independent repeat without overwriting repeat 1.")
     args = parser.parse_args()
-    run(args.model_id, args.condition, validation=args.validation)
+    run(args.model_id, args.condition,
+        validation=args.validation or args.source_fidelity,
+        source_fidelity=args.source_fidelity, repeat_id=args.repeat_id)
 
 
 if __name__ == "__main__":

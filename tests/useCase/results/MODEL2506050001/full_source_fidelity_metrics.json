@@ -1,0 +1,84 @@
+{
+  "model": "MODEL2506050001",
+  "condition": "full_source_fidelity",
+  "configuration": {
+    "llm_model": "gpt-5-mini-2025-08-07",
+    "method": "direct",
+    "top_k": 3,
+    "n_return": 1,
+    "max_entities": null,
+    "entity_type": "gene",
+    "database": [
+      "ncbigene"
+    ],
+    "tax_id": [
+      "9606",
+      "10090",
+      "10116"
+    ],
+    "chunk_size": 50,
+    "validation": true,
+    "source_fidelity": true
+  },
+  "metrics": {
+    "total_entities": 165,
+    "entities_with_predictions": 154,
+    "annotation_rate": 0.9333333333333333,
+    "total_predictions": 569,
+    "matches": 0,
+    "accuracy": null,
+    "total_time": 229.92750000953674,
+    "llm_time": 228.38531589508057,
+    "search_time": 0.5519499778747559,
+    "llm_usage": {
+      "input_tokens": 17960,
+      "output_tokens": 30221,
+      "total_tokens": 48181,
+      "reasoning_tokens": 18112,
+      "cached_input_tokens": 0,
+      "requests": 5,
+      "models": [
+        "gpt-5-mini-2025-08-07"
+      ]
+    },
+    "validation": {
+      "enabled": true,
+      "source_fidelity": true,
+      "event_counts": {
+        "structured_output_valid": 5
+      },
+      "events": [
+        {
+          "kind": "structured_output_valid",
+          "stage": "normalization",
+          "attempt": 1,
+          "entity_count": 50
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "normalization",
+          "attempt": 1,
+          "entity_count": 50
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "normalization",
+          "attempt": 1,
+          "entity_count": 50
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "normalization",
+          "attempt": 1,
+          "entity_count": 15
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "ranking",
+          "attempt": 1,
+          "entity_count": 78
+        }
+      ]
+    }
+  }
+}

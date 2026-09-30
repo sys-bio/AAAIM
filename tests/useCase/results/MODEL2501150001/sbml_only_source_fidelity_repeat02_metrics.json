@@ -1,0 +1,73 @@
+{
+  "model": "MODEL2501150001",
+  "condition": "sbml_only_source_fidelity_repeat02",
+  "configuration": {
+    "llm_model": "gpt-5-mini-2025-08-07",
+    "method": "direct",
+    "top_k": 3,
+    "n_return": 1,
+    "max_entities": null,
+    "entity_type": "auto",
+    "database": [
+      "chebi",
+      "uniprot"
+    ],
+    "tax_id": "9606",
+    "chunk_size": 50,
+    "max_completion_tokens": 12000,
+    "supplementary_context": null,
+    "validation": true,
+    "source_fidelity": true,
+    "repeat_id": 2
+  },
+  "metrics": {
+    "total_entities": 47,
+    "entities_with_predictions": 44,
+    "annotation_rate": 0.9361702127659575,
+    "total_predictions": 85,
+    "matches": 0,
+    "accuracy": null,
+    "total_time": 204.44085502624512,
+    "llm_time": 198.90735411643982,
+    "search_time": 5.312072038650513,
+    "llm_usage": {
+      "input_tokens": 12388,
+      "output_tokens": 17233,
+      "total_tokens": 29621,
+      "reasoning_tokens": 12288,
+      "cached_input_tokens": 4352,
+      "requests": 3,
+      "models": [
+        "gpt-5-mini-2025-08-07"
+      ]
+    },
+    "validation": {
+      "enabled": true,
+      "source_fidelity": true,
+      "event_counts": {
+        "structured_output_valid": 2,
+        "structured_output_repair": 1
+      },
+      "events": [
+        {
+          "kind": "structured_output_valid",
+          "stage": "normalization",
+          "attempt": 1,
+          "entity_count": 47
+        },
+        {
+          "kind": "structured_output_repair",
+          "stage": "ranking",
+          "attempt": 1,
+          "error": "ranking unit mismatch; expected=['BRaf_iBRaf_dimer|BRaf_iBRaf_dimer_2', 'EG2SOS|EG2SOS_3', 'ERK', 'GRB2_SOS|GRB2_SOS_2', 'MEK', 'Ras_BRaf|Ras_BRaf_1', 'Ras_BRaf_Raf1_tetramer|Ras_BRaf_Raf1_tetramer_1', 'Ras_BRaf_pRaf1_tetramer|Ras_BRaf_pRaf1_tetramer_1', 'Ras_Braf_iRaf1_tetramer|Ras_Braf_iRaf1_tetramer_1', 'Ras_Braf_iRaf1_tetramer|Ras_Braf_iRaf1_tetramer_4', 'Ras_GDP|Ras_GDP_1', 'Ras_GDP|Ras_GDP_2', 'Ras_GTP|Ras_GTP_1', 'Ras_GTP|Ras_GTP_2', 'Ras_Raf1|Ras_Raf1_1', 'Ras_Raf1_iBRaf_tetramer|Ras_Raf1_iBRaf_tetramer_1', 'Ras_Raf1_iBRaf_tetramer|Ras_Raf1_iBRaf_tetramer_4', 'Ras_iBRaf|Ras_iBRaf_1', 'Ras_iBRaf|Ras_iBRaf_3', 'Ras_iRaf1|Ras_iRaf1_1', 'Ras_iRaf1|Ras_iRaf1_3', 'Ras_iRaf1_iBRaf1_tetramer|Ras_iRaf1_iBRaf1_tetramer_1', 'Ras_iRaf1_iBRaf1_tetramer|Ras_iRaf1_iBRaf1_tetramer_4', 'Ras_iRaf1_tetramer|Ras_iRaf1_tetramer_1', 'Ras_iRaf1_tetramer|Ras_iRaf1_tetramer_3', 'Ras_nfpBRaf|Ras_nfpBRaf_1', 'Ras_nfpRaf1|Ras_nfpRaf1_1', 'Ras_nfpiBRaf|Ras_nfpiBRaf_1', 'Ras_nfpiBRaf|Ras_nfpiBRaf_3', 'Ras_nfpiRaf1|Ras_nfpiRaf1_1', 'Ras_pRaf1|Ras_pRaf1_1', 'Ras_pRaf1_Raf1_tetramer|Ras_pRaf1_Raf1_tetramer_1', 'Ras_pRaf1_iBRaf_tetramer|Ras_pRaf1_iBRaf_tetramer_1', 'Ras_pRaf1_iBRaf_tetramer|Ras_pRaf1_iBRaf_tetramer_4', 'Ras_pRaf1_tetramer|Ras_pRaf1_tetramer_1', 'SOS', 'iBRaf|iBRaf_2', 'iBRaf_dimer|iBRaf_dimer_2', 'iRaf1|iRaf1_2', 'nfpSOS', 'pERK', 'pMEK', 'sorafenib'], returned=['BRaf_iBRaf_dimer|BRaf_iBRaf_dimer_2', 'EG2SOS|EG2SOS_3', 'ERK', 'GRB2_SOS|GRB2_SOS_2', 'MEK', 'Ras_BRaf|Ras_BRaf_1', 'Ras_BRaf_Raf1_tetramer|Ras_BRaf_Raf1_tetramer_1', 'Ras_BRaf_pRaf1_tetramer|Ras_BRaf_pRaf1_tetramer_1', 'Ras_Braf_iRaf1_tetramer|Ras_Braf_iRaf1_tetramer_1', 'Ras_Braf_iRaf1_tetramer|Ras_Braf_iRaf1_tetramer_4', 'Ras_GDP|Ras_GDP_1', 'Ras_GDP|Ras_GDP_2', 'Ras_GTP|Ras_GTP_1', 'Ras_GTP|Ras_GTP_2', 'Ras_Raf1|Ras_Raf1_1', 'Ras_Raf1_iBRaf_tetramer|Ras_Raf1_iBRaf_tetramer_1', 'Ras_Raf1_iBRaf_tetramer|Ras_Raf1_iBRaf_tetramer_4', 'Ras_iBRaf|Ras_iBRaf_1', 'Ras_iBRaf|Ras_iBRaf_3', 'Ras_iRaf1|Ras_iRaf1_1', 'Ras_iRaf1|Ras_iRaf1_3', 'Ras_iRaf1_iBRaf1_tetramer|Ras_iRaf1_iBRaf1_tetramer_1', 'Ras_iRaf1_iBRaf1_tetramer|Ras_iRaf1_iBRaf1_tetramer_4', 'Ras_iRaf1_tetramer|Ras_iRaf1_tetramer_1', 'Ras_iRaf1_tetramer|Ras_iRaf1_tetramer_3', 'Ras_nfpBRaf|Ras_nfpBRaf_1', 'Ras_nfpRaf1|Ras_nfpRaf1_1', 'Ras_nfpiBRaf|Ras_nfpiBRaf_1', 'Ras_nfpiBRaf|Ras_nfpiBRaf_3', 'Ras_nfpiRaf|Ras_nfpiRaf_1', 'Ras_pRaf1|Ras_pRaf1_1', 'Ras_pRaf1_Raf1_tetramer|Ras_pRaf1_Raf1_tetramer_1', 'Ras_pRaf1_iBRaf_tetramer|Ras_pRaf1_iBRaf_tetramer_1', 'Ras_pRaf1_iBRaf_tetramer|Ras_pRaf1_iBRaf_tetramer_4', 'Ras_pRaf1_tetramer|Ras_pRaf1_tetramer_1', 'SOS', 'iBRaf|iBRaf_2', 'iBRaf_dimer|iBRaf_dimer_2', 'iRaf1|iRaf1_2', 'nfpSOS', 'pERK', 'pMEK', 'sorafenib']"
+        },
+        {
+          "kind": "structured_output_valid",
+          "stage": "ranking",
+          "attempt": 2,
+          "entity_count": 43
+        }
+      ]
+    }
+  }
+}

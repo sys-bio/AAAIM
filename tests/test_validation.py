@@ -2,18 +2,72 @@ import json
 from pathlib import Path
 
 from core.annotation_workflow import (
+    _exact_source_chebi_ids,
     _filter_recommendations_by_chemistry,
     _formula_counter,
     _parse_structured_normalization,
     _parse_structured_ranking,
     _search_one_database,
     _search_with_entity_type_validation,
+    _preserve_source_names,
+    _prioritize_source_chebi_candidates,
+    _source_name_variants,
+    rank_species_annotations_with_llm,
 )
 from core.model_info import get_species_chemical_properties
 from utils.constants import EntityType
 
 
 USE_CASE = Path(__file__).parent / "useCase" / "MODEL2507280001.xml"
+
+
+def test_source_name_variants_preserve_stereo_and_expand_acp():
+    assert _source_name_variants("(S)-3-Methyl-2-oxopentanoate") == [
+        "(S)-3-Methyl-2-oxopentanoate"
+    ]
+    assert _source_name_variants("Myristoyl-ACP (n-C14:0ACP)") == [
+        "Myristoyl-ACP (n-C14:0ACP)", "Myristoyl-ACP",
+        "Myristoyl-[acyl-carrier protein] (n-C14:0ACP)",
+        "Myristoyl-[acyl-carrier protein]",
+    ]
+    assert "50651" in _exact_source_chebi_ids("Myristoyl-ACP (n-C14:0ACP)")
+
+
+def test_source_candidate_priority_and_stereo_top_one_without_llm():
+    sid = "M_3mop_c"
+    synonyms = {sid: ["3-methyl-2-oxopentanoate", "alpha-keto-beta-methylvalerate"]}
+    display = {sid: "(S)-3-Methyl-2-oxopentanoate"}
+    _preserve_source_names(synonyms, display, [sid])
+    assert synonyms[sid][0] == display[sid]
+    recs = _search_one_database([sid], synonyms, "chebi", "direct", 3)
+    _prioritize_source_chebi_candidates(recs, {sid: "chebi"}, display, 3)
+    assert recs[0].candidates[0] == "35146"
+    _filter_recommendations_by_chemistry(
+        recs, {sid: "chebi"}, {}, get_species_chemical_properties(str(USE_CASE), [sid])
+    )
+    import pandas as pd
+    table = pd.DataFrame({
+        "id": [sid] * len(recs[0].candidates),
+        "type": ["chemical"] * len(recs[0].candidates),
+        "display_name": [display[sid]] * len(recs[0].candidates),
+        "annotation": [f"CHEBI:{cid}" for cid in recs[0].candidates],
+        "identity_rank": list(range(1, len(recs[0].candidates) + 1)),
+    })
+    result = rank_species_annotations_with_llm(
+        str(USE_CASE), table, n_return=1, validation=True, source_fidelity=True
+    )
+    assert result["annotation"].tolist() == ["CHEBI:35146"]
+
+
+def test_source_acp_name_displaces_free_acid_candidate():
+    from core.data_types import Recommendation
+
+    sid = "M_myrsACP_c"
+    rec = Recommendation(sid, ["myristic acid"], ["28875"], ["tetradecanoic acid"], [1.0])
+    _prioritize_source_chebi_candidates(
+        [rec], {sid: "chebi"}, {sid: "Myristoyl-ACP (n-C14:0ACP)"}, 3
+    )
+    assert rec.candidates[:2] == ["50651", "28875"]
 
 
 def test_generic_formula_is_inconclusive():

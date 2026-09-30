@@ -1,0 +1,2685 @@
+{
+  "model": {
+    "species": 165,
+    "reactions": 165
+  },
+  "configuration": {
+    "entity_type": "gene",
+    "database": "NCBI Gene",
+    "tax_ids": [
+      "9606",
+      "10090",
+      "10116"
+    ],
+    "ranking": "top-1 identity per species or complex component, then taxon expansion"
+  },
+  "species_with_candidates": 154,
+  "complex_species": 13,
+  "component_groups": 50,
+  "reference_nodes": 51,
+  "source_reference_entrez_occurrences": 245,
+  "predicted_entrez_occurrences_on_reference_nodes": 183,
+  "source_exact_entrez_hits": 163,
+  "source_exact_entrez_recall": 0.6653061224489796,
+  "source_exact_entrez_precision": 0.8907103825136612,
+  "verified_ortholog_predictions_not_listed_in_source": 8,
+  "reviewed_supported_predictions": 171,
+  "reviewed_supported_precision": 0.9344262295081968,
+  "reference_nodes_with_any_source_exact_hit": 48,
+  "reference_nodes_with_all_deposited_ids_recovered": 37,
+  "per_taxon": {
+    "9606": {
+      "source_expected": 91,
+      "predicted": 61,
+      "source_exact_hits": 57,
+      "ortholog_supported": 0,
+      "related_nonreference": 0,
+      "wrong": 4
+    },
+    "10090": {
+      "source_expected": 90,
+      "predicted": 61,
+      "source_exact_hits": 56,
+      "ortholog_supported": 1,
+      "related_nonreference": 0,
+      "wrong": 4
+    },
+    "10116": {
+      "source_expected": 64,
+      "predicted": 61,
+      "source_exact_hits": 50,
+      "ortholog_supported": 7,
+      "related_nonreference": 0,
+      "wrong": 4
+    }
+  },
+  "ortholog_supported_predictions": [
+    {
+      "id": "node_55",
+      "name": "GF",
+      "entrez_id": "25313",
+      "label": "Egf",
+      "identity": "EGF",
+      "tax_id": "10116",
+      "reference_genes": [
+        {
+          "entrez_id": "1950",
+          "name": "EGF",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "3082",
+          "name": "HGF",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "7422",
+          "name": "VEGFA",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "13645",
+          "name": "Egf",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "15234",
+          "name": "Hgf",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "22339",
+          "name": "Vegfa",
+          "tax_id": "10090"
+        }
+      ]
+    },
+    {
+      "id": "node_56",
+      "name": "GF_High",
+      "entrez_id": "25313",
+      "label": "Egf",
+      "identity": "EGF",
+      "tax_id": "10116",
+      "reference_genes": [
+        {
+          "entrez_id": "1950",
+          "name": "EGF",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "3082",
+          "name": "HGF",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "7422",
+          "name": "VEGFA",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "13645",
+          "name": "Egf",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "15234",
+          "name": "Hgf",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "22339",
+          "name": "Vegfa",
+          "tax_id": "10090"
+        }
+      ]
+    },
+    {
+      "id": "node_106",
+      "name": "RTK",
+      "entrez_id": "24329",
+      "label": "Egfr",
+      "identity": "EGFR",
+      "tax_id": "10116",
+      "reference_genes": [
+        {
+          "entrez_id": "1956",
+          "name": "EGFR",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "2260",
+          "name": "FGFR1",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "2261",
+          "name": "FGFR3",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "2263",
+          "name": "FGFR2",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "2264",
+          "name": "FGFR4",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "3643",
+          "name": "INSR",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "3791",
+          "name": "KDR",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "4233",
+          "name": "MET",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "4914",
+          "name": "NTRK1",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "5156",
+          "name": "PDGFRA",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "5159",
+          "name": "PDGFRB",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "13649",
+          "name": "Egfr",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "14182",
+          "name": "Fgfr1",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "14183",
+          "name": "Fgfr2",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "14184",
+          "name": "Fgfr3",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "14186",
+          "name": "Fgfr4",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "16337",
+          "name": "Insr",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "16542",
+          "name": "Kdr",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "17295",
+          "name": "Met",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "18211",
+          "name": "Ntrk1",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "18595",
+          "name": "Pdgfra",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "18596",
+          "name": "Pdgfrb",
+          "tax_id": "10090"
+        }
+      ]
+    },
+    {
+      "id": "node_95",
+      "name": "PI3K",
+      "entrez_id": "170911",
+      "label": "Pik3ca",
+      "identity": "PIK3CA",
+      "tax_id": "10116",
+      "reference_genes": [
+        {
+          "entrez_id": "5290",
+          "name": "PIK3CA",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "5291",
+          "name": "PIK3CB",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "5295",
+          "name": "PIK3R1",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "5296",
+          "name": "PIK3R2",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "18706",
+          "name": "Pik3ca",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "18708",
+          "name": "Pik3r1",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "18709",
+          "name": "Pik3r2",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "74769",
+          "name": "Pik3cb",
+          "tax_id": "10090"
+        }
+      ]
+    },
+    {
+      "id": "node_157",
+      "name": "p110_H",
+      "entrez_id": "170911",
+      "label": "Pik3ca",
+      "identity": "PIK3CA",
+      "tax_id": "10116",
+      "reference_genes": [
+        {
+          "entrez_id": "5290",
+          "name": "PIK3CA",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "18706",
+          "name": "Pik3ca",
+          "tax_id": "10090"
+        }
+      ]
+    },
+    {
+      "id": "node_96",
+      "name": "PI3K_H",
+      "entrez_id": "170911",
+      "label": "Pik3ca",
+      "identity": "PIK3CA",
+      "tax_id": "10116",
+      "reference_genes": [
+        {
+          "entrez_id": "5290",
+          "name": "PIK3CA",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "5291",
+          "name": "PIK3CB",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "5295",
+          "name": "PIK3R1",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "5296",
+          "name": "PIK3R2",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "18706",
+          "name": "Pik3ca",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "18708",
+          "name": "Pik3r1",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "18709",
+          "name": "Pik3r2",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "74769",
+          "name": "Pik3cb",
+          "tax_id": "10090"
+        }
+      ]
+    },
+    {
+      "id": "node_100",
+      "name": "PTEN_c",
+      "entrez_id": "50557",
+      "label": "Pten",
+      "identity": "PTEN",
+      "tax_id": "10116",
+      "reference_genes": [
+        {
+          "entrez_id": "5728",
+          "name": "PTEN",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "19211",
+          "name": "Pten",
+          "tax_id": "10090"
+        }
+      ]
+    },
+    {
+      "id": "node_47",
+      "name": "Emi1",
+      "entrez_id": "67141",
+      "label": "Fbxo5",
+      "identity": "FBXO5",
+      "tax_id": "10090",
+      "reference_genes": [
+        {
+          "entrez_id": "26271",
+          "name": "FBXO5",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "292263",
+          "name": "Fbxo5",
+          "tax_id": "10116"
+        }
+      ]
+    }
+  ],
+  "biologically_related_nonreference_predictions": [],
+  "wrong_predictions": [
+    {
+      "id": "node_32",
+      "name": "CyclinA_mRNA",
+      "entrez_id": "890",
+      "label": "CCNA2",
+      "identity": "CCNA2",
+      "tax_id": "9606",
+      "reference_genes": [
+        {
+          "entrez_id": "8900",
+          "name": "CCNA1",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "12427",
+          "name": "Ccna1",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "295052",
+          "name": "Ccna1",
+          "tax_id": "10116"
+        }
+      ]
+    },
+    {
+      "id": "node_32",
+      "name": "CyclinA_mRNA",
+      "entrez_id": "12428",
+      "label": "Ccna2",
+      "identity": "CCNA2",
+      "tax_id": "10090",
+      "reference_genes": [
+        {
+          "entrez_id": "8900",
+          "name": "CCNA1",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "12427",
+          "name": "Ccna1",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "295052",
+          "name": "Ccna1",
+          "tax_id": "10116"
+        }
+      ]
+    },
+    {
+      "id": "node_32",
+      "name": "CyclinA_mRNA",
+      "entrez_id": "114494",
+      "label": "Ccna2",
+      "identity": "CCNA2",
+      "tax_id": "10116",
+      "reference_genes": [
+        {
+          "entrez_id": "8900",
+          "name": "CCNA1",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "12427",
+          "name": "Ccna1",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "295052",
+          "name": "Ccna1",
+          "tax_id": "10116"
+        }
+      ]
+    },
+    {
+      "id": "node_31",
+      "name": "CyclinA",
+      "entrez_id": "890",
+      "label": "CCNA2",
+      "identity": "CCNA2",
+      "tax_id": "9606",
+      "reference_genes": [
+        {
+          "entrez_id": "8900",
+          "name": "CCNA1",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "12427",
+          "name": "Ccna1",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "295052",
+          "name": "Ccna1",
+          "tax_id": "10116"
+        }
+      ]
+    },
+    {
+      "id": "node_31",
+      "name": "CyclinA",
+      "entrez_id": "12428",
+      "label": "Ccna2",
+      "identity": "CCNA2",
+      "tax_id": "10090",
+      "reference_genes": [
+        {
+          "entrez_id": "8900",
+          "name": "CCNA1",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "12427",
+          "name": "Ccna1",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "295052",
+          "name": "Ccna1",
+          "tax_id": "10116"
+        }
+      ]
+    },
+    {
+      "id": "node_31",
+      "name": "CyclinA",
+      "entrez_id": "114494",
+      "label": "Ccna2",
+      "identity": "CCNA2",
+      "tax_id": "10116",
+      "reference_genes": [
+        {
+          "entrez_id": "8900",
+          "name": "CCNA1",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "12427",
+          "name": "Ccna1",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "295052",
+          "name": "Ccna1",
+          "tax_id": "10116"
+        }
+      ]
+    },
+    {
+      "id": "node_162",
+      "name": "pAPC",
+      "entrez_id": "991",
+      "label": "CDC20",
+      "identity": "CDC20",
+      "tax_id": "9606",
+      "reference_genes": [
+        {
+          "entrez_id": "17222",
+          "name": "Anapc1",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "29882",
+          "name": "ANAPC2",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "64682",
+          "name": "ANAPC1",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "99152",
+          "name": "Anapc2",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "296558",
+          "name": "Anapc2",
+          "tax_id": "10116"
+        },
+        {
+          "entrez_id": "311412",
+          "name": "Anapc1",
+          "tax_id": "10116"
+        }
+      ]
+    },
+    {
+      "id": "node_162",
+      "name": "pAPC",
+      "entrez_id": "107995",
+      "label": "Cdc20",
+      "identity": "CDC20",
+      "tax_id": "10090",
+      "reference_genes": [
+        {
+          "entrez_id": "17222",
+          "name": "Anapc1",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "29882",
+          "name": "ANAPC2",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "64682",
+          "name": "ANAPC1",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "99152",
+          "name": "Anapc2",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "296558",
+          "name": "Anapc2",
+          "tax_id": "10116"
+        },
+        {
+          "entrez_id": "311412",
+          "name": "Anapc1",
+          "tax_id": "10116"
+        }
+      ]
+    },
+    {
+      "id": "node_162",
+      "name": "pAPC",
+      "entrez_id": "64515",
+      "label": "Cdc20",
+      "identity": "CDC20",
+      "tax_id": "10116",
+      "reference_genes": [
+        {
+          "entrez_id": "17222",
+          "name": "Anapc1",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "29882",
+          "name": "ANAPC2",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "64682",
+          "name": "ANAPC1",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "99152",
+          "name": "Anapc2",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "296558",
+          "name": "Anapc2",
+          "tax_id": "10116"
+        },
+        {
+          "entrez_id": "311412",
+          "name": "Anapc1",
+          "tax_id": "10116"
+        }
+      ]
+    },
+    {
+      "id": "node_26",
+      "name": "Cdh1",
+      "entrez_id": "999",
+      "label": "CDH1",
+      "identity": "CDH1",
+      "tax_id": "9606",
+      "reference_genes": [
+        {
+          "entrez_id": "51343",
+          "name": "FZR1",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "56371",
+          "name": "Fzr1",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "314642",
+          "name": "Fzr1",
+          "tax_id": "10116"
+        }
+      ]
+    },
+    {
+      "id": "node_26",
+      "name": "Cdh1",
+      "entrez_id": "12550",
+      "label": "Cdh1",
+      "identity": "CDH1",
+      "tax_id": "10090",
+      "reference_genes": [
+        {
+          "entrez_id": "51343",
+          "name": "FZR1",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "56371",
+          "name": "Fzr1",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "314642",
+          "name": "Fzr1",
+          "tax_id": "10116"
+        }
+      ]
+    },
+    {
+      "id": "node_26",
+      "name": "Cdh1",
+      "entrez_id": "83502",
+      "label": "Cdh1",
+      "identity": "CDH1",
+      "tax_id": "10116",
+      "reference_genes": [
+        {
+          "entrez_id": "51343",
+          "name": "FZR1",
+          "tax_id": "9606"
+        },
+        {
+          "entrez_id": "56371",
+          "name": "Fzr1",
+          "tax_id": "10090"
+        },
+        {
+          "entrez_id": "314642",
+          "name": "Fzr1",
+          "tax_id": "10116"
+        }
+      ]
+    }
+  ],
+  "missing_references": [
+    {
+      "id": "node_55",
+      "name": "GF",
+      "entrez_id": "3082",
+      "label": "HGF",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_55",
+      "name": "GF",
+      "entrez_id": "7422",
+      "label": "VEGFA",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_55",
+      "name": "GF",
+      "entrez_id": "15234",
+      "label": "Hgf",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_55",
+      "name": "GF",
+      "entrez_id": "22339",
+      "label": "Vegfa",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_56",
+      "name": "GF_High",
+      "entrez_id": "3082",
+      "label": "HGF",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_56",
+      "name": "GF_High",
+      "entrez_id": "7422",
+      "label": "VEGFA",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_56",
+      "name": "GF_High",
+      "entrez_id": "15234",
+      "label": "Hgf",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_56",
+      "name": "GF_High",
+      "entrez_id": "22339",
+      "label": "Vegfa",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_106",
+      "name": "RTK",
+      "entrez_id": "2260",
+      "label": "FGFR1",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_106",
+      "name": "RTK",
+      "entrez_id": "2261",
+      "label": "FGFR3",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_106",
+      "name": "RTK",
+      "entrez_id": "2263",
+      "label": "FGFR2",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_106",
+      "name": "RTK",
+      "entrez_id": "2264",
+      "label": "FGFR4",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_106",
+      "name": "RTK",
+      "entrez_id": "3643",
+      "label": "INSR",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_106",
+      "name": "RTK",
+      "entrez_id": "3791",
+      "label": "KDR",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_106",
+      "name": "RTK",
+      "entrez_id": "4233",
+      "label": "MET",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_106",
+      "name": "RTK",
+      "entrez_id": "4914",
+      "label": "NTRK1",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_106",
+      "name": "RTK",
+      "entrez_id": "5156",
+      "label": "PDGFRA",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_106",
+      "name": "RTK",
+      "entrez_id": "5159",
+      "label": "PDGFRB",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_106",
+      "name": "RTK",
+      "entrez_id": "14182",
+      "label": "Fgfr1",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_106",
+      "name": "RTK",
+      "entrez_id": "14183",
+      "label": "Fgfr2",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_106",
+      "name": "RTK",
+      "entrez_id": "14184",
+      "label": "Fgfr3",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_106",
+      "name": "RTK",
+      "entrez_id": "14186",
+      "label": "Fgfr4",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_106",
+      "name": "RTK",
+      "entrez_id": "16337",
+      "label": "Insr",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_106",
+      "name": "RTK",
+      "entrez_id": "16542",
+      "label": "Kdr",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_106",
+      "name": "RTK",
+      "entrez_id": "17295",
+      "label": "Met",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_106",
+      "name": "RTK",
+      "entrez_id": "18211",
+      "label": "Ntrk1",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_106",
+      "name": "RTK",
+      "entrez_id": "18595",
+      "label": "Pdgfra",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_106",
+      "name": "RTK",
+      "entrez_id": "18596",
+      "label": "Pdgfrb",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_118",
+      "name": "SOS",
+      "entrez_id": "6655",
+      "label": "SOS2",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_118",
+      "name": "SOS",
+      "entrez_id": "20663",
+      "label": "Sos2",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_118",
+      "name": "SOS",
+      "entrez_id": "85384",
+      "label": "Sos2",
+      "tax_id": "10116"
+    },
+    {
+      "id": "node_109",
+      "name": "Ras",
+      "entrez_id": "3265",
+      "label": "HRAS",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_109",
+      "name": "Ras",
+      "entrez_id": "3845",
+      "label": "KRAS",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_109",
+      "name": "Ras",
+      "entrez_id": "15461",
+      "label": "Hras",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_109",
+      "name": "Ras",
+      "entrez_id": "16653",
+      "label": "Kras",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_109",
+      "name": "Ras",
+      "entrez_id": "24525",
+      "label": "Kras",
+      "tax_id": "10116"
+    },
+    {
+      "id": "node_109",
+      "name": "Ras",
+      "entrez_id": "293621",
+      "label": "Hras",
+      "tax_id": "10116"
+    },
+    {
+      "id": "node_104",
+      "name": "RAF",
+      "entrez_id": "673",
+      "label": "BRAF",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_104",
+      "name": "RAF",
+      "entrez_id": "109880",
+      "label": "Braf",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_104",
+      "name": "RAF",
+      "entrez_id": "114486",
+      "label": "Braf",
+      "tax_id": "10116"
+    },
+    {
+      "id": "node_79",
+      "name": "MEK",
+      "entrez_id": "5605",
+      "label": "MAP2K2",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_79",
+      "name": "MEK",
+      "entrez_id": "26396",
+      "label": "Map2k2",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_79",
+      "name": "MEK",
+      "entrez_id": "58960",
+      "label": "Map2k2",
+      "tax_id": "10116"
+    },
+    {
+      "id": "node_43",
+      "name": "ERK",
+      "entrez_id": "5595",
+      "label": "MAPK3",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_43",
+      "name": "ERK",
+      "entrez_id": "26417",
+      "label": "Mapk3",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_43",
+      "name": "ERK",
+      "entrez_id": "50689",
+      "label": "Mapk3",
+      "tax_id": "10116"
+    },
+    {
+      "id": "node_151",
+      "name": "mTORC2",
+      "entrez_id": "9675",
+      "label": "TTI1",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_151",
+      "name": "mTORC2",
+      "entrez_id": "9894",
+      "label": "TELO2",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_151",
+      "name": "mTORC2",
+      "entrez_id": "55615",
+      "label": "PRR5",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_151",
+      "name": "mTORC2",
+      "entrez_id": "64798",
+      "label": "DEPTOR",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_151",
+      "name": "mTORC2",
+      "entrez_id": "71718",
+      "label": "Telo2",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_151",
+      "name": "mTORC2",
+      "entrez_id": "72446",
+      "label": "Prr5l",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_151",
+      "name": "mTORC2",
+      "entrez_id": "75425",
+      "label": "Tti1",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_151",
+      "name": "mTORC2",
+      "entrez_id": "79899",
+      "label": "PRR5L",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_151",
+      "name": "mTORC2",
+      "entrez_id": "97998",
+      "label": "Deptor",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_151",
+      "name": "mTORC2",
+      "entrez_id": "109270",
+      "label": "Prr5",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_151",
+      "name": "mTORC2",
+      "entrez_id": "302986",
+      "label": "Telo2",
+      "tax_id": "10116"
+    },
+    {
+      "id": "node_151",
+      "name": "mTORC2",
+      "entrez_id": "314979",
+      "label": "Deptor",
+      "tax_id": "10116"
+    },
+    {
+      "id": "node_151",
+      "name": "mTORC2",
+      "entrez_id": "315189",
+      "label": "Prr5",
+      "tax_id": "10116"
+    },
+    {
+      "id": "node_151",
+      "name": "mTORC2",
+      "entrez_id": "362171",
+      "label": "Prr5l",
+      "tax_id": "10116"
+    },
+    {
+      "id": "node_151",
+      "name": "mTORC2",
+      "entrez_id": "499935",
+      "label": "Tti1",
+      "tax_id": "10116"
+    },
+    {
+      "id": "node_95",
+      "name": "PI3K",
+      "entrez_id": "5291",
+      "label": "PIK3CB",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_95",
+      "name": "PI3K",
+      "entrez_id": "5295",
+      "label": "PIK3R1",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_95",
+      "name": "PI3K",
+      "entrez_id": "5296",
+      "label": "PIK3R2",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_95",
+      "name": "PI3K",
+      "entrez_id": "18708",
+      "label": "Pik3r1",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_95",
+      "name": "PI3K",
+      "entrez_id": "18709",
+      "label": "Pik3r2",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_95",
+      "name": "PI3K",
+      "entrez_id": "74769",
+      "label": "Pik3cb",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_96",
+      "name": "PI3K_H",
+      "entrez_id": "5291",
+      "label": "PIK3CB",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_96",
+      "name": "PI3K_H",
+      "entrez_id": "5295",
+      "label": "PIK3R1",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_96",
+      "name": "PI3K_H",
+      "entrez_id": "5296",
+      "label": "PIK3R2",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_96",
+      "name": "PI3K_H",
+      "entrez_id": "18708",
+      "label": "Pik3r1",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_96",
+      "name": "PI3K_H",
+      "entrez_id": "18709",
+      "label": "Pik3r2",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_96",
+      "name": "PI3K_H",
+      "entrez_id": "74769",
+      "label": "Pik3cb",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_32",
+      "name": "CyclinA_mRNA",
+      "entrez_id": "8900",
+      "label": "CCNA1",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_32",
+      "name": "CyclinA_mRNA",
+      "entrez_id": "12427",
+      "label": "Ccna1",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_32",
+      "name": "CyclinA_mRNA",
+      "entrez_id": "295052",
+      "label": "Ccna1",
+      "tax_id": "10116"
+    },
+    {
+      "id": "node_31",
+      "name": "CyclinA",
+      "entrez_id": "8900",
+      "label": "CCNA1",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_31",
+      "name": "CyclinA",
+      "entrez_id": "12427",
+      "label": "Ccna1",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_31",
+      "name": "CyclinA",
+      "entrez_id": "295052",
+      "label": "Ccna1",
+      "tax_id": "10116"
+    },
+    {
+      "id": "node_26",
+      "name": "Cdh1",
+      "entrez_id": "51343",
+      "label": "FZR1",
+      "tax_id": "9606"
+    },
+    {
+      "id": "node_26",
+      "name": "Cdh1",
+      "entrez_id": "56371",
+      "label": "Fzr1",
+      "tax_id": "10090"
+    },
+    {
+      "id": "node_26",
+      "name": "Cdh1",
+      "entrez_id": "314642",
+      "label": "Fzr1",
+      "tax_id": "10116"
+    }
+  ],
+  "nodes_without_source_gene_mapping": 114,
+  "predictions_on_nodes_without_source_gene_mapping": [
+    {
+      "id": "node_29",
+      "name": "CellDensity_High",
+      "identities": [
+        "NF2"
+      ],
+      "entrez_ids": [
+        "4771",
+        "18016",
+        "25744"
+      ]
+    },
+    {
+      "id": "node_30",
+      "name": "CellDensity_Low",
+      "identities": [
+        "YAP1"
+      ],
+      "entrez_ids": [
+        "10413",
+        "22601",
+        "363014"
+      ]
+    },
+    {
+      "id": "node_124",
+      "name": "Stiff_ECM",
+      "identities": [
+        "COL1A1"
+      ],
+      "entrez_ids": [
+        "1277",
+        "12842",
+        "29393"
+      ]
+    },
+    {
+      "id": "node_42",
+      "name": "ECM",
+      "identities": [
+        "FN1"
+      ],
+      "entrez_ids": [
+        "2335",
+        "14268",
+        "25661"
+      ]
+    },
+    {
+      "id": "node_121",
+      "name": "Shc",
+      "identities": [
+        "SHC1"
+      ],
+      "entrez_ids": [
+        "6464",
+        "20416",
+        "85385"
+      ]
+    },
+    {
+      "id": "node_97",
+      "name": "PIP3",
+      "identities": [
+        "PIK3CA"
+      ],
+      "entrez_ids": [
+        "5290",
+        "18706",
+        "170911"
+      ]
+    },
+    {
+      "id": "node_69",
+      "name": "IP3",
+      "identities": [
+        "PLCG1"
+      ],
+      "entrez_ids": [
+        "5335",
+        "18803",
+        "25738"
+      ]
+    },
+    {
+      "id": "node_16",
+      "name": "Ca2p",
+      "identities": [
+        "CALM1"
+      ],
+      "entrez_ids": [
+        "801",
+        "12313",
+        "24242"
+      ]
+    },
+    {
+      "id": "node_38",
+      "name": "DAG",
+      "identities": [
+        "PRKCA"
+      ],
+      "entrez_ids": [
+        "5578",
+        "18750",
+        "24680"
+      ]
+    },
+    {
+      "id": "node_111",
+      "name": "Rheb",
+      "identities": [
+        "RHEB"
+      ],
+      "entrez_ids": [
+        "6009",
+        "19744",
+        "26954"
+      ]
+    },
+    {
+      "id": "node_150",
+      "name": "mTORC1",
+      "identities": [
+        "MLST8",
+        "MTOR",
+        "RPTOR"
+      ],
+      "entrez_ids": [
+        "2475",
+        "56716",
+        "56717",
+        "56718",
+        "57521",
+        "64223",
+        "64226",
+        "74370",
+        "287871"
+      ]
+    },
+    {
+      "id": "node_113",
+      "name": "S6K",
+      "identities": [
+        "RPS6KB1"
+      ],
+      "entrez_ids": [
+        "6198",
+        "72508",
+        "83840"
+      ]
+    },
+    {
+      "id": "node_149",
+      "name": "h_4EBP1",
+      "identities": [
+        "EIF4EBP1"
+      ],
+      "entrez_ids": [
+        "1978",
+        "13685",
+        "116636"
+      ]
+    },
+    {
+      "id": "node_146",
+      "name": "eIF4E",
+      "identities": [
+        "EIF4E"
+      ],
+      "entrez_ids": [
+        "1977",
+        "13684",
+        "117045"
+      ]
+    },
+    {
+      "id": "node_57",
+      "name": "GSK3",
+      "identities": [
+        "GSK3B"
+      ],
+      "entrez_ids": [
+        "2932",
+        "56637",
+        "84027"
+      ]
+    },
+    {
+      "id": "node_71",
+      "name": "Integrin",
+      "identities": [
+        "ITGB1"
+      ],
+      "entrez_ids": [
+        "3688",
+        "16412",
+        "24511"
+      ]
+    },
+    {
+      "id": "node_67",
+      "name": "ILK",
+      "identities": [
+        "ILK"
+      ],
+      "entrez_ids": [
+        "3611",
+        "16202",
+        "170922"
+      ]
+    },
+    {
+      "id": "node_48",
+      "name": "FAK",
+      "identities": [
+        "PTK2"
+      ],
+      "entrez_ids": [
+        "5747",
+        "14083",
+        "25614"
+      ]
+    },
+    {
+      "id": "node_122",
+      "name": "Src",
+      "identities": [
+        "SRC"
+      ],
+      "entrez_ids": [
+        "6714",
+        "20779",
+        "83805"
+      ]
+    },
+    {
+      "id": "node_123",
+      "name": "Src_High",
+      "identities": [
+        "SRC"
+      ],
+      "entrez_ids": [
+        "6714",
+        "20779",
+        "83805"
+      ]
+    },
+    {
+      "id": "node_88",
+      "name": "Nectin3",
+      "identities": [
+        "NECTIN3"
+      ],
+      "entrez_ids": [
+        "25945",
+        "58998",
+        "288124"
+      ]
+    },
+    {
+      "id": "node_87",
+      "name": "Necl5",
+      "identities": [
+        "PVR"
+      ],
+      "entrez_ids": [
+        "5817",
+        "25066",
+        "52118"
+      ]
+    },
+    {
+      "id": "node_119",
+      "name": "SPRY2",
+      "identities": [
+        "SPRY2"
+      ],
+      "entrez_ids": [
+        "10253",
+        "24064",
+        "306141"
+      ]
+    },
+    {
+      "id": "node_72",
+      "name": "J_Ecadherin",
+      "identities": [
+        "CDH1"
+      ],
+      "entrez_ids": [
+        "999",
+        "12550",
+        "83502"
+      ]
+    },
+    {
+      "id": "node_74",
+      "name": "J_bcatenin",
+      "identities": [
+        "CDH1"
+      ],
+      "entrez_ids": [
+        "999",
+        "12550",
+        "83502"
+      ]
+    },
+    {
+      "id": "node_73",
+      "name": "J_acatenin",
+      "identities": [
+        "CDH1",
+        "CTNNB1"
+      ],
+      "entrez_ids": [
+        "999",
+        "1499",
+        "12387",
+        "12550",
+        "83502",
+        "84353"
+      ]
+    },
+    {
+      "id": "node_51",
+      "name": "FocalAdhesions",
+      "identities": [
+        "ITGB1",
+        "PTK2",
+        "PXN"
+      ],
+      "entrez_ids": [
+        "3688",
+        "5747",
+        "5829",
+        "14083",
+        "16412",
+        "19303",
+        "24511",
+        "25614",
+        "360820"
+      ]
+    },
+    {
+      "id": "node_125",
+      "name": "Stress_Fibers",
+      "identities": [
+        "ACTA2"
+      ],
+      "entrez_ids": [
+        "59",
+        "11475",
+        "81633"
+      ]
+    },
+    {
+      "id": "node_139",
+      "name": "YAP",
+      "identities": [
+        "YAP1"
+      ],
+      "entrez_ids": [
+        "10413",
+        "22601",
+        "363014"
+      ]
+    },
+    {
+      "id": "node_131",
+      "name": "TRIO",
+      "identities": [
+        "TRIO"
+      ],
+      "entrez_ids": [
+        "7204",
+        "223435",
+        "310192"
+      ]
+    },
+    {
+      "id": "node_137",
+      "name": "WT1",
+      "identities": [
+        "WT1"
+      ],
+      "entrez_ids": [
+        "7490",
+        "22431",
+        "24883"
+      ]
+    },
+    {
+      "id": "node_126",
+      "name": "TAZ",
+      "identities": [
+        "WWTR1"
+      ],
+      "entrez_ids": [
+        "25937",
+        "97064",
+        "295062"
+      ]
+    },
+    {
+      "id": "node_45",
+      "name": "Ecadherin_mRNA_H",
+      "identities": [
+        "CDH1"
+      ],
+      "entrez_ids": [
+        "999",
+        "12550",
+        "83502"
+      ]
+    },
+    {
+      "id": "node_5",
+      "name": "ApicalBasal_Pol",
+      "identities": [
+        "PARD3"
+      ],
+      "entrez_ids": [
+        "56288",
+        "81918",
+        "93742"
+      ]
+    },
+    {
+      "id": "node_83",
+      "name": "Mst1_2",
+      "identities": [
+        "PARD3"
+      ],
+      "entrez_ids": [
+        "56288",
+        "81918",
+        "93742"
+      ]
+    },
+    {
+      "id": "node_76",
+      "name": "Lats1_2",
+      "identities": [
+        "LATS1"
+      ],
+      "entrez_ids": [
+        "9113",
+        "16798",
+        "308265"
+      ]
+    },
+    {
+      "id": "node_2",
+      "name": "AMOT",
+      "identities": [
+        "AMOT"
+      ],
+      "entrez_ids": [
+        "27494",
+        "154796",
+        "300289"
+      ]
+    },
+    {
+      "id": "node_81",
+      "name": "Merlin",
+      "identities": [
+        "NF2"
+      ],
+      "entrez_ids": [
+        "4771",
+        "18016",
+        "25744"
+      ]
+    },
+    {
+      "id": "node_70",
+      "name": "IQGAP1_LeadingE",
+      "identities": [
+        "IQGAP1"
+      ],
+      "entrez_ids": [
+        "8826",
+        "29875",
+        "361598"
+      ]
+    },
+    {
+      "id": "node_63",
+      "name": "Horizontal_Pol",
+      "identities": [
+        "SCRIB"
+      ],
+      "entrez_ids": [
+        "23513",
+        "105782",
+        "362938"
+      ]
+    },
+    {
+      "id": "node_107",
+      "name": "Rac1",
+      "identities": [
+        "RAC1"
+      ],
+      "entrez_ids": [
+        "5879",
+        "19353",
+        "363875"
+      ]
+    },
+    {
+      "id": "node_108",
+      "name": "Rac1_H",
+      "identities": [
+        "RAC1"
+      ],
+      "entrez_ids": [
+        "5879",
+        "19353",
+        "363875"
+      ]
+    },
+    {
+      "id": "node_92",
+      "name": "PAK1",
+      "identities": [
+        "PAK1"
+      ],
+      "entrez_ids": [
+        "5058",
+        "18479",
+        "29431"
+      ]
+    },
+    {
+      "id": "node_82",
+      "name": "Migration",
+      "identities": [
+        "MMP9"
+      ],
+      "entrez_ids": [
+        "4318",
+        "17395",
+        "81687"
+      ]
+    },
+    {
+      "id": "node_50",
+      "name": "Fast_Migration",
+      "identities": [
+        "MMP9"
+      ],
+      "entrez_ids": [
+        "4318",
+        "17395",
+        "81687"
+      ]
+    },
+    {
+      "id": "node_66",
+      "name": "IKKa_b",
+      "identities": [
+        "CHUK"
+      ],
+      "entrez_ids": [
+        "1147",
+        "12675",
+        "309361"
+      ]
+    },
+    {
+      "id": "node_90",
+      "name": "NfkB",
+      "identities": [
+        "RELA"
+      ],
+      "entrez_ids": [
+        "5970",
+        "19697",
+        "309165"
+      ]
+    },
+    {
+      "id": "node_145",
+      "name": "c_Myb",
+      "identities": [
+        "MYB"
+      ],
+      "entrez_ids": [
+        "4602",
+        "17863",
+        "498982"
+      ]
+    },
+    {
+      "id": "node_78",
+      "name": "MCRIP1",
+      "identities": [
+        "MCRIP1"
+      ],
+      "entrez_ids": [
+        "192173",
+        "348262",
+        "360677"
+      ]
+    },
+    {
+      "id": "node_85",
+      "name": "N_bcatenin",
+      "identities": [
+        "CTNNB1"
+      ],
+      "entrez_ids": [
+        "1499",
+        "12387",
+        "84353"
+      ]
+    },
+    {
+      "id": "node_129",
+      "name": "TGFb_ext",
+      "identities": [
+        "TGFB1"
+      ],
+      "entrez_ids": [
+        "7040",
+        "21803",
+        "59086"
+      ]
+    },
+    {
+      "id": "node_120",
+      "name": "Self_Loop",
+      "identities": [
+        "TGFB1"
+      ],
+      "entrez_ids": [
+        "7040",
+        "21803",
+        "59086"
+      ]
+    },
+    {
+      "id": "node_128",
+      "name": "TGF_bRII",
+      "identities": [
+        "TGFBR2"
+      ],
+      "entrez_ids": [
+        "7048",
+        "21813",
+        "81810"
+      ]
+    },
+    {
+      "id": "node_127",
+      "name": "TGF_bRI",
+      "identities": [
+        "TGFBR1"
+      ],
+      "entrez_ids": [
+        "7046",
+        "21812",
+        "29591"
+      ]
+    },
+    {
+      "id": "node_115",
+      "name": "SMAD2_3_4",
+      "identities": [
+        "SMAD2",
+        "SMAD3",
+        "SMAD4"
+      ],
+      "entrez_ids": [
+        "4087",
+        "4088",
+        "4089",
+        "17126",
+        "17127",
+        "17128",
+        "25631",
+        "29357",
+        "50554"
+      ]
+    },
+    {
+      "id": "node_60",
+      "name": "HMGA2",
+      "identities": [
+        "SMAD2",
+        "SMAD3",
+        "SMAD4"
+      ],
+      "entrez_ids": [
+        "4087",
+        "4088",
+        "4089",
+        "17126",
+        "17127",
+        "17128",
+        "25631",
+        "29357",
+        "50554"
+      ]
+    },
+    {
+      "id": "node_68",
+      "name": "ILK_Rictor",
+      "identities": [
+        "ILK",
+        "RICTOR"
+      ],
+      "entrez_ids": [
+        "3611",
+        "16202",
+        "78757",
+        "170922",
+        "253260",
+        "310131"
+      ]
+    },
+    {
+      "id": "node_158",
+      "name": "p15",
+      "identities": [
+        "CDKN2B"
+      ],
+      "entrez_ids": [
+        "1030",
+        "12579",
+        "25164"
+      ]
+    },
+    {
+      "id": "node_40",
+      "name": "DUSP4",
+      "identities": [
+        "SMAD2",
+        "SMAD3",
+        "SMAD4"
+      ],
+      "entrez_ids": [
+        "4087",
+        "4088",
+        "4089",
+        "17126",
+        "17127",
+        "17128",
+        "25631",
+        "29357",
+        "50554"
+      ]
+    },
+    {
+      "id": "node_112",
+      "name": "Runx1",
+      "identities": [
+        "RUNX1"
+      ],
+      "entrez_ids": [
+        "861",
+        "12394",
+        "50662"
+      ]
+    },
+    {
+      "id": "node_116",
+      "name": "SNAI1",
+      "identities": [
+        "SNAI1"
+      ],
+      "entrez_ids": [
+        "6615",
+        "20613",
+        "116490"
+      ]
+    },
+    {
+      "id": "node_75",
+      "name": "LEF1",
+      "identities": [
+        "LEF1"
+      ],
+      "entrez_ids": [
+        "16842",
+        "51176",
+        "161452"
+      ]
+    },
+    {
+      "id": "node_117",
+      "name": "SNAI2",
+      "identities": [
+        "SNAI2"
+      ],
+      "entrez_ids": [
+        "6591",
+        "20583",
+        "25554"
+      ]
+    },
+    {
+      "id": "node_134",
+      "name": "Twist",
+      "identities": [
+        "TWIST1"
+      ],
+      "entrez_ids": [
+        "7291",
+        "22160",
+        "85489"
+      ]
+    },
+    {
+      "id": "node_141",
+      "name": "ZEB1_H",
+      "identities": [
+        "ZEB1"
+      ],
+      "entrez_ids": [
+        "6935",
+        "21417",
+        "25705"
+      ]
+    },
+    {
+      "id": "node_140",
+      "name": "ZEB1",
+      "identities": [
+        "ZEB1"
+      ],
+      "entrez_ids": [
+        "6935",
+        "21417",
+        "25705"
+      ]
+    },
+    {
+      "id": "node_142",
+      "name": "ZEB2",
+      "identities": [
+        "ZEB2"
+      ],
+      "entrez_ids": [
+        "9839",
+        "24136",
+        "311071"
+      ]
+    },
+    {
+      "id": "node_59",
+      "name": "HMGA1",
+      "identities": [
+        "HMGA1"
+      ],
+      "entrez_ids": [
+        "3159",
+        "15361",
+        "117062"
+      ]
+    },
+    {
+      "id": "node_86",
+      "name": "N_bcatenin_H",
+      "identities": [
+        "CTNNB1"
+      ],
+      "entrez_ids": [
+        "1499",
+        "12387",
+        "84353"
+      ]
+    },
+    {
+      "id": "node_144",
+      "name": "bcatenin_Hif1a_complex",
+      "identities": [
+        "CTNNB1",
+        "HIF1A"
+      ],
+      "entrez_ids": [
+        "1499",
+        "3091",
+        "12387",
+        "15251",
+        "29560",
+        "84353"
+      ]
+    },
+    {
+      "id": "node_44",
+      "name": "Ecadherin_mRNA",
+      "identities": [
+        "CDH1"
+      ],
+      "entrez_ids": [
+        "999",
+        "12550",
+        "83502"
+      ]
+    },
+    {
+      "id": "node_143",
+      "name": "b_catenin_TCF4",
+      "identities": [
+        "CTNNB1",
+        "TCF7L2"
+      ],
+      "entrez_ids": [
+        "1499",
+        "6934",
+        "12387",
+        "21416",
+        "84353",
+        "679869"
+      ]
+    },
+    {
+      "id": "node_130",
+      "name": "TGFb_secr",
+      "identities": [
+        "TGFB1"
+      ],
+      "entrez_ids": [
+        "7040",
+        "21803",
+        "59086"
+      ]
+    },
+    {
+      "id": "node_62",
+      "name": "Hif1a_basal",
+      "identities": [
+        "HIF1A"
+      ],
+      "entrez_ids": [
+        "3091",
+        "15251",
+        "29560"
+      ]
+    },
+    {
+      "id": "node_61",
+      "name": "Hif1a_High",
+      "identities": [
+        "HIF1A"
+      ],
+      "entrez_ids": [
+        "3091",
+        "15251",
+        "29560"
+      ]
+    },
+    {
+      "id": "node_105",
+      "name": "ROS",
+      "identities": [
+        "ROS1"
+      ],
+      "entrez_ids": [
+        "6098"
+      ]
+    },
+    {
+      "id": "node_164",
+      "name": "pVHL",
+      "identities": [
+        "VHL"
+      ],
+      "entrez_ids": [
+        "7428",
+        "22346",
+        "24874"
+      ]
+    },
+    {
+      "id": "node_94",
+      "name": "PHD1_2",
+      "identities": [
+        "EGLN1"
+      ],
+      "entrez_ids": [
+        "54583",
+        "112405",
+        "308913"
+      ]
+    },
+    {
+      "id": "node_49",
+      "name": "FIH",
+      "identities": [
+        "HIF1AN"
+      ],
+      "entrez_ids": [
+        "55662",
+        "309434",
+        "319594"
+      ]
+    },
+    {
+      "id": "node_103",
+      "name": "Pre_RC",
+      "identities": [
+        "CDC6",
+        "CDT1",
+        "MCM2",
+        "MCM3",
+        "MCM4",
+        "MCM5",
+        "MCM6",
+        "MCM7",
+        "ORC1",
+        "ORC2",
+        "ORC3",
+        "ORC4",
+        "ORC5",
+        "ORC6"
+      ],
+      "entrez_ids": [
+        "990",
+        "4171",
+        "4172",
+        "4173",
+        "4174",
+        "4175",
+        "4176",
+        "4998",
+        "4999",
+        "5000",
+        "5001",
+        "17215",
+        "17216",
+        "17217",
+        "17218",
+        "17219",
+        "17220",
+        "18392",
+        "18393",
+        "23594",
+        "23595",
+        "23834",
+        "26428",
+        "26429",
+        "29685",
+        "29728",
+        "50793",
+        "56452",
+        "67177",
+        "81620",
+        "288532",
+        "291885",
+        "291927",
+        "292071",
+        "295596",
+        "301430",
+        "312538",
+        "313138",
+        "313479",
+        "316273",
+        "360621",
+        "362304"
+      ]
+    },
+    {
+      "id": "node_3",
+      "name": "ATR",
+      "identities": [
+        "ATR"
+      ],
+      "entrez_ids": [
+        "545",
+        "245000",
+        "685055"
+      ]
+    },
+    {
+      "id": "node_15",
+      "name": "CHK1",
+      "identities": [
+        "CHEK1"
+      ],
+      "entrez_ids": [
+        "1111",
+        "12649",
+        "140583"
+      ]
+    },
+    {
+      "id": "node_102",
+      "name": "Plk1_H",
+      "identities": [
+        "PLK1"
+      ],
+      "entrez_ids": [
+        "5347",
+        "18817",
+        "25515"
+      ]
+    },
+    {
+      "id": "node_46",
+      "name": "Ect2",
+      "identities": [
+        "ECT2"
+      ],
+      "entrez_ids": [
+        "1894",
+        "13605",
+        "361921"
+      ]
+    },
+    {
+      "id": "node_133",
+      "name": "Trail",
+      "identities": [
+        "TNFSF10"
+      ],
+      "entrez_ids": [
+        "8743",
+        "22035",
+        "246775"
+      ]
+    },
+    {
+      "id": "node_39",
+      "name": "DR4_5",
+      "identities": [
+        "TNFRSF10A"
+      ],
+      "entrez_ids": [
+        "8797"
+      ]
+    },
+    {
+      "id": "node_19",
+      "name": "Casp8",
+      "identities": [
+        "CASP8"
+      ],
+      "entrez_ids": [
+        "841",
+        "12370",
+        "64044"
+      ]
+    },
+    {
+      "id": "node_17",
+      "name": "Casp2",
+      "identities": [
+        "CASP2"
+      ],
+      "entrez_ids": [
+        "835",
+        "12366",
+        "64314"
+      ]
+    },
+    {
+      "id": "node_77",
+      "name": "MCL_1",
+      "identities": [
+        "MCL1"
+      ],
+      "entrez_ids": [
+        "4170",
+        "17210",
+        "60430"
+      ]
+    },
+    {
+      "id": "node_10",
+      "name": "BCLXL",
+      "identities": [
+        "BCL2L1"
+      ],
+      "entrez_ids": [
+        "598",
+        "12048",
+        "24888"
+      ]
+    },
+    {
+      "id": "node_9",
+      "name": "BCL2",
+      "identities": [
+        "BCL2"
+      ],
+      "entrez_ids": [
+        "596",
+        "12043",
+        "24224"
+      ]
+    },
+    {
+      "id": "node_6",
+      "name": "BAD",
+      "identities": [
+        "BAD"
+      ],
+      "entrez_ids": [
+        "572",
+        "12015",
+        "64639"
+      ]
+    },
+    {
+      "id": "node_12",
+      "name": "BIK",
+      "identities": [
+        "BIK"
+      ],
+      "entrez_ids": [
+        "638",
+        "12124",
+        "114496"
+      ]
+    },
+    {
+      "id": "node_13",
+      "name": "BIM",
+      "identities": [
+        "BCL2L11"
+      ],
+      "entrez_ids": [
+        "10018",
+        "12125",
+        "64547"
+      ]
+    },
+    {
+      "id": "node_11",
+      "name": "BID",
+      "identities": [
+        "BID"
+      ],
+      "entrez_ids": [
+        "637",
+        "12122",
+        "64625"
+      ]
+    },
+    {
+      "id": "node_7",
+      "name": "BAK",
+      "identities": [
+        "BAK1"
+      ],
+      "entrez_ids": [
+        "578",
+        "12018",
+        "116502"
+      ]
+    },
+    {
+      "id": "node_8",
+      "name": "BAX",
+      "identities": [
+        "BAX"
+      ],
+      "entrez_ids": [
+        "581",
+        "12028",
+        "24887"
+      ]
+    },
+    {
+      "id": "node_36",
+      "name": "Cyto_C",
+      "identities": [
+        "CYCS"
+      ],
+      "entrez_ids": [
+        "13063",
+        "25309",
+        "54205"
+      ]
+    },
+    {
+      "id": "node_114",
+      "name": "SMAC",
+      "identities": [
+        "DIABLO"
+      ],
+      "entrez_ids": [
+        "56616",
+        "66593",
+        "288753"
+      ]
+    },
+    {
+      "id": "node_65",
+      "name": "IAPs",
+      "identities": [
+        "XIAP"
+      ],
+      "entrez_ids": [
+        "331",
+        "11798",
+        "63879"
+      ]
+    },
+    {
+      "id": "node_20",
+      "name": "Casp9",
+      "identities": [
+        "CASP9"
+      ],
+      "entrez_ids": [
+        "842",
+        "12371",
+        "58918"
+      ]
+    },
+    {
+      "id": "node_18",
+      "name": "Casp3",
+      "identities": [
+        "CASP3"
+      ],
+      "entrez_ids": [
+        "836",
+        "12367",
+        "25402"
+      ]
+    },
+    {
+      "id": "node_14",
+      "name": "CAD",
+      "identities": [
+        "DFFB"
+      ],
+      "entrez_ids": [
+        "1677",
+        "13368",
+        "84359"
+      ]
+    }
+  ]
+}

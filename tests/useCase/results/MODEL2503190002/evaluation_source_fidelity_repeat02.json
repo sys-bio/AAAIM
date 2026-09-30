@@ -1,0 +1,17 @@
+{
+  "model": {
+    "species": 31,
+    "reactions": 40
+  },
+  "ranking": "top-1 identity per species or complex component",
+  "species_with_candidates": 28,
+  "molecular_species_complete": 28,
+  "molecular_species_total": 28,
+  "wrong_predictions": [],
+  "missing_identities": [],
+  "process_state_abstentions": [
+    "DNA_damage",
+    "Autophagy_active",
+    "Autophagy_inactive"
+  ]
+}
