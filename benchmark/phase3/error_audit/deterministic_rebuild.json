@@ -1,0 +1,53 @@
+{
+  "all_byte_equal": true,
+  "builds": 2,
+  "command": "python -m benchmark.scripts.phase3_error_inventory",
+  "files": [
+    {
+      "byte_equal": true,
+      "path": "README.md",
+      "sha256": "108cb3648d9b285c716abc5ba31f4bb6d2d755248e00ef5388c22b7bf6d7a08f"
+    },
+    {
+      "byte_equal": true,
+      "path": "all_method_disagreements.csv",
+      "sha256": "7eea9fcb73a3ec0f5d57f03bb13d98742e8fbe03be4f908c10c9ae807fb6d995"
+    },
+    {
+      "byte_equal": true,
+      "path": "all_validation_outcomes.csv",
+      "sha256": "14a70bc7144ed47d08e2e2dafe74ae286e792e00758a1424003c560de43c4eb6"
+    },
+    {
+      "byte_equal": true,
+      "path": "inventory_summary.json",
+      "sha256": "66654f7096fcd76be3d69aa8ea92d8b325bad4b9c70257575bdf204c7cbbd8d3"
+    },
+    {
+      "byte_equal": true,
+      "path": "phase3c_abstentions.csv",
+      "sha256": "39b768af179cdef205ca31a1dab62b771d7fa0d8206cbfef9e16a42ae3392e68"
+    },
+    {
+      "byte_equal": true,
+      "path": "phase3c_compliance_cases.csv",
+      "sha256": "36af96b47707e9b53e4d72f931aa53c52180c517689087748f1f36903530cacc"
+    },
+    {
+      "byte_equal": true,
+      "path": "phase3c_incorrect_selections.csv",
+      "sha256": "53a7db0908edaee033d98ac695dddda1f2d243341622b4a55f7b9c9a52409f32"
+    },
+    {
+      "byte_equal": true,
+      "path": "phase3c_noncorrect_review.csv",
+      "sha256": "a2fd3e4016112ebc8bc11e13903df49e9f49b6313695a9457d867b69bf846b7c"
+    },
+    {
+      "byte_equal": true,
+      "path": "source_provenance.json",
+      "sha256": "519757f37f578515be387147b54ffa4df73dab929b9a678445e3d06157f2d133"
+    }
+  ],
+  "schema": "phase3-error-audit-deterministic-rebuild-v1"
+}

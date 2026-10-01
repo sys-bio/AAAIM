@@ -1,0 +1,117 @@
+{
+  "$id": "aaaim-human-review-v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "human_fields_prepopulated": false,
+  "pass1": {
+    "confidence": [
+      "high",
+      "medium",
+      "low"
+    ],
+    "fields": [
+      "audit_id",
+      "verdict",
+      "proposed_kegg_ids",
+      "kegg_mappable",
+      "confidence",
+      "needs_second_review",
+      "biological_rationale",
+      "supporting_sources",
+      "general_notes",
+      "complete"
+    ],
+    "kegg_mappable": [
+      "yes",
+      "no",
+      "uncertain"
+    ],
+    "required_to_complete": [
+      "verdict",
+      "biological_rationale"
+    ],
+    "verdict_descriptions": {
+      "catalog_snapshot_issue": "The frozen catalog snapshot prevents a reliable determination.",
+      "insufficient_model_information": "The local model does not provide enough information to decide.",
+      "label_correct": "The existing label accurately describes the modeled reaction.",
+      "label_correct_but_incomplete": "The label is accurate but omits a material aspect of the modeled reaction.",
+      "label_incorrect": "The existing label does not accurately describe the modeled reaction.",
+      "multiple_defensible_annotations": "More than one KEGG reaction label is scientifically defensible.",
+      "not_kegg_mappable": "The modeled event should not be represented by a KEGG reaction label.",
+      "unresolved": "A decision cannot yet be made; explain what evidence is missing."
+    },
+    "verdicts": [
+      "label_correct",
+      "label_correct_but_incomplete",
+      "label_incorrect",
+      "multiple_defensible_annotations",
+      "not_kegg_mappable",
+      "insufficient_model_information",
+      "catalog_snapshot_issue",
+      "unresolved"
+    ]
+  },
+  "pass2": {
+    "confidence": [
+      "high",
+      "medium",
+      "low"
+    ],
+    "failure_taxonomy": [
+      "source_label_error",
+      "source_label_incomplete",
+      "catalog_coverage_failure",
+      "query_information_failure",
+      "retrieval_failure",
+      "ranking_failure",
+      "llm_selection_failure",
+      "llm_overabstention",
+      "appropriate_abstention",
+      "ontology_equivalence",
+      "nonchemical_event",
+      "no_system_failure",
+      "unresolved"
+    ],
+    "fields": [
+      "audit_id",
+      "prediction_assessment",
+      "failure_taxonomy",
+      "defensible_prediction_ids",
+      "exact_matching_too_strict",
+      "equivalence_relationship",
+      "phase2_assessment",
+      "bm25_assessment",
+      "biencoder_assessment",
+      "fusion_assessment",
+      "direct_open_set_assessment",
+      "grounded_llm_assessment",
+      "recommended_label_action",
+      "needs_adjudication",
+      "confidence",
+      "biological_rationale",
+      "supporting_sources",
+      "reviewer_notes",
+      "complete"
+    ],
+    "prediction_assessments": [
+      "prediction_correct",
+      "prediction_defensible_alternative",
+      "prediction_related_but_incorrect",
+      "prediction_incorrect",
+      "abstention_appropriate",
+      "abstention_inappropriate",
+      "insufficient_information",
+      "unresolved"
+    ],
+    "required_to_complete": [
+      "prediction_assessment",
+      "biological_rationale"
+    ],
+    "yes_no_uncertain": [
+      "yes",
+      "no",
+      "uncertain"
+    ]
+  },
+  "review_schema_version": "aaaim-human-review-v1",
+  "title": "AAAIM reaction annotation human review"
+}
