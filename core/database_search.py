@@ -1106,6 +1106,7 @@ def _get_kegg_recommendations_rulebased(
     max_descendant_depth: int = 1,
     max_species_relax_depth: Optional[int] = None,
     max_reaction_relax_depth: Optional[int] = None,
+    strict_errors: bool = False,
 ) -> List[Recommendation]:
     """
     Find KEGG reaction recommendations by matching model reactions to KEGG reactions.
@@ -1120,6 +1121,11 @@ def _get_kegg_recommendations_rulebased(
         include_exchange_reactions: If True, attempt candidate generation for
             exchange reactions (empty LHS or RHS). If False (default), exchange
             reactions are retained but returned with no candidates.
+        strict_errors: If True, propagate any exception instead of logging it and
+            returning an empty list. Callers that must distinguish "no candidates
+            found" from "candidate generation crashed" (e.g. the benchmark harness)
+            should set this, since the default swallows the error and discards
+            candidates already produced for earlier reactions in the batch.
 
     Returns:
         List of Recommendation objects with candidates and match scores
@@ -1592,6 +1598,8 @@ def _get_kegg_recommendations_rulebased(
         return recommendations
 
     except Exception as e:
+        if strict_errors:
+            raise
         logger.error(f"Error in KEGG recommendation: {e}")
         import traceback
         traceback.print_exc()

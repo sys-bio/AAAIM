@@ -1,0 +1,55 @@
+{
+  "candidate_rows": 91802,
+  "config_id": "86938b48ab88",
+  "distinct_candidates": 7761,
+  "environment": {
+    "pandas": "2.2.3",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.10"
+  },
+  "failure_types": {},
+  "generation_config": {
+    "cache_schema_version": 2,
+    "cofactors_to_ignore": "CofactorConfig.default",
+    "drop_unconstrained_candidate_sets": true,
+    "evaluate_candidates": true,
+    "generator": "aaaim_rulebased_kegg",
+    "include_exchange_reactions": false,
+    "max_ancestor_depth": 2,
+    "max_descendant_depth": 1,
+    "max_relax_level": 2,
+    "penalty_lam": 0.0,
+    "rank_tie_break": "candidate_kegg_ascending",
+    "reaction_id_source": "extract_reactions_with_ids_from_sbml",
+    "reaction_scope": "evaluable",
+    "species_evidence": "phase2_species_evidence_chebi_plus_kegg_compound",
+    "species_match_score": 1.0,
+    "spectators": false,
+    "strict_errors": true,
+    "top_k": null
+  },
+  "inputs": {
+    "reactions_csv_sha256": "f11ebc6f4d0734deb14c054caf277b81695b22668017d70af9c43cd6146004f1",
+    "species_annotations_csv_sha256": "10712febb6b46eb5625a0d944aac64e94ad7a040985c8c2e4d4f8dd2a8803933"
+  },
+  "is_final": true,
+  "models_assembled": 74,
+  "models_missing_cache": [],
+  "models_pending": 0,
+  "models_pending_list": [],
+  "models_requested": 74,
+  "outputs": {
+    "candidate_generation_failures_csv_sha256": "b83fe71c44bfeda6e12f75a6cfba78534ed1b52c41859e1fd2dc4b3ac0e53f29",
+    "candidate_status_csv_sha256": "4e126ac26f232e717f62c37e6bb26bf07ea6a79a6f6c0e3ca385e57852ea63fa",
+    "candidates_csv_sha256": "0489930c87c7c5b7e0d20de277954354127b2e5cab9f56016ab483635a0206ce"
+  },
+  "partial_run": false,
+  "pipeline_failures": 0,
+  "reactions_with_status": 5816,
+  "status_counts": {
+    "no_candidates": 2646,
+    "ok": 2359,
+    "unconstrained_candidate_set": 811
+  },
+  "total_generation_seconds": 34006.3
+}

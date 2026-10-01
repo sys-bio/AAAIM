@@ -1,0 +1,321 @@
+{
+  "criteria": [
+    "exact",
+    "ec",
+    "ko",
+    "brite_orthology",
+    "rclass"
+  ],
+  "headline": {
+    "heuristic": {
+      "failure_decomposition": {
+        "conditional_reranking_failure_rate_retrievable": {
+          "denominator": 2019,
+          "numerator": 85,
+          "pct": 4.21,
+          "population": "reactions whose candidate set contains the exact answer",
+          "rate": 0.0421
+        },
+        "conditional_retrieval_failure_rate_nonempty": {
+          "denominator": 2359,
+          "numerator": 340,
+          "pct": 14.41,
+          "population": "evaluable reactions with a nonempty candidate set",
+          "rate": 0.1441
+        },
+        "conditional_top1_accuracy_nonempty": {
+          "denominator": 2359,
+          "numerator": 1934,
+          "pct": 81.98,
+          "population": "evaluable reactions with a nonempty candidate set",
+          "rate": 0.8198
+        },
+        "overall_retrieval_failure_rate": {
+          "denominator": 5816,
+          "numerator": 3797,
+          "pct": 65.29,
+          "population": "all evaluable reactions; failure = exact answer absent from candidate set (includes every zero-candidate reaction)",
+          "rate": 0.6529
+        },
+        "overall_top1_accuracy": {
+          "denominator": 5816,
+          "numerator": 1934,
+          "pct": 33.25,
+          "population": "all evaluable reactions",
+          "rate": 0.3325
+        },
+        "overall_top1_failure_rate": {
+          "denominator": 5816,
+          "numerator": 3882,
+          "pct": 66.75,
+          "population": "all evaluable reactions",
+          "rate": 0.6675
+        },
+        "zero_candidate_rate": {
+          "denominator": 5816,
+          "numerator": 3457,
+          "pct": 59.44,
+          "population": "all evaluable reactions",
+          "rate": 0.5944
+        }
+      },
+      "recall_at_1_brite_orthology_scored": {
+        "cluster_macro": 0.8081,
+        "model_macro": 0.8174,
+        "reaction_micro": 0.8448
+      },
+      "recall_at_1_exact_scored": {
+        "cluster_macro": 0.7369,
+        "model_macro": 0.7158,
+        "reaction_micro": 0.8198
+      }
+    },
+    "lexical": {
+      "failure_decomposition": {
+        "conditional_reranking_failure_rate_retrievable": {
+          "denominator": 2019,
+          "numerator": 93,
+          "pct": 4.61,
+          "population": "reactions whose candidate set contains the exact answer",
+          "rate": 0.0461
+        },
+        "conditional_retrieval_failure_rate_nonempty": {
+          "denominator": 2359,
+          "numerator": 340,
+          "pct": 14.41,
+          "population": "evaluable reactions with a nonempty candidate set",
+          "rate": 0.1441
+        },
+        "conditional_top1_accuracy_nonempty": {
+          "denominator": 2359,
+          "numerator": 1926,
+          "pct": 81.64,
+          "population": "evaluable reactions with a nonempty candidate set",
+          "rate": 0.8164
+        },
+        "overall_retrieval_failure_rate": {
+          "denominator": 5816,
+          "numerator": 3797,
+          "pct": 65.29,
+          "population": "all evaluable reactions; failure = exact answer absent from candidate set (includes every zero-candidate reaction)",
+          "rate": 0.6529
+        },
+        "overall_top1_accuracy": {
+          "denominator": 5816,
+          "numerator": 1926,
+          "pct": 33.12,
+          "population": "all evaluable reactions",
+          "rate": 0.3312
+        },
+        "overall_top1_failure_rate": {
+          "denominator": 5816,
+          "numerator": 3890,
+          "pct": 66.88,
+          "population": "all evaluable reactions",
+          "rate": 0.6688
+        },
+        "zero_candidate_rate": {
+          "denominator": 5816,
+          "numerator": 3457,
+          "pct": 59.44,
+          "population": "all evaluable reactions",
+          "rate": 0.5944
+        }
+      },
+      "recall_at_1_brite_orthology_scored": {
+        "cluster_macro": 0.7929,
+        "model_macro": 0.8071,
+        "reaction_micro": 0.8457
+      },
+      "recall_at_1_exact_scored": {
+        "cluster_macro": 0.7235,
+        "model_macro": 0.7259,
+        "reaction_micro": 0.8164
+      }
+    },
+    "oracle": {
+      "failure_decomposition": {
+        "conditional_reranking_failure_rate_retrievable": {
+          "denominator": 2019,
+          "numerator": 0,
+          "pct": 0.0,
+          "population": "reactions whose candidate set contains the exact answer",
+          "rate": 0.0
+        },
+        "conditional_retrieval_failure_rate_nonempty": {
+          "denominator": 2359,
+          "numerator": 340,
+          "pct": 14.41,
+          "population": "evaluable reactions with a nonempty candidate set",
+          "rate": 0.1441
+        },
+        "conditional_top1_accuracy_nonempty": {
+          "denominator": 2359,
+          "numerator": 2019,
+          "pct": 85.59,
+          "population": "evaluable reactions with a nonempty candidate set",
+          "rate": 0.8559
+        },
+        "overall_retrieval_failure_rate": {
+          "denominator": 5816,
+          "numerator": 3797,
+          "pct": 65.29,
+          "population": "all evaluable reactions; failure = exact answer absent from candidate set (includes every zero-candidate reaction)",
+          "rate": 0.6529
+        },
+        "overall_top1_accuracy": {
+          "denominator": 5816,
+          "numerator": 2019,
+          "pct": 34.71,
+          "population": "all evaluable reactions",
+          "rate": 0.3471
+        },
+        "overall_top1_failure_rate": {
+          "denominator": 5816,
+          "numerator": 3797,
+          "pct": 65.29,
+          "population": "all evaluable reactions",
+          "rate": 0.6529
+        },
+        "zero_candidate_rate": {
+          "denominator": 5816,
+          "numerator": 3457,
+          "pct": 59.44,
+          "population": "all evaluable reactions",
+          "rate": 0.5944
+        }
+      },
+      "recall_at_1_brite_orthology_scored": {
+        "cluster_macro": 0.87,
+        "model_macro": 0.8844,
+        "reaction_micro": 0.8639
+      },
+      "recall_at_1_exact_scored": {
+        "cluster_macro": 0.8476,
+        "model_macro": 0.8619,
+        "reaction_micro": 0.8559
+      }
+    },
+    "random": {
+      "failure_decomposition": {
+        "conditional_reranking_failure_rate_retrievable": {
+          "denominator": 2019,
+          "numerator": 176,
+          "pct": 8.72,
+          "population": "reactions whose candidate set contains the exact answer",
+          "rate": 0.0872
+        },
+        "conditional_retrieval_failure_rate_nonempty": {
+          "denominator": 2359,
+          "numerator": 340,
+          "pct": 14.41,
+          "population": "evaluable reactions with a nonempty candidate set",
+          "rate": 0.1441
+        },
+        "conditional_top1_accuracy_nonempty": {
+          "denominator": 2359,
+          "numerator": 1843,
+          "pct": 78.13,
+          "population": "evaluable reactions with a nonempty candidate set",
+          "rate": 0.7813
+        },
+        "overall_retrieval_failure_rate": {
+          "denominator": 5816,
+          "numerator": 3797,
+          "pct": 65.29,
+          "population": "all evaluable reactions; failure = exact answer absent from candidate set (includes every zero-candidate reaction)",
+          "rate": 0.6529
+        },
+        "overall_top1_accuracy": {
+          "denominator": 5816,
+          "numerator": 1843,
+          "pct": 31.69,
+          "population": "all evaluable reactions",
+          "rate": 0.3169
+        },
+        "overall_top1_failure_rate": {
+          "denominator": 5816,
+          "numerator": 3973,
+          "pct": 68.31,
+          "population": "all evaluable reactions",
+          "rate": 0.6831
+        },
+        "zero_candidate_rate": {
+          "denominator": 5816,
+          "numerator": 3457,
+          "pct": 59.44,
+          "population": "all evaluable reactions",
+          "rate": 0.5944
+        }
+      },
+      "recall_at_1_brite_orthology_scored": {
+        "cluster_macro": 0.7658,
+        "model_macro": 0.7812,
+        "reaction_micro": 0.8262
+      },
+      "recall_at_1_exact_scored": {
+        "cluster_macro": 0.6884,
+        "model_macro": 0.6771,
+        "reaction_micro": 0.7813
+      }
+    }
+  },
+  "inputs": {
+    "candidates_csv_sha256": "0489930c87c7c5b7e0d20de277954354127b2e5cab9f56016ab483635a0206ce",
+    "reaction_retrieval_csv_sha256": "3111db3cc4a91c15bb0eac48b6dd4b1c3982aed4d2d4879a461617aac79623d7",
+    "reaction_text_csv_sha256": "5874f54cd2420eaa57cdb3a3b487ff006b0d9a711bd9ddc727b29456715d4af9"
+  },
+  "k_values": [
+    1,
+    3,
+    5,
+    10
+  ],
+  "llm_errors": [],
+  "llm_sample": null,
+  "llm_top_n": 15,
+  "outputs": {
+    "baseline_rankings_csv_sha256": "9ad2f785d052b6629c3618b30157c94f6377ffec511d49fe9b64a9055b95b4d2",
+    "baseline_table_csv_sha256": "b9dcff2755896ebd289845639b6d34524260e4eb10872f2547ecf110c78de756",
+    "failure_stratification_csv_sha256": "43dc5b0e9c176d7870a1e1d2c90472f7aed3f4601b755a10f0ef90f62ce3f1c0"
+  },
+  "populations": {
+    "all_evaluable": {
+      "description": "every reaction with ground truth in the frozen Phase 1 table",
+      "n": 5816
+    },
+    "nonempty_candidate_set": {
+      "description": "evaluable reactions for which generation stored >=1 candidate; the only reactions any ranker can score",
+      "n": 2359
+    },
+    "zero_candidate": {
+      "description": "evaluable reactions with no candidates; unreachable for every ranker and charged as retrieval failures in overall metrics",
+      "n": 3457
+    }
+  },
+  "random_seed": 20260901,
+  "ranker_notes": {
+    "heuristic": {
+      "reactions_ranked": 2359,
+      "recall_at_1_exact_micro": 0.8198
+    },
+    "lexical": {
+      "reactions_ranked": 2359,
+      "recall_at_1_exact_micro": 0.8164
+    },
+    "oracle": {
+      "reactions_ranked": 2359,
+      "recall_at_1_exact_micro": 0.8559
+    },
+    "random": {
+      "reactions_ranked": 2359,
+      "recall_at_1_exact_micro": 0.7813
+    }
+  },
+  "rankers_run": [
+    "heuristic",
+    "lexical",
+    "random",
+    "oracle"
+  ]
+}

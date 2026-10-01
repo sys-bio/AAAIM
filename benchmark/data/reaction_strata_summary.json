@@ -1,0 +1,36 @@
+{
+  "clusters": 54,
+  "complexity_bucket_counts": {
+    "1-2": 565,
+    "3-4": 2678,
+    "5-6": 2295,
+    "7+": 278
+  },
+  "evaluable_reactions": 5816,
+  "genome_scale_models": [
+    "BIOMD0000001061",
+    "BIOMD0000001062",
+    "BIOMD0000001063",
+    "BIOMD0000001090",
+    "BIOMD0000001091",
+    "BIOMD0000001092",
+    "BIOMD0000001093"
+  ],
+  "genome_scale_reaction_share": 0.783,
+  "inputs": {
+    "reactions_csv_sha256": "f11ebc6f4d0734deb14c054caf277b81695b22668017d70af9c43cd6146004f1",
+    "species_evidence_csv_sha256": "10712febb6b46eb5625a0d944aac64e94ad7a040985c8c2e4d4f8dd2a8803933"
+  },
+  "mean_participant_annotation_coverage": 0.9943,
+  "outputs": {
+    "reaction_strata_csv_sha256": "261a03f77529d10db8f65da82c64cbc3672a0214fb2fdbd9d4615531771c8a90"
+  },
+  "reactions": 5838,
+  "reactions_with_missing_annotations": 75,
+  "species_annotation_source_counts": {
+    "chebi": 67,
+    "chebi+kegg_compound": 4260,
+    "kegg_compound": 1482,
+    "none": 7
+  }
+}

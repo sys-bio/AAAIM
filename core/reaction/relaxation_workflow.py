@@ -382,6 +382,7 @@ def map_reactions_to_kegg_with_relaxation(
     run_matching: bool = True,
     evaluate_candidates: bool = True,
     include_exchange_reactions: bool = False,
+    strict_errors: bool = False,
 ) -> Tuple[List[Dict[str, Any]], List[Any], Dict[str, int]]:
     """
     Single iterative loop: normalize -> penalized KEGG matching -> relax targets -> converge.
@@ -505,6 +506,7 @@ def map_reactions_to_kegg_with_relaxation(
             chebi_to_kegg=merged_kegg,
             max_ancestor_depth=max_ancestor_depth,
             max_descendant_depth=down_depth,
+            strict_errors=strict_errors,
         )
 
         # Merge: baseline scores for unaffected reactions + new scores for affected ones.
@@ -589,6 +591,7 @@ def map_reactions_to_kegg_with_relaxation(
             chebi_to_kegg=merged_kegg,
             max_ancestor_depth=max_ancestor_depth,
             max_descendant_depth=down_depth,
+            strict_errors=strict_errors,
         )
         if not evaluate_candidates:
             # Generation-only mode: do not score, do not relax, return after first pass.

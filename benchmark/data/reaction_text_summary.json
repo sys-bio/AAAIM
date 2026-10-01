@@ -1,0 +1,13 @@
+{
+  "empty_query_text": 0,
+  "inputs": {
+    "reactions_csv_sha256": "f11ebc6f4d0734deb14c054caf277b81695b22668017d70af9c43cd6146004f1"
+  },
+  "mean_query_chars": 126.3,
+  "outputs": {
+    "reaction_text_csv_sha256": "5874f54cd2420eaa57cdb3a3b487ff006b0d9a711bd9ddc727b29456715d4af9"
+  },
+  "reactions": 5838,
+  "with_reaction_name": 5644,
+  "with_reaction_name_pct": 96.68
+}
