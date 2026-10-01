@@ -1,0 +1,109 @@
+{
+  "all_applicable_checks_passed": true,
+  "checks": [
+    {
+      "command": "python -m benchmark.scripts.verify_snapshot",
+      "result": "75 of 75 Phase 1 model inputs matched; 0 problems",
+      "scope": "Phase 1 working snapshot"
+    },
+    {
+      "command": "python -m benchmark.scripts.freeze_phase2 --verify",
+      "result": "15 artifacts verified; 0 problems",
+      "scope": "Phase 2 manifest"
+    },
+    {
+      "command": "python -m benchmark.scripts.freeze_phase2 --verify-caches",
+      "result": "74 caches verified; 0 problems",
+      "scope": "Phase 2 cache registry"
+    },
+    {
+      "command": "python -m benchmark.scripts.phase3_openai_eval --verify-manifest",
+      "result": "0 problems",
+      "scope": "Phase 3A validation"
+    },
+    {
+      "command": "python -m benchmark.scripts.phase3_openai_eval --verify-manifest benchmark/phase3/validation_rescue_2048",
+      "result": "0 problems",
+      "scope": "Phase 3A rescue"
+    },
+    {
+      "command": "python -m benchmark.scripts.phase3_openai_eval --verify-manifest benchmark/phase3/validation_rescue_2048/sensitivity",
+      "result": "0 problems",
+      "scope": "Phase 3A rescue sensitivity"
+    },
+    {
+      "command": "python -m benchmark.scripts.phase3_retrieval verify",
+      "result": "0 problems",
+      "scope": "Phase 3 retrieval baselines"
+    },
+    {
+      "command": "python -m benchmark.scripts.phase3_biencoder verify --out benchmark/phase3/phase3b_smoke",
+      "result": "0 problems",
+      "scope": "Phase 3B smoke"
+    },
+    {
+      "command": "python -m benchmark.scripts.phase3_biencoder full-verify",
+      "result": "0 problems",
+      "scope": "Phase 3B full run"
+    },
+    {
+      "command": "python -m benchmark.scripts.phase3b_release verify-selected",
+      "result": "selected epoch 1 checkpoint and ranking matched frozen metadata",
+      "scope": "Phase 3B selected checkpoint"
+    },
+    {
+      "command": "python -m benchmark.scripts.phase3b_release verify-archive",
+      "result": "archive SHA-256 3412a3fa546347d8209ab62ca7ef55fb490e148b5f90c25cf33616328a0d0f53; 0 problems",
+      "scope": "Phase 3B inference archive"
+    },
+    {
+      "command": "python -m benchmark.scripts.phase3b_release verify-fusion",
+      "result": "0 problems",
+      "scope": "Phase 3B fusion"
+    },
+    {
+      "command": "python -m benchmark.scripts.phase3c_grounded --verify",
+      "result": "0 problems",
+      "scope": "Phase 3C smoke"
+    },
+    {
+      "command": "python -m benchmark.scripts.phase3c_validation --verify",
+      "result": "0 problems",
+      "scope": "Phase 3C validation"
+    },
+    {
+      "command": "python -m pytest tests/test_phase3c_validation.py tests/test_phase3c_grounded.py -q --basetemp benchmark/data/_pytest_phase3c_final -p no:cacheprovider",
+      "result": "32 passed",
+      "scope": "focused Phase 3C tests"
+    },
+    {
+      "command": "python -m pytest -q --basetemp benchmark/data/_pytest_all_phase3c_final -p no:cacheprovider",
+      "result": "278 passed, 2 skipped",
+      "scope": "complete repository test suite"
+    },
+    {
+      "command": "git diff --check",
+      "result": "0 problems",
+      "scope": "patch whitespace integrity"
+    }
+  ],
+  "frozen_hashes": {
+    "benchmark/phase3/phase3b_fusion/rankings_bm25_trained_epoch1_rrf.jsonl.xz": "9601149e0297831ebfbfb4fde24b725a9b00287cf1b4d74270bf2921be138b31",
+    "benchmark/phase3/phase3c_smoke/frozen_responses.jsonl": "2f8121b7a9f78d1940f5771142c6b5195d48c9827456d4f4ca19637c1215451d",
+    "benchmark/phase3/pilot_answer_key.csv": "62415034be49a11dd672e0940675f8ebe827cb217b79a773386f1c4d20bb4c83",
+    "benchmark/phase3/pilot_sample.csv": "be086250023be617df278ab62549756b23bd477f8f5d6de92531608dcbf1088a",
+    "benchmark/phase3/validation/scored_rows.json": "f0c4b909321f470a05d30e66003515cb893ec82e25babeadf9b0fe9859847538"
+  },
+  "hash_function": "sha256_portable (LF-normalized for text artifacts)",
+  "not_applicable": [
+    {
+      "command": "python -m benchmark.scripts.verify_snapshot --archive benchmark/dist/aaaim-benchmark-phase1-v1-sbml-inputs.zip",
+      "reason": "The optional Phase 1 release archive is not present; the complete 75-file working snapshot was verified."
+    },
+    {
+      "command": "python -m benchmark.scripts.freeze_phase2 --verify-cache-archive",
+      "reason": "The optional Phase 2 cache archive is not present; all 74 working caches were verified against the committed registry."
+    }
+  ],
+  "schema": "phase3c-validation-verification-v1"
+}

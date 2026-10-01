@@ -1,0 +1,123 @@
+{
+  "fusion_top1": {
+    "brite_orthology": {
+      "count": 113,
+      "denominator": 163,
+      "rate": 0.693252
+    },
+    "exact": {
+      "count": 93,
+      "denominator": 163,
+      "rate": 0.570552
+    }
+  },
+  "grounded": {
+    "abstention_rate": {
+      "count": 39,
+      "denominator": 163,
+      "rate": 0.239264
+    },
+    "brite_orthology_accuracy": {
+      "count": 119,
+      "denominator": 163,
+      "rate": 0.730061
+    },
+    "correct_answer_absent_abstention_accuracy": {
+      "count": 18,
+      "denominator": 30,
+      "rate": 0.6
+    },
+    "correct_answer_present_selection_accuracy": {
+      "count": 102,
+      "denominator": 133,
+      "rate": 0.766917
+    },
+    "coverage": {
+      "count": 124,
+      "denominator": 163,
+      "rate": 0.760736
+    },
+    "evidence_compliance_rate": {
+      "count": 161,
+      "denominator": 163,
+      "rate": 0.98773
+    },
+    "exact_top1_accuracy": {
+      "count": 102,
+      "denominator": 163,
+      "rate": 0.625767
+    },
+    "harm_rate_relative_to_fusion_top1": {
+      "count": 7,
+      "denominator": 93,
+      "rate": 0.075269
+    },
+    "incorrect_in_evidence_prediction_rate": {
+      "count": 22,
+      "denominator": 163,
+      "rate": 0.134969
+    },
+    "n": 163,
+    "recovery_rate_beyond_fusion_top1": {
+      "count": 16,
+      "denominator": 70,
+      "rate": 0.228571
+    },
+    "schema_invalid_rate": {
+      "count": 0,
+      "denominator": 163,
+      "rate": 0.0
+    },
+    "selective_exact_accuracy": {
+      "count": 102,
+      "denominator": 124,
+      "rate": 0.822581
+    },
+    "unsupported_fabricated_id_rate": {
+      "count": 0,
+      "denominator": 163,
+      "rate": 0.0
+    }
+  },
+  "phase2_heuristic_top1": {
+    "exact": {
+      "count": 26,
+      "denominator": 163,
+      "rate": 0.159509
+    }
+  },
+  "phase3a_target_only": {
+    "abstention": {
+      "count": 22,
+      "denominator": 163,
+      "rate": 0.134969
+    },
+    "brite_orthology": {
+      "count": 70,
+      "denominator": 163,
+      "rate": 0.429448
+    },
+    "exact": {
+      "count": 49,
+      "denominator": 163,
+      "rate": 0.300613
+    },
+    "incorrect_unsupported_in_catalog": {
+      "count": 81,
+      "denominator": 163,
+      "rate": 0.496933
+    },
+    "unsupported_in_catalog": {
+      "count": 130,
+      "denominator": 163,
+      "rate": 0.797546
+    }
+  },
+  "trained_biencoder_top1": {
+    "exact": {
+      "count": 98,
+      "denominator": 163,
+      "rate": 0.601227
+    }
+  }
+}

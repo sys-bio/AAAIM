@@ -1,0 +1,4 @@
+# Phase 3C orchestration environment (exact tested versions).
+openai==1.78.1
+pydantic==2.13.5
+langchain-core==1.6.2

@@ -1,0 +1,26 @@
+{
+  "by_outcome": {
+    "abstain": {
+      "max": 0.99,
+      "mean": 0.974103,
+      "median": 0.98,
+      "min": 0.91,
+      "n": 39
+    },
+    "exact": {
+      "max": 1.0,
+      "mean": 0.983069,
+      "median": 0.99,
+      "min": 0.78,
+      "n": 102
+    },
+    "incorrect": {
+      "max": 0.999,
+      "mean": 0.986182,
+      "median": 0.99,
+      "min": 0.91,
+      "n": 22
+    }
+  },
+  "interpretation": "self-reported metadata only; not a calibrated probability and no threshold selected"
+}

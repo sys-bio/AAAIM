@@ -1,0 +1,84 @@
+{
+  "all_byte_equal": true,
+  "commands": {
+    "diff_check": "git diff --check",
+    "focused_tests": "python -m pytest tests/test_phase3c_validation.py tests/test_phase3c_grounded.py -q --basetemp benchmark/data/_pytest_phase3c -p no:cacheprovider",
+    "full_tests": "python -m pytest -q --basetemp benchmark/data/_pytest_all -p no:cacheprovider",
+    "rebuild_from_frozen_cache_and_responses": "python benchmark/scripts/phase3c_validation.py --cache-only --evaluate",
+    "verify_phase1_snapshot": "python -m benchmark.scripts.verify_snapshot",
+    "verify_phase2_caches": "python -m benchmark.scripts.freeze_phase2 --verify-caches",
+    "verify_phase2_manifest": "python -m benchmark.scripts.freeze_phase2 --verify",
+    "verify_phase3a_validation": "python -m benchmark.scripts.phase3_openai_eval --verify-manifest",
+    "verify_phase3b_archive": "python -m benchmark.scripts.phase3b_release verify-archive",
+    "verify_phase3b_full": "python -m benchmark.scripts.phase3_biencoder full-verify",
+    "verify_phase3b_fusion": "python -m benchmark.scripts.phase3b_release verify-fusion",
+    "verify_phase3c_manifest_read_only": "python benchmark/scripts/phase3c_validation.py --verify",
+    "verify_phase3c_smoke": "python -m benchmark.scripts.phase3c_grounded --verify",
+    "verify_retrieval_baselines": "python -m benchmark.scripts.phase3_retrieval verify"
+  },
+  "derived_artifacts_rebuilt_twice": true,
+  "files": [
+    {
+      "byte_equal": true,
+      "path": "answer_key_join.jsonl",
+      "sha256": "01844afb38ff036a0c139896e1b0ea70163b8e0324c74c952e431bba01f4ad43"
+    },
+    {
+      "byte_equal": true,
+      "path": "bootstrap_comparisons.json",
+      "sha256": "d731751e882636a9f4d3ab5f65cdd1212a80b28d7353ad9834f4655389940cfb"
+    },
+    {
+      "byte_equal": true,
+      "path": "cluster_analysis.json",
+      "sha256": "6fe0a79c508ddf8def7dd8652f62329f3d55918eaa98cf274291a844b1871b6b"
+    },
+    {
+      "byte_equal": true,
+      "path": "confidence_analysis.json",
+      "sha256": "7cc0884adf66706f08f91eabb18057944402ce4f679e10751b5a36c4778ac444"
+    },
+    {
+      "byte_equal": true,
+      "path": "model_analysis.json",
+      "sha256": "80ccb0f79baa5f2496921b54fe1334b68045e26d4cf426a411ee76dcbc20c80c"
+    },
+    {
+      "byte_equal": true,
+      "path": "overall_metrics.json",
+      "sha256": "893ee8555b6211107febdfbb772a76c99d1bed625857e938bef03ee0590ebb5d"
+    },
+    {
+      "byte_equal": true,
+      "path": "paired_transitions.json",
+      "sha256": "d1afd48f444415447f7e1076c3cffdf3d23a9f3f119a1e8c859d51525d09df4d"
+    },
+    {
+      "byte_equal": true,
+      "path": "phase2_failure_analysis.json",
+      "sha256": "bf5f193d866634acb5aefd1bb82eeb6a49ab79808706684164e69e90cb8f0811"
+    },
+    {
+      "byte_equal": true,
+      "path": "qualitative_examples.json",
+      "sha256": "33e91e50e9be45d06d8669ede2f12823ffcf032f5a67e175a71a68758cbab990"
+    },
+    {
+      "byte_equal": true,
+      "path": "retrieval_state_analysis.json",
+      "sha256": "c3b7492eddc68af5fc1d17ca16a74aa75c4afa7bd5776a8db4eeb62edf1cffe7"
+    },
+    {
+      "byte_equal": true,
+      "path": "seen_unseen_analysis.json",
+      "sha256": "4dd502e3c8625c00d07f36586a10135c80054f73abb542edd7ed7dd1f549a9f1"
+    },
+    {
+      "byte_equal": true,
+      "path": "stratum_analysis.json",
+      "sha256": "4d60d1218bf316d954a81704e8dca12212b18bfc0a70f3170f703823c5deace1"
+    }
+  ],
+  "same_file_set": true,
+  "schema": "phase3c-deterministic-rebuild-v1"
+}

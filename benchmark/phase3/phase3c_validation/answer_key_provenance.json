@@ -1,0 +1,10 @@
+{
+  "deterministic_python_evaluation": true,
+  "join_key": "sample_id",
+  "llm_judge": false,
+  "opened_after_frozen_responses": true,
+  "schema": "phase3c-answer-key-join-v1",
+  "source": "benchmark/phase3/pilot_answer_key.csv",
+  "source_sha256": "62415034be49a11dd672e0940675f8ebe827cb217b79a773386f1c4d20bb4c83",
+  "test_rows_read": 0
+}

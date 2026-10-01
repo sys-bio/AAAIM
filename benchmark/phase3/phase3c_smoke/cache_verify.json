@@ -1,0 +1,70 @@
+{
+  "api_calls": 0,
+  "attempts": 0,
+  "cache_hits": 5,
+  "cache_only": true,
+  "caps": {
+    "attempts": 5,
+    "cost_usd": 0.5,
+    "requests": 5
+  },
+  "execute": false,
+  "per_sample": [
+    {
+      "cached_input_tokens": 0,
+      "cost_usd": 0.012894,
+      "input_tokens": 5577,
+      "output_tokens": 145,
+      "reasoning_tokens": 40,
+      "sample_id": "P3C0001"
+    },
+    {
+      "cached_input_tokens": 0,
+      "cost_usd": 0.013638,
+      "input_tokens": 5397,
+      "output_tokens": 237,
+      "reasoning_tokens": 93,
+      "sample_id": "P3C0002"
+    },
+    {
+      "cached_input_tokens": 0,
+      "cost_usd": 0.012994,
+      "input_tokens": 5363,
+      "output_tokens": 189,
+      "reasoning_tokens": 48,
+      "sample_id": "P3C0003"
+    },
+    {
+      "cached_input_tokens": 0,
+      "cost_usd": 0.015404,
+      "input_tokens": 6040,
+      "output_tokens": 277,
+      "reasoning_tokens": 150,
+      "sample_id": "P3C0004"
+    },
+    {
+      "cached_input_tokens": 0,
+      "cost_usd": 0.013758,
+      "input_tokens": 5973,
+      "output_tokens": 151,
+      "reasoning_tokens": 35,
+      "sample_id": "P3C0005"
+    }
+  ],
+  "pricing_date": "2026-09-03",
+  "pricing_source": "https://developers.openai.com/api/docs/pricing (Standard, short context). Snapshot recorded 2026-09-03 from the OpenAI API pricing page.",
+  "rates": {
+    "cached_input_per_million": 0.2,
+    "input_per_million": 2.0,
+    "output_per_million": 12.0
+  },
+  "rows": 5,
+  "spent_usd_including_cached_original_calls": 0.068688,
+  "total_attempts_across_resumes": 5,
+  "usage_totals": {
+    "cached_input_tokens": 0,
+    "input_tokens": 28350,
+    "output_tokens": 999,
+    "reasoning_tokens": 366
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "files": [
+    {
+      "bytes": 595,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3c_smoke/REPORT.md",
+      "sha256": "f6cb33efc6ef81e2ed7a1841c0aa16c78dca42afb956566ac8a25ae967043993"
+    },
+    {
+      "bytes": 919,
+      "n_lines": 5,
+      "path": "benchmark/phase3/phase3c_smoke/answer_key.jsonl",
+      "sha256": "07602e9a303748019698f7548808be399d1d8f7c5e7c0ebc3aa286861b1a145c"
+    },
+    {
+      "bytes": 1689,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3c_smoke/cache_verify.json",
+      "sha256": "fb4231b995cf457576c6fa80017b93e76c8437c88c50d01da61e290ea3f45aaf"
+    },
+    {
+      "bytes": 439,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3c_smoke/config.json",
+      "sha256": "da8de2da6277139dbb4270a553b67fb706b0105dd9147a0898db7e73b9d6d4a7"
+    },
+    {
+      "bytes": 1689,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3c_smoke/cost_report.json",
+      "sha256": "9574f064cc2973834742bd14745887061e8fb8973ad3322ff4f416c2caa16991"
+    },
+    {
+      "bytes": 1908,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3c_smoke/dry_run_plan.json",
+      "sha256": "8a80c3b51ad1f2903084b37f8d82ca718eac82a6f19af5a261f41d30fbf48480"
+    },
+    {
+      "bytes": 3518,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3c_smoke/eval.json",
+      "sha256": "9c8153d4200be282151c7b122b6f420eeee6f2ee7d263fd1dd30564887ae9db5"
+    },
+    {
+      "bytes": 60583,
+      "n_lines": 5,
+      "path": "benchmark/phase3/phase3c_smoke/frozen_evidence.jsonl",
+      "sha256": "0d64943ce299bffacddc5a1b6668dc9e1fe48076a1aecd4363df8cad5f1f9364"
+    },
+    {
+      "bytes": 72136,
+      "n_lines": 5,
+      "path": "benchmark/phase3/phase3c_smoke/frozen_requests.jsonl",
+      "sha256": "7bf0293e9aac157404fb427e76ba64c0eccddd14aff14689c55cef91a1f8ffad"
+    },
+    {
+      "bytes": 4806,
+      "n_lines": 5,
+      "path": "benchmark/phase3/phase3c_smoke/frozen_responses.jsonl",
+      "sha256": "2f8121b7a9f78d1940f5771142c6b5195d48c9827456d4f4ca19637c1215451d"
+    },
+    {
+      "bytes": 1279,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3c_smoke/full_validation_plan.json",
+      "sha256": "5ea0d56bd389b078b407a0d6243c9c121f107f7654b1564827925b968f522d8c"
+    },
+    {
+      "bytes": 1102,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3c_smoke/prior_manifest_verification.json",
+      "sha256": "40a7507330f2409ba9ed6bbeb109ceb284fb1350a8ffbb5a3c0fc3664a7462a8"
+    },
+    {
+      "bytes": 2100,
+      "n_lines": 5,
+      "path": "benchmark/phase3/phase3c_smoke/sample.jsonl",
+      "sha256": "4b38aa06e55afdf8ba93fcc66d24049d748c950bc7eb0bc017dead5b440ccb3b"
+    }
+  ],
+  "n_files": 13
+}
