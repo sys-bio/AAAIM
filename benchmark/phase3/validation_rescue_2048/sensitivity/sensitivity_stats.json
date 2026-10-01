@@ -1,0 +1,16 @@
+{
+  "analysis_kind": "rescue_completed_sensitivity",
+  "n_original_length_truncated": 13,
+  "n_original_missing_usage": 10,
+  "n_original_output_at_1024_ceiling": 13,
+  "n_original_schema_invalid": 26,
+  "n_original_validation_error": 10,
+  "n_original_zero_output_tokens": 3,
+  "n_rescued_successfully": 26,
+  "n_still_schema_invalid": 0,
+  "note": "Substitutes successfully parsed 2048-token rescue responses for the original schema-invalid keys only. The other 463 rows are the original 1024-token responses. Not an intention-to-treat result. Original, rescue, and total calculated costs are reported separately; do not use the mixed composed-file row-sum as a billing total.",
+  "original_calculated_cost_usd": 2.585398,
+  "rescue_calculated_cost_usd": 0.294394,
+  "total_calculated_cost_usd": 2.879792,
+  "truncation_note": "LengthFinishReasonError was not stored as api_error on the original rows. Observable truncation signatures are n_output_tokens==1024 (the original ceiling) and ValidationError with missing usage."
+}

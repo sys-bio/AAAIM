@@ -1,0 +1,777 @@
+# Phase 3: retrieval-first recovery
+
+Phase 3 starts from tag **`benchmark-phase2-v1`** (commit `1958057`). It does not
+modify Phase 1 or Phase 2 artifacts and does not regenerate candidates.
+
+Phase 2 showed that retrieval, not ranking, is the bottleneck:
+
+| Quantity | Value | Population |
+| --- | ---: | --- |
+| Evaluable reactions | 5,816 | all evaluable |
+| Zero candidates | 3,457 (59.44%) | all evaluable |
+| Nonempty set, exact answer absent | 340 | all evaluable |
+| Exact answer retrievable | 2,019 | all evaluable |
+| Heuristic exact Top-1 | 1,934 | all evaluable |
+| Retrievable but not rank-1 | 85 | all evaluable |
+| Overall exact retrieval failure | **65.29%** | all evaluable |
+| Max gain from perfect reranking | **+1.46 pp** | all evaluable |
+| Share of errors that are retrieval failures | **97.8%** | all failures |
+
+A reranker-only Phase 3 is capped at +1.46 pp. This phase therefore studies **open-set
+recovery** and **learned full-database retrieval**. Closed-set reranking is a control,
+not the programme.
+
+This commit is design and offline scaffolding only. No API calls, no model downloads,
+no training.
+
+## Research questions
+
+1. Can a model recover the correct KEGG reaction when AAAIM’s rule-based retriever
+   returns no useful answer?
+2. How much apparent recovery is parametric LLM knowledge versus evidence-backed
+   database/tool retrieval?
+3. Can a learned full-database retriever outperform strict subset-containment retrieval?
+4. Which compact forms of biological context improve recovery enough to justify their
+   token cost?
+5. Can the system recognize insufficient evidence and abstain?
+6. When should the system use deterministic ranking, learned retrieval, LLM inference,
+   tool-assisted recovery, or abstention?
+
+These are different tasks. Mixing them inflates recovery:
+
+| Task | What it measures | What it is not |
+| --- | --- | --- |
+| Closed-set reranking | Ordering a frozen Phase 2 candidate set | Recovery of missing answers |
+| Open-set direct LLM | Parametric identification with no catalog search | Database retrieval |
+| Learned full-database retrieval | Ranking all ~12,312 KEGG reactions from a query encoder | Reranking Phase 2 candidates |
+| Tool-assisted recovery | Answering from recorded search evidence | An unsupported guess that happens to be right |
+| End-to-end routed accuracy | A future gate choosing among the above, plus abstention | Any single mode’s headline |
+
+A correct direct-LLM guess is **parametric identification**. It is reported separately
+from evidence-backed tool recovery. The model’s self-report (`basis`) is metadata, not
+proof.
+
+## Layout
+
+Artifacts live in `benchmark/phase3/`, not in the frozen `benchmark/data/` tree.
+
+| Script | Output |
+| --- | --- |
+| `build_phase3_strata.py` | `strata.csv`, `strata_summary.json` |
+| `build_phase3_splits.py` | `splits.csv`, `split_summary.json`, `target_overlap.json` |
+| `build_phase3_lookups.py` | `species_names.csv`, `kegg_catalog_ids.json` |
+| `sample_phase3_pilot.py` | `pilot_sample.csv` (no ground truth), `pilot_answer_key.csv`, `pilot_summary.json` |
+| `phase3_prompts.py --write` | `pilot_prompts.jsonl` |
+| `phase3_cost.py` | `cost_estimate.json` |
+| `phase3_modes.py` | schemas, mocks, cache (library) |
+| `phase3_eval.py` | offline scoring (library) |
+| `phase3_openai_run.py` | OpenAI smoke (9), validation-pilot (489), and 26-row schema-invalid rescue runner (dry-run default) |
+| `phase3_openai_eval.py` | Offline validation scoring, artifact-manifest verification, and rescue sensitivity |
+
+```powershell
+$env:PYTHONHASHSEED = "0"
+python benchmark/scripts/build_phase3_strata.py
+python benchmark/scripts/build_phase3_splits.py
+python benchmark/scripts/build_phase3_lookups.py
+python benchmark/scripts/sample_phase3_pilot.py
+python benchmark/scripts/phase3_prompts.py --write
+python benchmark/scripts/phase3_cost.py
+python benchmark/scripts/phase3_openai_run.py
+python benchmark/scripts/phase3_openai_run.py --execute --max-cost-usd 1.00
+python benchmark/scripts/phase3_openai_run.py --cache-only
+python benchmark/scripts/phase3_openai_run.py --profile validation
+python benchmark/scripts/phase3_openai_run.py --profile validation --execute --max-cost-usd 5.00
+python benchmark/scripts/phase3_openai_run.py --profile validation --cache-only
+python benchmark/scripts/phase3_openai_eval.py --results-dir benchmark/phase3/validation
+python benchmark/scripts/phase3_openai_eval.py --verify-manifest
+python benchmark/scripts/phase3_openai_run.py --profile rescue_schema_invalid
+python benchmark/scripts/phase3_openai_run.py --profile rescue_schema_invalid --execute --max-cost-usd 1.00 --max-requests 26 --max-output-tokens 2048 --max-retries 0
+python benchmark/scripts/phase3_openai_run.py --profile rescue_schema_invalid --cache-only
+python benchmark/scripts/phase3_openai_eval.py --rescue-dir benchmark/phase3/validation_rescue_2048 --sensitivity-out-dir benchmark/phase3/validation_rescue_2048/sensitivity
+```
+
+`benchmark/phase3/_*/` is gitignored (live response cache). Pricing is read from a file;
+`pricing.example.json` is labelled EXAMPLE ONLY.
+
+## Outcome strata
+
+Every evaluable reaction gets exactly one stratum from **exact** Phase 2 matching:
+
+| Stratum | Definition | Corpus |
+| --- | --- | ---: |
+| `unconstrained` | status `unconstrained_candidate_set` | 811 |
+| `empty_constrained` | status `no_candidates` | 2,646 |
+| `nonempty_answer_absent` | nonempty set, exact answer absent | 340 |
+| `retrievable_rerank_failure` | exact answer present, heuristic not Top-1 | 85 |
+| `retrievable_top1_success` | heuristic exact Top-1 | 1,934 |
+| **Total** | mutually exclusive, exhaustive | **5,816** |
+
+Equivalence-aware hit columns are stored beside the stratum. They never assign it.
+
+## Leakage-resistant splits
+
+Partition units are the **54 Phase 1 clusters**. No cluster appears in more than one
+split. `CLU_BIOMD0000000042` (seven yeast models) is already one cluster and stays
+together; it landed in **validation**.
+
+Algorithm `cluster_greedy_v1`, seed **20260902**. Target shares 60/15/25
+train/validation/test by reaction count. Clusters are assigned largest-first to the
+split that least increases a weighted squared-error loss, then locally improved.
+Loss weights up-weight the rare `retrievable_rerank_failure` stratum and genome-scale
+mass. Phase 1 membership is never rewritten to make the numbers prettier.
+
+Observed assignment:
+
+| Split | Reactions | Models | Clusters | Genome-scale rxn | Share |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| train | 3,497 | 29 | 21 | 2,542 | 0.601 |
+| validation | 969 | 18 | 12 | 792 | 0.167 |
+| test | 1,350 | 27 | 21 | 1,220 | 0.232 |
+| **total** | **5,816** | **74** | **54** | 4,554 | 1.000 |
+
+Test stratum counts (the **final** held-out set; not used for the exploratory pilot):
+
+| Stratum | Test | Train | Val |
+| --- | ---: | ---: | ---: |
+| unconstrained | 36 | 690 | 85 |
+| empty_constrained | 708 | 1,519 | 419 |
+| nonempty_answer_absent | 174 | 144 | 22 |
+| retrievable_rerank_failure | 22 | 47 | 16 |
+| retrievable_top1_success | 410 | 1,097 | 427 |
+
+### Why unconstrained is unbalanced
+
+`CLU_BIOMD0000001091` alone holds **653** of the 811 unconstrained reactions. That
+cluster cannot be fractionally split. Putting it in test would flood the held-out
+set with one genome-scale model. It therefore stays in train, and the test split
+has only 36 unconstrained reactions. The exploratory pilot uses **validation**
+(85 unconstrained), so this cluster constraint does not starve the pilot. The
+split is not rewritten to manufacture a round 200.
+
+### KEGG target overlap
+
+The catalog is closed (~12,312 KEGG reactions). Seeing a target id in training does
+not leak the *query*, but it can inflate parametric memorization. Overlap is allowed
+and must be reported.
+
+| Quantity | Value |
+| --- | ---: |
+| Distinct test targets | 877 |
+| Distinct train targets | 1,596 |
+| Distinct validation targets | 658 |
+| Targets in both train and test | 645 |
+| Test targets seen in train or validation | 658 (75.03%) |
+| Test targets never seen in train or validation | 219 (24.97%) |
+
+Future results must be split into **seen** vs **unseen** targets relative to the
+data actually used to **fit** the model: train-only if the retriever is trained
+on train (method selection on validation), or train+validation if the final
+retriever is refit before the test run. Frequencies are in `target_overlap.json`.
+
+## Open-set pilot sample
+
+Drawn **only from validation**. Test is reserved for one frozen-method run after
+the pilot chooses context variant, prompt, provider/model, abstention, and tool
+strategy. Sequence: train fits the retriever; validation runs the exploratory
+LLM pilot; test runs the frozen method once.
+
+Seed **20260902**. Default quotas 50/50/50/25/25. Within a stratum, clusters are
+visited round-robin after a seeded within-cluster shuffle. Train and test are
+never used as backfill.
+
+| Stratum | Quota | Eligible in validation | Selected | Shortfall |
+| --- | ---: | ---: | ---: | ---: |
+| unconstrained | 50 | 85 | 50 | 0 |
+| empty_constrained | 50 | 419 | 50 | 0 |
+| nonempty_answer_absent | 50 | 22 | 22 | 28 (took all) |
+| retrievable_rerank_failure | 25 | 16 | 16 | 9 (took all) |
+| retrievable_top1_success | 25 | 427 | 25 | 0 |
+| **total** | 200 | | **163** | |
+
+163 reactions, 17 models, 12 clusters. The shortfalls are accepted; the cluster split is not rewritten
+to reach 200.
+
+`pilot_sample.csv` is what a model may see: no ground-truth KEGG ids.
+`pilot_answer_key.csv` holds the labels. Prompts are scanned for `R#####` and
+`kegg.reaction` URIs and fail loudly on a hit.
+
+This size is large enough to see whether unconstrained / empty / answer-absent
+recovery is even possible, and small enough that example mid-band chat prices stay
+in the low single-digit dollars for three context variants. It is **not** large
+enough for significance theatre; evaluation reports cluster-aware intervals and
+their limits.
+
+## Context variants
+
+Provider-independent payloads, template `phase3-open-set-v3`.
+
+| Variant | Contents | Bound |
+| --- | --- | --- |
+| `target_only` | Equation, participant names, ChEBI / KEGG *compound* ids, direction | no model chain |
+| `target_plus_model` | Plus title and a 280-character redacted description | no model chain |
+| `target_plus_neighborhood` | Plus up to **k=4** other reactions in the same model that share participants | k is configurable; selection is (−shared, reaction_id) |
+
+Participant display names come from a `(model_id, species_id) → species_name`
+table extracted from SBML (`species_names.csv`). Names are **not** inferred by
+zipping unique equation ids with semicolon-separated `substrate_names` /
+`product_names`. That positional join attaches the wrong name when a species
+appears on both sides (for example NFAT vs calcineurin in
+`BIOMD0000000122/R1`) or when a name itself contains a semicolon. Missing ids
+fall back to the species id, never to a shifted name list.
+
+The entire model reaction list is never included. Neighbor order is deterministic.
+
+KEGG reaction-id detection uses **digit boundaries**, not word boundaries:
+`(?<!\d)(R\d{5})(?!\d)`. That finds `R#####` inside SBML identifiers such as
+`R_R06861_C3_cytop`, `R00678_Tdo`, and `prefixR00024_suffix`, and rejects
+six-or-more-digit sequences such as `R000240`. Every free-text and identifier
+field in the model-visible payload is redacted (target id/name/equation, neighbor
+ids/names/equations, model title/description, participant ids/names, rendered
+prompt). Join keys in `pilot_prompts.jsonl` may still be KEGG-shaped when a
+BioModels file uses the KEGG id as the SBML reaction id; those keys are not shown
+to the model. Compound ids (`C#####`, ChEBI) are allowed: they are species
+evidence, not the answer.
+
+Direct open-set system instruction: use the supplied reaction context **and
+internal knowledge**; no tools, database queries, or candidate list. Tool-assisted
+mode uses a distinct instruction that points at recorded tool/search evidence.
+Self-report `basis` is not treated as evidence.
+
+## Experiment modes
+
+Common `ModeResult` schema in `phase3_modes.py`. The OpenAI runner in
+`phase3_openai_run.py` uses the Responses API with Structured Outputs
+(`openai==1.78.1`, `responses.parse` + the existing Phase 3 Pydantic schema).
+Live HTTP still defaults to dry-run; `--execute` is required, with a run-level
+`--max-cost-usd` cap enforced locally.
+
+Profiles:
+
+- `smoke` (default): nine calls, $1.00 cap, writes `benchmark/phase3/smoke/`.
+- `validation`: 163 frozen validation-pilot reactions × 3 variants = **489**
+  planned rows, $5.00 cap, writes `benchmark/phase3/validation/`. Compatible
+  smoke-test cache entries are reused and not repurchased. The answer key is
+  not joined in the runner; score with `phase3_openai_eval.py` after freeze.
+
+1. **Direct open-set LLM** — no candidates, no tools. Parametric identification.
+2. **Tool-assisted recovery** — queries, hits, source ids/URLs, and snippets are
+   recorded. Outcomes use **top-1** support only: `correct_and_evidence_supported`
+   iff the correct top-1 prediction itself is in the recorded evidence ids;
+   `correct_but_unsupported` if top-1 is correct but unsupported (even when a
+   lower rank is supported); `incorrect_despite_evidence` if top-1 is wrong and
+   that top-1 id is in the evidence. Per-prediction
+   `prediction_supported_by_evidence` / `supporting_evidence_ids` are preserved.
+3. **Closed-set control** — frozen Phase 2 candidates only. Inapplicable when the
+   set is empty. Not open-set recovery.
+4. **Learned full-database retrieval** — query against all KEGG reactions. Schema
+   is ready; **training is not started**.
+
+Responses are cached by SHA-256 of `(mode, provider, model, prompt)`. Re-running a
+cached item is a no-op. Tests use `MemoryCache` and `MockProvider`.
+
+## Evaluation
+
+`phase3_eval.py` scores mocked or future cached outputs:
+
+- Exact and BRITE/orthology Top-1 / Top-3
+- Identifier class against the frozen Phase 2 KEGG catalog: malformed,
+  well-formed but absent, or in-catalog. Syntax `R#####` is not existence.
+- Abstention rate; accuracy among answered reactions
+- Accuracy-versus-coverage curve
+- By stratum, context variant, mode, and seen vs unseen **fit** targets
+- Cluster-macro where the subset is large enough
+- Evidence-linked outcomes for tool mode
+- Recall@1/3/5/10 and MRR for retrieval-shaped outputs
+- Parser/compliance: confidence outside [0, 1], duplicate predicted ids,
+  `abstain=false` with no predictions
+
+Abstention is **not** a hallucinated identifier. It is incorrect for full-coverage
+accuracy and is the uncovered case in selective accuracy.
+
+Uncertainty: cluster bootstrap (1,000 resamples) with an explicit limitation string.
+The 163-reaction validation pilot is too small to support strong significance claims.
+
+## Token and cost estimate (no API)
+
+489 calls (163 validation reactions × 3 variants). Scaffolding estimate: 4
+characters ≈ 1 token (`chars_div_4_scaffold`). This method **must not** gate a
+paid run; replace it with the chosen model's tokenizer or a conservative
+provider-specific bound before any live call. Planned max output: 400 tokens/call.
+
+| Variant | Calls | Mean input tokens | Total input |
+| --- | ---: | ---: | ---: |
+| target_only | 163 | 303 | 49,323 |
+| target_plus_model | 163 | 374 | 60,954 |
+| target_plus_neighborhood | 163 | 471 | 76,785 |
+| **bounded total** | **489** | | **187,062** |
+| Whole-model-context counterfactual | 163 | | **907,270** |
+
+Repeating every reaction in the model for every target uses **4.85×** more input
+tokens on this sample. That is the quadratic anti-pattern this design avoids.
+
+Example prices from `pricing.example.json` (date 2026-09-02, **not a quote**,
+replace before any paid run):
+
+| Placeholder band | Expected USD | Worst-case USD (2× output) |
+| --- | ---: | ---: |
+| small chat (~$0.15/$0.60 per 1M) | 0.15 | 0.26 |
+| mid chat (~$3/$15 per 1M) | 3.50 | 6.43 |
+| large chat (~$15/$75 per 1M) | 17.48 | 32.15 |
+
+No live run proceeds until the sample is frozen, leakage tests pass, this estimate
+is printed, caching is on, a real tokenizer is wired, and the user approves
+**provider, model, sample size, and budget**.
+
+Proposed options, **not a choice**: a small/cheap chat model for the first pilot
+(sensitivity to parametric knowledge vs noise); a mid-size general model; a
+science-tuned model if one is already licensed. Tool-assisted mode additionally
+needs an explicit KEGG/BioModels search backend. None of these is selected here.
+
+## Learned full-database retriever (design only)
+
+This is a **retriever over all ~12,312 KEGG reactions**, not a reranker of Phase 2
+sets. Phase 2’s heuristic is already within 3.6 pp of the conditional oracle; the
+missing 65% are reactions whose candidate set is empty or omits the answer.
+Reranking cannot touch those. A bi-encoder can.
+
+### Architecture
+
+- Small bi-encoder (scientific or general text checkpoint, to be chosen at training
+  time; **not downloaded now**).
+- Contrastive training on (reaction query, KEGG document) pairs.
+- Precompute KEGG document embeddings once; retrieve with exact or ANN search.
+- Evaluate on the cluster-separated splits above, reporting seen vs unseen targets.
+
+### Query fields
+
+SBML equation; participant names; available ChEBI and KEGG *compound* ids; optional
+bounded model title / k-neighborhood from the same prompt builder. Never the
+ground-truth reaction id, never `kegg.reaction` URIs.
+
+### Document fields
+
+KEGG equation, definition/name, EC, KO, RCLASS. The document id is the retrieval
+key, not a string that should appear in the query.
+
+### Hard negatives
+
+- Phase 2 candidates for the same reaction (when they exist and are wrong)
+- KEGG reactions sharing compounds
+- Lexically similar KEGG text
+- Retrieved false positives from an initial encoder (ANCE-style)
+- Equivalence-aware near matches: **not** automatic negatives. Label as
+  equivalent / adjacent / unrelated. Treating BRITE siblings as hard negatives
+  would punish chemically correct retrieval.
+
+### Training
+
+- Objective: InfoNCE / MultipleNegativesRanking, in-batch negatives plus explicit
+  hard negatives.
+- Batch: 32–64 queries, 1 positive + 7–15 hard negatives, plus in-batch.
+- Max length: 256 query / 256 document tokens as a starting point.
+- Validation: cluster-macro Recall@10 and MRR on the validation split, stratified
+  by Phase 2 stratum. Early stop on validation Recall@10.
+- Model selection: primary = Recall@10 on *unseen* validation targets; secondary =
+  unconstrained and empty_constrained Recall@10 (the Phase 2 hole).
+- Hardware: a single 12–24 GB GPU should fine-tune a MiniLM/SciBERT-scale encoder
+  on 3.5k training reactions in well under a day; CPU-only is possible but slower.
+  Exact runtime is deferred until a checkpoint is chosen.
+- Reproducibility: seed 20260902, frozen splits, logged config, hashed query/document
+  text, checkpoints under `benchmark/phase3/_checkpoints/` (gitignored).
+- Tracking: a local JSONL run log is enough for the first experiment; no external
+  SaaS is required.
+
+### Optional cross-encoder
+
+A small cross-encoder reranker may be trained later **only** on retrievable
+reactions (the 2,019). It is bounded by the Phase 2 oracle (+1.46 pp overall) and
+is secondary.
+
+## Routed system (not implemented)
+
+A future gate, without access to ground truth at inference:
+
+| Signal | Action |
+| --- | --- |
+| Phase 2 set small, high heuristic margin | Keep the heuristic |
+| Phase 2 set nonempty but large/flat scores | Learned or LLM rerank (secondary) |
+| Empty, unconstrained, or low-confidence set | Full-database retrieval and/or tool-assisted recovery |
+| Low evidence (few mapped participants, low retriever score) | Abstain |
+
+**Answer absence is not observable.** Proxies to learn or threshold without labels:
+
+- `filtered_species_count` / unconstrained flag (already in Phase 2 status)
+- Candidate-set size and score entropy
+- Retriever margin between rank-1 and rank-2
+- A binary calibrator trained on the train split to predict
+  `stratum ∈ {unconstrained, empty_constrained, nonempty_answer_absent}`
+
+Those proxies will be wrong sometimes; the evaluation of a router is end-to-end
+selective accuracy, not oracle routing.
+
+## Phase 3A operational smoke test
+
+Direct open-set only. Model default `gpt-5.6-terra` (CLI override allowed).
+Selection rule `seeded_round_robin_one_per_stratum_v1` with seed **20260902**
+picks three validation-pilot reactions, one per stratum in frozen stratum
+order, then emits all three bounded context variants (**nine** planned calls).
+The test split is not read. `pilot_answer_key.csv` is joined only after
+responses are persisted.
+
+Spend gate: conservative `chars_div_2_conservative` input bound, plus planned
+max output tokens, times retries. Pricing snapshot:
+`pricing.openai.gpt-5.6-terra.json` (OpenAI list prices, 2026-09-03). Live
+calls refuse to start if `.env` is tracked, if the preflight worst case exceeds
+`--max-cost-usd`, or if a request still contains a KEGG reaction id. Cache
+keys include sample join key, variant, template version, prompt hash, model,
+inference settings, and output-schema version.
+
+```powershell
+python benchmark/scripts/phase3_openai_run.py --out-dir benchmark/phase3/smoke
+python benchmark/scripts/phase3_openai_run.py --execute --max-cost-usd 1.00 --out-dir benchmark/phase3/smoke
+python benchmark/scripts/phase3_openai_run.py --cache-only --out-dir benchmark/phase3/smoke
+```
+
+## Direct open-set validation pilot
+
+Same model, prompt template, schema, and inference settings as the smoke test
+(`gpt-5.6-terra`, `phase3-open-set-v3`, `phase3-structured-v1`,
+`max_output_tokens=1024`, `reasoning_effort=low`). The experimental unit is the
+**reaction** (163), not the 489 prompts. Test-split rows are never read.
+`pilot_answer_key.csv` is joined only after responses are frozen.
+
+The frozen sample shortfalls are kept (answer-absent 22 vs 50, rerank-failure
+16 vs 25). Do not resample to original quotas.
+
+This 163-reaction pilot **deliberately oversamples Phase 2 failure strata**.
+Overall 30–31% exact Top-1 describes this constructed validation pilot only.
+It is **not** an estimate of corpus-wide accuracy. Stratum-specific rates and
+paired comparisons across context variants are the principal interpretable
+results. The experimental unit is the reaction; the 489 prompts are three
+paired conditions on 163 reactions.
+
+True Phase 2 retrieval failures are only `unconstrained`,
+`empty_constrained`, and `nonempty_answer_absent` (**122** reactions in this
+pilot). `retrievable_rerank_failure` is separate: the answer was retrieved
+but ranked incorrectly. Direct open-set reports use **incorrect in-catalog
+prediction**, not “unsupported”; there is no external evidence in this mode.
+
+```powershell
+python benchmark/scripts/phase3_openai_run.py --profile validation --max-cost-usd 5.00 --out-dir benchmark/phase3/validation --cache-dir benchmark/phase3/_response_cache
+python benchmark/scripts/phase3_openai_run.py --profile validation --execute --max-cost-usd 5.00 --max-requests 489 --out-dir benchmark/phase3/validation --cache-dir benchmark/phase3/_response_cache
+python benchmark/scripts/phase3_openai_run.py --profile validation --cache-only --out-dir benchmark/phase3/validation --cache-dir benchmark/phase3/_response_cache
+python benchmark/scripts/phase3_openai_eval.py --results-dir benchmark/phase3/validation
+python benchmark/scripts/phase3_openai_eval.py --verify-manifest
+```
+
+Expected (pre-execution dry-run): 489 planned rows, 9 compatible smoke cache
+hits, at most 480 new calls, conservative input 373,411 tokens, expected
+**$1.72**, retry-inclusive worst case **$19.90**, cap **$5.00**. The runtime
+gate, not the theoretical maximum, enforces the cap.
+
+### Observed validation run (intention-to-treat)
+
+The original 489-row `results.jsonl` is immutable source data
+(newline-normalized SHA-256
+`0bb9c892ec811e532133f2cd6e1fce5e1e1d249e41a263388979ae6d1a29fbdd`).
+Offline analysis must not alter it.
+
+| Quantity | Value |
+| --- | ---: |
+| Planned rows | 489 |
+| Compatible smoke cache hits | 9 |
+| New live calls | 480 |
+| Succeeded | 463 |
+| Schema-invalid (no parsed prediction) | 26 |
+| Refusals | 0 |
+| Model requested / returned | `gpt-5.6-terra` |
+| Input / output / reasoning tokens | 306,563 / 151,556 / 103,941 |
+| Calculated cost | **$2.585398** |
+| Cost per reaction | $0.0159 |
+
+The first live session was interrupted by a Windows `os.replace` lock on
+`results.jsonl` after 422 cached responses; the run resumed from cache and
+did not repurchase those calls. Cache-only replay then made **zero** additional
+API calls. Phase 2 freeze verification still reports 15 artifacts, 0 problems.
+
+The 26 schema-invalid rows are operational failures, not incorrect KEGG
+predictions. Intention-to-treat tables count them as unsuccessful in the 163
+denominator and report their count explicitly.
+
+Exact Top-1 (reaction unit, n = 163; schema-invalid counted as unsuccessful):
+
+| Variant | Exact Top-1 | BRITE Top-1 | Coverage | Selective exact | Abstain | Incorrect in-catalog | Schema-invalid |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `target_only` | 49/163 (0.301) | 0.429 | 0.810 | 0.371 | 0.135 | 0.497 | 9 |
+| `target_plus_model` | 51/163 (0.313) | 0.380 | 0.785 | 0.398 | 0.160 | 0.454 | 9 |
+| `target_plus_neighborhood` | 51/163 (0.313) | 0.393 | 0.840 | 0.372 | 0.110 | 0.485 | 8 |
+
+Paired cluster-bootstrap accuracy deltas vs `target_only` are +0.012 with
+intervals that include zero (12 clusters; exploratory). Do not freeze a
+context winner from this gap. `target_only` remains the working default.
+
+True retrieval-failure recovery is exact Top-1 / **122** reactions
+(`unconstrained` + `empty_constrained` + `nonempty_answer_absent`;
+abstention is not recovery; schema-invalid remains unsuccessful):
+
+| Variant | True retrieval-failure | Rerank-failure (separate) |
+| --- | ---: | ---: |
+| `target_only` | 32/122 (0.2623) | 6/16 |
+| `target_plus_model` | 34/122 (0.2787) | 6/16 |
+| `target_plus_neighborhood` | 31/122 (0.2541) | 9/16 |
+
+Train-seen targets 43–48/114 vs unseen 3–6/49. Raw confidence is not
+calibrated (ECE ≈ 0.58; correct and incorrect means both ≈ 0.96).
+Artifact manifest verification is read-only
+(`python benchmark/scripts/phase3_openai_eval.py --verify-manifest`).
+Artifacts: `benchmark/phase3/validation/`.
+
+### Targeted 26-row rescue (`max_output_tokens=2048`)
+
+A separate profile re-issued **only** the 26 original schema-invalid
+`(sample_id, variant)` keys. It does not mutate the original 489-row file.
+Same model, prompt, schema, `reasoning_effort=low`, and no-tools mode;
+`max_retries=0` so total provider requests cannot exceed 26.
+
+| Quantity | Value |
+| --- | ---: |
+| Planned / attempted / succeeded / failed | 26 / 26 / 26 / 0 |
+| Cached at dry-run / live / cache-only | 0 / 0 / 26 |
+| Cache-only new API calls | **0** |
+| Calculated rescue cost | **$0.294394** |
+| Rescue + original calculated cost | **$2.879792** |
+| Output tokens (min / max / mean) | 97 / 1760 / 827 |
+| Rows with output > 1024 | 8 |
+
+Observable truncation on the original 26: 13 rows recorded
+`n_output_tokens=1024` (the original ceiling); 10 were `ValidationError`
+with missing usage; 3 recorded zero output tokens.
+`LengthFinishReasonError` was not stored as `api_error`. Raising the
+ceiling parsed all 26.
+
+### Rescue-completed sensitivity
+
+For the original schema-invalid keys only, substitute the parsed 2048-token
+responses; keep the other 463 original rows. This is **not**
+intention-to-treat.
+
+| Variant | ITT exact Top-1 | Sensitivity exact Top-1 | ITT true RF (122) | Sensitivity true RF | ITT rerank (16) | Sensitivity rerank |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `target_only` | 49/163 | 50/163 | 32/122 | 33/122 | 6/16 | 6/16 |
+| `target_plus_model` | 51/163 | 51/163 | 34/122 | 34/122 | 6/16 | 6/16 |
+| `target_plus_neighborhood` | 51/163 | 51/163 | 31/122 | 31/122 | 9/16 | 9/16 |
+
+Sensitivity incorrect-in-catalog rates rise (0.528 / 0.491 / 0.528) because
+rescued rows are mostly additional wrong in-catalog guesses or abstentions,
+not additional correct identifications. Unseen-in-train remains far worse
+than seen (target_only 7/49 vs 43/114). Paired context intervals still
+include zero. Artifacts: `benchmark/phase3/validation_rescue_2048/`.
+
+## Stop point
+
+Phase 3A validation is method development, not a Phase 3 release and not the
+held-out test evaluation. The rescue-completed sensitivity does **not**
+change the following decisions:
+
+1. Do not freeze a context variant. Working default: `target_only`.
+2. Retain direct open-set only as a selective research probe, not as an
+   unthresholded annotator. Incorrect in-catalog predictions remain ~45–53%.
+3. Do not use raw model confidence as a probability threshold.
+4. Do not run the held-out test set for unfiltered direct inference.
+5. Next work is retrieval methods that provide database evidence, not another
+   unfiltered direct-open-set provider/model comparison.
+
+Do not start BM25, tool-assisted mode, bi-encoder training, test-set
+evaluation, or another provider/model from this authorization.
+
+## Framework-independent retrieval baselines (Phase 3 retrieval milestone)
+
+The subsequent authorization evaluates four retrieval-only conditions on all 969
+validation reactions: the already-frozen Phase 2 candidates, native Okapi BM25,
+off-the-shelf `BAAI/bge-m3` dense retrieval, and rank-only BM25+dense RRF.  It does
+not read held-out test labels, call an LLM, train an encoder, or change any Phase 1,
+Phase 2, or Phase 3A artifact.
+
+Implementation plan: (1) freeze label-free target-local queries and a common KEGG
+document template; (2) freeze component rankings before labels are joined; (3) fuse
+100-deep component rankings with one-indexed RRF; (4) evaluate offline at the reaction
+unit and rebuild all derived reports twice; (5) verify the complete suite and frozen
+artifact digests before committing.
+
+Canonical query (`phase3-retrieval-query-v1`):
+
+```text
+Equation: {normalized SBML reaction equation}
+Participants: {name} [species={SBML species id}; ChEBI={ids}; KEGG-compound={ids}]; ...
+```
+
+The reaction is target-local. Every string is scanned with the Phase 3 digit-bounded
+`R#####` policy and redacted before ranking. Ground truth and catalog membership are
+not inputs to query construction.
+
+Canonical catalog document (`phase3-retrieval-document-v1`) consists of labelled,
+nonempty `DEFINITION`, `NAME`, `EQUATION`, `ENZYME`, `RCLASS`, and `BRITE` lines in
+that order. The frozen snapshot does not expose a separate KO field; BRITE contains
+the available orthology/enzyme hierarchy. KEGG compound IDs and compound names occur
+in `EQUATION` and `DEFINITION`. The reaction identifier is removed from all searchable
+text and retained only as the document key.
+
+BM25 is project-native Okapi BM25 (`phase3_retrieval.py v1`), with the prespecified
+`k1=1.2`, `b=0.75`. Its regex tokenizer lowercases while preserving biochemical
+alphanumeric tokens, underscores, numbers, decimal points, hyphens, charges, slashes,
+and colons. There is no stemming, stopword removal, query expansion, or validation
+hyperparameter search.
+
+Dense retrieval uses only the normalized dense CLS vector from official
+`BAAI/bge-m3`, pinned to Hugging Face commit
+`5617a9f61b028005a4858fdac845db406aefb181`. Similarity is exact inner product over
+L2-normalized vectors (cosine). Learned-sparse and multi-vector outputs are disabled;
+the encoder is not fine-tuned. CUDA uses FP16 with batch backoff on OOM; CPU uses FP32.
+Catalog-cache identity includes catalog SHA-256, document template, model revision,
+pooling, normalization, similarity, and max length.
+
+RRF uses `score(d) = sum(1 / (60 + rank_i(d)))`, one-indexed ranks, zero contribution
+for a missing document, and ascending KEGG ID to resolve score ties. Both components
+are retrieved to depth 100 before fusion.
+
+Exact commands:
+
+```powershell
+python -m benchmark.scripts.phase3_retrieval bm25
+python -m benchmark.scripts.phase3_retrieval phase2
+python -u -m benchmark.scripts.phase3_retrieval dense --revision 5617a9f61b028005a4858fdac845db406aefb181 --batch 2
+python -m benchmark.scripts.phase3_retrieval fuse
+python -m benchmark.scripts.phase3_retrieval evaluate
+python -m benchmark.scripts.phase3_retrieval evaluate
+python -m benchmark.scripts.phase3_retrieval verify
+python -m pytest tests/test_phase3_retrieval.py -q --basetemp benchmark/phase3/_pytest_retrieval
+python -m pytest -q --basetemp benchmark/phase3/_pytest_all
+python benchmark/scripts/freeze_phase2.py --verify
+python benchmark/scripts/phase3_openai_eval.py --verify-manifest
+```
+
+Outputs and the human-readable result live in
+`benchmark/phase3/retrieval_baselines/`. Model and embedding caches are reproducible,
+gitignored, and are not part of the artifact manifest. This milestone is an
+off-the-shelf baseline only; Phase 3B training, reranking, LangChain integration, and
+held-out test evaluation remain out of scope.
+
+### Frozen multi-label stratum inconsistency
+
+The retrieval audit found two validation rows whose frozen Phase 3 stratum disagrees
+with the frozen candidates and multi-label answer key. Phase 2's
+`analyze_retrieval.py` splits `ground_truth_kegg_all` on `|`, but the Phase 1 artifact
+uses `;`: `BIOMD0000000042/reaction_1` contains alternate answer `R00299` at Phase 2
+rank 1, and `reaction_3` contains alternate answer `R01070` at rank 2. Both were
+therefore incorrectly frozen as `nonempty_answer_absent`.
+
+No frozen Phase 1–3A artifact or split is changed. This milestone records the two rows
+in `frozen_stratum_discrepancies.csv` and derives its evaluation stratum mechanically
+from the frozen status, candidates, and all semicolon-separated ground truths. The
+corrected validation counts are 85 unconstrained, 419 empty constrained, 20 nonempty
+answer absent, 17 retrievable rerank failures, and 428 rule-based Top-1 successes.
+Thus true retrieval failure is 524 reactions, not 526. Overall retrieval metrics and
+split membership are unchanged; only stratum-specific denominators are corrected.
+
+## Phase 3B selected-model package and BM25 fusion
+
+The prespecified three-epoch Phase 3B run selected epoch 1 on validation. Its source
+checkpoint SHA-256 is
+`8773b04f09916889b74c956e708044fe2c653fa764fe73c422ecc376ecae81c1`;
+the initializer is `BAAI/bge-small-en-v1.5` at immutable revision
+`5e62ea33e012fda8c02802b906664c915ebd1bb1`. Inference uses CLS pooling, L2
+normalization, maximum sequence length 256, and the existing v1 query/document
+templates.
+
+### Portable inference archive
+
+`benchmark.scripts.phase3b_release` converts only the selected model state to a
+standard local Hugging Face layout with `model.safetensors`, configuration,
+tokenizer files, inference metadata, source/catalog/input digests, environment
+versions, a fixed inference fixture, loading instructions, and a per-file manifest.
+Optimizer, scheduler, scaler, cursor/RNG state, the checkpoint container, and the
+original Hugging Face cache are excluded. Resuming optimization would require those
+excluded states plus the exact training configuration and dataset; no resume archive
+was created because no continuation is planned.
+
+The deterministic ZIP was independently built twice with byte-identical output:
+
+| Field | Value |
+| --- | --- |
+| File | `benchmark/dist/aaaim-phase3b-selected-epoch1-inference.zip` (gitignored) |
+| SHA-256 | `3412a3fa546347d8209ab62ca7ef55fb490e148b5f90c25cf33616328a0d0f53` |
+| Compressed size | 111,163,286 bytes |
+| Uncompressed size | 134,416,825 bytes |
+
+Clean-room restoration extracted into a fresh temporary directory, forced offline
+loading from the extracted archive, and did not access `best.pt` or the original
+cache. The fixed inference fixture and all 969 validation Top-100 ranked KEGG-ID
+lists reproduced exactly. The committed registry/restoration records and exact
+future upload/restore instructions are under `benchmark/dist/`; the ZIP is not
+committed and no upload occurred.
+
+```powershell
+benchmark/phase3/_phase3b_env/Scripts/python.exe -m benchmark.scripts.phase3b_release build-archive
+benchmark/phase3/_phase3b_env/Scripts/python.exe -m benchmark.scripts.phase3b_release verify-archive
+benchmark/phase3/_phase3b_env/Scripts/python.exe -m benchmark.scripts.phase3b_release restore --batch 64
+```
+
+### Prespecified BM25 + trained epoch-1 RRF
+
+The fusion uses only the already-frozen 100-deep BM25 and epoch-1 rankings. It is
+equal-weight reciprocal rank fusion with `k=60`, one-indexed ranks, zero contribution
+for a missing document, and ascending KEGG-ID tie-breaking. The union receives
+positive RRF scores; all remaining zero-score IDs follow in ascending order, yielding
+a complete 12,312-ID catalog permutation for every validation reaction. No labels,
+re-encoding, retraining, tuning, or weighted search enter ranking construction. The
+XZ-compressed ranking is hashed before ground truth is loaded.
+
+Exact reaction-micro results:
+
+| Method | R@1 | R@3 | R@5 | R@10 | MRR@10 | Unseen R@10 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Phase 2 rule-based | 0.441692 | 0.459236 | 0.459236 | 0.459236 | 0.449260 | 0.450820 |
+| BM25 | 0.780186 | 0.884417 | 0.901961 | 0.919505 | 0.832932 | 0.778689 |
+| Off-the-shelf BGE-M3 | 0.431373 | 0.626419 | 0.722394 | 0.785346 | 0.550519 | 0.532787 |
+| BM25 + BGE-M3 RRF | 0.736842 | 0.854489 | 0.897833 | 0.924665 | 0.802582 | 0.819672 |
+| Trained epoch-1 bi-encoder | 0.840041 | 0.897833 | 0.911249 | 0.921569 | 0.871584 | 0.647541 |
+| **BM25 + trained epoch-1 RRF** | **0.876161** | **0.928793** | **0.937049** | **0.952528** | **0.902243** | **0.844262** |
+
+The new fusion's BRITE/orthology-aware reaction-micro R@1/R@3/R@5/R@10 and
+MRR@10 are 0.907121/0.952528/0.958720/0.969040 and 0.928424. Exact R@10
+model macro and cluster macro are 0.810343 and 0.803688. Seen R@10 is 0.968123;
+true Phase 2 retrieval-failure R@10 is 0.940840. The 17-row Phase 2 reranking-failure
+subset declines to 0.529412 versus 0.882353 for the trained model, an important
+small-stratum tradeoff.
+
+At R@10, BM25-only/trained-only/both/neither counts are 43/45/848/33. Fusion
+recovers 34 reactions beyond BM25 and 42 beyond the trained model (one missed by
+both), while losing 2 BM25 hits and 12 trained-model hits. It improves unseen-target
+R@10 by 0.196721 over the trained model and increases rather than harms trained-model
+R@1 (+0.036120).
+
+Paired 10,000-replicate cluster bootstraps use seed 20260902 and 12 validation
+clusters. Fusion minus BM25 intervals exclude zero for R@1 (+0.095975,
+95% CI [+0.013003, +0.243697]) and R@10 (+0.033024,
+[+0.004790, +0.190299]). Fusion minus old BM25+BGE-M3 RRF also excludes zero for
+R@1 (+0.139319, [+0.100209, +0.225131]) and R@10 (+0.027864,
+[+0.014855, +0.077320]). Fusion minus the trained model includes zero for R@1
+(+0.036120, [-0.011299, +0.067278]) and R@10 (+0.030960,
+[-0.011609, +0.245487]); no superiority claim is made for those comparisons.
+Only 12 clusters are available, so all percentile intervals may be unstable.
+
+For the future Phase 3C Top-10 database evidence set, use
+`bm25_trained_epoch1_rrf`. It is the validation Pareto winner over exact R@1, overall
+R@10, and unseen-target R@10, while the uncertainty versus the trained component and
+the reranking-failure subset regression must remain visible. This is only the
+retriever selection; no Phase 3C or LangChain workflow was started.
+
+```powershell
+python -m benchmark.scripts.phase3b_release fusion
+python -m benchmark.scripts.phase3b_release verify-fusion
+python -m pytest tests/test_phase3b_release.py -q --basetemp benchmark/phase3/_pytest_phase3b_release
+```
+
+All scientific outputs, complete metrics, strata, overlaps/transitions, bootstrap
+results, qualitative examples, deterministic rebuild record, and read-only manifest
+are in `benchmark/phase3/phase3b_fusion/`.

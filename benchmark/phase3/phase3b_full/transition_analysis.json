@@ -1,0 +1,464 @@
+{
+  "example_selection_is_mechanical": true,
+  "examples": [
+    {
+      "category": "successful_biochemical_retrieval_learned",
+      "eligible_count": 770,
+      "example": {
+        "cluster_id": "CLU_BIOMD0000000017",
+        "first_hit_rank_exact": {
+          "bm25": 2,
+          "epoch0": 3,
+          "selected": 1
+        },
+        "ground_truth_ids": [
+          "R00703",
+          "R00704"
+        ],
+        "model_id": "BIOMD0000000017",
+        "multi_positive": true,
+        "query": "Equation: NADH + pyruvate => NAD + lactate\nParticipants: NADH [species=NADH; ChEBI=CHEBI:16908; KEGG-compound=C00004]; pyruvate [species=pyruvate; ChEBI=CHEBI:15361; KEGG-compound=C00022]; NAD [species=NAD; ChEBI=CHEBI:15846; KEGG-compound=C00003]; lactate [species=lactate; ChEBI=CHEBI:24996; KEGG-compound=C00186]",
+        "reaction_id": "R2",
+        "seen_in_train": true,
+        "stratum": "empty_constrained",
+        "top10": {
+          "bm25": [
+            "R13050",
+            "R00703",
+            "R13049",
+            "R00704",
+            "R11676",
+            "R03337",
+            "R10691",
+            "R11996",
+            "R01447",
+            "R03373"
+          ],
+          "epoch0": [
+            "R04876",
+            "R05694",
+            "R00703",
+            "R06454",
+            "R00704",
+            "R10476",
+            "R08590",
+            "R00091",
+            "R11666",
+            "R06792"
+          ],
+          "selected": [
+            "R00703",
+            "R00704",
+            "R11676",
+            "R13049",
+            "R13050",
+            "R00214",
+            "R03337",
+            "R03373",
+            "R04185",
+            "R00215"
+          ]
+        }
+      },
+      "selection": "lexicographically first eligible validation reaction"
+    },
+    {
+      "category": "harmed_by_fine_tuning",
+      "eligible_count": 2,
+      "example": {
+        "cluster_id": "CLU_BIOMD0000001061",
+        "first_hit_rank_exact": {
+          "bm25": 1,
+          "epoch0": 1,
+          "selected": 3
+        },
+        "ground_truth_ids": [
+          "R05813"
+        ],
+        "model_id": "BIOMD0000001061",
+        "multi_positive": false,
+        "query": "Equation: 2 M_amet_c + M_codhpre6_c => 2 M_ahcys_c + M_co2_c + M_copre8_c + M_h_c\nParticipants: S-Adenosyl-L-methionine [species=M_amet_c; ChEBI=CHEBI:10786,CHEBI:10833,CHEBI:12742,CHEBI:12757,CHEBI:12760,CHEBI:15414,CHEBI:22036,CHEBI:33442,CHEBI:45607,CHEBI:527887,CHEBI:59789,CHEBI:67040,CHEBI:8946; KEGG-compound=C00019]; Cobalt-dihydro-precorrin 6 [species=M_codhpre6_c; ChEBI=CHEBI:3789,CHEBI:72780; KEGG-compound=C11543]; S-Adenosyl-L-homocysteine [species=M_ahcys_c; ChEBI=CHEBI:12741,CHEBI:12759,CHEBI:12761,CHEBI:16680,CHEBI:22034,CHEBI:45495,CHEBI:57856,CHEBI:67009,CHEBI:8945; KEGG-compound=C00021]; CO2 CO2 [species=M_co2_c; ChEBI=CHEBI:13282,CHEBI:13283,CHEBI:13284,CHEBI:13285,CHEBI:16526,CHEBI:23011,CHEBI:3283,CHEBI:48829; KEGG-compound=C00011]; Cobalt-precorrin 8 [species=M_copre8_c; ChEBI=CHEBI:3795,CHEBI:70792; KEGG-compound=C11545]; H+ [species=M_h_c; ChEBI=CHEBI:10744,CHEBI:13357,CHEBI:15378,CHEBI:5584; KEGG-compound=C00080]",
+        "reaction_id": "R_CPC6MT",
+        "seen_in_train": false,
+        "stratum": "empty_constrained",
+        "top10": {
+          "bm25": [
+            "R05813",
+            "R07774",
+            "R07775",
+            "R05812",
+            "R05149",
+            "R07773",
+            "R05811",
+            "R05809",
+            "R05810",
+            "R07251"
+          ],
+          "epoch0": [
+            "R05813",
+            "R06767",
+            "R07922",
+            "R06778",
+            "R12138",
+            "R11740",
+            "R07239",
+            "R12857",
+            "R05809",
+            "R08797"
+          ],
+          "selected": [
+            "R07774",
+            "R05149",
+            "R05813",
+            "R07773",
+            "R05811",
+            "R07775",
+            "R07238",
+            "R05810",
+            "R05219",
+            "R05809"
+          ]
+        }
+      },
+      "selection": "lexicographically first eligible validation reaction"
+    },
+    {
+      "category": "unseen_target_improvement",
+      "eligible_count": 81,
+      "example": {
+        "cluster_id": "CLU_BIOMD0000000023",
+        "first_hit_rank_exact": {
+          "bm25": 1,
+          "epoch0": null,
+          "selected": 1
+        },
+        "ground_truth_ids": [
+          "R00766"
+        ],
+        "model_id": "BIOMD0000000023",
+        "multi_positive": false,
+        "query": "Equation: 2 HexP <=> UDP + Suc6P\nParticipants: HexP [species=HexP; ChEBI=CHEBI:14314,CHEBI:15946,CHEBI:16218,CHEBI:18066; KEGG-compound=C00029,C00085,C00103,C00668]; UDP [species=UDP; ChEBI=CHEBI:17659; KEGG-compound=C00015]; Suc6P [species=Suc6P; ChEBI=CHEBI:16308; KEGG-compound=C02591]",
+        "reaction_id": "v6",
+        "seen_in_train": false,
+        "stratum": "empty_constrained",
+        "top10": {
+          "bm25": [
+            "R00766",
+            "R02737",
+            "R03526",
+            "R00292",
+            "R10639",
+            "R06048",
+            "R01995",
+            "R12469",
+            "R12470",
+            "R12471"
+          ],
+          "epoch0": [
+            "R06454",
+            "R03078",
+            "R07949",
+            "R04975",
+            "R07983",
+            "R13390",
+            "R12995",
+            "R10476",
+            "R12557",
+            "R08797"
+          ],
+          "selected": [
+            "R00766",
+            "R06073",
+            "R00769",
+            "R00155",
+            "R00293",
+            "R12553",
+            "R06193",
+            "R00159",
+            "R00156",
+            "R03238"
+          ]
+        }
+      },
+      "selection": "lexicographically first eligible validation reaction"
+    },
+    {
+      "category": "unseen_target_regression",
+      "eligible_count": 2,
+      "example": {
+        "cluster_id": "CLU_BIOMD0000000017",
+        "first_hit_rank_exact": {
+          "bm25": 1,
+          "epoch0": 3,
+          "selected": 4
+        },
+        "ground_truth_ids": [
+          "R02344",
+          "R02946"
+        ],
+        "model_id": "BIOMD0000000017",
+        "multi_positive": true,
+        "query": "Equation: NADH + AcetoinIn => NAD + Butanediol\nParticipants: NADH [species=NADH; ChEBI=CHEBI:16908; KEGG-compound=C00004]; AcetoinIn [species=AcetoinIn; ChEBI=CHEBI:15688; KEGG-compound=C00466]; NAD [species=NAD; ChEBI=CHEBI:15846; KEGG-compound=C00003]; Butanediol [species=Butanediol; ChEBI=CHEBI:16812,CHEBI:16982; KEGG-compound=C03044,C03046]",
+        "reaction_id": "R11",
+        "seen_in_train": false,
+        "stratum": "empty_constrained",
+        "top10": {
+          "bm25": [
+            "R02344",
+            "R05724",
+            "R02343",
+            "R02946",
+            "R03707",
+            "R09524",
+            "R12673",
+            "R12838",
+            "R00112",
+            "R13072"
+          ],
+          "epoch0": [
+            "R06454",
+            "R02343",
+            "R02344",
+            "R02856",
+            "R10476",
+            "R05866",
+            "R10477",
+            "R10478",
+            "R11092",
+            "R10361"
+          ],
+          "selected": [
+            "R10504",
+            "R10505",
+            "R03707",
+            "R02946",
+            "R02344",
+            "R09078",
+            "R02855",
+            "R11448",
+            "R02343",
+            "R04429"
+          ]
+        }
+      },
+      "selection": "lexicographically first eligible validation reaction"
+    },
+    {
+      "category": "bm25_success_biencoder_misses",
+      "eligible_count": 53,
+      "example": {
+        "cluster_id": "CLU_BIOMD0000000017",
+        "first_hit_rank_exact": {
+          "bm25": 1,
+          "epoch0": 3,
+          "selected": 4
+        },
+        "ground_truth_ids": [
+          "R02344",
+          "R02946"
+        ],
+        "model_id": "BIOMD0000000017",
+        "multi_positive": true,
+        "query": "Equation: NADH + AcetoinIn => NAD + Butanediol\nParticipants: NADH [species=NADH; ChEBI=CHEBI:16908; KEGG-compound=C00004]; AcetoinIn [species=AcetoinIn; ChEBI=CHEBI:15688; KEGG-compound=C00466]; NAD [species=NAD; ChEBI=CHEBI:15846; KEGG-compound=C00003]; Butanediol [species=Butanediol; ChEBI=CHEBI:16812,CHEBI:16982; KEGG-compound=C03044,C03046]",
+        "reaction_id": "R11",
+        "seen_in_train": false,
+        "stratum": "empty_constrained",
+        "top10": {
+          "bm25": [
+            "R02344",
+            "R05724",
+            "R02343",
+            "R02946",
+            "R03707",
+            "R09524",
+            "R12673",
+            "R12838",
+            "R00112",
+            "R13072"
+          ],
+          "epoch0": [
+            "R06454",
+            "R02343",
+            "R02344",
+            "R02856",
+            "R10476",
+            "R05866",
+            "R10477",
+            "R10478",
+            "R11092",
+            "R10361"
+          ],
+          "selected": [
+            "R10504",
+            "R10505",
+            "R03707",
+            "R02946",
+            "R02344",
+            "R09078",
+            "R02855",
+            "R11448",
+            "R02343",
+            "R04429"
+          ]
+        }
+      },
+      "selection": "lexicographically first eligible validation reaction"
+    },
+    {
+      "category": "biencoder_success_bm25_misses",
+      "eligible_count": 111,
+      "example": {
+        "cluster_id": "CLU_BIOMD0000000017",
+        "first_hit_rank_exact": {
+          "bm25": 2,
+          "epoch0": 3,
+          "selected": 1
+        },
+        "ground_truth_ids": [
+          "R00703",
+          "R00704"
+        ],
+        "model_id": "BIOMD0000000017",
+        "multi_positive": true,
+        "query": "Equation: NADH + pyruvate => NAD + lactate\nParticipants: NADH [species=NADH; ChEBI=CHEBI:16908; KEGG-compound=C00004]; pyruvate [species=pyruvate; ChEBI=CHEBI:15361; KEGG-compound=C00022]; NAD [species=NAD; ChEBI=CHEBI:15846; KEGG-compound=C00003]; lactate [species=lactate; ChEBI=CHEBI:24996; KEGG-compound=C00186]",
+        "reaction_id": "R2",
+        "seen_in_train": true,
+        "stratum": "empty_constrained",
+        "top10": {
+          "bm25": [
+            "R13050",
+            "R00703",
+            "R13049",
+            "R00704",
+            "R11676",
+            "R03337",
+            "R10691",
+            "R11996",
+            "R01447",
+            "R03373"
+          ],
+          "epoch0": [
+            "R04876",
+            "R05694",
+            "R00703",
+            "R06454",
+            "R00704",
+            "R10476",
+            "R08590",
+            "R00091",
+            "R11666",
+            "R06792"
+          ],
+          "selected": [
+            "R00703",
+            "R00704",
+            "R11676",
+            "R13049",
+            "R13050",
+            "R00214",
+            "R03337",
+            "R03373",
+            "R04185",
+            "R00215"
+          ]
+        }
+      },
+      "selection": "lexicographically first eligible validation reaction"
+    }
+  ],
+  "n_reactions": 969,
+  "rank_not_in_top100_value_for_comparison": 101,
+  "scope": "paired 969-reaction validation population; exact reaction matching",
+  "top1_transition_matrix": {
+    "correct_to_correct": 44,
+    "correct_to_wrong": 2,
+    "wrong_to_correct": 770,
+    "wrong_to_wrong": 153
+  },
+  "transitions": {
+    "correct_epoch0_to_incorrect_selected": {
+      "by_stratum": {
+        "empty_constrained": 1,
+        "nonempty_answer_absent": 1
+      },
+      "multi_positive": 0,
+      "rerank_failure": 0,
+      "seen": 1,
+      "single_positive": 2,
+      "total": 2,
+      "true_retrieval_failure": 2,
+      "unseen": 1
+    },
+    "improved_rank_without_top1": {
+      "by_stratum": {
+        "empty_constrained": 67,
+        "nonempty_answer_absent": 4,
+        "retrievable_rerank_failure": 10,
+        "retrievable_top1_success": 20,
+        "unconstrained": 2
+      },
+      "multi_positive": 5,
+      "rerank_failure": 10,
+      "seen": 82,
+      "single_positive": 98,
+      "total": 103,
+      "true_retrieval_failure": 73,
+      "unseen": 21
+    },
+    "incorrect_epoch0_to_correct_selected": {
+      "by_stratum": {
+        "empty_constrained": 319,
+        "nonempty_answer_absent": 6,
+        "retrievable_rerank_failure": 7,
+        "retrievable_top1_success": 368,
+        "unconstrained": 70
+      },
+      "multi_positive": 7,
+      "rerank_failure": 7,
+      "seen": 710,
+      "single_positive": 763,
+      "total": 770,
+      "true_retrieval_failure": 395,
+      "unseen": 60
+    },
+    "lost_from_top10": {
+      "by_stratum": {},
+      "multi_positive": 0,
+      "rerank_failure": 0,
+      "seen": 0,
+      "single_positive": 0,
+      "total": 0,
+      "true_retrieval_failure": 0,
+      "unseen": 0
+    },
+    "recovered_within_top10": {
+      "by_stratum": {
+        "empty_constrained": 316,
+        "nonempty_answer_absent": 6,
+        "retrievable_rerank_failure": 13,
+        "retrievable_top1_success": 276,
+        "unconstrained": 53
+      },
+      "multi_positive": 8,
+      "rerank_failure": 13,
+      "seen": 606,
+      "single_positive": 656,
+      "total": 664,
+      "true_retrieval_failure": 375,
+      "unseen": 58
+    },
+    "worsened_rank": {
+      "by_stratum": {
+        "empty_constrained": 2,
+        "nonempty_answer_absent": 1
+      },
+      "multi_positive": 1,
+      "rerank_failure": 0,
+      "seen": 1,
+      "single_positive": 2,
+      "total": 3,
+      "true_retrieval_failure": 3,
+      "unseen": 2
+    }
+  }
+}

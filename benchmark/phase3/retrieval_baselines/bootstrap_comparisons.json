@@ -1,0 +1,55 @@
+{
+  "best_full_catalog_minus_phase2": {
+    "best_method": "bm25_bge_m3_rrf",
+    "ci_95_percentile": [
+      0.197492,
+      0.724359
+    ],
+    "delta_a_minus_b": 0.465428,
+    "estimand": "paired reaction-micro Recall@10 difference",
+    "limitation": "Only 12 validation clusters; intervals may be unstable. Do not claim superiority when zero is included.",
+    "n_boot": 10000,
+    "n_clusters": 12,
+    "seed": 20260902,
+    "unit": "frozen validation cluster"
+  },
+  "bm25_minus_dense": {
+    "ci_95_percentile": [
+      0.071713,
+      0.306667
+    ],
+    "delta_a_minus_b": 0.134159,
+    "estimand": "paired reaction-micro Recall@10 difference",
+    "limitation": "Only 12 validation clusters; intervals may be unstable. Do not claim superiority when zero is included.",
+    "n_boot": 10000,
+    "n_clusters": 12,
+    "seed": 20260902,
+    "unit": "frozen validation cluster"
+  },
+  "rrf_minus_bm25": {
+    "ci_95_percentile": [
+      -0.013158,
+      0.120482
+    ],
+    "delta_a_minus_b": 0.00516,
+    "estimand": "paired reaction-micro Recall@10 difference",
+    "limitation": "Only 12 validation clusters; intervals may be unstable. Do not claim superiority when zero is included.",
+    "n_boot": 10000,
+    "n_clusters": 12,
+    "seed": 20260902,
+    "unit": "frozen validation cluster"
+  },
+  "rrf_minus_dense": {
+    "ci_95_percentile": [
+      0.102389,
+      0.371053
+    ],
+    "delta_a_minus_b": 0.139319,
+    "estimand": "paired reaction-micro Recall@10 difference",
+    "limitation": "Only 12 validation clusters; intervals may be unstable. Do not claim superiority when zero is included.",
+    "n_boot": 10000,
+    "n_clusters": 12,
+    "seed": 20260902,
+    "unit": "frozen validation cluster"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "archive": {
+    "compressed_bytes": 111163286,
+    "filename": "aaaim-phase3b-selected-epoch1-inference.zip",
+    "gitignored_path": "benchmark/dist/aaaim-phase3b-selected-epoch1-inference.zip",
+    "sha256": "3412a3fa546347d8209ab62ca7ef55fb490e148b5f90c25cf33616328a0d0f53",
+    "uncompressed_bytes": 134416825
+  },
+  "contents_verified": true,
+  "deterministic_build": {
+    "byte_identical": true,
+    "compression": "deflate level 9",
+    "fixed_zip_timestamp": "1980-01-01T00:00:00",
+    "independent_passes": 2
+  },
+  "restoration": {
+    "complete_validation_rankings_reproduced": true,
+    "fixture_reproduced": true,
+    "performed": true,
+    "verification_path": "benchmark/dist/aaaim-phase3b-selected-epoch1-inference.restoration.json"
+  },
+  "schema": "phase3b-selected-inference-v1",
+  "selected_model": {
+    "checkpoint_sha256": "8773b04f09916889b74c956e708044fe2c653fa764fe73c422ecc376ecae81c1",
+    "config_hash": "0b808b72948311a44ebfd5869168751297df47a6afcfd1484a3b6907c9cabe88",
+    "dataset_hash": "142c9f0d404531cf2a8c59ddfabdc80a2858dddd4656a1becc1fb5c0ff292a05",
+    "initializer": "BAAI/bge-small-en-v1.5",
+    "max_length": 256,
+    "metadata_checkpoint_sha256": "8773b04f09916889b74c956e708044fe2c653fa764fe73c422ecc376ecae81c1",
+    "normalization": "l2",
+    "pooling": "cls",
+    "ranking_sha256": "660c7ff55d787928050ba963cf4236788de21f661a523a5ebc1c47abbfc2f304",
+    "recall_at_1": 0.840041,
+    "recall_at_10": 0.921569,
+    "revision": "5e62ea33e012fda8c02802b906664c915ebd1bb1",
+    "selected_epoch": 1
+  },
+  "upload_performed": false
+}

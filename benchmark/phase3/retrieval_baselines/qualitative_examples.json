@@ -1,0 +1,405 @@
+{
+  "examples": [
+    {
+      "category": "bm25_only",
+      "first_hit_rank_exact": {
+        "bge_m3_dense": 17,
+        "bm25": 1,
+        "bm25_bge_m3_rrf": 3,
+        "phase2_rule_based": null
+      },
+      "ground_truth_ids": [
+        "R02344",
+        "R02946"
+      ],
+      "model_id": "BIOMD0000000017",
+      "query": "Equation: NADH + AcetoinIn => NAD + Butanediol\nParticipants: NADH [species=NADH; ChEBI=CHEBI:16908; KEGG-compound=C00004]; AcetoinIn [species=AcetoinIn; ChEBI=CHEBI:15688; KEGG-compound=C00466]; NAD [species=NAD; ChEBI=CHEBI:15846; KEGG-compound=C00003]; Butanediol [species=Butanediol; ChEBI=CHEBI:16812,CHEBI:16982; KEGG-compound=C03044,C03046]",
+      "reaction_id": "R11",
+      "seen_in_train": false,
+      "stratum": "empty_constrained",
+      "top10": {
+        "bge_m3_dense": [
+          "R02343",
+          "R00754",
+          "R03544",
+          "R00710",
+          "R09524",
+          "R10505",
+          "R09078",
+          "R00746",
+          "R08557",
+          "R10504"
+        ],
+        "bm25": [
+          "R02344",
+          "R05724",
+          "R02343",
+          "R02946",
+          "R03707",
+          "R09524",
+          "R12673",
+          "R12838",
+          "R00112",
+          "R13072"
+        ],
+        "bm25_bge_m3_rrf": [
+          "R02343",
+          "R09524",
+          "R02344",
+          "R13073",
+          "R02946",
+          "R03707",
+          "R13072",
+          "R00700",
+          "R07171",
+          "R00112"
+        ],
+        "phase2_rule_based": []
+      }
+    },
+    {
+      "category": "dense_only",
+      "first_hit_rank_exact": {
+        "bge_m3_dense": 9,
+        "bm25": 13,
+        "bm25_bge_m3_rrf": 3,
+        "phase2_rule_based": 1
+      },
+      "ground_truth_ids": [
+        "R00230"
+      ],
+      "model_id": "BIOMD0000000017",
+      "query": "Equation: AcCoA + PO4 => CoA + AcP\nParticipants: AcCoA [species=AcCoA; ChEBI=CHEBI:15351; KEGG-compound=C00024]; PO4 [species=PO4; ChEBI=CHEBI:18367; KEGG-compound=C00009]; CoA [species=CoA; ChEBI=CHEBI:15346; KEGG-compound=C00010]; AcP [species=AcP; ChEBI=CHEBI:15350; KEGG-compound=C00227]",
+      "reaction_id": "R4",
+      "seen_in_train": true,
+      "stratum": "retrievable_top1_success",
+      "top10": {
+        "bge_m3_dense": [
+          "R07895",
+          "R10219",
+          "R05509",
+          "R06944",
+          "R04546",
+          "R08767",
+          "R13487",
+          "R07891",
+          "R00230",
+          "R11412"
+        ],
+        "bm25": [
+          "R10700",
+          "R12430",
+          "R10707",
+          "R11412",
+          "R12735",
+          "R10172",
+          "R06635",
+          "R11615",
+          "R11616",
+          "R06643"
+        ],
+        "bm25_bge_m3_rrf": [
+          "R11412",
+          "R06635",
+          "R00230",
+          "R13487",
+          "R12430",
+          "R00229",
+          "R06637",
+          "R07895",
+          "R10700",
+          "R08453"
+        ],
+        "phase2_rule_based": [
+          "R00230"
+        ]
+      }
+    },
+    {
+      "category": "hybrid_only",
+      "first_hit_rank_exact": {
+        "bge_m3_dense": 15,
+        "bm25": 21,
+        "bm25_bge_m3_rrf": 1,
+        "phase2_rule_based": null
+      },
+      "ground_truth_ids": [
+        "R00756"
+      ],
+      "model_id": "BIOMD0000000064",
+      "query": "Equation: F6P + P => F16P\nParticipants: Fructose 6 Phosphate [species=F6P; ChEBI=CHEBI:15946; KEGG-compound=C05345]; High energy phosphates [species=P; ChEBI=CHEBI:15422,CHEBI:16761; KEGG-compound=C00002,C00008]; Fructose-1,6 bisphosphate [species=F16P; ChEBI=CHEBI:16905; KEGG-compound=C00354]",
+      "reaction_id": "vPFK",
+      "seen_in_train": true,
+      "stratum": "empty_constrained",
+      "top10": {
+        "bge_m3_dense": [
+          "R08125",
+          "R00762",
+          "R01068",
+          "R00764",
+          "R00761",
+          "R03920",
+          "R00760",
+          "R05805",
+          "R02073",
+          "R13199"
+        ],
+        "bm25": [
+          "R10987",
+          "R10288",
+          "R10268",
+          "R13205",
+          "R07641",
+          "R05685",
+          "R06529",
+          "R06290",
+          "R10281",
+          "R01395"
+        ],
+        "bm25_bge_m3_rrf": [
+          "R00756",
+          "R13203",
+          "R10987",
+          "R04779",
+          "R01395",
+          "R02732",
+          "R06102",
+          "R06211",
+          "R10541",
+          "R06110"
+        ],
+        "phase2_rule_based": []
+      }
+    },
+    {
+      "category": "all_method_failure",
+      "first_hit_rank_exact": {
+        "bge_m3_dense": null,
+        "bm25": null,
+        "bm25_bge_m3_rrf": null,
+        "phase2_rule_based": null
+      },
+      "ground_truth_ids": [
+        "R02947"
+      ],
+      "model_id": "BIOMD0000000017",
+      "query": "Equation: AcLac => AcetoinIn\nParticipants: AcLac [species=AcLac; ChEBI=CHEBI:16444; KEGG-compound=C00900]; AcetoinIn [species=AcetoinIn; ChEBI=CHEBI:15688; KEGG-compound=C00466]",
+      "reaction_id": "R9",
+      "seen_in_train": false,
+      "stratum": "nonempty_answer_absent",
+      "top10": {
+        "bge_m3_dense": [
+          "R01026",
+          "R09524",
+          "R00238",
+          "R01359",
+          "R07725",
+          "R08478",
+          "R06332",
+          "R06735",
+          "R02396",
+          "R05509"
+        ],
+        "bm25": [
+          "R02343",
+          "R02344",
+          "R03052",
+          "R02345",
+          "R00006",
+          "R03050",
+          "R03051",
+          "R09524",
+          "R00165",
+          "R00166"
+        ],
+        "bm25_bge_m3_rrf": [
+          "R09524",
+          "R02343",
+          "R01026",
+          "R02344",
+          "R00238",
+          "R03052",
+          "R01359",
+          "R02345",
+          "R00006",
+          "R07725"
+        ],
+        "phase2_rule_based": [
+          "R02948"
+        ]
+      }
+    },
+    {
+      "category": "fusion_harms_rank",
+      "first_hit_rank_exact": {
+        "bge_m3_dense": 17,
+        "bm25": 1,
+        "bm25_bge_m3_rrf": 3,
+        "phase2_rule_based": null
+      },
+      "ground_truth_ids": [
+        "R02344",
+        "R02946"
+      ],
+      "model_id": "BIOMD0000000017",
+      "query": "Equation: NADH + AcetoinIn => NAD + Butanediol\nParticipants: NADH [species=NADH; ChEBI=CHEBI:16908; KEGG-compound=C00004]; AcetoinIn [species=AcetoinIn; ChEBI=CHEBI:15688; KEGG-compound=C00466]; NAD [species=NAD; ChEBI=CHEBI:15846; KEGG-compound=C00003]; Butanediol [species=Butanediol; ChEBI=CHEBI:16812,CHEBI:16982; KEGG-compound=C03044,C03046]",
+      "reaction_id": "R11",
+      "seen_in_train": false,
+      "stratum": "empty_constrained",
+      "top10": {
+        "bge_m3_dense": [
+          "R02343",
+          "R00754",
+          "R03544",
+          "R00710",
+          "R09524",
+          "R10505",
+          "R09078",
+          "R00746",
+          "R08557",
+          "R10504"
+        ],
+        "bm25": [
+          "R02344",
+          "R05724",
+          "R02343",
+          "R02946",
+          "R03707",
+          "R09524",
+          "R12673",
+          "R12838",
+          "R00112",
+          "R13072"
+        ],
+        "bm25_bge_m3_rrf": [
+          "R02343",
+          "R09524",
+          "R02344",
+          "R13073",
+          "R02946",
+          "R03707",
+          "R13072",
+          "R00700",
+          "R07171",
+          "R00112"
+        ],
+        "phase2_rule_based": []
+      }
+    },
+    {
+      "category": "seen_target_behavior",
+      "first_hit_rank_exact": {
+        "bge_m3_dense": 1,
+        "bm25": 2,
+        "bm25_bge_m3_rrf": 1,
+        "phase2_rule_based": null
+      },
+      "ground_truth_ids": [
+        "R00703",
+        "R00704"
+      ],
+      "model_id": "BIOMD0000000017",
+      "query": "Equation: NADH + pyruvate => NAD + lactate\nParticipants: NADH [species=NADH; ChEBI=CHEBI:16908; KEGG-compound=C00004]; pyruvate [species=pyruvate; ChEBI=CHEBI:15361; KEGG-compound=C00022]; NAD [species=NAD; ChEBI=CHEBI:15846; KEGG-compound=C00003]; lactate [species=lactate; ChEBI=CHEBI:24996; KEGG-compound=C00186]",
+      "reaction_id": "R2",
+      "seen_in_train": true,
+      "stratum": "empty_constrained",
+      "top10": {
+        "bge_m3_dense": [
+          "R00704",
+          "R00703",
+          "R01370",
+          "R13073",
+          "R00209",
+          "R03337",
+          "R11676",
+          "R07171",
+          "R01308",
+          "R01388"
+        ],
+        "bm25": [
+          "R13050",
+          "R00703",
+          "R13049",
+          "R00704",
+          "R11676",
+          "R03337",
+          "R10691",
+          "R11996",
+          "R01447",
+          "R03373"
+        ],
+        "bm25_bge_m3_rrf": [
+          "R00703",
+          "R00704",
+          "R11676",
+          "R03337",
+          "R13049",
+          "R13050",
+          "R03373",
+          "R00209",
+          "R04876",
+          "R00214"
+        ],
+        "phase2_rule_based": []
+      }
+    },
+    {
+      "category": "unseen_target_behavior",
+      "first_hit_rank_exact": {
+        "bge_m3_dense": 17,
+        "bm25": 1,
+        "bm25_bge_m3_rrf": 3,
+        "phase2_rule_based": null
+      },
+      "ground_truth_ids": [
+        "R02344",
+        "R02946"
+      ],
+      "model_id": "BIOMD0000000017",
+      "query": "Equation: NADH + AcetoinIn => NAD + Butanediol\nParticipants: NADH [species=NADH; ChEBI=CHEBI:16908; KEGG-compound=C00004]; AcetoinIn [species=AcetoinIn; ChEBI=CHEBI:15688; KEGG-compound=C00466]; NAD [species=NAD; ChEBI=CHEBI:15846; KEGG-compound=C00003]; Butanediol [species=Butanediol; ChEBI=CHEBI:16812,CHEBI:16982; KEGG-compound=C03044,C03046]",
+      "reaction_id": "R11",
+      "seen_in_train": false,
+      "stratum": "empty_constrained",
+      "top10": {
+        "bge_m3_dense": [
+          "R02343",
+          "R00754",
+          "R03544",
+          "R00710",
+          "R09524",
+          "R10505",
+          "R09078",
+          "R00746",
+          "R08557",
+          "R10504"
+        ],
+        "bm25": [
+          "R02344",
+          "R05724",
+          "R02343",
+          "R02946",
+          "R03707",
+          "R09524",
+          "R12673",
+          "R12838",
+          "R00112",
+          "R13072"
+        ],
+        "bm25_bge_m3_rrf": [
+          "R02343",
+          "R09524",
+          "R02344",
+          "R13073",
+          "R02946",
+          "R03707",
+          "R13072",
+          "R00700",
+          "R07171",
+          "R00112"
+        ],
+        "phase2_rule_based": []
+      }
+    }
+  ],
+  "selection": "lexicographically_first_eligible_reaction"
+}

@@ -1,0 +1,34 @@
+{
+  "bge_m3_dense": {
+    "missing_outputs": 0,
+    "n_expected": 969,
+    "n_outputs": 969,
+    "ranking_depth_max": 100,
+    "ranking_depth_mean": 100.0,
+    "ranking_depth_min": 100
+  },
+  "bm25": {
+    "missing_outputs": 0,
+    "n_expected": 969,
+    "n_outputs": 969,
+    "ranking_depth_max": 100,
+    "ranking_depth_mean": 100.0,
+    "ranking_depth_min": 100
+  },
+  "bm25_bge_m3_rrf": {
+    "missing_outputs": 0,
+    "n_expected": 969,
+    "n_outputs": 969,
+    "ranking_depth_max": 100,
+    "ranking_depth_mean": 100.0,
+    "ranking_depth_min": 100
+  },
+  "phase2_rule_based": {
+    "missing_outputs": 0,
+    "n_expected": 969,
+    "n_outputs": 969,
+    "ranking_depth_max": 303,
+    "ranking_depth_mean": 1.3,
+    "ranking_depth_min": 0
+  }
+}

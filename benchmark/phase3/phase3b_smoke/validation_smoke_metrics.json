@@ -1,0 +1,12 @@
+{
+  "n_validation_reactions": 969,
+  "ranking_sha256_before_label_join": "b9033d001352e65f2f2c42e44182f55a559256f09e2152fac6c0cd45c74999cb",
+  "recall_at_1": 0.40763673890608876,
+  "recall_at_10": 0.7616099071207431,
+  "scope": "single validation-only smoke diagnostic; not checkpoint selection or scientific performance",
+  "test_rows_read": 0,
+  "true_retrieval_failure_n": 524,
+  "true_retrieval_failure_recall_at_10": 0.6889312977099237,
+  "unseen_target_n": 122,
+  "unseen_target_recall_at_10": 0.5327868852459017
+}

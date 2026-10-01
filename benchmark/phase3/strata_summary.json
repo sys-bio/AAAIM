@@ -1,0 +1,17 @@
+{
+  "config_id": "86938b48ab88",
+  "counts": {
+    "empty_constrained": 2646,
+    "nonempty_answer_absent": 340,
+    "retrievable_rerank_failure": 85,
+    "retrievable_top1_success": 1934,
+    "unconstrained": 811
+  },
+  "exhaustive": true,
+  "matching": "exact",
+  "mutually_exclusive": true,
+  "n_evaluable": 5816,
+  "note": "Equivalence-aware hit columns are stored but do not assign the stratum.",
+  "phase2_commit": "19580572a70c2c138290aa6da06697a7cef9d7f6",
+  "phase2_tag": "benchmark-phase2-v1"
+}

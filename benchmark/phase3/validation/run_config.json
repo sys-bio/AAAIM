@@ -1,0 +1,28 @@
+{
+  "experiment": "phase3a_direct_open_set_validation_pilot",
+  "scientific_question": "Given an SBML reaction and bounded biological context but no KEGG candidate list, database retrieval, answer key, or external tools, can gpt-5.6-terra identify the correct KEGG reaction or appropriately abstain?",
+  "provider": "openai",
+  "api": "responses",
+  "model": "gpt-5.6-terra",
+  "sdk": "openai==1.78.1",
+  "mode": "direct_open_set",
+  "split": "validation",
+  "n_reactions": 163,
+  "n_planned_requests": 489,
+  "context_variants": [
+    "target_only",
+    "target_plus_model",
+    "target_plus_neighborhood"
+  ],
+  "prompt_template_version": "phase3-open-set-v3",
+  "output_schema_version": "phase3-structured-v1",
+  "max_output_tokens": 1024,
+  "reasoning_effort": "low",
+  "max_retries": 2,
+  "tokenizer": "chars_div_2_conservative",
+  "cap_usd": 5.0,
+  "tools": [],
+  "answer_key_joined_only_after_freeze": true,
+  "test_split_read": false,
+  "release_tag": null
+}

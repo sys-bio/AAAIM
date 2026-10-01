@@ -1,0 +1,42 @@
+{
+  "by_variant": {
+    "target_only": {
+      "cost_usd": 0.838394,
+      "input_tokens": 86305,
+      "n": 163,
+      "output_tokens": 52922,
+      "reasoning_tokens": 37330
+    },
+    "target_plus_model": {
+      "cost_usd": 0.839722,
+      "input_tokens": 96485,
+      "n": 163,
+      "output_tokens": 47496,
+      "reasoning_tokens": 31847
+    },
+    "target_plus_neighborhood": {
+      "cost_usd": 0.907282,
+      "input_tokens": 123773,
+      "n": 163,
+      "output_tokens": 51138,
+      "reasoning_tokens": 34764
+    }
+  },
+  "cached_input_tokens": 0,
+  "cost_per_correct_prediction_usd": 0.017122,
+  "cost_per_reaction_usd": 0.015861,
+  "input_tokens": 306563,
+  "latency_ms": {
+    "max": 19010.9,
+    "mean": 5829.7309,
+    "n": 470,
+    "p50": 4150.5,
+    "p90": 13228.0
+  },
+  "n_cached": 0,
+  "n_live_this_file": 489,
+  "note": "Dollar values are calculated from recorded usage and the frozen pricing snapshot. cache_hit means the row was replayed in this file; cost_usd is still the original purchase.",
+  "output_tokens": 151556,
+  "reasoning_tokens": 103941,
+  "total_cost_usd": 2.585398
+}

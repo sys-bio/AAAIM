@@ -1,0 +1,28 @@
+{
+  "actual_cached_input_tokens": 0,
+  "actual_cost_usd": 0,
+  "actual_input_tokens": 306563,
+  "actual_output_tokens": 151556,
+  "actual_reasoning_tokens": 103941,
+  "api_calls": 0,
+  "cache_dir": "benchmark\\phase3\\_response_cache",
+  "cache_only": true,
+  "execute": false,
+  "interrupted": false,
+  "max_cost_usd": 5.0,
+  "model_requested": "gpt-5.6-terra",
+  "n_attempted": 0,
+  "n_cached": 489,
+  "n_compliance_error": 0,
+  "n_failed": 26,
+  "n_missing_usage": 10,
+  "n_planned": 489,
+  "n_refused": 0,
+  "n_succeeded": 463,
+  "out_dir": "benchmark\\phase3\\validation",
+  "spent_usd": 2.585398,
+  "status_counts": {
+    "schema_invalid": 26,
+    "succeeded": 463
+  }
+}

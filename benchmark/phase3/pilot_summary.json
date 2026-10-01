@@ -1,0 +1,44 @@
+{
+  "answer_key": "pilot_answer_key.csv",
+  "config_id": "86938b48ab88",
+  "counts_by_stratum": {
+    "empty_constrained": 50,
+    "nonempty_answer_absent": 22,
+    "retrievable_rerank_failure": 16,
+    "retrievable_top1_success": 25,
+    "unconstrained": 50
+  },
+  "n_clusters": 12,
+  "n_genome_scale": 70,
+  "n_models": 17,
+  "n_selected": 163,
+  "phase2_commit": "19580572a70c2c138290aa6da06697a7cef9d7f6",
+  "phase2_tag": "benchmark-phase2-v1",
+  "public_sample": "pilot_sample.csv",
+  "quotas": {
+    "empty_constrained": 50,
+    "nonempty_answer_absent": 50,
+    "retrievable_rerank_failure": 25,
+    "retrievable_top1_success": 25,
+    "unconstrained": 50
+  },
+  "seed": 20260902,
+  "selection": "Only the validation split is eligible. The exploratory pilot chooses method details here; test is reserved for one frozen-method run. Within each stratum, clusters are visited round-robin after a seeded within-cluster shuffle so large models cannot exhaust the quota. If a stratum has fewer eligible validation reactions than its quota, every eligible reaction is taken and the shortfall is recorded; test/train are never used as a backfill. The cluster split is not rewritten to reach the nominal 200.",
+  "shortfalls": {
+    "nonempty_answer_absent": {
+      "action": "included every eligible validation reaction; did not borrow from test/train",
+      "eligible_in_source": 22,
+      "quota": 50,
+      "selected": 22,
+      "shortfall": 28
+    },
+    "retrievable_rerank_failure": {
+      "action": "included every eligible validation reaction; did not borrow from test/train",
+      "eligible_in_source": 16,
+      "quota": 25,
+      "selected": 16,
+      "shortfall": 9
+    }
+  },
+  "source_split": "validation"
+}

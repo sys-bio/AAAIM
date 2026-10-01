@@ -1,0 +1,67 @@
+{
+  "environment_change": {
+    "commands": [
+      "python -m venv benchmark/phase3/_phase3b_env",
+      "benchmark/phase3/_phase3b_env/Scripts/python.exe -m pip install torch==2.7.1 --index-url https://download.pytorch.org/whl/cu128",
+      "benchmark/phase3/_phase3b_env/Scripts/python.exe -m pip install -r benchmark/requirements-phase3b.txt"
+    ],
+    "path": "benchmark/phase3/_phase3b_env",
+    "scope": "isolated project-local virtual environment; original Python environment unchanged"
+  },
+  "initial_active_environment": {
+    "compute_capability": null,
+    "cuda_available": false,
+    "cuda_tensor_operation": null,
+    "gpu_name": null,
+    "mixed_precision_bf16_supported": false,
+    "mixed_precision_fp16_supported": false,
+    "nvidia_smi": "NVIDIA GeForce RTX 3070, 8192, 591.86",
+    "packages": {
+      "huggingface-hub": "1.29.0",
+      "numpy": "2.2.2",
+      "pandas": "2.2.3",
+      "pytest": "9.1.1",
+      "safetensors": "0.8.0",
+      "tokenizers": "0.23.1",
+      "torch": "2.13.0",
+      "transformers": "5.16.1"
+    },
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.10",
+    "python_executable": "C:\\Users\\janis\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+    "torch_cuda_version": null,
+    "torch_version": "2.13.0+cpu",
+    "total_vram_bytes": null
+  },
+  "phase3b_cuda_environment": {
+    "compute_capability": [
+      8,
+      6
+    ],
+    "cuda_available": true,
+    "cuda_tensor_operation": {
+      "device": "cuda:0",
+      "sum": 120.0
+    },
+    "gpu_name": "NVIDIA GeForce RTX 3070",
+    "mixed_precision_bf16_supported": true,
+    "mixed_precision_fp16_supported": true,
+    "nvidia_smi": "NVIDIA GeForce RTX 3070, 8192, 591.86",
+    "packages": {
+      "huggingface-hub": "1.29.0",
+      "numpy": "2.2.2",
+      "pandas": "2.2.3",
+      "pytest": "8.3.5",
+      "safetensors": "0.8.0",
+      "tokenizers": "0.23.1",
+      "torch": "2.7.1+cu128",
+      "transformers": "5.16.1"
+    },
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.10",
+    "python_executable": "C:\\Users\\janis\\Documents\\software_projects\\janisshin\\AAAIM\\benchmark\\phase3\\_phase3b_env\\Scripts\\python.exe",
+    "torch_cuda_version": "12.8",
+    "torch_version": "2.7.1+cu128",
+    "total_vram_bytes": 8589410304
+  }
+}

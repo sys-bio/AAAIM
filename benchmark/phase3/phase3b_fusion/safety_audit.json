@@ -1,0 +1,11 @@
+{
+  "evaluation_split": "validation",
+  "paid_api_calls": 0,
+  "parameter_tuning": false,
+  "ranking_frozen_sha256_before_label_join": "9601149e0297831ebfbfb4fde24b725a9b00287cf1b4d74270bf2921be138b31",
+  "ranking_labels_loaded": false,
+  "reencoding": false,
+  "retraining": false,
+  "test_rows_read_ranked_or_scored": 0,
+  "validation_reactions": 969
+}

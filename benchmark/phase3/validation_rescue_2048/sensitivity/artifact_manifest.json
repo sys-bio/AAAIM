@@ -1,0 +1,71 @@
+{
+  "files": [
+    {
+      "bytes": 47707,
+      "n_lines": null,
+      "path": "benchmark/phase3/validation_rescue_2048/sensitivity/calibration.json",
+      "sha256": "6cb66b7929bad2233eeceaa5ee3e97aaf66f9058eaeede2959360eb238ad3f4d"
+    },
+    {
+      "bytes": 1881,
+      "n_lines": null,
+      "path": "benchmark/phase3/validation_rescue_2048/sensitivity/context_comparison.json",
+      "sha256": "645dd5b80e4ad010e19a6c3b72ff27dd807dc5b89f04b1b0bfd6921d0dce825f"
+    },
+    {
+      "bytes": 1108,
+      "n_lines": null,
+      "path": "benchmark/phase3/validation_rescue_2048/sensitivity/cost_report.json",
+      "sha256": "ad0721556616f7a080694e737f947e3b6e15e18e248f678496ea99ba3806df54"
+    },
+    {
+      "bytes": 301637,
+      "n_lines": null,
+      "path": "benchmark/phase3/validation_rescue_2048/sensitivity/eval.json",
+      "sha256": "5762430f54bf015bf74f723db28af524a3a6929cc0c1349ac804ebb0d072a142"
+    },
+    {
+      "bytes": 7305,
+      "n_lines": null,
+      "path": "benchmark/phase3/validation_rescue_2048/sensitivity/failure_taxonomy.json",
+      "sha256": "246e14c9b46158c1fa1edfcbd3dad171916e64ffd468223e53ecbc592a6de152"
+    },
+    {
+      "bytes": 4507,
+      "n_lines": null,
+      "path": "benchmark/phase3/validation_rescue_2048/sensitivity/metrics_by_variant.json",
+      "sha256": "d7671462822d353cd254562f4ce9ecc22a000c01e939abebed8079a02232c93d"
+    },
+    {
+      "bytes": 1309,
+      "n_lines": null,
+      "path": "benchmark/phase3/validation_rescue_2048/sensitivity/recommendation.json",
+      "sha256": "91f7c9ad7ef2085c9ff9a62030faad3a38f381487abfcf5a5dc7ef9608abbde4"
+    },
+    {
+      "bytes": 1023370,
+      "n_lines": 489,
+      "path": "benchmark/phase3/validation_rescue_2048/sensitivity/results.jsonl",
+      "sha256": "7616b49970a3829c0010514fd17278b8c5ce006063ddc7ab21d5e7be815241f0"
+    },
+    {
+      "bytes": 936504,
+      "n_lines": null,
+      "path": "benchmark/phase3/validation_rescue_2048/sensitivity/scored_rows.json",
+      "sha256": "60ba61e5f95cb6162d3a43b529e5618ce4fa32634905f34feb558d7ac0f9dbcf"
+    },
+    {
+      "bytes": 1029,
+      "n_lines": null,
+      "path": "benchmark/phase3/validation_rescue_2048/sensitivity/sensitivity_stats.json",
+      "sha256": "afa30a3ca1992f4a341ec67651917e20e3cac98b7653437323559b3e1f10af70"
+    },
+    {
+      "bytes": 7414,
+      "n_lines": null,
+      "path": "benchmark/phase3/validation_rescue_2048/sensitivity/stratum_analysis.json",
+      "sha256": "171705da05e72e7d6f914e136c5b2a96d63419330fe7d23f52d1e4749dd8ad77"
+    }
+  ],
+  "n_files": 11
+}

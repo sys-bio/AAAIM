@@ -1,0 +1,137 @@
+{
+  "files": [
+    {
+      "bytes": 3106,
+      "n_lines": null,
+      "path": "benchmark/phase3/retrieval_baselines/REPORT.md",
+      "sha256": "145dda95a60dfef5db56b2045e8c9240c7a02e65277b43847787389224f81748"
+    },
+    {
+      "bytes": 1724,
+      "n_lines": null,
+      "path": "benchmark/phase3/retrieval_baselines/bootstrap_comparisons.json",
+      "sha256": "06f9e6e3f4d45f7deba50e19f5bc185f6dcbcef954129f7004c1b68a28e5e902"
+    },
+    {
+      "bytes": 2036,
+      "n_lines": null,
+      "path": "benchmark/phase3/retrieval_baselines/config.json",
+      "sha256": "e05390f5b1c9f3ed441af48cd803460c1cda6862a15ac9d9436e19a8649fe1c6"
+    },
+    {
+      "bytes": 267,
+      "n_lines": 3,
+      "path": "benchmark/phase3/retrieval_baselines/frozen_stratum_discrepancies.csv",
+      "sha256": "87d2e533fb0ba65a5cf259bea0c9fd8e2dce6e1e91e8a223bcc291290b3d6456"
+    },
+    {
+      "bytes": 167,
+      "n_lines": null,
+      "path": "benchmark/phase3/retrieval_baselines/method_overlap.json",
+      "sha256": "d5a12cc02235f3b770214e2fa3d340f5c037e165236cb1c0e20a48f632cf9a69"
+    },
+    {
+      "bytes": 6557,
+      "n_lines": null,
+      "path": "benchmark/phase3/retrieval_baselines/metrics_by_method.json",
+      "sha256": "961b3e0b44ff2db10cf5a10c87d7605f77c95b50c748b359591f363f267221d8"
+    },
+    {
+      "bytes": 751,
+      "n_lines": null,
+      "path": "benchmark/phase3/retrieval_baselines/output_diagnostics.json",
+      "sha256": "1b5c56cab49d45b49ba383b0dfef23f6d8082002d5ddd96d7b36852003494143"
+    },
+    {
+      "bytes": 10523,
+      "n_lines": null,
+      "path": "benchmark/phase3/retrieval_baselines/qualitative_examples.json",
+      "sha256": "2502b9373ec9edecc10711d2648119edeadb61bd3678b9550135a55f4fc46aae"
+    },
+    {
+      "bytes": 683303,
+      "n_lines": 969,
+      "path": "benchmark/phase3/retrieval_baselines/queries.jsonl",
+      "sha256": "37aafef84eb5bd0bb259f6d93bfbccd51cde1cbab6a4f184073be703216be964"
+    },
+    {
+      "bytes": 966683,
+      "n_lines": 969,
+      "path": "benchmark/phase3/retrieval_baselines/rankings_bge_m3_dense.jsonl",
+      "sha256": "93221d52d031ecdd36fec759cb5f0c419ecf6fa51522c3ba14734bcb84b3fe49"
+    },
+    {
+      "bytes": 958931,
+      "n_lines": 969,
+      "path": "benchmark/phase3/retrieval_baselines/rankings_bm25.jsonl",
+      "sha256": "f0b700248e388bd75fb7bca9c05a46ecbb6b5802861a8631eadb944e0b1572f0"
+    },
+    {
+      "bytes": 969590,
+      "n_lines": 969,
+      "path": "benchmark/phase3/retrieval_baselines/rankings_bm25_bge_m3_rrf.jsonl",
+      "sha256": "0bc7c727d96f3bc64d3b69ea8ebaaa7105acc7a036b90e8ee5f6f868bc07677b"
+    },
+    {
+      "bytes": 111272,
+      "n_lines": 969,
+      "path": "benchmark/phase3/retrieval_baselines/rankings_phase2_rule_based.jsonl",
+      "sha256": "e22954bb0b8cee75ff17511d96fc42b923217003388f3e4e4a7e03200ef31c0d"
+    },
+    {
+      "bytes": 542,
+      "n_lines": null,
+      "path": "benchmark/phase3/retrieval_baselines/recommendation.json",
+      "sha256": "84a80b452779a75d7691ec26d2f4b8a0222cfc4378e811e8393b70f1da526b31"
+    },
+    {
+      "bytes": 598,
+      "n_lines": null,
+      "path": "benchmark/phase3/retrieval_baselines/runtime_bge_m3_dense.json",
+      "sha256": "f620e388218b0ce54d3a211aa4686b766003f0f8df582e7a8e8979f77987bb7c"
+    },
+    {
+      "bytes": 129,
+      "n_lines": null,
+      "path": "benchmark/phase3/retrieval_baselines/runtime_bm25.json",
+      "sha256": "c6a3d8469e3f862172580b51c18f6d7c0c9196f1251ad99f9ffd8fe1c892c4bf"
+    },
+    {
+      "bytes": 150171,
+      "n_lines": 970,
+      "path": "benchmark/phase3/retrieval_baselines/scored_bge_m3_dense.csv",
+      "sha256": "5b671c710d3068a5ebe2f3ab5bbbab7252b39a37414aa12017e8ff57c8bce947"
+    },
+    {
+      "bytes": 138999,
+      "n_lines": 970,
+      "path": "benchmark/phase3/retrieval_baselines/scored_bm25.csv",
+      "sha256": "49ccf6ab8b466344fc4096054a47dfe90053491ea70343513844dfc7a3850ef0"
+    },
+    {
+      "bytes": 150318,
+      "n_lines": 970,
+      "path": "benchmark/phase3/retrieval_baselines/scored_bm25_bge_m3_rrf.csv",
+      "sha256": "ae7a9b0ae0ccb32c850934f4a154083b2ae0153bf3f458e4c8aaed1b59ffe5dd"
+    },
+    {
+      "bytes": 150694,
+      "n_lines": 970,
+      "path": "benchmark/phase3/retrieval_baselines/scored_phase2_rule_based.csv",
+      "sha256": "d0c24f4a00cd3f1a28fcba0ed66aad92694407e733aa2e314426b9fcb4bd7205"
+    },
+    {
+      "bytes": 14118,
+      "n_lines": null,
+      "path": "benchmark/phase3/retrieval_baselines/seen_unseen_analysis.json",
+      "sha256": "f6b7b8a2bee169129b1fd848cdd400de36fef446ea09fa25b36bfb8937a266d9"
+    },
+    {
+      "bytes": 48527,
+      "n_lines": null,
+      "path": "benchmark/phase3/retrieval_baselines/stratum_analysis.json",
+      "sha256": "85d3c5cead56ad6acaa71cd580012f60fec61d27a2bd87c33903d341064a368c"
+    }
+  ],
+  "n_files": 22
+}

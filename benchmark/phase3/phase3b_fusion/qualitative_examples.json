@@ -1,0 +1,676 @@
+{
+  "examples": [
+    {
+      "category": "bm25_only_at_10",
+      "first_hit_rank_exact": {
+        "bge_m3_dense": 6,
+        "bm25": 3,
+        "bm25_bge_m3_rrf": 2,
+        "bm25_trained_epoch1_rrf": 5,
+        "phase2_rule_based": null,
+        "trained_biencoder_epoch1": 33
+      },
+      "ground_truth_ids": [
+        "R00315"
+      ],
+      "model_id": "BIOMD0000000017",
+      "reaction_id": "R5",
+      "seen_in_train": true,
+      "selection": "lexicographically first eligible validation reaction",
+      "stratum": "empty_constrained",
+      "top10": {
+        "bge_m3_dense": [
+          "R00124",
+          "R00512",
+          "R00570",
+          "R06944",
+          "R00126",
+          "R00315",
+          "R00162",
+          "R00229",
+          "R00316",
+          "R00127"
+        ],
+        "bm25": [
+          "R08906",
+          "R08905",
+          "R00315",
+          "R00124",
+          "R00229",
+          "R00162",
+          "R00086",
+          "R13274",
+          "R00512",
+          "R01547"
+        ],
+        "bm25_bge_m3_rrf": [
+          "R00124",
+          "R00315",
+          "R00512",
+          "R00229",
+          "R00162",
+          "R01547",
+          "R00513",
+          "R02090",
+          "R00127",
+          "R03632"
+        ],
+        "bm25_trained_epoch1_rrf": [
+          "R00124",
+          "R00086",
+          "R08905",
+          "R00162",
+          "R00315",
+          "R10948",
+          "R00104",
+          "R01881",
+          "R02903",
+          "R01526"
+        ],
+        "phase2_rule_based": [],
+        "trained_biencoder_epoch1": [
+          "R00124",
+          "R00086",
+          "R12793",
+          "R10948",
+          "R11629",
+          "R00104",
+          "R13256",
+          "R00126",
+          "R04385",
+          "R01395"
+        ]
+      }
+    },
+    {
+      "category": "trained_biencoder_only_at_10",
+      "first_hit_rank_exact": {
+        "bge_m3_dense": 9,
+        "bm25": 49,
+        "bm25_bge_m3_rrf": 16,
+        "bm25_trained_epoch1_rrf": 16,
+        "phase2_rule_based": null,
+        "trained_biencoder_epoch1": 10
+      },
+      "ground_truth_ids": [
+        "R00802"
+      ],
+      "model_id": "BIOMD0000000023",
+      "reaction_id": "v9",
+      "seen_in_train": false,
+      "selection": "lexicographically first eligible validation reaction",
+      "stratum": "nonempty_answer_absent",
+      "top10": {
+        "bge_m3_dense": [
+          "R06087",
+          "R06059",
+          "R00801",
+          "R06088",
+          "R05140",
+          "R02120",
+          "R06135",
+          "R11307",
+          "R00802",
+          "R06079"
+        ],
+        "bm25": [
+          "R01823",
+          "R00803",
+          "R00801",
+          "R02120",
+          "R12527",
+          "R08676",
+          "R00806",
+          "R00015",
+          "R12528",
+          "R04194"
+        ],
+        "bm25_bge_m3_rrf": [
+          "R00801",
+          "R02120",
+          "R06087",
+          "R01823",
+          "R05140",
+          "R12527",
+          "R00803",
+          "R00015",
+          "R00874",
+          "R04194"
+        ],
+        "bm25_trained_epoch1_rrf": [
+          "R00801",
+          "R12527",
+          "R04194",
+          "R00015",
+          "R07256",
+          "R12528",
+          "R06052",
+          "R06066",
+          "R00803",
+          "R02120"
+        ],
+        "phase2_rule_based": [
+          "R00801"
+        ],
+        "trained_biencoder_epoch1": [
+          "R06066",
+          "R01068",
+          "R00801",
+          "R07256",
+          "R00760",
+          "R12527",
+          "R06052",
+          "R00762",
+          "R00867",
+          "R00802"
+        ]
+      }
+    },
+    {
+      "category": "correct_for_both_at_10",
+      "first_hit_rank_exact": {
+        "bge_m3_dense": 17,
+        "bm25": 1,
+        "bm25_bge_m3_rrf": 3,
+        "bm25_trained_epoch1_rrf": 1,
+        "phase2_rule_based": null,
+        "trained_biencoder_epoch1": 4
+      },
+      "ground_truth_ids": [
+        "R02344",
+        "R02946"
+      ],
+      "model_id": "BIOMD0000000017",
+      "reaction_id": "R11",
+      "seen_in_train": false,
+      "selection": "lexicographically first eligible validation reaction",
+      "stratum": "empty_constrained",
+      "top10": {
+        "bge_m3_dense": [
+          "R02343",
+          "R00754",
+          "R03544",
+          "R00710",
+          "R09524",
+          "R10505",
+          "R09078",
+          "R00746",
+          "R08557",
+          "R10504"
+        ],
+        "bm25": [
+          "R02344",
+          "R05724",
+          "R02343",
+          "R02946",
+          "R03707",
+          "R09524",
+          "R12673",
+          "R12838",
+          "R00112",
+          "R13072"
+        ],
+        "bm25_bge_m3_rrf": [
+          "R02343",
+          "R09524",
+          "R02344",
+          "R13073",
+          "R02946",
+          "R03707",
+          "R13072",
+          "R00700",
+          "R07171",
+          "R00112"
+        ],
+        "bm25_trained_epoch1_rrf": [
+          "R02344",
+          "R03707",
+          "R02946",
+          "R02343",
+          "R09524",
+          "R03475",
+          "R03544",
+          "R02462",
+          "R00100",
+          "R10504"
+        ],
+        "phase2_rule_based": [],
+        "trained_biencoder_epoch1": [
+          "R10504",
+          "R10505",
+          "R03707",
+          "R02946",
+          "R02344",
+          "R09078",
+          "R02855",
+          "R11448",
+          "R02343",
+          "R04429"
+        ]
+      }
+    },
+    {
+      "category": "missed_by_both_at_10",
+      "first_hit_rank_exact": {
+        "bge_m3_dense": 9,
+        "bm25": 13,
+        "bm25_bge_m3_rrf": 3,
+        "bm25_trained_epoch1_rrf": 28,
+        "phase2_rule_based": 1,
+        "trained_biencoder_epoch1": null
+      },
+      "ground_truth_ids": [
+        "R00230"
+      ],
+      "model_id": "BIOMD0000000017",
+      "reaction_id": "R4",
+      "seen_in_train": true,
+      "selection": "lexicographically first eligible validation reaction",
+      "stratum": "retrievable_top1_success",
+      "top10": {
+        "bge_m3_dense": [
+          "R07895",
+          "R10219",
+          "R05509",
+          "R06944",
+          "R04546",
+          "R08767",
+          "R13487",
+          "R07891",
+          "R00230",
+          "R11412"
+        ],
+        "bm25": [
+          "R10700",
+          "R12430",
+          "R10707",
+          "R11412",
+          "R12735",
+          "R10172",
+          "R06635",
+          "R11615",
+          "R11616",
+          "R06643"
+        ],
+        "bm25_bge_m3_rrf": [
+          "R11412",
+          "R06635",
+          "R00230",
+          "R13487",
+          "R12430",
+          "R00229",
+          "R06637",
+          "R07895",
+          "R10700",
+          "R08453"
+        ],
+        "bm25_trained_epoch1_rrf": [
+          "R10700",
+          "R11450",
+          "R12430",
+          "R00229",
+          "R01625",
+          "R07895",
+          "R00388",
+          "R10707",
+          "R11412",
+          "R13256"
+        ],
+        "phase2_rule_based": [
+          "R00230"
+        ],
+        "trained_biencoder_epoch1": [
+          "R01625",
+          "R07895",
+          "R00388",
+          "R13256",
+          "R02402",
+          "R00389",
+          "R00130",
+          "R07897",
+          "R00352",
+          "R02241"
+        ]
+      }
+    },
+    {
+      "category": "fusion_recovers_beyond_bm25_at_10",
+      "first_hit_rank_exact": {
+        "bge_m3_dense": 23,
+        "bm25": null,
+        "bm25_bge_m3_rrf": 46,
+        "bm25_trained_epoch1_rrf": 4,
+        "phase2_rule_based": null,
+        "trained_biencoder_epoch1": 1
+      },
+      "ground_truth_ids": [
+        "R00299"
+      ],
+      "model_id": "BIOMD0000000064",
+      "reaction_id": "vGLK",
+      "seen_in_train": true,
+      "selection": "lexicographically first eligible validation reaction",
+      "stratum": "empty_constrained",
+      "top10": {
+        "bge_m3_dense": [
+          "R02739",
+          "R12721",
+          "R05134",
+          "R06226",
+          "R12815",
+          "R02185",
+          "R06102",
+          "R12811",
+          "R07810",
+          "R03321"
+        ],
+        "bm25": [
+          "R01997",
+          "R07575",
+          "R09723",
+          "R13280",
+          "R09641",
+          "R06102",
+          "R05685",
+          "R06290",
+          "R06289",
+          "R07104"
+        ],
+        "bm25_bge_m3_rrf": [
+          "R06102",
+          "R01011",
+          "R01997",
+          "R02739",
+          "R01016",
+          "R07575",
+          "R12721",
+          "R05134",
+          "R09723",
+          "R06226"
+        ],
+        "bm25_trained_epoch1_rrf": [
+          "R01786",
+          "R10288",
+          "R10268",
+          "R00299",
+          "R01997",
+          "R07575",
+          "R08639",
+          "R02739",
+          "R09723",
+          "R00303"
+        ],
+        "phase2_rule_based": [],
+        "trained_biencoder_epoch1": [
+          "R00299",
+          "R08639",
+          "R02739",
+          "R00303",
+          "R00959",
+          "R01786",
+          "R00835",
+          "R00949",
+          "R13199",
+          "R00771"
+        ]
+      }
+    },
+    {
+      "category": "fusion_recovers_beyond_trained_at_10",
+      "first_hit_rank_exact": {
+        "bge_m3_dense": 6,
+        "bm25": 3,
+        "bm25_bge_m3_rrf": 2,
+        "bm25_trained_epoch1_rrf": 5,
+        "phase2_rule_based": null,
+        "trained_biencoder_epoch1": 33
+      },
+      "ground_truth_ids": [
+        "R00315"
+      ],
+      "model_id": "BIOMD0000000017",
+      "reaction_id": "R5",
+      "seen_in_train": true,
+      "selection": "lexicographically first eligible validation reaction",
+      "stratum": "empty_constrained",
+      "top10": {
+        "bge_m3_dense": [
+          "R00124",
+          "R00512",
+          "R00570",
+          "R06944",
+          "R00126",
+          "R00315",
+          "R00162",
+          "R00229",
+          "R00316",
+          "R00127"
+        ],
+        "bm25": [
+          "R08906",
+          "R08905",
+          "R00315",
+          "R00124",
+          "R00229",
+          "R00162",
+          "R00086",
+          "R13274",
+          "R00512",
+          "R01547"
+        ],
+        "bm25_bge_m3_rrf": [
+          "R00124",
+          "R00315",
+          "R00512",
+          "R00229",
+          "R00162",
+          "R01547",
+          "R00513",
+          "R02090",
+          "R00127",
+          "R03632"
+        ],
+        "bm25_trained_epoch1_rrf": [
+          "R00124",
+          "R00086",
+          "R08905",
+          "R00162",
+          "R00315",
+          "R10948",
+          "R00104",
+          "R01881",
+          "R02903",
+          "R01526"
+        ],
+        "phase2_rule_based": [],
+        "trained_biencoder_epoch1": [
+          "R00124",
+          "R00086",
+          "R12793",
+          "R10948",
+          "R11629",
+          "R00104",
+          "R13256",
+          "R00126",
+          "R04385",
+          "R01395"
+        ]
+      }
+    },
+    {
+      "category": "fusion_loses_bm25_hit_at_10",
+      "first_hit_rank_exact": {
+        "bge_m3_dense": null,
+        "bm25": 1,
+        "bm25_bge_m3_rrf": 13,
+        "bm25_trained_epoch1_rrf": 11,
+        "phase2_rule_based": 3,
+        "trained_biencoder_epoch1": 35
+      },
+      "ground_truth_ids": [
+        "R00846"
+      ],
+      "model_id": "BIOMD0000000071",
+      "reaction_id": "vGPO",
+      "seen_in_train": false,
+      "selection": "lexicographically first eligible validation reaction",
+      "stratum": "retrievable_rerank_failure",
+      "top10": {
+        "bge_m3_dense": [
+          "R01015",
+          "R12808",
+          "R02063",
+          "R10899",
+          "R11832",
+          "R12811",
+          "R01063",
+          "R02064",
+          "R13099",
+          "R10349"
+        ],
+        "bm25": [
+          "R00846",
+          "R00848",
+          "R00844",
+          "R00842",
+          "R00849",
+          "R00847",
+          "R00841",
+          "R00850",
+          "R03457",
+          "R08657"
+        ],
+        "bm25_bge_m3_rrf": [
+          "R01015",
+          "R00847",
+          "R00844",
+          "R01801",
+          "R01063",
+          "R10349",
+          "R05378",
+          "R02340",
+          "R01010",
+          "R00855"
+        ],
+        "bm25_trained_epoch1_rrf": [
+          "R00841",
+          "R00842",
+          "R00848",
+          "R00844",
+          "R01015",
+          "R00847",
+          "R01068",
+          "R01070",
+          "R00850",
+          "R02340"
+        ],
+        "phase2_rule_based": [
+          "R00842",
+          "R00844",
+          "R00846",
+          "R00848",
+          "R00849",
+          "R08657"
+        ],
+        "trained_biencoder_epoch1": [
+          "R01015",
+          "R00841",
+          "R01512",
+          "R01063",
+          "R01068",
+          "R01070",
+          "R01515",
+          "R00842",
+          "R00845",
+          "R01061"
+        ]
+      }
+    },
+    {
+      "category": "fusion_loses_trained_hit_at_10",
+      "first_hit_rank_exact": {
+        "bge_m3_dense": 9,
+        "bm25": 49,
+        "bm25_bge_m3_rrf": 16,
+        "bm25_trained_epoch1_rrf": 16,
+        "phase2_rule_based": null,
+        "trained_biencoder_epoch1": 10
+      },
+      "ground_truth_ids": [
+        "R00802"
+      ],
+      "model_id": "BIOMD0000000023",
+      "reaction_id": "v9",
+      "seen_in_train": false,
+      "selection": "lexicographically first eligible validation reaction",
+      "stratum": "nonempty_answer_absent",
+      "top10": {
+        "bge_m3_dense": [
+          "R06087",
+          "R06059",
+          "R00801",
+          "R06088",
+          "R05140",
+          "R02120",
+          "R06135",
+          "R11307",
+          "R00802",
+          "R06079"
+        ],
+        "bm25": [
+          "R01823",
+          "R00803",
+          "R00801",
+          "R02120",
+          "R12527",
+          "R08676",
+          "R00806",
+          "R00015",
+          "R12528",
+          "R04194"
+        ],
+        "bm25_bge_m3_rrf": [
+          "R00801",
+          "R02120",
+          "R06087",
+          "R01823",
+          "R05140",
+          "R12527",
+          "R00803",
+          "R00015",
+          "R00874",
+          "R04194"
+        ],
+        "bm25_trained_epoch1_rrf": [
+          "R00801",
+          "R12527",
+          "R04194",
+          "R00015",
+          "R07256",
+          "R12528",
+          "R06052",
+          "R06066",
+          "R00803",
+          "R02120"
+        ],
+        "phase2_rule_based": [
+          "R00801"
+        ],
+        "trained_biencoder_epoch1": [
+          "R06066",
+          "R01068",
+          "R00801",
+          "R07256",
+          "R00760",
+          "R12527",
+          "R06052",
+          "R00762",
+          "R00867",
+          "R00802"
+        ]
+      }
+    }
+  ],
+  "selection_rule": "lexicographically first eligible validation reaction per prespecified category",
+  "test_rows_read": 0
+}

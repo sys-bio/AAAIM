@@ -1,0 +1,52 @@
+{
+  "bm25": {
+    "b": 0.75,
+    "implementation": "project native Okapi BM25",
+    "k1": 1.2,
+    "version": "phase3_retrieval.py v1"
+  },
+  "catalog": {
+    "count": 12312,
+    "sha256": "00acb4de1bbfb1ddae0298a09d218f93eb22241844179439ff34a2912fba046c",
+    "source": "data/kegg/kegg_reaction_features.lzma"
+  },
+  "dense": {
+    "checkpoint": "BAAI/bge-m3",
+    "fine_tuned": false,
+    "learned_sparse": false,
+    "multi_vector": false,
+    "normalization": "l2",
+    "pooling": "cls",
+    "revision": "5617a9f61b028005a4858fdac845db406aefb181",
+    "similarity": "inner_product_cosine"
+  },
+  "document_fields": [
+    "DEFINITION",
+    "NAME",
+    "EQUATION",
+    "ENZYME",
+    "RCLASS",
+    "BRITE"
+  ],
+  "document_format": "Definition/Names/Equation/Enzyme/Class/Brite labelled lines when present",
+  "document_id_searchable": false,
+  "document_template": "phase3-retrieval-document-v1",
+  "inputs": {
+    "benchmark/data/candidate_status.csv": "4e126ac26f232e717f62c37e6bb26bf07ea6a79a6f6c0e3ca385e57852ea63fa",
+    "benchmark/data/candidates.csv": "0489930c87c7c5b7e0d20de277954354127b2e5cab9f56016ab483635a0206ce",
+    "benchmark/data/reaction_text.csv": "5874f54cd2420eaa57cdb3a3b487ff006b0d9a711bd9ddc727b29456715d4af9",
+    "benchmark/data/reactions.csv": "f11ebc6f4d0734deb14c054caf277b81695b22668017d70af9c43cd6146004f1",
+    "benchmark/data/species_evidence.csv": "10712febb6b46eb5625a0d944aac64e94ad7a040985c8c2e4d4f8dd2a8803933",
+    "benchmark/phase3/species_names.csv": "6d3fc948d8c8b993aaffdda5ebe4b3dbba60715104072e4e2a87b7a268e6f708",
+    "benchmark/phase3/splits.csv": "7df9566693ea1f2c170fe9d442fde47d8927ee6668a9d5c1c2e762d52cf55a4b"
+  },
+  "query_format": "Equation: {normalized SBML equation}\\nParticipants: {name} [species={SBML id}; ChEBI={ids}; KEGG-compound={ids}]; ...",
+  "query_template": "phase3-retrieval-query-v1",
+  "rrf": {
+    "k": 60,
+    "missing": "zero contribution",
+    "ranks": "one-indexed",
+    "tie_break": "KEGG identifier ascending"
+  },
+  "tokenizer": "biochemical-regex-v1"
+}

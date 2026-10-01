@@ -1,0 +1,9 @@
+{
+  "bm25_only": 157,
+  "both": 734,
+  "dense_only": 27,
+  "neither": 51,
+  "phase2_overlap_bm25": 420,
+  "phase2_overlap_dense": 376,
+  "rrf_only_vs_components": 3
+}

@@ -1,0 +1,12 @@
+{
+  "bytes": 1050708,
+  "catalog_permutation_verified": true,
+  "frozen_before_ground_truth_join": true,
+  "labels_loaded_during_ranking": false,
+  "n_queries": 969,
+  "path": "benchmark/phase3/phase3b_fusion/rankings_bm25_trained_epoch1_rrf.jsonl.xz",
+  "ranking_depth": 12312,
+  "schema": "phase3b-fusion-ranking-v1",
+  "sha256": "9601149e0297831ebfbfb4fde24b725a9b00287cf1b4d74270bf2921be138b31",
+  "test_rows_read": 0
+}
