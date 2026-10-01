@@ -1,0 +1,24 @@
+{
+  "benchmark_version": "phase1-v1",
+  "manifest_sha256": "3fd01d100bf544af9217722b5fe4a7204cf82aea9ec391571eae11965e26a861",
+  "registry_sha256": "8ba6de7b4171309828a043fa83835dcb1c47d202952152fa945119fa8cb1e367",
+  "artifact_sha256": {
+    "reactions.csv": "f11ebc6f4d0734deb14c054caf277b81695b22668017d70af9c43cd6146004f1",
+    "model_summary.csv": "90210acf3d2e05c1a6b94f38aee25c4c0663b96383d7fdb5fdf32392a7f2f3d8",
+    "model_context.csv": "94ea74e1506183b5b1ebd231d5cf24b33824e71b6a5188c9f2b588ff16cd9f1d",
+    "model_clusters.csv": "9878d843888077e4b3ac8110260492bdbb81491f2d8197eca702ee35ce8e48fb",
+    "exclusions.csv": "d71b0614016e3c0693d6f6d860af41ea4f9d582aad3dbd697124d699afdaafb5",
+    "pipeline_failures.csv": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "duplicate_groups.csv": "56e62170cee8fffe2a0270a7130cd83db43e188e9bba6b403582286a10e67460",
+    "species_annotations.csv": "99320d1da098215211d0364b70e719a6e59383b82383a30e3436f96d8abafd82",
+    "parser_diagnostics.csv": "889e72069702858817a07c275c68cb1640bf70e2ef362ea202a931a4afe56b06",
+    "benchmark_summary.json": "bcdb4b0ef07d1735e6ba31a221e8cf11a7bd1c04f8f40c0e6f8154c0c903ff5d",
+    "invariants.json": "135665dbbeb036816e18e910918ca87a664463c4a5b1b12708fad1b3b6e89918"
+  },
+  "counts": {
+    "models_included": 74,
+    "total_ground_truth_reactions": 5838,
+    "evaluable_reactions": 5816
+  },
+  "invariants_all_passed": true
+}

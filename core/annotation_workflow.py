@@ -1692,6 +1692,10 @@ def annotate_single_model(
     validation: bool = False,
     source_fidelity: bool = False,
     audit_to: Optional[str] = None,
+    evaluate_candidates: bool = False,
+    include_exchange_reactions: bool = False,
+    cofactor_config=None,
+    disable_ontology_relaxation: bool = False,
 ) -> Tuple[pd.DataFrame, Dict[str, Any]]:
     """
     Annotate a single model that has no or limited existing annotations.
@@ -1931,6 +1935,10 @@ def annotate_single_model(
             species_recommendations_df,
             existing_annotations=existing_annotations,
             convergence_config=ConvergenceConfig(max_iterations=em_max_iterations),
+            evaluate_candidates=bool(evaluate_candidates),
+            include_exchange_reactions=bool(include_exchange_reactions),
+            cofactor_config=cofactor_config,
+            disable_ontology_relaxation=bool(disable_ontology_relaxation),
         )
         search_time = time.time() - search_start
         logger.info(f"Rule-based search completed in {search_time:.2f}s")
@@ -2496,7 +2504,9 @@ def _generate_recommendation_table(model_file: str,
             rec_db = row_database(rec.id, candidate)
             candidate_display = f"{rec_db.upper()}:{candidate}"
             is_existing = candidate in existing_annotations.get(rec.id, [])
-            match_score = rec.match_score[i]
+            # Generation-only reaction matching intentionally omits scores.
+            # Keep those candidates representable in the shared output table.
+            match_score = candidate_value(rec.match_score, i, 0.0)
 
             if is_existing:
                 status = 'original and predicted'

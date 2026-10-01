@@ -1,0 +1,7 @@
+# Frozen benchmark artifacts carry SHA-256 digests in benchmark/data/VERSION.json.
+# Those digests are computed over LF-terminated files, so line endings must survive
+# checkout unchanged on every platform or the digests will not verify.
+benchmark/data/*.csv text eol=lf
+benchmark/data/*.json text eol=lf
+benchmark/manifest/*.txt text eol=lf
+benchmark/manifest/*.json text eol=lf

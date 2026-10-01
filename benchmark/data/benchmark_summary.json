@@ -1,0 +1,28 @@
+{
+  "benchmark_version": "phase1-v1",
+  "with_candidates": false,
+  "duplicate_threshold": 0.9,
+  "containment_threshold": 0.9,
+  "manifest_models": 75,
+  "manifest_unique_accessions": 75,
+  "models_processed": 75,
+  "models_included": 74,
+  "models_excluded_no_ground_truth": 1,
+  "models_pipeline_failure": 0,
+  "models_with_zero_eval_reactions": 0,
+  "total_ground_truth_reactions": 5838,
+  "evaluable_reactions": 5816,
+  "reactions_excluded_ssx": 19,
+  "reactions_excluded_invalid_gt": 3,
+  "reactions_with_multiple_ground_truth_ids": 91,
+  "duplicate_clusters_multi_member": 9,
+  "models_in_multi_member_clusters": 29,
+  "distinct_clusters": 54,
+  "models_with_parser_discrepancy": 0,
+  "models_with_misplaced_annotations_only": 1,
+  "historical_reference": {
+    "models": 68,
+    "reactions": 4379,
+    "note": "Clue only, not an acceptance criterion. Differences are documented in benchmark/data/RECONCILIATION.md rather than engineered away."
+  }
+}

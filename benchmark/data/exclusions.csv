@@ -1,0 +1,24 @@
+model_id,reaction_id,exclusion_level,reason,detail
+BIOMD0000000579,,model,no_kegg_reaction_annotations,175 reactions parsed; 0 reaction-level kegg.reaction mentions; 13 species carry a kegg.reaction annotation (manifest selected this model by raw file grep)
+BIOMD0000000015,pyr,reaction,exchange_ssx,Empty reactant or product side; rule-based matcher skips it when include_exchange_reactions=False.
+BIOMD0000000051,vDAHPS,reaction,exchange_ssx,Empty reactant or product side; rule-based matcher skips it when include_exchange_reactions=False.
+BIOMD0000000051,vG1PAT,reaction,exchange_ssx,Empty reactant or product side; rule-based matcher skips it when include_exchange_reactions=False.
+BIOMD0000000051,vG3PDH,reaction,exchange_ssx,Empty reactant or product side; rule-based matcher skips it when include_exchange_reactions=False.
+BIOMD0000000051,vPDH,reaction,exchange_ssx,Empty reactant or product side; rule-based matcher skips it when include_exchange_reactions=False.
+BIOMD0000000051,vPPK,reaction,exchange_ssx,Empty reactant or product side; rule-based matcher skips it when include_exchange_reactions=False.
+BIOMD0000000051,vpepCxylase,reaction,exchange_ssx,Empty reactant or product side; rule-based matcher skips it when include_exchange_reactions=False.
+BIOMD0000000081,IP3Phosphatase,reaction,exchange_ssx,Empty reactant or product side; rule-based matcher skips it when include_exchange_reactions=False.
+BIOMD0000000191,NOS,reaction,exchange_ssx,Empty reactant or product side; rule-based matcher skips it when include_exchange_reactions=False.
+BIOMD0000000191,ODC,reaction,exchange_ssx,Empty reactant or product side; rule-based matcher skips it when include_exchange_reactions=False.
+BIOMD0000000236,vgapdh,reaction,exchange_ssx,Empty reactant or product side; rule-based matcher skips it when include_exchange_reactions=False.
+BIOMD0000000244,e_Acoa2act,reaction,exchange_ssx,Empty reactant or product side; rule-based matcher skips it when include_exchange_reactions=False.
+BIOMD0000000268,gluconeogenesis_ser,reaction,invalid_ground_truth_id,ground truth IDs failed R##### validation: R0006565
+BIOMD0000000450,gluconeogenesis_ser,reaction,invalid_ground_truth_id,ground truth IDs failed R##### validation: R0006565
+BIOMD0000000590,r1,reaction,exchange_ssx,Empty reactant or product side; rule-based matcher skips it when include_exchange_reactions=False.
+BIOMD0000000674,gluconeogenesis_ser,reaction,invalid_ground_truth_id,ground truth IDs failed R##### validation: R0006565
+BIOMD0000000691,v4_cell_1,reaction,exchange_ssx,Empty reactant or product side; rule-based matcher skips it when include_exchange_reactions=False.
+BIOMD0000000691,v4_cell_2,reaction,exchange_ssx,Empty reactant or product side; rule-based matcher skips it when include_exchange_reactions=False.
+BIOMD0000000691,v6_cell_1,reaction,exchange_ssx,Empty reactant or product side; rule-based matcher skips it when include_exchange_reactions=False.
+BIOMD0000000691,v6_cell_2,reaction,exchange_ssx,Empty reactant or product side; rule-based matcher skips it when include_exchange_reactions=False.
+BIOMD0000001063,r_1710,reaction,exchange_ssx,Empty reactant or product side; rule-based matcher skips it when include_exchange_reactions=False.
+BIOMD0000001063,r_1989,reaction,exchange_ssx,Empty reactant or product side; rule-based matcher skips it when include_exchange_reactions=False.

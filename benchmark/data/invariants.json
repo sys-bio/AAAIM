@@ -1,0 +1,57 @@
+{
+  "all_passed": true,
+  "num_passed": 10,
+  "num_checks": 10,
+  "checks": [
+    {
+      "check": "manifest_has_75_unique_accessions",
+      "passed": true,
+      "detail": "75 entries, 75 unique"
+    },
+    {
+      "check": "every_registry_entry_has_provenance_and_sha256",
+      "passed": true,
+      "detail": "75/75 registry entries carry URL + local SHA-256"
+    },
+    {
+      "check": "every_downloaded_file_checksum_verified",
+      "passed": true,
+      "detail": "75/75 match upstream SHA-256"
+    },
+    {
+      "check": "every_included_model_parses",
+      "passed": true,
+      "detail": "0 parse failures, none among 74 included models"
+    },
+    {
+      "check": "every_included_reaction_has_valid_ground_truth",
+      "passed": true,
+      "detail": "0 of 5816 evaluable reactions lack a valid KEGG ID"
+    },
+    {
+      "check": "all_included_ground_truth_ids_wellformed",
+      "passed": true,
+      "detail": "0 evaluable reactions carry a malformed ID"
+    },
+    {
+      "check": "reaction_records_reconcile",
+      "passed": true,
+      "detail": "5838 ground-truth reactions = 5816 evaluable + 22 excluded"
+    },
+    {
+      "check": "model_records_reconcile",
+      "passed": true,
+      "detail": "75 manifest = 74 included + 1 scientifically excluded + 0 pipeline failures"
+    },
+    {
+      "check": "every_included_model_has_cluster_id",
+      "passed": true,
+      "detail": "74/74 assigned"
+    },
+    {
+      "check": "reaction_keys_unique",
+      "passed": true,
+      "detail": "0 duplicate (model_id, reaction_id) keys"
+    }
+  ]
+}

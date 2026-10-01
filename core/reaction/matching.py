@@ -26,7 +26,7 @@ def normalize_reactions(model_reactions):
 
     Args:
         model_reactions: List of reaction dictionaries
-        
+
     Returns:
         List of normalized reaction dictionaries
 
@@ -34,19 +34,19 @@ def normalize_reactions(model_reactions):
         ``hierarchy_relaxation.normalize_reaction`` — ChEBI → KEGG compound sets.
     """
     normalized_reactions = []
-    
+
     for rxn in model_reactions:
         subs = count_metabolites(rxn.get('substrates', []))
         prods = count_metabolites(rxn.get('products', []))
-        
+
         normalized_reactions.append({
             'reaction_name_in_model': rxn.get('id', 'Unknown'),
             'substrate_counter': subs,
             'product_counter': prods,
         })
-                
+
     return normalized_reactions
-            
+
 def count_metabolites(kegg_list):
 
     counter = Counter()
@@ -117,14 +117,14 @@ def collect_species_ids_from_rxn_list(rxn_list: List[str], spectators: bool = Fa
 def map_reactions_to_kegg(rxn_list: List[str], reaction_ids: List[str], id_df: pd.DataFrame, spectators=False) -> List[Dict[str, Any]]:
     """
     Map reaction strings to KEGG reaction identifiers.
-    
+
     This function processes a list of reaction strings and maps the metabolites
     in each reaction to their corresponding KEGG IDs using the provided mapping DataFrame.
-    
+
     Args:
         rxn_list: List of reaction strings in the format "id: reactants -> products"
         id_df: DataFrame with columns 'id' and 'KEGG_ID' mapping metabolite IDs to KEGG IDs
-        
+
     Returns:
         List of dictionaries containing mapped reaction information:
         - id: Reaction identifier
@@ -132,14 +132,14 @@ def map_reactions_to_kegg(rxn_list: List[str], reaction_ids: List[str], id_df: p
         - substrates: List of Counter objects with mapped substrate KEGG IDs and stoichiometry
         - products: List of Counter objects with mapped product KEGG IDs and stoichiometry
     """
-    
+
     # Keep full rows so we can propagate relaxation metadata when available.
     id_lookup = id_df.copy()
     id_grouped = dict(list(id_lookup.groupby("id")))
 
     # Process each reaction
     output = []
-       
+
     for idx, rxn in enumerate(rxn_list):
         # Extract reaction string (remove ID prefix if present)
         if ":" in rxn:
@@ -150,7 +150,7 @@ def map_reactions_to_kegg(rxn_list: List[str], reaction_ids: List[str], id_df: p
         # Parse reaction equation into reactants and products
         reactants, products = parse_reaction_equation(rxn_str)
 
-        if not spectators: 
+        if not spectators:
             # Stoichiometric cancellation -- eliminate specatators
             reactants, products = cancel_spectators(reactants, products)
 
@@ -165,7 +165,7 @@ def map_reactions_to_kegg(rxn_list: List[str], reaction_ids: List[str], id_df: p
             "substrates": substrates_mapped,
             "products": products_mapped
         })
-    
+
     return output
 
 def map_metabolites_to_kegg(
@@ -176,15 +176,15 @@ def map_metabolites_to_kegg(
 ) -> List[Counter]:
         """
         Map metabolite IDs to KEGG IDs while preserving stoichiometry.
-        
+
         For each metabolite in the counter, finds all possible KEGG IDs and
         generates all possible combinations of mappings.
-        
+
         Args:
             counter: Counter mapping metabolite IDs to stoichiometric coefficients
             mapping_df: DataFrame mapping metabolite IDs to KEGG IDs (+ optional metadata)
             _grouped: Pre-computed ``mapping_df.groupby("id")`` dict for hot-path callers.
-            
+
         Returns:
             List of Counter objects representing all possible KEGG ID mappings
         """
@@ -221,10 +221,17 @@ def map_metabolites_to_kegg(
                     'candidates': choices
                 }
             except (KeyError, IndexError):
+                # Keep unmapped metabolites so downstream logic can:
+                # - preserve stoichiometry (coeff)
+                # - perform ChEBI-based recovery/relaxation to find candidates later
                 logger.debug(f"No KEGG mapping found for metabolite: {met}")
-                continue
-        
+                id_choices[met] = {
+                    "species_id": met,
+                    "coeff": coeff,
+                    "candidates": [],
+                }
+
         if not id_choices:
             return []
-                       
+
         return id_choices

@@ -30,3 +30,10 @@ analysis/**
 **/scratch.ipynb
 **/participants_likelihood*.csv
 **/reaction_likelihood*.csv
+
+# benchmark artifacts
+# Downloaded SBML is reproducible from the manifest + checksums, so it is not vendored.
+benchmark/models/
+# Transient build scratch and logs (leading underscore = not a frozen artifact).
+benchmark/data/_*
+**/BioModels_251106

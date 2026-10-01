@@ -193,8 +193,9 @@ UNIPROT_URI_PATTERNS = [
 ]
 
 KEGG_REACTION_URI_PATTERNS = [
-    r'https?://identifiers\.org/kegg\.reaction:(R\d+)',
-    r'urn:miriam:kegg\.reaction:(R\d+)'
+    # identifiers.org supports both `prefix:ID` and `prefix/ID` forms
+    r'https?://identifiers\.org/kegg\.reaction[:/](R\d+)',
+    r'urn:miriam:kegg\.reaction:(R\d+)',
 ]
 
 KEGG_COMPOUND_URI_PATTERNS = [
@@ -382,4 +383,26 @@ reaction_id: ID[, ID...]
 
 Example:
 J4: R01068, R01070
+"""
+
+REACTION_ANNOTATION_SINGLE_RANKING_PROMPT = """Task: Select the best matching KEGG reaction ID(s).
+Instructions:
+- Choose only from the provided KEGG IDs.
+- Return the ID(s) only. Do NOT explain your reasoning. Do NOT include any other text.
+- Order multiple IDs from best to worst match.
+- If none match, return: UNK
+- Interpret the reaction within the full model context when context is provided.
+- If multiple candidates differ only in specificity, rank the most specific reaction highest.
+- Consider biochemical equivalence, including isomers and implicit conversions.
+
+Model context:
+{model_context}
+
+Model reaction:
+{model_reaction}
+
+Candidate KEGG reactions:
+{reaction_annotation_choices}
+
+Return the ID(s) only, one per line.
 """
