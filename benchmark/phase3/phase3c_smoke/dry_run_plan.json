@@ -1,0 +1,64 @@
+{
+  "answer_key_in_requests": false,
+  "answer_key_read_for_selection_only": true,
+  "answer_presence_by_sample": {
+    "P3C0001": false,
+    "P3C0002": true,
+    "P3C0003": false,
+    "P3C0004": true,
+    "P3C0005": true
+  },
+  "api_calls": 0,
+  "attempt_cap": 5,
+  "automatic_retries": 0,
+  "cost_cap_usd": 0.5,
+  "input_tokens_estimate_pending": 33103,
+  "max_output_tokens_pending": 10240,
+  "max_output_tokens_per_call": 2048,
+  "n_cache_hits": 0,
+  "n_pending": 5,
+  "pending_cache_ids": [
+    "37ce394fb232188c488a3f4464908539e6f70c5db804795d50aaff6645323826",
+    "4a3374a881c5ecde2d8f54021d5d0a3f192691ffefabe37b10d015bb48304f74",
+    "6ae1becc2c5a0ff792849ef2e9c3a14970a12eca87591c120f372f25bac28743",
+    "ebb8bad155a5b8d3ffd3abb492e84a1e63a3e04a3faa68ac17f05eb02a7e3b61",
+    "5b6157a180f379cc060694f2e23bb4af5b5c1d6c7254a5462becbbbc30c3e8ce"
+  ],
+  "planned_ids_and_strata": [
+    {
+      "corrected_stratum": "unconstrained",
+      "model_id": "BIOMD0000000171",
+      "reaction_id": "P1_pho",
+      "sample_id": "P3C0001"
+    },
+    {
+      "corrected_stratum": "empty_constrained",
+      "model_id": "BIOMD0000000017",
+      "reaction_id": "R11",
+      "sample_id": "P3C0002"
+    },
+    {
+      "corrected_stratum": "nonempty_answer_absent",
+      "model_id": "BIOMD0000000017",
+      "reaction_id": "R9",
+      "sample_id": "P3C0003"
+    },
+    {
+      "corrected_stratum": "retrievable_rerank_failure",
+      "model_id": "BIOMD0000000042",
+      "reaction_id": "reaction_3",
+      "sample_id": "P3C0004"
+    },
+    {
+      "corrected_stratum": "retrievable_top1_success",
+      "model_id": "BIOMD0000000017",
+      "reaction_id": "R3",
+      "sample_id": "P3C0005"
+    }
+  ],
+  "request_cap": 5,
+  "schema": "phase3c-dry-run-v1",
+  "selection_rule": "lexicographically_first_by_corrected_stratum_and_prespecified_answer_presence",
+  "test_rows_read": 0,
+  "worst_case_cost_usd": 0.189086
+}

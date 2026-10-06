@@ -1,0 +1,52 @@
+{
+  "grounded_minus_fusion_exact_accuracy": {
+    "ci_95_percentile": [
+      0.01,
+      0.141304
+    ],
+    "delta": 0.055215,
+    "n_clusters": 12,
+    "positive_superiority_claim_allowed": true,
+    "replicates": 10000,
+    "seed": 20260902,
+    "unit": "frozen validation cluster"
+  },
+  "grounded_minus_phase3a_brite_orthology_accuracy": {
+    "ci_95_percentile": [
+      0.048,
+      0.477273
+    ],
+    "delta": 0.300613,
+    "n_clusters": 12,
+    "positive_superiority_claim_allowed": true,
+    "replicates": 10000,
+    "seed": 20260902,
+    "unit": "frozen validation cluster"
+  },
+  "grounded_minus_phase3a_exact_accuracy": {
+    "ci_95_percentile": [
+      -0.008197,
+      0.555184
+    ],
+    "delta": 0.325153,
+    "n_clusters": 12,
+    "positive_superiority_claim_allowed": false,
+    "replicates": 10000,
+    "seed": 20260902,
+    "unit": "frozen validation cluster"
+  },
+  "grounded_minus_phase3a_unsupported_output_rate": {
+    "ci_95_percentile": [
+      -0.904762,
+      -0.597826
+    ],
+    "delta": -0.797546,
+    "n_clusters": 12,
+    "positive_superiority_claim_allowed": false,
+    "replicates": 10000,
+    "seed": 20260902,
+    "unit": "frozen validation cluster"
+  },
+  "interpretation": "Do not claim superiority when the interval includes zero.",
+  "method": "paired cluster percentile bootstrap"
+}

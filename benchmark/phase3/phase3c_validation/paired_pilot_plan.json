@@ -1,0 +1,18 @@
+{
+  "held_out_test": "sealed",
+  "later_969_run": "not authorized; consider only if this paired pilot establishes scientific necessity",
+  "paired_methods": [
+    "frozen BM25 + trained epoch-1 RRF Top-1",
+    "frozen Phase 3A target_only",
+    "Phase 3C grounded selection from frozen RRF Top-10"
+  ],
+  "population": "same exact 163 validation reactions as frozen Phase 3A pilot",
+  "schema": "phase3c-validation-plan-v1",
+  "supersedes": "benchmark/phase3/phase3c_smoke/full_validation_plan.json (historical 969-row proposal; left immutable)",
+  "why_163": [
+    "enables direct paired comparison against frozen Phase 3A target_only outputs",
+    "limits method-development cost",
+    "avoids consuming all 969 validation reactions before deciding whether the LLM layer is useful",
+    "preserves a later all-validation analysis only if scientifically necessary"
+  ]
+}

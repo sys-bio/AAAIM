@@ -1,0 +1,15 @@
+{
+  "byte_equivalent": true,
+  "demonstration_api_calls": 0,
+  "demonstration_model": "none (synthetic AIMessage tool call)",
+  "langchain_demonstration_path": "zero_cost_synthetic_ai_message_to_local_structured_tool",
+  "langchain_role": "orchestration/integration adapter only; not retrieval algorithm or evaluator",
+  "mismatched_sample_ids": [],
+  "n_queries_compared": 163,
+  "native_path": "Python invokes frozen retrieval, serializes Top-10 evidence, then calls Responses API",
+  "paid_calls_used_autonomous_provider_tool_calls": false,
+  "paid_calls_used_langchain_wrapper": false,
+  "paid_response_path": "native_python_pre_retrieval_then_responses_api",
+  "provider_request_tools": [],
+  "schema": "phase3c-langchain-provenance-v1"
+}

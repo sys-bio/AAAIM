@@ -1,0 +1,39 @@
+{
+  "cost_reporting": [
+    "input/output/reasoning/cached tokens",
+    "latency",
+    "per-row and total USD",
+    "cache reuse"
+  ],
+  "execution_authorized": false,
+  "go_no_go": "Proceed only if evidence compliance is complete, grounded exact accuracy improves over fusion Top1 with an interval excluding zero or yields a prespecified useful coverage/accuracy tradeoff, and observed cost remains inside a separately approved cap.",
+  "methods": [
+    "phase3b_fusion_top1",
+    "phase3c_grounded_llm_over_fusion_top10",
+    "frozen_phase3a_aligned_target_only",
+    "abstention"
+  ],
+  "population": "all 969 frozen validation reactions; no held-out test rows",
+  "primary_metrics": [
+    "exact_accuracy",
+    "selective_accuracy",
+    "coverage",
+    "abstention_rate",
+    "evidence_compliance_rate"
+  ],
+  "scope": "planned full frozen validation comparison; do not execute in Phase 3C smoke",
+  "secondary_metrics": [
+    "BRITE_orthology_accuracy",
+    "per_stratum_counts",
+    "seen_unseen_counts",
+    "schema_failure_count"
+  ],
+  "test_rows_read": 0,
+  "uncertainty": {
+    "method": "paired cluster bootstrap",
+    "replicates": 10000,
+    "report": "point deltas and 95% percentile intervals",
+    "seed": 20260902,
+    "unit": "frozen validation cluster"
+  }
+}

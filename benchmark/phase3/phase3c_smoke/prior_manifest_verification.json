@@ -1,0 +1,44 @@
+{
+  "manifests": [
+    {
+      "manifest": "benchmark/phase3/phase3b_full/artifact_manifest.json",
+      "n_files": 36,
+      "problems": []
+    },
+    {
+      "manifest": "benchmark/phase3/phase3b_fusion/artifact_manifest.json",
+      "n_files": 13,
+      "problems": []
+    },
+    {
+      "manifest": "benchmark/phase3/phase3b_smoke/artifact_manifest.json",
+      "n_files": 11,
+      "problems": []
+    },
+    {
+      "manifest": "benchmark/phase3/retrieval_baselines/artifact_manifest.json",
+      "n_files": 22,
+      "problems": []
+    },
+    {
+      "manifest": "benchmark/phase3/validation/artifact_manifest.json",
+      "n_files": 18,
+      "problems": []
+    },
+    {
+      "manifest": "benchmark/phase3/validation_rescue_2048/artifact_manifest.json",
+      "n_files": 9,
+      "problems": []
+    },
+    {
+      "manifest": "benchmark/phase3/validation_rescue_2048/sensitivity/artifact_manifest.json",
+      "n_files": 11,
+      "problems": []
+    }
+  ],
+  "n_manifests": 7,
+  "n_problems": 0,
+  "problems": [],
+  "read_only": true,
+  "scope": "all pre-Phase-3C Phase 3 artifact manifests"
+}
