@@ -1,0 +1,750 @@
+{
+  "benchmark_version": "phase2-v1",
+  "config_id": "86938b48ab88",
+  "files": {
+    "BIOMD0000000013.json": {
+      "bytes": 51503,
+      "candidate_rows": 169,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 101.6,
+      "failures": 0,
+      "model_id": "BIOMD0000000013",
+      "sha256": "043d139cb3afb6d1b3394eee382a61cb7b28d7a51c9cdcd5f11e715b89486d46",
+      "status_rows": 17
+    },
+    "BIOMD0000000015.json": {
+      "bytes": 11259,
+      "candidate_rows": 7,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 151.44,
+      "failures": 0,
+      "model_id": "BIOMD0000000015",
+      "sha256": "3f3ac792930d8fee8893ca0e732b8e13e2f2bd5e5faa2514451f3bec83dc2edb",
+      "status_rows": 27
+    },
+    "BIOMD0000000017.json": {
+      "bytes": 3990,
+      "candidate_rows": 3,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 46.76,
+      "failures": 0,
+      "model_id": "BIOMD0000000017",
+      "sha256": "16ca7d324afa2f8ca6d9fd478305bc0762de199ed71057c5725831be67c46309",
+      "status_rows": 9
+    },
+    "BIOMD0000000018.json": {
+      "bytes": 7757,
+      "candidate_rows": 13,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 40.07,
+      "failures": 0,
+      "model_id": "BIOMD0000000018",
+      "sha256": "c8c4313a696c4e6cb4e0edf225fe62dd2f4316888a7a45e3c606f789b309e397",
+      "status_rows": 12
+    },
+    "BIOMD0000000023.json": {
+      "bytes": 3043,
+      "candidate_rows": 2,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 44.89,
+      "failures": 0,
+      "model_id": "BIOMD0000000023",
+      "sha256": "e04957462ccb052bbca3fafb741f62ae7bd341d85c7a5a304d6492c5acba1ea7",
+      "status_rows": 7
+    },
+    "BIOMD0000000038.json": {
+      "bytes": 1083,
+      "candidate_rows": 1,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 7.26,
+      "failures": 0,
+      "model_id": "BIOMD0000000038",
+      "sha256": "f08eae0a3c7c4fe915e1853033d4273798ce7b8e36f12d94c29b5d2c8c5c4e69",
+      "status_rows": 2
+    },
+    "BIOMD0000000042.json": {
+      "bytes": 5971,
+      "candidate_rows": 10,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 43.6,
+      "failures": 0,
+      "model_id": "BIOMD0000000042",
+      "sha256": "bb5a1b286f7d1edaed40d1986dc58a7f09a598dc13224ffb78ef6d6b6dc60953",
+      "status_rows": 9
+    },
+    "BIOMD0000000046.json": {
+      "bytes": 1338,
+      "candidate_rows": 2,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 1.54,
+      "failures": 0,
+      "model_id": "BIOMD0000000046",
+      "sha256": "e1347ef4ffa0e7e5df5c9a3729b777de632d31bbd664d99956e3f7e43ecd7339",
+      "status_rows": 2
+    },
+    "BIOMD0000000051.json": {
+      "bytes": 12877,
+      "candidate_rows": 26,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 77.11,
+      "failures": 0,
+      "model_id": "BIOMD0000000051",
+      "sha256": "8a8f36eabad9a5de75eba529a8892b8694c6e25d0948cf37fbb16c3fb3b233a0",
+      "status_rows": 17
+    },
+    "BIOMD0000000061.json": {
+      "bytes": 5763,
+      "candidate_rows": 7,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 54.23,
+      "failures": 0,
+      "model_id": "BIOMD0000000061",
+      "sha256": "745cfbfc8c700ae2d79a123563be2b3b097b0418bd6ad377127cab707410747b",
+      "status_rows": 11
+    },
+    "BIOMD0000000063.json": {
+      "bytes": 1433,
+      "candidate_rows": 1,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 13.77,
+      "failures": 0,
+      "model_id": "BIOMD0000000063",
+      "sha256": "a225ff0ac97424ed85410f1f8123d9bc0090e6f3b30c13e22cdf1dc89552d6c6",
+      "status_rows": 3
+    },
+    "BIOMD0000000064.json": {
+      "bytes": 6027,
+      "candidate_rows": 8,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 60.13,
+      "failures": 0,
+      "model_id": "BIOMD0000000064",
+      "sha256": "03089bdb332636e1801b1b59634c9a45472e660ca7bed1247815a87d20a21340",
+      "status_rows": 11
+    },
+    "BIOMD0000000066.json": {
+      "bytes": 2628,
+      "candidate_rows": 3,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 22.69,
+      "failures": 0,
+      "model_id": "BIOMD0000000066",
+      "sha256": "3827a6d9c616238697c6ea2195ae17ea610e03fcaa7427707f9081fd2f680ab4",
+      "status_rows": 5
+    },
+    "BIOMD0000000067.json": {
+      "bytes": 3257,
+      "candidate_rows": 9,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 2.69,
+      "failures": 0,
+      "model_id": "BIOMD0000000067",
+      "sha256": "452e8900f200faf01e33f7b4d62d929df36caa88021275f2a8dd08535dea8888",
+      "status_rows": 2
+    },
+    "BIOMD0000000068.json": {
+      "bytes": 1340,
+      "candidate_rows": 2,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 5.53,
+      "failures": 0,
+      "model_id": "BIOMD0000000068",
+      "sha256": "65da312dabbc3bf6de22a8d8acdbc5e3eac48cb3e0da81faa44ba45fc2e3cb6b",
+      "status_rows": 2
+    },
+    "BIOMD0000000070.json": {
+      "bytes": 11562,
+      "candidate_rows": 12,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 138.76,
+      "failures": 0,
+      "model_id": "BIOMD0000000070",
+      "sha256": "c8c559bd1cd01fc31e1b8168a9173649bf39df19b0e220d541ab9cd72d70a723",
+      "status_rows": 24
+    },
+    "BIOMD0000000071.json": {
+      "bytes": 7273,
+      "candidate_rows": 14,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 63.89,
+      "failures": 0,
+      "model_id": "BIOMD0000000071",
+      "sha256": "9b2f5b0c8afa174ba3e4597d7d71c8bb86b187266c2d28532287906ffe1582c0",
+      "status_rows": 10
+    },
+    "BIOMD0000000076.json": {
+      "bytes": 1633,
+      "candidate_rows": 3,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 10.42,
+      "failures": 0,
+      "model_id": "BIOMD0000000076",
+      "sha256": "73603ccd9067e5b114c4fdb3aca7270ebb155ecd6d45a565b1e6ded05027802e",
+      "status_rows": 2
+    },
+    "BIOMD0000000081.json": {
+      "bytes": 2580,
+      "candidate_rows": 4,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 12.14,
+      "failures": 0,
+      "model_id": "BIOMD0000000081",
+      "sha256": "1388c787e995a916c5376edbd1aac2ad3ce4b46557f377836832e99667b63cd4",
+      "status_rows": 4
+    },
+    "BIOMD0000000088.json": {
+      "bytes": 10656,
+      "candidate_rows": 6,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 110.67,
+      "failures": 0,
+      "model_id": "BIOMD0000000088",
+      "sha256": "3ce478920c439b2c154eab022d548ee5a116f10586a6d096c66404f0a121c276",
+      "status_rows": 26
+    },
+    "BIOMD0000000093.json": {
+      "bytes": 841,
+      "candidate_rows": 0,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 1.26,
+      "failures": 0,
+      "model_id": "BIOMD0000000093",
+      "sha256": "d090a4340f60c2b54556e976b007884e99e51f9e1c170766b9868118e87d00e6",
+      "status_rows": 2
+    },
+    "BIOMD0000000094.json": {
+      "bytes": 841,
+      "candidate_rows": 0,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 1.36,
+      "failures": 0,
+      "model_id": "BIOMD0000000094",
+      "sha256": "5d49bf09da667caf45096324c5fc4c45cae1f2395fdc2114a1331075e950a00c",
+      "status_rows": 2
+    },
+    "BIOMD0000000108.json": {
+      "bytes": 1039,
+      "candidate_rows": 2,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 2.36,
+      "failures": 0,
+      "model_id": "BIOMD0000000108",
+      "sha256": "70b72f3138d4bba0f7bb50a3555f601f476b038bdb0422da9d077ccfc97f89cb",
+      "status_rows": 1
+    },
+    "BIOMD0000000122.json": {
+      "bytes": 492,
+      "candidate_rows": 0,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 1.72,
+      "failures": 0,
+      "model_id": "BIOMD0000000122",
+      "sha256": "173f2c1a13efa2d8c039d9ab7acb9f513141666fb1531afdab7b5ec93301f58a",
+      "status_rows": 1
+    },
+    "BIOMD0000000123.json": {
+      "bytes": 492,
+      "candidate_rows": 0,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 0.33,
+      "failures": 0,
+      "model_id": "BIOMD0000000123",
+      "sha256": "a97889a03d563d53a5483b85d87bbb525ea892a69bf42d7908a97e98cb83adc2",
+      "status_rows": 1
+    },
+    "BIOMD0000000137.json": {
+      "bytes": 743,
+      "candidate_rows": 1,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 1.58,
+      "failures": 0,
+      "model_id": "BIOMD0000000137",
+      "sha256": "e0e37ca1ffa34682cfc21164bd6b5b0c0513220f10ae029ef2360193d3befeb6",
+      "status_rows": 1
+    },
+    "BIOMD0000000143.json": {
+      "bytes": 1426,
+      "candidate_rows": 1,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 6.77,
+      "failures": 0,
+      "model_id": "BIOMD0000000143",
+      "sha256": "522d8ca5c7827defb424f550be3349b1e8fcf1d6a5a63f113a64f552f0da48e0",
+      "status_rows": 3
+    },
+    "BIOMD0000000171.json": {
+      "bytes": 2318,
+      "candidate_rows": 3,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 8.66,
+      "failures": 0,
+      "model_id": "BIOMD0000000171",
+      "sha256": "a7072e59dcc21f5bc4c3b32d09462ff7bd4bc699838ab034ee9639483dc575f5",
+      "status_rows": 4
+    },
+    "BIOMD0000000172.json": {
+      "bytes": 8842,
+      "candidate_rows": 15,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 51.82,
+      "failures": 0,
+      "model_id": "BIOMD0000000172",
+      "sha256": "f968efb141da043c9663038aacb6a5498aee2f843e07fdb3fe55e2ec4aab74f2",
+      "status_rows": 14
+    },
+    "BIOMD0000000176.json": {
+      "bytes": 8841,
+      "candidate_rows": 15,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 51.97,
+      "failures": 0,
+      "model_id": "BIOMD0000000176",
+      "sha256": "01faaf1975887178543be566a357aa1478464e3cb76c149005b8026ded27b28e",
+      "status_rows": 14
+    },
+    "BIOMD0000000177.json": {
+      "bytes": 13762,
+      "candidate_rows": 32,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 54.37,
+      "failures": 0,
+      "model_id": "BIOMD0000000177",
+      "sha256": "a0838e1419c1abc9b943e00872e0b0427943e4637c7ec50dac94c109d35fd992",
+      "status_rows": 15
+    },
+    "BIOMD0000000190.json": {
+      "bytes": 4825,
+      "candidate_rows": 6,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 37.5,
+      "failures": 0,
+      "model_id": "BIOMD0000000190",
+      "sha256": "ced86429a77a33c868b454a97c225d0b32beb35dcab1c4b01867b172719c45d2",
+      "status_rows": 9
+    },
+    "BIOMD0000000191.json": {
+      "bytes": 3503,
+      "candidate_rows": 11,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 3.26,
+      "failures": 0,
+      "model_id": "BIOMD0000000191",
+      "sha256": "1722104f32c548e4b961b6d0cb8f72087e2eb9d39bdfb6aa02da089057c81e70",
+      "status_rows": 1
+    },
+    "BIOMD0000000206.json": {
+      "bytes": 3242,
+      "candidate_rows": 4,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 33.44,
+      "failures": 0,
+      "model_id": "BIOMD0000000206",
+      "sha256": "639930b15ee09e3d37dc97970206c7d01cf11088ed03f340b2b90c96222fdec9",
+      "status_rows": 6
+    },
+    "BIOMD0000000211.json": {
+      "bytes": 10285,
+      "candidate_rows": 19,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 63.45,
+      "failures": 0,
+      "model_id": "BIOMD0000000211",
+      "sha256": "25ff6626ed47ddd4fdcba6d91eaf9544387752077606100ac5b9f74ed74773c6",
+      "status_rows": 15
+    },
+    "BIOMD0000000212.json": {
+      "bytes": 8171,
+      "candidate_rows": 11,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 51.83,
+      "failures": 0,
+      "model_id": "BIOMD0000000212",
+      "sha256": "b0bdc58df999796c8c04f40c2030620fee2a7ce983da7ab9db83bd4ce3280da9",
+      "status_rows": 15
+    },
+    "BIOMD0000000213.json": {
+      "bytes": 14722,
+      "candidate_rows": 40,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 30.4,
+      "failures": 0,
+      "model_id": "BIOMD0000000213",
+      "sha256": "bc26c509a1be8547f59852664eea031f83b110caafd7b0000860515cf2ccc179",
+      "status_rows": 11
+    },
+    "BIOMD0000000218.json": {
+      "bytes": 15569,
+      "candidate_rows": 41,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 46.65,
+      "failures": 0,
+      "model_id": "BIOMD0000000218",
+      "sha256": "e0b9a983058fad50a0cd21ded224107907fe82e554690525a3ae1120993f8771",
+      "status_rows": 13
+    },
+    "BIOMD0000000219.json": {
+      "bytes": 16441,
+      "candidate_rows": 43,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 49.24,
+      "failures": 0,
+      "model_id": "BIOMD0000000219",
+      "sha256": "607ded2158c3958de793a4d514cfc699de0fd04d89220b9ecc440f96ac408555",
+      "status_rows": 14
+    },
+    "BIOMD0000000221.json": {
+      "bytes": 13222,
+      "candidate_rows": 36,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 39.34,
+      "failures": 0,
+      "model_id": "BIOMD0000000221",
+      "sha256": "9d078be0aa230e921a83c0fe1deaf5cb1e0c862f3e5322f470cc5c056689c398",
+      "status_rows": 10
+    },
+    "BIOMD0000000222.json": {
+      "bytes": 13222,
+      "candidate_rows": 36,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 39.99,
+      "failures": 0,
+      "model_id": "BIOMD0000000222",
+      "sha256": "e81583d563835cf21815ea3d67f76ca0554ed4b06bd810398131fc45e4e643af",
+      "status_rows": 10
+    },
+    "BIOMD0000000225.json": {
+      "bytes": 1980,
+      "candidate_rows": 3,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 15.21,
+      "failures": 0,
+      "model_id": "BIOMD0000000225",
+      "sha256": "af6cabb3ae27c780143ba0d5484e0fc5bb051fe8fc69d38864bbaf52834f5aa7",
+      "status_rows": 3
+    },
+    "BIOMD0000000231.json": {
+      "bytes": 150064,
+      "candidate_rows": 557,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 5.48,
+      "failures": 0,
+      "model_id": "BIOMD0000000231",
+      "sha256": "2bc2fd94df73631cb6a964c2ed3691a8a91f0dac96ffd184ff04f628695616c1",
+      "status_rows": 4
+    },
+    "BIOMD0000000232.json": {
+      "bytes": 124034,
+      "candidate_rows": 445,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 30.86,
+      "failures": 0,
+      "model_id": "BIOMD0000000232",
+      "sha256": "604afb3c34c7e156e816250d60e593c62a0112a718745eeee65c6ce09824333c",
+      "status_rows": 9
+    },
+    "BIOMD0000000236.json": {
+      "bytes": 1697,
+      "candidate_rows": 2,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 18.27,
+      "failures": 0,
+      "model_id": "BIOMD0000000236",
+      "sha256": "9484584d2ba54b7e6360cb241c0a3ae60b278cb6f9d092cddd215e52d16eb644",
+      "status_rows": 3
+    },
+    "BIOMD0000000244.json": {
+      "bytes": 837,
+      "candidate_rows": 0,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 15.84,
+      "failures": 0,
+      "model_id": "BIOMD0000000244",
+      "sha256": "29803249c0b2d7a4dc4abe34f55640ab1e325e62a757931067305cb527be5112",
+      "status_rows": 2
+    },
+    "BIOMD0000000245.json": {
+      "bytes": 2215,
+      "candidate_rows": 4,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 13.59,
+      "failures": 0,
+      "model_id": "BIOMD0000000245",
+      "sha256": "6d474f07c9039dbc0797df73e652126d5d848561e799a3837bd2fa5393f36b7e",
+      "status_rows": 3
+    },
+    "BIOMD0000000247.json": {
+      "bytes": 10361,
+      "candidate_rows": 14,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 123.12,
+      "failures": 0,
+      "model_id": "BIOMD0000000247",
+      "sha256": "1eb45aacdc0855523bc436e1f7927eb3b649c5f1ffaaf45b516c0ba9489b9ec3",
+      "status_rows": 19
+    },
+    "BIOMD0000000248.json": {
+      "bytes": 498,
+      "candidate_rows": 0,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 4.38,
+      "failures": 0,
+      "model_id": "BIOMD0000000248",
+      "sha256": "350a50103d8211887c7bc0fbf2ab5abe691ca692b3fb1f2541add2c61e830f45",
+      "status_rows": 1
+    },
+    "BIOMD0000000253.json": {
+      "bytes": 1174,
+      "candidate_rows": 0,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 13.0,
+      "failures": 0,
+      "model_id": "BIOMD0000000253",
+      "sha256": "ad84dbdf66c4fba446b8c864db77fc5dfb400256e3954a83b86fbb805308c1b5",
+      "status_rows": 3
+    },
+    "BIOMD0000000268.json": {
+      "bytes": 148419,
+      "candidate_rows": 515,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 55.45,
+      "failures": 0,
+      "model_id": "BIOMD0000000268",
+      "sha256": "9e9b5cbe981bac8819374d32284c14c224383be8d3697bc6f7df0f5400d28c02",
+      "status_rows": 21
+    },
+    "BIOMD0000000281.json": {
+      "bytes": 7554,
+      "candidate_rows": 10,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 71.8,
+      "failures": 0,
+      "model_id": "BIOMD0000000281",
+      "sha256": "4d50421a4002433f9ce4e0f7129b9c007757a3576448b4a47ff938aa00d87b25",
+      "status_rows": 14
+    },
+    "BIOMD0000000292.json": {
+      "bytes": 831,
+      "candidate_rows": 0,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 14.87,
+      "failures": 0,
+      "model_id": "BIOMD0000000292",
+      "sha256": "d81cbcbfe68c61bac9724133ccbb546ff48cb149ab9e1c2f8323e5785e7a3ba5",
+      "status_rows": 2
+    },
+    "BIOMD0000000450.json": {
+      "bytes": 148419,
+      "candidate_rows": 515,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 54.76,
+      "failures": 0,
+      "model_id": "BIOMD0000000450",
+      "sha256": "e3bdac4e77b95e956599f396cc092a6e7434f0053d282ab3591a860e40a07197",
+      "status_rows": 21
+    },
+    "BIOMD0000000471.json": {
+      "bytes": 783718,
+      "candidate_rows": 2669,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 1010.72,
+      "failures": 0,
+      "model_id": "BIOMD0000000471",
+      "sha256": "c8c7441454fa540188134ce25c9fbc4f9a6eee69edb13c8f5967f25a9fb03caa",
+      "status_rows": 197
+    },
+    "BIOMD0000000472.json": {
+      "bytes": 783718,
+      "candidate_rows": 2669,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 1005.46,
+      "failures": 0,
+      "model_id": "BIOMD0000000472",
+      "sha256": "ddbfbb860b9cb808b9fc9729acb66acdf70ddc82aa9bb5883c360c9ed339fb40",
+      "status_rows": 197
+    },
+    "BIOMD0000000473.json": {
+      "bytes": 917100,
+      "candidate_rows": 3155,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 1075.93,
+      "failures": 0,
+      "model_id": "BIOMD0000000473",
+      "sha256": "7b20d65364e6ce572a41a9e4c55f882eb5dabc5a73d309789b0ba70eff35122a",
+      "status_rows": 212
+    },
+    "BIOMD0000000503.json": {
+      "bytes": 9458,
+      "candidate_rows": 16,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 64.38,
+      "failures": 0,
+      "model_id": "BIOMD0000000503",
+      "sha256": "1c92d1082d5432ae98572905f6c241951b5ac07aec64946b4d46a0058d0c0889",
+      "status_rows": 15
+    },
+    "BIOMD0000000590.json": {
+      "bytes": 5489,
+      "candidate_rows": 10,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 25.03,
+      "failures": 0,
+      "model_id": "BIOMD0000000590",
+      "sha256": "b890e5def8a14cc147a458a0991787dd96e7b5415fc746f14d439bbc289b8479",
+      "status_rows": 8
+    },
+    "BIOMD0000000602.json": {
+      "bytes": 17259,
+      "candidate_rows": 19,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 228.85,
+      "failures": 0,
+      "model_id": "BIOMD0000000602",
+      "sha256": "a3055c2ab7956e0bd2536b7c19d738a20920966c18fa7829acaed50980a19fb4",
+      "status_rows": 35
+    },
+    "BIOMD0000000627.json": {
+      "bytes": 11629,
+      "candidate_rows": 0,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 337.54,
+      "failures": 0,
+      "model_id": "BIOMD0000000627",
+      "sha256": "d46003e151605e5801e938fc2674615a46f5bd36b0a71e24565c739c4b13ad3c",
+      "status_rows": 32
+    },
+    "BIOMD0000000633.json": {
+      "bytes": 34093,
+      "candidate_rows": 93,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 69.39,
+      "failures": 0,
+      "model_id": "BIOMD0000000633",
+      "sha256": "ec01eaca01ce5d4f1fbae5eebe4a90b94631a2f96336b1e3b625a855a434df10",
+      "status_rows": 27
+    },
+    "BIOMD0000000674.json": {
+      "bytes": 148419,
+      "candidate_rows": 515,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 55.41,
+      "failures": 0,
+      "model_id": "BIOMD0000000674",
+      "sha256": "da01fb77f7aaad3a40896618691b5b6f817a5b3b913bba26be56e00acce615d4",
+      "status_rows": 21
+    },
+    "BIOMD0000000689.json": {
+      "bytes": 2464,
+      "candidate_rows": 1,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 30.14,
+      "failures": 0,
+      "model_id": "BIOMD0000000689",
+      "sha256": "9b6c6cc53d3411e49063e8c8972ed492f4ce7b0ac02d9a485a0b195a91832c24",
+      "status_rows": 6
+    },
+    "BIOMD0000000690.json": {
+      "bytes": 2464,
+      "candidate_rows": 1,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 30.22,
+      "failures": 0,
+      "model_id": "BIOMD0000000690",
+      "sha256": "7134a85b99ade8f00aa3d195d33cab4cc182042d13265a54bf7af05f9c332e1d",
+      "status_rows": 6
+    },
+    "BIOMD0000000691.json": {
+      "bytes": 410199,
+      "candidate_rows": 1470,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 45.12,
+      "failures": 0,
+      "model_id": "BIOMD0000000691",
+      "sha256": "e4a6933b1cc3d063359333c713b3cdcbb21f0145366cf6a5c1304556f607bce1",
+      "status_rows": 6
+    },
+    "BIOMD0000000725.json": {
+      "bytes": 14899,
+      "candidate_rows": 15,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 102.05,
+      "failures": 0,
+      "model_id": "BIOMD0000000725",
+      "sha256": "a82b62e6c624a86c354e18d563df2ec2873629aa11ef5e5892e80af24ca929f0",
+      "status_rows": 31
+    },
+    "BIOMD0000001061.json": {
+      "bytes": 171238,
+      "candidate_rows": 100,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 3930.08,
+      "failures": 0,
+      "model_id": "BIOMD0000001061",
+      "sha256": "4abeb01c8180397393e01898ad5fe6298c14550a7607a5e2fe1ab692abfe1fab",
+      "status_rows": 419
+    },
+    "BIOMD0000001062.json": {
+      "bytes": 316230,
+      "candidate_rows": 159,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 4083.36,
+      "failures": 0,
+      "model_id": "BIOMD0000001062",
+      "sha256": "4775e34ab9e8f3d0fe7998c75dfd31df91448ac99505c0b6a5919a1e8032ce26",
+      "status_rows": 793
+    },
+    "BIOMD0000001063.json": {
+      "bytes": 21293083,
+      "candidate_rows": 77073,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 6384.7,
+      "failures": 0,
+      "model_id": "BIOMD0000001063",
+      "sha256": "21343b0e8fa8643ad1736ac5c8250d1f88bd894842941f922ab06fa37a4cd60d",
+      "status_rows": 874
+    },
+    "BIOMD0000001090.json": {
+      "bytes": 267509,
+      "candidate_rows": 485,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 1340.05,
+      "failures": 0,
+      "model_id": "BIOMD0000001090",
+      "sha256": "b8b27fed4a597a006f33fb0d03815088651a980cc1678a8473f2d140e131fe21",
+      "status_rows": 373
+    },
+    "BIOMD0000001091.json": {
+      "bytes": 497033,
+      "candidate_rows": 465,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 5466.67,
+      "failures": 0,
+      "model_id": "BIOMD0000001091",
+      "sha256": "ff7960b654a9c1250d85af2060efe0586949c010d8eaa088b35a442cb6f0e80c",
+      "status_rows": 1047
+    },
+    "BIOMD0000001092.json": {
+      "bytes": 142017,
+      "candidate_rows": 85,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 3222.51,
+      "failures": 0,
+      "model_id": "BIOMD0000001092",
+      "sha256": "fc9088eaa78d0b3f1a2999f3f5b864470769fc19db1b6fc610ada7530099037b",
+      "status_rows": 346
+    },
+    "BIOMD0000001093.json": {
+      "bytes": 274397,
+      "candidate_rows": 119,
+      "config_id": "86938b48ab88",
+      "elapsed_s": 3475.59,
+      "failures": 0,
+      "model_id": "BIOMD0000001093",
+      "sha256": "bf6cc58236a717bb5eeb012fc45a6bd7b1f32f6738721e547391b7377edd5efd",
+      "status_rows": 702
+    }
+  },
+  "n_files": 74,
+  "purpose": "Per-model candidate-generation caches. Regenerating them costs a ~3-day pass, so they are archived as a release asset rather than committed. Assembly from them into the committed aggregate artifacts is verified byte-identical by audit_phase2.py --check-reassembly.",
+  "total_bytes": 26996311,
+  "total_generation_seconds": 34006.3
+}

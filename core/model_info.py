@@ -881,6 +881,60 @@ def map_reaction_ids_to_participant_ids(model_file: str) -> Dict[str, Set[str]]:
     return out
 
 
+def extract_reactions_with_ids_from_sbml(
+    model_file: str, species_ids: List[str]
+) -> Tuple[List[str], List[str], set]:
+    """
+    Extract reactions involving the target species, paired with their reaction IDs.
+
+    Prefer this over :func:`extract_reactions_from_sbml` when the caller needs to know
+    which reaction each string came from. Reactions that mention none of
+    ``species_ids`` are filtered out, so the returned strings are *not* positionally
+    aligned with :func:`get_all_reaction_ids`; consumers such as
+    :func:`~core.reaction.matching.map_reactions_to_kegg` label results by position and
+    would otherwise attribute a reaction's candidates to a different reaction entirely.
+
+    Args:
+        model_file: Path to the SBML model file
+        species_ids: List of species IDs to filter reactions for
+
+    Returns:
+        Tuple containing:
+        - List of reaction IDs (empty string when the ID could not be parsed)
+        - List of reaction strings, index-aligned with the IDs
+        - Set of all species IDs involved in the filtered reactions
+    """
+    reaction_ids: List[str] = []
+    reactions: List[str] = []
+    related_species = set(species_ids)
+
+    reaction_matches = _parse_antimony_reaction_matches(model_file)
+
+    # Filter reactions to only include those involving our species
+    for match in reaction_matches:
+        left_side, arrow, right_side = match
+
+        # Split off the reaction ID prefix (e.g. "J53:" or "R1:") from the left side.
+        id_match = re.match(r'^([A-Za-z0-9_]+):\s*(.*)$', left_side.strip(), re.DOTALL)
+        if id_match:
+            reaction_id, left_side_cleaned = id_match.group(1), id_match.group(2).strip()
+        else:
+            reaction_id, left_side_cleaned = "", left_side.strip()
+
+        reaction_str = f"{left_side_cleaned} {arrow} {right_side.strip()}"
+
+        # Check if any of our species IDs are in this reaction
+        if any(re.search(r'\b' + re.escape(species_id) + r'\b', left_side + ' ' + right_side) for species_id in species_ids):
+            reactions.append(reaction_str)
+            reaction_ids.append(reaction_id)
+
+            # Extract all species IDs from this reaction
+            all_ids_in_reaction = re.findall(r'\b([A-Za-z0-9_]+)\b', left_side + ' ' + right_side)
+            related_species.update(all_ids_in_reaction)
+
+    return reaction_ids, reactions, related_species
+
+
 def extract_reactions_from_sbml(model_file: str, species_ids: List[str]) -> Tuple[List[str], set]:
     """
     Extract reactions from an SBML model file using antimony.
@@ -895,29 +949,7 @@ def extract_reactions_from_sbml(model_file: str, species_ids: List[str]) -> Tupl
         - List of reaction strings
         - Set of all species IDs involved in the filtered reactions
     """
-    reactions = []
-    related_species = set(species_ids)
-
-    reaction_matches = _parse_antimony_reaction_matches(model_file)
-
-    # Filter reactions to only include those involving our species
-    for match in reaction_matches:
-        left_side, arrow, right_side = match
-        
-        # Remove reaction ID prefix (e.g., "J53:" or "R53:" from beginning of left_side)
-        # This captures patterns like "J53: " or "R1: " etc. at the start
-        left_side_cleaned = re.sub(r'^[A-Za-z0-9_]+:\s*', '', left_side.strip())
-        
-        reaction_str = f"{left_side_cleaned} {arrow} {right_side.strip()}"
-        
-        # Check if any of our species IDs are in this reaction
-        if any(re.search(r'\b' + re.escape(species_id) + r'\b', left_side + ' ' + right_side) for species_id in species_ids):
-            reactions.append(reaction_str)
-            
-            # Extract all species IDs from this reaction
-            all_ids_in_reaction = re.findall(r'\b([A-Za-z0-9_]+)\b', left_side + ' ' + right_side)
-            related_species.update(all_ids_in_reaction)
-            
+    _, reactions, related_species = extract_reactions_with_ids_from_sbml(model_file, species_ids)
     return reactions, related_species
 
 def extract_model_info(model_file: str, species_ids: List[str], entity_type: str = "chemical") -> Dict[str, Any]:
