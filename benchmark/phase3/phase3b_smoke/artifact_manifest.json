@@ -1,0 +1,71 @@
+{
+  "files": [
+    {
+      "bytes": 1874,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_smoke/REPORT.md",
+      "sha256": "17ab4d411907cb64aafb055790413871100c0e114189059be560f7633c92b7b7"
+    },
+    {
+      "bytes": 320,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_smoke/dataset_manifest.json",
+      "sha256": "041069e52944be07acb88285389439abbc9b1a5aec355df49c6c5e1ed893d9aa"
+    },
+    {
+      "bytes": 8765,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_smoke/dataset_summary.json",
+      "sha256": "37b535aa5030a47bb13c20e4340081d9520daa4e5dc4cb5a4c4f370e44dafc24"
+    },
+    {
+      "bytes": 2293,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_smoke/environment.json",
+      "sha256": "b4bae417e72547b53b358284b9b9309160cdd185f63f8036f68d7beebcf300ee"
+    },
+    {
+      "bytes": 804,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_smoke/negative_summary.json",
+      "sha256": "aa20b9f0958839803179bf791a830e5273f959fabc287538d5faae0617354ba3"
+    },
+    {
+      "bytes": 11619,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_smoke/overfit_metrics.json",
+      "sha256": "d3b5ad164642b4fb48af6091f8e2606930fcf29cc72e6be1861279a5d16ce619"
+    },
+    {
+      "bytes": 13082,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_smoke/representative_sample.json",
+      "sha256": "f234e3e57a5168e3ce0f42e8b9d9a35d14d2a16b9ce6ff9abc3b03812cfe3de0"
+    },
+    {
+      "bytes": 703,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_smoke/runtime.json",
+      "sha256": "6686155861951438ec367c99347158e879da91b84458df65fd4428a520257adf"
+    },
+    {
+      "bytes": 7087,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_smoke/smoke_metrics.json",
+      "sha256": "2f6c117ee63691d1d0f737754f4924cd193da849989e4b804ca743414f770d5b"
+    },
+    {
+      "bytes": 2383,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_smoke/training_config.json",
+      "sha256": "1761f6cf85d159da385205870acd601c8ffb83134c1d82d25350fb4f6cc4af87"
+    },
+    {
+      "bytes": 521,
+      "n_lines": null,
+      "path": "benchmark/phase3/phase3b_smoke/validation_smoke_metrics.json",
+      "sha256": "73d9459ea5a7a43b6d20164b1231538825b073c506e7f1a3c12e59bf8dd03910"
+    }
+  ],
+  "n_files": 11
+}

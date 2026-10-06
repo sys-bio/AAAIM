@@ -1,0 +1,66 @@
+{
+  "byte_identical": true,
+  "files": [
+    {
+      "bytes": 4123,
+      "path": "benchmark/phase3/phase3b_fusion/REPORT.md",
+      "sha256": "6584c2dfaf6ebd7f48417a0ea53f559db648c77eb38358c14a8de97246717a0d"
+    },
+    {
+      "bytes": 3438,
+      "path": "benchmark/phase3/phase3b_fusion/bootstrap_comparisons.json",
+      "sha256": "0845bc3c9b35630125449b36a4ebfb8c714d6ea16b23f405af1af8f1256dfc36"
+    },
+    {
+      "bytes": 1411,
+      "path": "benchmark/phase3/phase3b_fusion/config.json",
+      "sha256": "748e8cc40b21339fa05679666f22f0959557009a5d63ff55262d9a2f1ee1fddc"
+    },
+    {
+      "bytes": 10693,
+      "path": "benchmark/phase3/phase3b_fusion/metrics_by_method.json",
+      "sha256": "7a772fff962bd4c0abb2a3eec01e698f5bb972b6fc19dff8314de795b54efc4d"
+    },
+    {
+      "bytes": 1731,
+      "path": "benchmark/phase3/phase3b_fusion/overlap_transition_analysis.json",
+      "sha256": "66928d647bdb77be1efcff9a0b4eb2ca79f2f5f2b6c15f75ca7b62900c613a1c"
+    },
+    {
+      "bytes": 14869,
+      "path": "benchmark/phase3/phase3b_fusion/qualitative_examples.json",
+      "sha256": "187232dad72996b3c49f357066beda79ff015a3bdc5dec388c0147ab003f91c8"
+    },
+    {
+      "bytes": 424,
+      "path": "benchmark/phase3/phase3b_fusion/ranking_freeze.json",
+      "sha256": "b3ddfade55af534dbc0c21f4a47d1b85a449a099ad8841b0f9724e5bc2a2f24a"
+    },
+    {
+      "bytes": 1050708,
+      "path": "benchmark/phase3/phase3b_fusion/rankings_bm25_trained_epoch1_rrf.jsonl.xz",
+      "sha256": "9601149e0297831ebfbfb4fde24b725a9b00287cf1b4d74270bf2921be138b31"
+    },
+    {
+      "bytes": 660,
+      "path": "benchmark/phase3/phase3b_fusion/recommendation.json",
+      "sha256": "ae89d404816102445f5a44a4ab70406d190b504da383f64d609884f45c6995bb"
+    },
+    {
+      "bytes": 355,
+      "path": "benchmark/phase3/phase3b_fusion/safety_audit.json",
+      "sha256": "e79c458fdf5c333a3fd59050e9ae99fa9026baa40e4421890277c3357af3d7b1"
+    },
+    {
+      "bytes": 21214,
+      "path": "benchmark/phase3/phase3b_fusion/seen_unseen_analysis.json",
+      "sha256": "f743e4e4e812752507ac3b7ab277d0a46e1fd03f525cd179302cb4c6d4222bd3"
+    },
+    {
+      "bytes": 21105,
+      "path": "benchmark/phase3/phase3b_fusion/stratum_analysis.json",
+      "sha256": "e46283e0294da77df1f568ef24715f094c9d5fcf54153435ff934eccdd3b5cf3"
+    }
+  ],
+  "passes": 2
+}

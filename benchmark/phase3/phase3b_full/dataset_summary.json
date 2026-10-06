@@ -1,0 +1,307 @@
+{
+  "dataset_sha256": "142c9f0d404531cf2a8c59ddfabdc80a2858dddd4656a1becc1fb5c0ff292a05",
+  "document_template": "phase3-retrieval-document-v1",
+  "excluded_no_catalog_positive": [
+    {
+      "cluster_id": "CLU_BIOMD0000001062",
+      "model_id": "BIOMD0000001062",
+      "positive_ids": [
+        "R03106"
+      ],
+      "reaction_id": "R_MCPST",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001062",
+      "model_id": "BIOMD0000001062",
+      "positive_ids": [
+        "R04990"
+      ],
+      "reaction_id": "R_URFGTT",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R01285"
+      ],
+      "reaction_id": "R_CYSTLr",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R00962"
+      ],
+      "reaction_id": "R_CYTDK3",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R02292"
+      ],
+      "reaction_id": "R_DHDPS",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R08209"
+      ],
+      "reaction_id": "R_IPDPS",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R03106"
+      ],
+      "reaction_id": "R_MCPSTr",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R00241"
+      ],
+      "reaction_id": "R_R00241",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R00516"
+      ],
+      "reaction_id": "R_R00516",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R00967"
+      ],
+      "reaction_id": "R_R00967",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R01548"
+      ],
+      "reaction_id": "R_R01548",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R01549"
+      ],
+      "reaction_id": "R_R01549",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R01880"
+      ],
+      "reaction_id": "R_R01880",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R02091"
+      ],
+      "reaction_id": "R_R02091",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R02096"
+      ],
+      "reaction_id": "R_R02096",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R02097"
+      ],
+      "reaction_id": "R_R02097",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R02327"
+      ],
+      "reaction_id": "R_R02327",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R02332"
+      ],
+      "reaction_id": "R_R02332",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R02371"
+      ],
+      "reaction_id": "R_R02371",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R02372"
+      ],
+      "reaction_id": "R_R02372",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R04936"
+      ],
+      "reaction_id": "R_R04936",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R05562"
+      ],
+      "reaction_id": "R_R05562",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R05614"
+      ],
+      "reaction_id": "R_R05614",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R06146"
+      ],
+      "reaction_id": "R_R06146",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R06843"
+      ],
+      "reaction_id": "R_R06843",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R06858"
+      ],
+      "reaction_id": "R_R06858",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R07180"
+      ],
+      "reaction_id": "R_R07180",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R07219"
+      ],
+      "reaction_id": "R_R07219",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R04990"
+      ],
+      "reaction_id": "R_URFGTT",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001091",
+      "model_id": "BIOMD0000001091",
+      "positive_ids": [
+        "R00970"
+      ],
+      "reaction_id": "R_URIK3",
+      "reason": "no positive document in frozen KEGG catalog"
+    },
+    {
+      "cluster_id": "CLU_BIOMD0000001093",
+      "model_id": "BIOMD0000001093",
+      "positive_ids": [
+        "R00568"
+      ],
+      "reaction_id": "R_DCTPD2",
+      "reason": "no positive document in frozen KEGG catalog"
+    }
+  ],
+  "materialization": "deterministically rebuilt from frozen sources; full redundant JSONL not committed",
+  "max_positives_per_query": 10,
+  "model_visible_kegg_ids": 0,
+  "n_clusters": 21,
+  "n_examples": 3466,
+  "n_excluded_no_catalog_positive": 31,
+  "n_frozen_train_rows": 3497,
+  "n_multi_positive_queries": 65,
+  "n_targets_seen_across_clusters": 699,
+  "n_unique_queries": 3466,
+  "n_unique_target_ids": 1567,
+  "query_template": "phase3-retrieval-query-v1",
+  "schema": "phase3b-training-examples-v1",
+  "source_digests": {
+    "benchmark/data/reaction_text.csv": "5874f54cd2420eaa57cdb3a3b487ff006b0d9a711bd9ddc727b29456715d4af9",
+    "benchmark/data/reactions.csv": "f11ebc6f4d0734deb14c054caf277b81695b22668017d70af9c43cd6146004f1",
+    "benchmark/data/species_evidence.csv": "10712febb6b46eb5625a0d944aac64e94ad7a040985c8c2e4d4f8dd2a8803933",
+    "benchmark/phase3/species_names.csv": "6d3fc948d8c8b993aaffdda5ebe4b3dbba60715104072e4e2a87b7a268e6f708",
+    "benchmark/phase3/splits.csv": "7df9566693ea1f2c170fe9d442fde47d8927ee6668a9d5c1c2e762d52cf55a4b",
+    "data/kegg/kegg_reaction_features.lzma": "00acb4de1bbfb1ddae0298a09d218f93eb22241844179439ff34a2912fba046c"
+  },
+  "split": "train"
+}

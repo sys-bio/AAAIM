@@ -1,0 +1,22 @@
+{
+  "pricing_date": "2026-09-02",
+  "source": "EXAMPLE ONLY — illustrative public list prices, not a quote and not guaranteed. Replace this file with the provider page you actually intend to use before any paid run, and record that page's date.",
+  "currency": "USD",
+  "models": {
+    "example-small-chat": {
+      "input_per_million": 0.15,
+      "output_per_million": 0.60,
+      "note": "Placeholder in the 'mini/flash/haiku' price band."
+    },
+    "example-mid-chat": {
+      "input_per_million": 3.00,
+      "output_per_million": 15.00,
+      "note": "Placeholder in the 'sonnet/gpt-4o-class' price band."
+    },
+    "example-large-chat": {
+      "input_per_million": 15.00,
+      "output_per_million": 75.00,
+      "note": "Placeholder in the 'opus/o-class' price band."
+    }
+  }
+}

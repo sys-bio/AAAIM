@@ -1,0 +1,38 @@
+{
+  "catalog": {
+    "path": "benchmark/phase3/kegg_catalog_ids.json",
+    "sha256": "1e65d51729adaa0c48bd7dfe51cc0ed709801ae88c939cfa62b1ee821035d127",
+    "size": 12312,
+    "source_path": "data/kegg/kegg_reaction_features.lzma",
+    "source_sha256": "00acb4de1bbfb1ddae0298a09d218f93eb22241844179439ff34a2912fba046c"
+  },
+  "components": [
+    {
+      "depth": 100,
+      "method": "bm25",
+      "path": "benchmark/phase3/retrieval_baselines/rankings_bm25.jsonl",
+      "sha256": "f0b700248e388bd75fb7bca9c05a46ecbb6b5802861a8631eadb944e0b1572f0",
+      "weight": 1.0
+    },
+    {
+      "depth": 100,
+      "method": "trained_biencoder_epoch1",
+      "path": "benchmark/phase3/phase3b_full/rankings_epoch_1.jsonl",
+      "sha256": "660c7ff55d787928050ba963cf4236788de21f661a523a5ebc1c47abbfc2f304",
+      "weight": 1.0
+    }
+  ],
+  "construction": "label-free; complete-catalog permutation; no re-encoding, retraining, tuning, or validation-label access",
+  "method": "bm25_trained_epoch1_rrf",
+  "rrf": {
+    "k": 60,
+    "missing_contribution": 0.0,
+    "rank_origin": 1,
+    "tie_break": "KEGG identifier ascending",
+    "weights": "equal"
+  },
+  "schema": "phase3b-fusion-ranking-v1",
+  "scope": "validation only; no held-out test reactions or labels",
+  "test_rows_read": 0,
+  "zero_score_tail": "IDs absent from both frozen 100-deep inputs have equal zero score and are ordered by ascending KEGG ID"
+}

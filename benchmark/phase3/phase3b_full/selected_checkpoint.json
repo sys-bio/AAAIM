@@ -1,0 +1,48 @@
+{
+  "hierarchy": [
+    "exact reaction-micro Recall@1",
+    "exact reaction-micro Recall@10",
+    "unseen-target Recall@10",
+    "earlier epoch"
+  ],
+  "latest_checkpoint": {
+    "bytes": 399385639,
+    "config_hash": "0b808b72948311a44ebfd5869168751297df47a6afcfd1484a3b6907c9cabe88",
+    "contains": [
+      "model",
+      "optimizer",
+      "scheduler",
+      "grad_scaler",
+      "epoch",
+      "cursor",
+      "rng-compatible deterministic ordering"
+    ],
+    "dataset_hash": "142c9f0d404531cf2a8c59ddfabdc80a2858dddd4656a1becc1fb5c0ff292a05",
+    "epoch": 3,
+    "path": "benchmark/phase3/phase3b_full/_checkpoints/latest.pt",
+    "role": "latest_completed_epoch",
+    "sha256": "d32143f3c2a53935d842e766750900f94e6c7dcbe06d1aae1380d86a52bf1468"
+  },
+  "selected_checkpoint": {
+    "bytes": 399385639,
+    "config_hash": "0b808b72948311a44ebfd5869168751297df47a6afcfd1484a3b6907c9cabe88",
+    "contains": [
+      "model",
+      "optimizer",
+      "scheduler",
+      "grad_scaler",
+      "epoch",
+      "cursor",
+      "rng-compatible deterministic ordering"
+    ],
+    "dataset_hash": "142c9f0d404531cf2a8c59ddfabdc80a2858dddd4656a1becc1fb5c0ff292a05",
+    "epoch": 1,
+    "path": "benchmark/phase3/phase3b_full/_checkpoints/best.pt",
+    "role": "validation_selected_best",
+    "sha256": "8773b04f09916889b74c956e708044fe2c653fa764fe73c422ecc376ecae81c1"
+  },
+  "selected_epoch": 1,
+  "selected_reference": "benchmark/phase3/phase3b_full/_checkpoints/best.pt",
+  "selection_population": "validation only; epochs 0 through 3",
+  "test_rows_read": 0
+}

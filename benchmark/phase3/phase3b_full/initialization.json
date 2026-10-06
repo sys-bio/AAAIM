@@ -1,0 +1,8 @@
+{
+  "cache": "benchmark/phase3/phase3b_smoke/_model_cache",
+  "epoch": 0,
+  "model": "BAAI/bge-small-en-v1.5",
+  "revision": "5e62ea33e012fda8c02802b906664c915ebd1bb1",
+  "smoke_checkpoint_used": false,
+  "source": "original official checkpoint"
+}

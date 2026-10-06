@@ -1,0 +1,37 @@
+{
+  "another_validation_experiment_before_test_freeze": true,
+  "high_incorrect_in_catalog_rate": true,
+  "notes": [
+    "Do not freeze a winner from a trivial numerical gap if cluster intervals include zero.",
+    "Direct open-set value depends on recovery in retrieval-failure strata, not control-set accuracy alone.",
+    "Held-out test evaluation is not part of this decision.",
+    "Self-reported confidence is not treated as a calibrated probability.",
+    "A non-abstained valid in-catalog miss is an incorrect in-catalog prediction.",
+    "Evidence-supported terminology is reserved for tool-assisted experiments.",
+    "target_only is the working default because added context did not beat uncertainty and costs more."
+  ],
+  "paired_accuracy_intervals": [
+    [
+      "target_plus_model_vs_target_only",
+      0.0061,
+      -0.0735,
+      0.0585
+    ],
+    [
+      "target_plus_neighborhood_vs_target_only",
+      0.0061,
+      -0.0756,
+      0.0688
+    ]
+  ],
+  "paired_deltas_cross_zero": true,
+  "preferred_context_variant": null,
+  "ranking_by_exact_top1": [
+    "target_plus_model",
+    "target_plus_neighborhood",
+    "target_only"
+  ],
+  "retain_direct_open_set": "selective_method_development_only",
+  "use_raw_confidence_threshold": false,
+  "working_context_for_followup": "target_only"
+}

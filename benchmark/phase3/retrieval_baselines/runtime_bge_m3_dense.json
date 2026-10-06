@@ -1,0 +1,20 @@
+{
+  "cache_hit": true,
+  "cache_key": "7191eb18ad7f0e768c5035c6cc84cd7b20f1491b01dee037faa7bad6edf247c8",
+  "device": "cpu",
+  "hardware": "Windows-11-10.0.26200-SP0",
+  "max_length": 512,
+  "mixed_precision": false,
+  "model": "BAAI/bge-m3",
+  "n_queries": 969,
+  "normalization": "l2",
+  "numpy": "2.2.2",
+  "pooling": "cls",
+  "python": "3.12.10",
+  "requested_revision": "5617a9f61b028005a4858fdac845db406aefb181",
+  "resolved_revision": "5617a9f61b028005a4858fdac845db406aefb181",
+  "seconds": 333.464,
+  "similarity": "inner_product_cosine",
+  "torch": "2.13.0",
+  "transformers": "5.16.1"
+}

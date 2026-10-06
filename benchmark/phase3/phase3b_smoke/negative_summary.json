@@ -1,0 +1,22 @@
+{
+  "dataset_sha256": "142c9f0d404531cf2a8c59ddfabdc80a2858dddd4656a1becc1fb5c0ff292a05",
+  "dense_rrf_hard_negatives": {
+    "reason": "frozen dense/RRF rankings exist only for validation; using them would not provide train-query negatives",
+    "used": false
+  },
+  "n_duplicate_negatives": 0,
+  "n_positive_negative_overlaps": 0,
+  "n_queries_with_fewer_bm25_negatives_than_requested": 0,
+  "n_total_negatives": 10398,
+  "n_uncertain_brite_orthology_siblings_excluded": 1150,
+  "random_policy": "deterministic per-query catalog control; all positives and uncertain EC/KO siblings excluded",
+  "requested_per_query": {
+    "bm25": 2,
+    "random": 1
+  },
+  "sibling_policy": "exclude candidates sharing EC or KO with any valid positive",
+  "source_counts": {
+    "bm25": 6932,
+    "random": 3466
+  }
+}

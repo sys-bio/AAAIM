@@ -1,0 +1,16 @@
+{
+  "evidence_depth": 10,
+  "fusion_minus_trained": {
+    "recall_at_1": 0.03612,
+    "recall_at_10": 0.030959,
+    "unseen_recall_at_10": 0.196721
+  },
+  "materially_harms_trained_recall_at_1": false,
+  "pareto_frontier_recall1_recall10_unseen_recall10": [
+    "bm25_trained_epoch1_rrf"
+  ],
+  "phase3c_evidence_retriever": "bm25_trained_epoch1_rrf",
+  "rationale": "Fusion has the best validation evidence-set recall, including unseen targets, with no material (>0.01) Recall@1 harm; statistical uncertainty is retained.",
+  "recall_at_1_material_harm_threshold": -0.01,
+  "scope": "validation-only selection for future Phase 3C; Phase 3C was not started"
+}

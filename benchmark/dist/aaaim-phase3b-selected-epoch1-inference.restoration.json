@@ -1,0 +1,36 @@
+{
+  "archive_sha256": "3412a3fa546347d8209ab62ca7ef55fb490e148b5f90c25cf33616328a0d0f53",
+  "device": "cuda",
+  "fixture": {
+    "embedding_digests_exact": true,
+    "expected_rankings": [
+      [
+        "D1",
+        "D4",
+        "D2",
+        "D3"
+      ],
+      [
+        "D2",
+        "D3",
+        "D4",
+        "D1"
+      ]
+    ],
+    "rankings_exact": true
+  },
+  "fresh_temporary_directory": true,
+  "loaded_from_extracted_archive_only": true,
+  "offline_environment": true,
+  "optimizer_scheduler_scaler_or_cursor_present": false,
+  "source_checkpoint_accessed_for_restore": false,
+  "source_model_cache_accessed_for_restore": false,
+  "test_rows_read": 0,
+  "validation": {
+    "catalog_size": 12312,
+    "expected_sha256": "660c7ff55d787928050ba963cf4236788de21f661a523a5ebc1c47abbfc2f304",
+    "n_queries": 969,
+    "rank_depth": 100,
+    "ranked_kegg_ids_exact": true
+  }
+}
