@@ -1,0 +1,65 @@
+{
+  "branch_base": "debc52978603532fe8cc25a1c9e1e4b3070df836",
+  "model_id": "MODEL2507280001",
+  "sbml_model_id": "iLG335",
+  "model_name": "iLG335",
+  "sbml_errors": 0,
+  "species": 593,
+  "reactions": 541,
+  "reactions_with_existing_kegg": 0,
+  "reactions_with_existing_ec": 265,
+  "prediction_component": "Phase 3 deterministic BM25 full-catalog retriever",
+  "candidate_generation_success": 541,
+  "assessment_counts": {
+    "insufficient_species_mapping": 16,
+    "not_applicable_biomass": 1,
+    "not_applicable_model_pseudo_reaction": 3,
+    "not_applicable_transport": 257,
+    "plausible_candidate_misranked": 47,
+    "top1_partial_plausible": 20,
+    "top1_transformation_supported": 147,
+    "weak_candidate_only": 18,
+    "wrong_transformation_or_retrieval_miss": 32
+  },
+  "failure_stage_counts": {
+    "candidate_ranking": 47,
+    "candidate_retrieval": 50,
+    "database_scope": 261,
+    "metabolite_mapping": 16,
+    "none": 167
+  },
+  "top1_strict_supported_non_scope": 167,
+  "top10_contains_supported_non_scope": 196,
+  "species_prediction_rows": 593,
+  "species_with_aaaim_chebi": 563,
+  "species_with_heldout_review_kegg": 556,
+  "phase3_limitations": [
+    "The selected Phase 3B trained checkpoint/inference archive is absent locally, so trained-neural plus BM25 RRF could not run.",
+    "AAAIM_PHASE3C_OPENAI_API_KEY is unset, so the grounded Phase 3C final selector could not run.",
+    "Reported predictions are BM25 component Top-1, not full fusion/grounded final outputs."
+  ],
+  "review_scoring": {
+    "pipeline_score_ignored": [
+      "C00001",
+      "C00002",
+      "C00003",
+      "C00004",
+      "C00005",
+      "C00006",
+      "C00007",
+      "C00008",
+      "C00009",
+      "C00013",
+      "C00027",
+      "C00080"
+    ],
+    "strict_review_ignored": [
+      "C00001",
+      "C00080"
+    ],
+    "strict_review_stoichiometry": "participant-presence comparison; raw model and KEGG equations retained for multiplicity review",
+    "strict_supported_threshold": 0.75,
+    "heldout_supplement_used_only_after_prediction": true
+  },
+  "elapsed_seconds": 9.132
+}

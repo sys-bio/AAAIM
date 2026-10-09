@@ -1,0 +1,334 @@
+{
+  "artifact": {
+    "archive_sha256": "3412a3fa546347d8209ab62ca7ef55fb490e148b5f90c25cf33616328a0d0f53",
+    "contents_verified": true,
+    "expected_archive_sha256": "3412a3fa546347d8209ab62ca7ef55fb490e148b5f90c25cf33616328a0d0f53",
+    "source_checkpoint_sha256": "8773b04f09916889b74c956e708044fe2c653fa764fe73c422ecc376ecae81c1",
+    "source_path": "C:\\Users\\janis\\Documents\\software_projects\\janisshin\\AAAIM\\benchmark\\dist\\aaaim-phase3b-selected-epoch1-inference.zip"
+  },
+  "bm25_baseline_264": {
+    "top10_strict": 194,
+    "top1_strict": 147,
+    "top1_supported_including_ec_backed_partial": {
+      "count": 167,
+      "fraction": 0.6325757575757576
+    },
+    "top_k_transformation_recall_strict": {
+      "1": {
+        "count": 147,
+        "fraction": 0.5568181818181818
+      },
+      "10": {
+        "count": 194,
+        "fraction": 0.7348484848484849
+      },
+      "3": {
+        "count": 169,
+        "fraction": 0.6401515151515151
+      },
+      "5": {
+        "count": 180,
+        "fraction": 0.6818181818181818
+      }
+    }
+  },
+  "comparison": {
+    "bm25_correct_predictions_degraded_by_phase3b": 2,
+    "bm25_failures_corrected_by_phase3b": 41,
+    "remained_correct": 165,
+    "remained_incorrect": 56,
+    "strong_top10_gained": 21,
+    "strong_top10_lost": 0
+  },
+  "credential": {
+    "available": false,
+    "environment_variable": "OPENAI_API_KEY"
+  },
+  "model_id": "MODEL2507280001",
+  "phase3b_metrics_264": {
+    "assessment_counts": {
+      "cofactor_dependent_false_positive": 7,
+      "plausible_candidate_misranked": 26,
+      "top1_partial_plausible": 24,
+      "top1_transformation_supported": 182,
+      "weak_candidate_only": 16,
+      "wrong_transformation_or_retrieval_miss": 9
+    },
+    "failure_stage_counts": {
+      "candidate_ranking": 33,
+      "candidate_retrieval": 25,
+      "none": 206
+    },
+    "plausible_candidate_absent_top10": 9,
+    "strong_candidate_absent_top10": 49,
+    "top1_supported_including_ec_backed_partial": {
+      "count": 206,
+      "fraction": 0.7803030303030303
+    },
+    "top1_transformation_match_strict": {
+      "count": 182,
+      "fraction": 0.6893939393939394
+    },
+    "top_k_transformation_recall_strict": {
+      "1": {
+        "count": 182,
+        "fraction": 0.6893939393939394
+      },
+      "10": {
+        "count": 215,
+        "fraction": 0.8143939393939394
+      },
+      "3": {
+        "count": 211,
+        "fraction": 0.7992424242424242
+      },
+      "5": {
+        "count": 212,
+        "fraction": 0.803030303030303
+      }
+    }
+  },
+  "pipeline": {
+    "fusion": "equal-weight reciprocal rank fusion; k=60; one-indexed; missing contribution zero; KEGG-ID ascending tie-break",
+    "phase3a": "project-native BM25, full 12,312-reaction catalog, depth 100",
+    "phase3b": "validation-selected BAAI/bge-small-en-v1.5 epoch-1 fine-tuned bi-encoder, depth 100",
+    "phase3c": "not executed"
+  },
+  "population": {
+    "adequately_mapped_internal_reactions": 264,
+    "all_model_reactions": 541,
+    "insufficient_mapping": 16,
+    "no_call_scope": 261
+  },
+  "representative_cases": {
+    "corrected": [
+      {
+        "bm25_assessment": "plausible_candidate_misranked",
+        "bm25_top1": "R00119",
+        "phase3b_assessment": "top1_transformation_supported",
+        "phase3b_best_top10": "R04534",
+        "phase3b_best_top10_score": 1.0,
+        "phase3b_top1": "R04534",
+        "phase3b_top1_strict_score": 1.0,
+        "reaction_equation": "M_3odecACP_c + M_h_c + M_nadph_c <=> M_nadp_c + M_3hdecACP_c",
+        "reaction_id": "R_3OAR100",
+        "reaction_name": "3-oxoacyl-[acyl-carrier-protein] reductase (n-C10:0)"
+      },
+      {
+        "bm25_assessment": "plausible_candidate_misranked",
+        "bm25_top1": "R00119",
+        "phase3b_assessment": "top1_transformation_supported",
+        "phase3b_best_top10": "R04964",
+        "phase3b_best_top10_score": 1.0,
+        "phase3b_top1": "R04964",
+        "phase3b_top1_strict_score": 1.0,
+        "reaction_equation": "M_h_c + M_nadph_c + M_3oddecACP_c <=> M_nadp_c + M_3hddecACP_c",
+        "reaction_id": "R_3OAR120",
+        "reaction_name": "3-oxoacyl-[acyl-carrier-protein] reductase (n-C12:0)"
+      },
+      {
+        "bm25_assessment": "plausible_candidate_misranked",
+        "bm25_top1": "R00119",
+        "phase3b_assessment": "top1_transformation_supported",
+        "phase3b_best_top10": "R04566",
+        "phase3b_best_top10_score": 1.0,
+        "phase3b_top1": "R04566",
+        "phase3b_top1_strict_score": 1.0,
+        "reaction_equation": "M_h_c + M_nadph_c + M_3omrsACP_c <=> M_nadp_c + M_3hmrsACP_c",
+        "reaction_id": "R_3OAR140",
+        "reaction_name": "3-oxoacyl-[acyl-carrier-protein] reductase (n-C14:0)"
+      },
+      {
+        "bm25_assessment": "plausible_candidate_misranked",
+        "bm25_top1": "R00119",
+        "phase3b_assessment": "top1_transformation_supported",
+        "phase3b_best_top10": "R04543",
+        "phase3b_best_top10_score": 1.0,
+        "phase3b_top1": "R04543",
+        "phase3b_top1_strict_score": 1.0,
+        "reaction_equation": "M_h_c + M_nadph_c + M_3opalmACP_c <=> M_nadp_c + M_3hpalmACP_c",
+        "reaction_id": "R_3OAR160",
+        "reaction_name": "3-oxoacyl-[acyl-carrier-protein] reductase (n-C16:0)"
+      },
+      {
+        "bm25_assessment": "plausible_candidate_misranked",
+        "bm25_top1": "R00119",
+        "phase3b_assessment": "top1_transformation_supported",
+        "phase3b_best_top10": "R07763",
+        "phase3b_best_top10_score": 1.0,
+        "phase3b_top1": "R07763",
+        "phase3b_top1_strict_score": 1.0,
+        "reaction_equation": "M_h_c + M_3ooctdACP_c + M_nadph_c <=> M_nadp_c + M_3hoctaACP_c",
+        "reaction_id": "R_3OAR180",
+        "reaction_name": "3-oxoacyl-[acyl-carrier-protein] reductase (n-C18:0)"
+      },
+      {
+        "bm25_assessment": "weak_candidate_only",
+        "bm25_top1": "R00119",
+        "phase3b_assessment": "top1_partial_plausible",
+        "phase3b_best_top10": "R02767",
+        "phase3b_best_top10_score": 0.6666666666666666,
+        "phase3b_top1": "R02767",
+        "phase3b_top1_strict_score": 0.6666666666666666,
+        "reaction_equation": "M_h_c + M_nadph_c + M_actACP_c <=> M_nadp_c + M_3haACP_c",
+        "reaction_id": "R_3OAR40",
+        "reaction_name": "3-oxoacyl-[acyl-carrier-protein] reductase (n-C4:0)"
+      },
+      {
+        "bm25_assessment": "plausible_candidate_misranked",
+        "bm25_top1": "R00119",
+        "phase3b_assessment": "top1_transformation_supported",
+        "phase3b_best_top10": "R04953",
+        "phase3b_best_top10_score": 1.0,
+        "phase3b_top1": "R04953",
+        "phase3b_top1_strict_score": 1.0,
+        "reaction_equation": "M_h_c + M_nadph_c + M_3ohexACP_c <=> M_nadp_c + M_3hhexACP_c",
+        "reaction_id": "R_3OAR60",
+        "reaction_name": "3-oxoacyl-[acyl-carrier-protein] reductase (n-C6:0)"
+      },
+      {
+        "bm25_assessment": "plausible_candidate_misranked",
+        "bm25_top1": "R00119",
+        "phase3b_assessment": "top1_transformation_supported",
+        "phase3b_best_top10": "R04536",
+        "phase3b_best_top10_score": 1.0,
+        "phase3b_top1": "R04536",
+        "phase3b_top1_strict_score": 1.0,
+        "reaction_equation": "M_h_c + M_nadph_c + M_3ooctACP_c <=> M_nadp_c + M_3hoctACP_c",
+        "reaction_id": "R_3OAR80",
+        "reaction_name": "3-oxoacyl-[acyl-carrier-protein] reductase (n-C8:0)"
+      }
+    ],
+    "degraded": [
+      {
+        "bm25_assessment": "top1_transformation_supported",
+        "bm25_top1": "R04968",
+        "phase3b_assessment": "plausible_candidate_misranked",
+        "phase3b_best_top10": "R04968",
+        "phase3b_best_top10_score": 1.0,
+        "phase3b_top1": "R02768",
+        "phase3b_top1_strict_score": 0.41666666666666663,
+        "reaction_equation": "M_h_c + M_malACP_c + M_myrsACP_c => M_ACP_c + M_co2_c + M_3opalmACP_c",
+        "reaction_id": "R_3OAS160",
+        "reaction_name": "3-oxoacyl-[acyl-carrier-protein] synthase (n-C16:0)"
+      },
+      {
+        "bm25_assessment": "top1_transformation_supported",
+        "bm25_top1": "R07176",
+        "phase3b_assessment": "plausible_candidate_misranked",
+        "phase3b_best_top10": "R07176",
+        "phase3b_best_top10_score": 1.0,
+        "phase3b_top1": "R02021",
+        "phase3b_top1_strict_score": 0.41666666666666663,
+        "reaction_equation": "M_aps_c + M_trdrd_c => M_so3_c + 2 M_h_c + M_amp_c + M_trdox_c",
+        "reaction_id": "R_APSR",
+        "reaction_name": "Adenosine 5'-phosphosulfate reductase"
+      }
+    ],
+    "remaining": [
+      {
+        "bm25_assessment": "wrong_transformation_or_retrieval_miss",
+        "bm25_top1": "R04355",
+        "phase3b_assessment": "wrong_transformation_or_retrieval_miss",
+        "phase3b_best_top10": "R02768",
+        "phase3b_best_top10_score": 0.41666666666666663,
+        "phase3b_top1": "R09482",
+        "phase3b_top1_strict_score": 0.375,
+        "reaction_equation": "M_h_c + M_malACP_c + M_palmACP_c => M_ACP_c + M_3ooctdACP_c + M_co2_c",
+        "reaction_id": "R_3OAS180",
+        "reaction_name": "3-oxoacyl-[acyl-carrier-protein] synthase (n-C18:0)"
+      },
+      {
+        "bm25_assessment": "weak_candidate_only",
+        "bm25_top1": "R12789",
+        "phase3b_assessment": "weak_candidate_only",
+        "phase3b_best_top10": "R12148",
+        "phase3b_best_top10_score": 0.5,
+        "phase3b_top1": "R07325",
+        "phase3b_top1_strict_score": 0.5,
+        "reaction_equation": "M_ACP_c + M_atp_c + M_octa_c => M_ocACP_c + M_ppi_c + M_amp_c",
+        "reaction_id": "R_AACPS9",
+        "reaction_name": "Acyl-[acyl-carrier-protein] synthetase (n-C8:0)"
+      },
+      {
+        "bm25_assessment": "plausible_candidate_misranked",
+        "bm25_top1": "R12789",
+        "phase3b_assessment": "plausible_candidate_misranked",
+        "phase3b_best_top10": "R01625",
+        "phase3b_best_top10_score": 1.0,
+        "phase3b_top1": "R12789",
+        "phase3b_top1_strict_score": 0.125,
+        "reaction_equation": "M_coa_c + M_apoACP_c => M_pap_c + M_h_c + M_ACP_c",
+        "reaction_id": "R_ACPS1",
+        "reaction_name": "acyl-carrier protein synthase"
+      },
+      {
+        "bm25_assessment": "wrong_transformation_or_retrieval_miss",
+        "bm25_top1": "R11319",
+        "phase3b_assessment": "weak_candidate_only",
+        "phase3b_best_top10": "R12633",
+        "phase3b_best_top10_score": 0.5,
+        "phase3b_top1": "R00333",
+        "phase3b_top1_strict_score": 0.3333333333333333,
+        "reaction_equation": "M_amp_c + M_pppi_c <=> M_ppi_c + M_adp_c",
+        "reaction_id": "R_ADK2",
+        "reaction_name": "adenylate kinase (Inorganic triphosphate)"
+      },
+      {
+        "bm25_assessment": "wrong_transformation_or_retrieval_miss",
+        "bm25_top1": "R07404",
+        "phase3b_assessment": "wrong_transformation_or_retrieval_miss",
+        "phase3b_best_top10": "R04591",
+        "phase3b_best_top10_score": 0.16666666666666666,
+        "phase3b_top1": "R04640",
+        "phase3b_top1_strict_score": 0.0,
+        "reaction_equation": "M_25aics_c <=> M_aicar_c + M_fum_c",
+        "reaction_id": "R_ADSL2r",
+        "reaction_name": "adenylosuccinate lyase"
+      },
+      {
+        "bm25_assessment": "wrong_transformation_or_retrieval_miss",
+        "bm25_top1": "R04037",
+        "phase3b_assessment": "plausible_candidate_misranked",
+        "phase3b_best_top10": "R04560",
+        "phase3b_best_top10_score": 1.0,
+        "phase3b_top1": "R04640",
+        "phase3b_top1_strict_score": 0.0,
+        "reaction_equation": "M_10fthf_c + M_aicar_c <=> M_fprica_c + M_thf_c",
+        "reaction_id": "R_AICART",
+        "reaction_name": "phosphoribosylaminoimidazolecarboxamide formyltransferase"
+      },
+      {
+        "bm25_assessment": "wrong_transformation_or_retrieval_miss",
+        "bm25_top1": "R00119",
+        "phase3b_assessment": "plausible_candidate_misranked",
+        "phase3b_best_top10": "R08549",
+        "phase3b_best_top10_score": 1.0,
+        "phase3b_top1": "R01197",
+        "phase3b_top1_strict_score": 0.5,
+        "reaction_equation": "M_nad_c + M_coa_c + M_akg_c => M_nadh_c + M_succoa_c + M_co2_c",
+        "reaction_id": "R_AKGDH",
+        "reaction_name": "2-Oxoglutarate dehydrogenase"
+      },
+      {
+        "bm25_assessment": "wrong_transformation_or_retrieval_miss",
+        "bm25_top1": "R10792",
+        "phase3b_assessment": "weak_candidate_only",
+        "phase3b_best_top10": "R00657",
+        "phase3b_best_top10_score": 0.5,
+        "phase3b_top1": "R00657",
+        "phase3b_top1_strict_score": 0.5,
+        "reaction_equation": "M_h2o_c + M_met_L_ala__L_c <=> M_met__L_c + M_ala__L_c",
+        "reaction_id": "R_AMPEP14",
+        "reaction_name": "methionyl aminopeptidase"
+      }
+    ]
+  },
+  "runtime": {
+    "batch_size": 64,
+    "device": "cuda",
+    "elapsed_seconds": 32.635,
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]"
+  }
+}
