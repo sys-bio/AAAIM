@@ -466,7 +466,7 @@ def _search_one_database(
     database: str,
     method: str,
     top_k: int,
-    tax_id: str = None,
+    tax_id: str | int | list | None = None,
     model_info: Dict[str, Any] = None,
     model_type: str = None,
 ) -> List[Recommendation]:
@@ -530,7 +530,7 @@ def _search_with_entity_type_validation(
     allowed_names: Sequence[str],
     method: str,
     top_k: int,
-    tax_id: str = None,
+    tax_id: str | int | list | None = None,
     model_info: Dict[str, Any] = None,
     model_type: str = None,
     validation_events: Optional[List[Dict[str, Any]]] = None,
@@ -808,7 +808,7 @@ def _search_complex_species(
     allowed_names: List[str],
     method: str,
     top_k: int,
-    tax_id: str = None,
+    tax_id: str | int | list | None = None,
     model_info: Dict[str, Any] = None,
     components: Optional[List[Tuple[str, List[str]]]] = None,
     model_type: str = None,
@@ -929,7 +929,7 @@ def _search_databases(
     databases: List[DatabaseID],
     method: str,
     top_k: int,
-    tax_id: str = None,
+    tax_id: str | int | list | None = None,
     entity_type_dict: Optional[Dict[str, str]] = None,
     model_info: Dict[str, Any] = None,
     component_dict: Optional[Dict[str, List[Tuple[str, List[str]]]]] = None,
@@ -1264,6 +1264,20 @@ def _print_run_summary(
         n_ann = len(pred)
         n_with = int(pred["id"].nunique()) if "id" in pred.columns and not pred.empty else 0
         print(f"Found {n_ann} annotations for {n_with} of {n_entities} {entity_word}.")
+        if "tax_id" in work.columns:
+            taxon_names = {"9606": "human", "10090": "mouse", "10116": "rat"}
+            taxa: List[str] = []
+            for value in work["tax_id"].tolist():
+                text = str(value).strip()
+                if text and text.lower() not in {"nan", "none"} and text not in taxa:
+                    taxa.append(text)
+            if len(taxa) > 1:
+                shown = [
+                    f"{taxon_names[tax]} ({tax})" if tax in taxon_names else tax
+                    for tax in taxa
+                ]
+                joined = " and ".join(shown) if len(shown) == 2 else ", ".join(shown)
+                print(f"Results for {len(taxa)} taxonomies were returned: {joined}.")
 
     texts: List[str] = []
     if isinstance(reason, dict):
@@ -1680,7 +1694,7 @@ def annotate_single_model(
     max_entities: int = None,
     entity_type: str | EntityType = EntityType.CHEMICAL,
     database: str | DatabaseID | Sequence[str | DatabaseID] = DatabaseID.CHEBI,
-    tax_id: str = None,
+    tax_id: str | int | list | None = None,
     chunk_size: int = 50,
     species_recommendations_df = None,
     annotate: str = "species",
@@ -1725,7 +1739,8 @@ def annotate_single_model(
             "auto", "reaction")
         database: Target database ("chebi", "ncbigene", "uniprot") or a list of
             databases when entity_type is "auto"
-        tax_id: For gene/protein annotations, the organism's tax_id for species-specific lookup
+        tax_id: For gene/protein annotations, one taxonomy id or a list of them.
+            When omitted, human (9606) and mouse (10090) are both returned.
         chunk_size: Size of chunks to split large models into (default: 50, None for no chunking)
         species_recommendations_df: Species recommendation table or CSV path. Used
             when annotating reactions; if omitted, ChEBI terms already in the model
@@ -2487,6 +2502,15 @@ def _generate_recommendation_table(model_file: str,
     def candidate_value(values: Sequence[Any], index: int, default: Any) -> Any:
         return values[index] if index < len(values) else default
 
+    def qualifier_for(species_id: str, candidate: Optional[str] = None, existing: bool = False) -> str:
+        if existing:
+            recorded = (qualifier_annotations.get(species_id) or {}).get(candidate)
+            if recorded:
+                return recorded
+        if row_type(species_id).lower() == 'complex':
+            return 'hasPart'
+        return 'is'
+
     def empty_row_for(
         rec: Recommendation,
         curated_name: str,
@@ -2494,11 +2518,7 @@ def _generate_recommendation_table(model_file: str,
         component: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         component = component or {}
-        if rec.id in qualifier_annotations and qualifier_annotations[rec.id]:
-            all_qualifiers = list(qualifier_annotations[rec.id].values())
-            specific_qualifier = ', '.join(all_qualifiers) if all_qualifiers else 'is'
-        else:
-            specific_qualifier = 'is'
+        specific_qualifier = qualifier_for(rec.id)
         rec_db = row_database(rec.id)
         return {
             'file': filename,
@@ -2553,10 +2573,7 @@ def _generate_recommendation_table(model_file: str,
                 else:
                     update_action = 'ignore'
 
-            if is_existing and qualifier_annotations:
-                specific_qualifier = qualifier_annotations.get(rec.id, {}).get(candidate, 'is')
-            else:
-                specific_qualifier = 'is'
+            specific_qualifier = qualifier_for(rec.id, candidate, existing=is_existing)
 
             row = {
                 'file': filename,
@@ -2601,10 +2618,7 @@ def _generate_recommendation_table(model_file: str,
                     candidate_display = f"{rec_db.upper()}:{ann}"
                     curated_name = curated_for(species_id)
 
-                    if qualifier_annotations:
-                        specific_qualifier = qualifier_annotations.get(species_id, {}).get(ann, 'is')
-                    else:
-                        specific_qualifier = 'is'
+                    specific_qualifier = qualifier_for(species_id, ann, existing=True)
 
                     row = {
                         'file': filename,
@@ -2776,6 +2790,8 @@ def annotate_model(model_file: str, **kwargs) -> Tuple[pd.DataFrame, Dict[str, A
     how many IDs the final LLM ranking keeps.
     ``save_to`` is the output file prefix (``<save_to>_species.csv`` /
     ``<save_to>_reactions.csv``).
+    ``tax_id`` is one NCBI taxonomy id or a list of them. When omitted, gene
+    and protein searches return human (9606) and mouse (10090).
     Other keyword arguments are forwarded to :func:`annotate_single_model`
     (including ``message`` for extra LLM prompt text).
     """

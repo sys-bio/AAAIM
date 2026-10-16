@@ -136,10 +136,14 @@ result = annotate_model(
 )
 ```
 
-For multi-taxon searches, candidate identities are ranked before their
-taxon-specific accessions are expanded. The output records `identity`,
+`tax_id` accepts one NCBI taxonomy id or a list of them. Omit it and gene or
+protein search returns human (9606) and mouse (10090). Pass a list to choose
+the organisms, as in the example above. Candidate identities are ranked before
+their taxon-specific accessions are expanded. The output records `identity`,
 `identity_rank`, `candidate_rank`, and `tax_id`, so a top-one identity may have
-one accession row per organism.
+one accession row per organism. When the table contains more than one taxonomy,
+the run prints which ones, for example
+`Results for 2 taxonomies were returned: human (9606) and mouse (10090).`
 
 #### Protein Annotation (UniProt)
 
@@ -150,9 +154,11 @@ result = annotate_model(
     model_file="path/to/model.xml",
     entity_type="protein",
     database="uniprot",
-    tax_id="9606"  # for human
+    tax_id="9606"  # one organism; or ["9606", "10090"] for human and mouse
 )
 ```
+
+The same `tax_id` rules apply: one id, a list of ids, or omit it for human and mouse.
 
 #### Automatic Entity Type Detection
 
@@ -180,7 +186,7 @@ print(result.recommendations_df[['species_id', 'type', 'synonyms_LLM', 'predicti
   - Chemicals → ChEBI
   - Genes → NCBI Gene
   - Proteins → UniProt
-  - Complexes → each component is searched in the database for that component's type (chemical → ChEBI, protein → UniProt, gene → NCBI Gene). The LLM lists all components, with a synonym group and type per component. Component boundaries are retained in the output and ranking is performed per component. Untyped (legacy) complex replies still search every allowed database as one unresolved unit.
+  - Complexes → each component is searched in the database for that component's type (chemical → ChEBI, protein → UniProt, gene → NCBI Gene). The LLM lists all components, with a synonym group and type per component. Component boundaries are retained in the output and ranking is performed per component. Predicted complex rows set `qualifier` to `hasPart`. Untyped (legacy) complex replies still search every allowed database as one unresolved unit. Gene and protein components use `tax_id` the same way as a gene or protein search.
 - Species with `unknown` type are included in results with their LLM-suggested synonyms but no database matches
 
 #### Reaction Annotation (KEGG)
@@ -283,6 +289,8 @@ print(f"Gene entities with existing annotations: {result.metrics['total_entities
 print(f"Accuracy: {result.metrics['accuracy']:.1%}")
 ```
 
+`tax_id` follows the annotation rules above. This example omits it, so human and mouse are both searched.
+
 #### Protein Curation
 
 ```python
@@ -292,7 +300,7 @@ result = curate_model(
     model_file="path/to/model.xml",
     entity_type="protein",
     database="uniprot",
-    tax_id=9606  # for human
+    tax_id=["9606", "10090"]  # one id or a list; omit for human and mouse
 )
 
 print(f"Protein entities with existing annotations: {result.metrics['total_entities']}")
@@ -367,9 +375,12 @@ update_annotation(
     original_model_path="path/to/original_model.xml",
     recommendation_table="recommendations.csv",  # or a pandas DataFrame
     new_model_path="path/to/updated_model.xml",
-    qualifier="is"  # (optional) bqbiol qualifier, default is 'is'
+    qualifier="is",  # fallback when a row's qualifier cell is blank
+    add_all=False,   # True adds every annotation and ignores update_annotation
 )
 ```
+
+The `qualifier` column of each row is the bqbiol qualifier written into the model (`is`, `hasPart`, and so on). Complex predictions are filled with `hasPart`. `qualifier` on the call is used only when that cell is blank. `add_all=True` adds every annotation in the table and does not read `update_annotation`.
 
 A summary of added/removed annotations will be printed after update.
 
@@ -395,6 +406,7 @@ result = annotate_model(
     verbose = False,					 # True for a short progress summary
     em_max_iterations = 5,				 # reaction EM rematch rounds; 0 skips EM
     message = "This is a model for human metabolism", # optional user message to the LLM
+    tax_id = ["9606", "10090"],		 # gene/protein organisms; omit for human and mouse
 )
 
 # Direct access to qualifier tracking functions
@@ -469,7 +481,7 @@ print_evaluation_results(
 
 After LLM name normalization, direct matching expands composite gene/protein fields into lookup-safe forms. For example, `MAP2K1 (MEK1), MAP2K2 (MEK2)` contributes the original text plus `MAP2K1`, `MEK1`, `MAP2K2`, and `MEK2`; transcript descriptors are removed from additional lookup variants. Chemical punctuation is preserved.
 
-Retrieval ranks `top_k` biological identities per ordinary species or parsed complex component. NCBI Gene and UniProt candidates are grouped across requested taxa before accessions are expanded. The LLM then retains up to `n_return` identities per unit. Output columns preserve `component_id`, `component_name`, `component_type`, `identity`, `identity_rank`, `retrieval_identity_rank`, `candidate_rank`, and `tax_id`. An unmatched parsed component receives its own empty row so complex completeness can be evaluated.
+Retrieval ranks `top_k` biological identities per ordinary species or parsed complex component. NCBI Gene and UniProt candidates are grouped across the requested taxa before accessions are expanded. `tax_id` may be one id or a list; when it is omitted the search uses human (9606) and mouse (10090). The LLM then retains up to `n_return` identities per unit. Output columns preserve `component_id`, `component_name`, `component_type`, `identity`, `identity_rank`, `retrieval_identity_rank`, `candidate_rank`, `tax_id`, and `qualifier`. Complex rows use `hasPart`. An unmatched parsed component receives its own empty row so complex completeness can be evaluated. A run that returns more than one taxonomy prints the organisms it included.
 
 When `validation=True`, the ranking LLM is also a constrained selection check:
 it must choose from retrieved IDs. This is not an independent validation of

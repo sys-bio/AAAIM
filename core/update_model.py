@@ -52,26 +52,46 @@ def insert_items_back_to_container(container, items, qualifier):
         )
     return updated_container
 
-def extract_ontology_from_items(items_list):
-    """
-    Extract ontology from items and return a flat list of (ontology type, full identifier, full_item_str).
-    ontology_type: e.g., 'chebi'
-    full identifier: e.g., 'CHEBI:15414'
-    """
-    result = []
-    for item in items_list:
-        # Try identifiers.org/TYPE/ID
-        m = re.match(r'.*identifiers.org/([^/]+)/([^/\"]+)', item)
-        if m:
-            ontology_type, ontology_id = m.group(1), m.group(2).replace('"', '')
-            result.append((ontology_type, ontology_id, item))
-        else:
-            # If not identifiers.org, preserve the item as is (e.g., kegg.compound)
-            result.append((None, None, item))
-    return result
+def annotation_resource(annotation):
+    """identifiers.org URI for a table value such as UNIPROT:P15056 or CHEBI:15996."""
+    prefix, ident = str(annotation).split(':', 1)
+    prefix, ident = prefix.strip().lower(), ident.strip()
+    if prefix == 'chebi':
+        if not ident.upper().startswith('CHEBI:'):
+            ident = f'CHEBI:{ident}'
+        return f'http://identifiers.org/chebi/{ident}'
+    if prefix == 'uniprot':
+        return f'http://identifiers.org/uniprot/{ident}'
+    if prefix == 'ncbigene':
+        return f'http://identifiers.org/ncbigene/{ident}'
+    if prefix == 'kegg' and ident[:1].upper() == 'R':
+        return f'http://identifiers.org/kegg.reaction/{ident}'
+    if prefix == 'kegg' and ident[:1].upper() == 'C':
+        return f'http://identifiers.org/kegg.compound/{ident}'
+    return f'http://identifiers.org/{prefix}/{ident}'
 
-def create_annotation_item(knowledge_resource, identifier):
-    return f'<rdf:li rdf:resource="http://identifiers.org/{knowledge_resource}/{identifier}"/>'
+
+def _resource_key(uri):
+    return uri.strip().replace('https://', 'http://').rstrip('/').lower()
+
+
+def _item_resource(item):
+    match = re.search(r'rdf:resource="([^"]+)"', item)
+    return match.group(1) if match else ''
+
+
+def create_annotation_item(annotation):
+    return f'<rdf:li rdf:resource="{annotation_resource(annotation)}"/>'
+
+
+def _row_qualifier(row, default):
+    raw = row.get('qualifier', default)
+    if pd.isna(raw) or str(raw).strip().lower() in {'', 'na', 'nan', 'none'}:
+        return default
+    qualifier = str(raw).strip()
+    if qualifier.lower().startswith('bqbiol:'):
+        qualifier = qualifier.split(':', 1)[1]
+    return qualifier
 
 def clean_items(items):
     # Only deduplicate by full item string
@@ -82,11 +102,14 @@ def update_annotation(
     original_model_path, 
     recommendation_table = None, 
     new_model_path = None, 
-    qualifier='is'
+    qualifier='is',
+    add_all=False,
     ):
     """
     Update SBML model annotations based on a recommendation table.
     Only add/delete the specified ontology (e.g., CHEBI), preserving all other annotation terms (e.g., KEGG).
+
+    add_all: add every annotation in the table and ignore the update_annotation column.
     """
     if recommendation_table is None:
         recommendation_table = original_model_path + '_species.csv'
@@ -119,22 +142,17 @@ def update_annotation(
     for species_id, group in grouped:
         to_add, to_delete = [], []
         for _, row in group.iterrows():
-            action = str(row.get('update_annotation', 'ignore')).lower()
+            action = 'add' if add_all else str(row.get('update_annotation', 'ignore')).lower()
             annotation = row.get('annotation', '')
-            typ = row.get('type', '')
-            # Get qualifier from the row, fall back to default if not specified
-            row_qualifier = row.get('qualifier', qualifier)
-            if row_qualifier == 'NA' or not row_qualifier:
-                row_qualifier = qualifier  # Use default qualifier
-            
-            if action == 'add' and annotation:
-                if ':' in annotation:
-                    knowledge_resource, identifier = annotation.split(':', 1)
-                    to_add.append((knowledge_resource.lower(), annotation, row_qualifier))
-            elif action == 'delete' and annotation:
-                if ':' in annotation:
-                    knowledge_resource, identifier = annotation.split(':', 1)
-                    to_delete.append((knowledge_resource.lower(), annotation))
+            if pd.isna(annotation) or ':' not in str(annotation):
+                continue
+            annotation = str(annotation).strip()
+            row_qualifier = _row_qualifier(row, qualifier)
+            resource_key = _resource_key(annotation_resource(annotation))
+            if action == 'add':
+                to_add.append((annotation, row_qualifier, resource_key))
+            elif action == 'delete':
+                to_delete.append(resource_key)
         sbml_elem = None
         if model_type.name.startswith('SBML'):
             sbml_elem = model.getElementBySId(species_id)
@@ -166,44 +184,38 @@ def update_annotation(
                 for item in items:
                     existing_items.append((item, qual_name))
         
-        # Parse all items, keep non-target ontologies, operate only on target ontology
         removed_this_species = 0
-        
+        if not to_add and not to_delete and not existing_items:
+            continue
+
         # Group existing items by qualifier
         existing_by_qualifier = {}
         for item, qual_name in existing_items:
-            if qual_name not in existing_by_qualifier:
-                existing_by_qualifier[qual_name] = []
-            existing_by_qualifier[qual_name].append(item)
-        
-        # Remove items to delete
-        for ont_type, ont_id, item in extract_ontology_from_items([item for item, _ in existing_items]):
-            # Only match for the correct ontology type and full identifier
-            if ont_type is not None and (ont_type.lower(), ont_id) in to_delete:
-                removed += 1
-                removed_this_species += 1
-                # Remove from all qualifier blocks
-                for qual_name in list(existing_by_qualifier.keys()):
-                    existing_by_qualifier[qual_name] = [i for i in existing_by_qualifier[qual_name] if i != item]
-                continue
-        
-        # Add new terms (avoid duplicates)
-        existing_set = set((ont_type.lower(), ont_id) for ont_type, ont_id, _ in extract_ontology_from_items([item for item, _ in existing_items]) if ont_type)
-        
-        # Group new items by qualifier
+            existing_by_qualifier.setdefault(qual_name, []).append(item)
+
+        delete_keys = set(to_delete)
+        for qual_name, items in list(existing_by_qualifier.items()):
+            kept = []
+            for item in items:
+                if _resource_key(_item_resource(item)) in delete_keys:
+                    removed += 1
+                    removed_this_species += 1
+                else:
+                    kept.append(item)
+            existing_by_qualifier[qual_name] = kept
+
+        existing_keys = {
+            _resource_key(_item_resource(item))
+            for items in existing_by_qualifier.values()
+            for item in items
+        }
         new_by_qualifier = {}
-        for ont in to_add:
-            if len(ont) == 3:  # New format with qualifier
-                knowledge_resource, annotation, row_qualifier = ont
-            else:  # Old format without qualifier
-                knowledge_resource, annotation = ont
-                row_qualifier = qualifier
-            
-            if (knowledge_resource, annotation) not in existing_set:
-                if row_qualifier not in new_by_qualifier:
-                    new_by_qualifier[row_qualifier] = []
-                new_by_qualifier[row_qualifier].append(create_annotation_item(knowledge_resource, annotation))
-                added += 1
+        for annotation, row_qualifier, resource_key in to_add:
+            if resource_key in existing_keys:
+                continue
+            existing_keys.add(resource_key)
+            new_by_qualifier.setdefault(row_qualifier, []).append(create_annotation_item(annotation))
+            added += 1
         
         # Merge existing and new items by qualifier
         final_by_qualifier = {}
@@ -214,10 +226,18 @@ def update_annotation(
             if qual_name in new_by_qualifier:
                 final_by_qualifier[qual_name].extend(new_by_qualifier[qual_name])
         
-        # Build new annotation string
+        # Build new annotation string. libsbml drops the annotation when bqbiol is undeclared.
+        # It also rejects the annotation when the element has no metaid.
         if final_by_qualifier:
-            meta_id = species_id
-            new_anno = f'<annotation>\n  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">\n    <rdf:Description rdf:about="#{meta_id}">\n'
+            if not sbml_elem.isSetMetaId():
+                sbml_elem.setMetaId(str(species_id))
+            meta_id = sbml_elem.getMetaId() or species_id
+            new_anno = (
+                '<annotation>\n'
+                '  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" '
+                'xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">\n'
+                f'    <rdf:Description rdf:about="#{meta_id}">\n'
+            )
             
             for qual_name, items in final_by_qualifier.items():
                 if items:  # Only add qualifier blocks with items

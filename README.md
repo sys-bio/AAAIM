@@ -30,7 +30,7 @@ result = annotate_model(
 )
 ```
 
-For other models like OpenAI models, just pass the model name, e.g. "gpt-4o-mini".
+For other models like OpenAI models, just pass the model name, e.g. "gpt-5-mini".
 
 ---
 
@@ -55,22 +55,6 @@ result = annotate_model(
 # result.reaction_recommendations_df   → KEGG reactions (when annotate is "reactions" or "both")
 ```
 
-For parsed complexes, the species table preserves `component_id`,
-`component_name`, and `component_type`. `top_k` and `n_return` apply to each
-component independently. For multi-organism gene/protein searches, accessions
-are grouped by biological identity before ranking and emitted with a `tax_id`;
-several accession rows can therefore share `identity_rank=1`.
-Component IDs are species-scoped: species `X` uses `X_1`, `X_2`, and so on.
-With `validation=True`, species normalization and ranking use structured LLM
-responses, and applicable entity-type and chemical-property checks run before
-the final top-one selection. The default is `False` for reproducibility with
-earlier AAAIM runs.
-With `source_fidelity=True` (requires `validation=True`), ordinary chemical
-species retain their literal SBML display name alongside generated synonyms.
-Exact source-name ChEBI matches enter the retrieval pool first; explicit
-stereochemistry and ACP conjugation are preserved, and a unique exact match
-remaining after chemistry checks is selected without another LLM decision.
-Complex components and gene/protein identities are not changed by this option.
 
 Run the bundled example (uses a test SBML model):
 
@@ -127,7 +111,7 @@ After reviewing the output CSV, edit the `update_annotation` column for each row
 | `delete`            | Remove the existing annotation |
 | `ignore` / `keep` | Leave unchanged                |
 
-Then write the updated model:
+Then write the updated model. `add_all=True` adds every annotation in the table and ignores the `update_annotation` column.
 
 ```python
 from core.update_model import update_annotation
@@ -135,7 +119,8 @@ from core.update_model import update_annotation
 update_annotation(
     original_model_path="model.xml",
     recommendation_table="recommendations.csv",
-    new_model_path="model_updated.xml"
+    new_model_path="model_updated.xml",
+    add_all=False,
 )
 ```
 

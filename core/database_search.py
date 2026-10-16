@@ -512,6 +512,16 @@ def _identity_label_key(label: str) -> str:
     return remove_symbols(text)
 
 
+# Human and mouse. Used when a gene/protein search omits tax_id.
+DEFAULT_GENE_PROTEIN_TAX_IDS = ["9606", "10090"]
+
+
+def _gene_protein_tax_ids(tax_id: Any) -> Any:
+    if not tax_id:
+        return list(DEFAULT_GENE_PROTEIN_TAX_IDS)
+    return tax_id
+
+
 def _select_taxonomic_identities(
     records: List[Dict[str, Any]],
     top_k: Optional[int],
@@ -973,7 +983,9 @@ def _get_taxonomic_recommendations_direct(
     Candidate IDs are first grouped into biological identities across requested
     taxa. ``top_k`` is applied to those identities and all accessions belonging
     to a selected identity are then emitted with explicit taxon provenance.
+    Omitted ``tax_id`` searches human (9606) and mouse (10090).
     """
+    tax_id = _gene_protein_tax_ids(tax_id)
     if database == "ncbigene":
         label_dict = load_ncbigene_label_dict()
         names_loader = load_ncbigene_names_dict
@@ -2118,13 +2130,15 @@ def get_species_recommendations_rag(
     - persist_directory (str): ChromaDB storage directory.
     - top_k (int): Number of top candidates to retrieve per species.
     - database (str): Database to search ("chebi", "ncbigene").
-    - tax_id (str/list): For ncbigene database, the organism's tax_id for organism-specific lookup. Use 9606 by default. If list, search all tax_ids for each species.
+    - tax_id (str/list): For ncbigene/uniprot, one taxonomy id or a list. When omitted, human (9606) and mouse (10090) are both searched.
 
     Returns:
     - list: List of Recommendation objects with candidates and similarity scores.
     """
     persist_directory = os.path.join(get_data_dir(), persist_directory)
     recommendations = []
+    if database in ("ncbigene", "uniprot"):
+        tax_id = _gene_protein_tax_ids(tax_id)
 
     # Helper to get collection for a given tax_id
     def get_collection_for_taxid(tid):
@@ -2213,10 +2227,6 @@ def get_species_recommendations_rag(
         return recommendations
     # If database is ncbigene/uniprot and tax_id is a str or None (single organism)
     if database in ["ncbigene", "uniprot"]:
-        if not tax_id:
-            default_tax_id = 9606
-            logger.warning(f"No tax_id provided for {database} RAG search. Using default tax_id {default_tax_id}.")
-            tax_id = default_tax_id
         if collection_name is None and model_type == "default":
             collection_name = f"{database}_default_tax{tax_id}"
         elif collection_name is None and model_type == "openai":

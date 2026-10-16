@@ -2,7 +2,12 @@
 
 from unittest.mock import patch
 
-from core.annotation_workflow import _search_databases, rank_species_annotations_with_llm
+from core.annotation_workflow import (
+    _generate_recommendation_table,
+    _print_run_summary,
+    _search_databases,
+    rank_species_annotations_with_llm,
+)
 from core.database_search import expand_lookup_synonyms, get_species_recommendations_direct
 from core import database_search
 from core.data_types import Recommendation
@@ -172,6 +177,35 @@ def test_direct_top_k_limits_identity_before_taxon(monkeypatch):
     assert rec.candidates == ["h_raf", "m_raf", "r_raf"]
     assert rec.candidate_taxa == ["9606", "10090", "10116"]
     assert rec.candidate_identity_ranks == [1, 1, 1]
+
+
+def test_skipped_tax_id_returns_human_and_mouse(monkeypatch, capsys):
+    names = {
+        "9606": {"egfr": ["P00533"]},
+        "10090": {"egfr": ["Q01279"]},
+    }
+    labels = {"P00533": "EGFR_HUMAN", "Q01279": "EGFR_MOUSE"}
+    monkeypatch.setattr(database_search, "load_ncbigene_names_dict", lambda tax_id=None: names[str(tax_id)])
+    monkeypatch.setattr(database_search, "load_ncbigene_label_dict", lambda: labels)
+    database_search._NORMALIZED_TAXON_NAMES_CACHE.clear()
+    rec = get_species_recommendations_direct(
+        ["x"], {"x": ["EGFR"]}, database="ncbigene", tax_id=None, top_k=1,
+    )[0]
+    assert rec.candidates == ["P00533", "Q01279"]
+    assert rec.candidate_taxa == ["9606", "10090"]
+    human = get_species_recommendations_direct(
+        ["x"], {"x": ["EGFR"]}, database="ncbigene", tax_id="9606", top_k=1,
+    )[0]
+    assert human.candidate_taxa == ["9606"]
+
+    df = _generate_recommendation_table(
+        "model.xml", [rec], {}, {"display_names": {}},
+        entity_type="gene", database="kegg",
+    )
+    assert list(df["tax_id"]) == ["9606", "10090"]
+    _print_run_summary(df)
+    message = capsys.readouterr().out
+    assert "Results for 2 taxonomies were returned: human (9606) and mouse (10090)." in message
 
 
 def test_similar_explicit_gene_symbols_are_not_merged(monkeypatch):
