@@ -1692,6 +1692,8 @@ def annotate_single_model(
     validation: bool = False,
     source_fidelity: bool = False,
     audit_to: Optional[str] = None,
+    species_ids: Optional[Sequence[str]] = None,
+    context: bool = True,
     evaluate_candidates: bool = False,
     include_exchange_reactions: bool = False,
     cofactor_config=None,
@@ -1746,6 +1748,10 @@ def annotate_single_model(
             specificity at top-one ranking. Default False.
         audit_to: Optional JSON path for species normalization, retrieved
             candidates before ranking, and final rows. Does not change decisions.
+        species_ids: Annotate only these species IDs. Default is every species
+            in the model. ``max_entities`` then limits that subset.
+        context: If True, include model name, reactions, and notes in the
+            prompt. If False, use display names only.
 
     Returns:
         AnnotationResult. Species tables are on ``species_recommendations_df``;
@@ -1896,7 +1902,31 @@ def annotate_single_model(
         _collect_existing_annotations(model_file, entity_type, databases)
     )
 
-    if max_entities:
+    if species_ids is not None:
+        wanted = {str(species_id) for species_id in species_ids}
+        entities_to_evaluate = [
+            species_id for species_id in all_entity_ids if str(species_id) in wanted
+        ]
+        if max_entities:
+            entities_to_evaluate = entities_to_evaluate[:max_entities]
+        kept = set(entities_to_evaluate)
+        existing_annotations = {
+            species_id: ids
+            for species_id, ids in existing_annotations.items()
+            if species_id in kept
+        }
+        qualifier_annotations = {
+            species_id: quals
+            for species_id, quals in qualifier_annotations.items()
+            if species_id in kept
+        }
+        existing_annotation_databases = {
+            key: db
+            for key, db in existing_annotation_databases.items()
+            if key[0] in kept
+        }
+        logger.info(f"Annotating {len(entities_to_evaluate)} requested entities")
+    elif max_entities:
         entities_to_evaluate = all_entity_ids[:max_entities]
         logger.info(f"Selected {max_entities} entities for annotation")
     else:
@@ -2004,6 +2034,7 @@ def annotate_single_model(
                     entity_type,
                     message=message,
                     structured_output=validation,
+                    context=context,
                 )
 
                 if not prompt:
@@ -2086,6 +2117,7 @@ def annotate_single_model(
                 entity_type,
                 message=message,
                 structured_output=validation,
+                context=context,
             )
 
             if not prompt:
