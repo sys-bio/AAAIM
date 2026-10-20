@@ -204,16 +204,19 @@ def update_annotation(
                     kept.append(item)
             existing_by_qualifier[qual_name] = kept
 
+        # A resource can legitimately have more than one relationship to a
+        # model element. Deduplicate the complete CVTerm, not just its URI.
         existing_keys = {
-            _resource_key(_item_resource(item))
-            for items in existing_by_qualifier.values()
+            (_resource_key(_item_resource(item)), qual_name)
+            for qual_name, items in existing_by_qualifier.items()
             for item in items
         }
         new_by_qualifier = {}
         for annotation, row_qualifier, resource_key in to_add:
-            if resource_key in existing_keys:
+            key = (resource_key, row_qualifier)
+            if key in existing_keys:
                 continue
-            existing_keys.add(resource_key)
+            existing_keys.add(key)
             new_by_qualifier.setdefault(row_qualifier, []).append(create_annotation_item(annotation))
             added += 1
         

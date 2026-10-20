@@ -139,10 +139,12 @@ result = annotate_model(
 `tax_id` accepts one NCBI taxonomy id or a list of them. Omit it and gene or
 protein search returns human (9606) and mouse (10090). Pass a list to choose
 the organisms, as in the example above. Candidate identities are ranked before
-their taxon-specific accessions are expanded. The output records `identity`,
-`identity_rank`, `candidate_rank`, and `tax_id`, so a top-one identity may have
-one accession row per organism. When the table contains more than one taxonomy,
-the run prints which ones, for example
+their taxon-specific accessions are expanded. Accessions with the same identity
+label and the same best match score within an organism remain tied. Thus
+`n_return=1` returns the top biological identity and all its tied accessions;
+it can produce more than one row for one organism. The output records
+`identity`, `identity_rank`, `candidate_rank`, and `tax_id`. When the table
+contains more than one taxonomy, the run prints which ones, for example
 `Results for 2 taxonomies were returned: human (9606) and mouse (10090).`
 
 #### Protein Annotation (UniProt)
@@ -481,7 +483,14 @@ print_evaluation_results(
 
 After LLM name normalization, direct matching expands composite gene/protein fields into lookup-safe forms. For example, `MAP2K1 (MEK1), MAP2K2 (MEK2)` contributes the original text plus `MAP2K1`, `MEK1`, `MAP2K2`, and `MEK2`; transcript descriptors are removed from additional lookup variants. Chemical punctuation is preserved.
 
-Retrieval ranks `top_k` biological identities per ordinary species or parsed complex component. NCBI Gene and UniProt candidates are grouped across the requested taxa before accessions are expanded. `tax_id` may be one id or a list; when it is omitted the search uses human (9606) and mouse (10090). The LLM then retains up to `n_return` identities per unit. Output columns preserve `component_id`, `component_name`, `component_type`, `identity`, `identity_rank`, `retrieval_identity_rank`, `candidate_rank`, `tax_id`, and `qualifier`. Complex rows use `hasPart`. An unmatched parsed component receives its own empty row so complex completeness can be evaluated. A run that returns more than one taxonomy prints the organisms it included.
+Retrieval ranks `top_k` biological identities per ordinary species or parsed complex component. NCBI Gene and UniProt candidates are grouped across the requested taxa before accessions are expanded; equal-score accessions for one identity within a taxon are retained together. `tax_id` may be one id or a list; when it is omitted the search uses human (9606) and mouse (10090). The LLM then retains up to `n_return` identity ranks per unit, including all tied accession rows. Output columns preserve `component_id`, `component_name`, `component_type`, `identity`, `identity_rank`, `retrieval_identity_rank`, `candidate_rank`, `tax_id`, and `qualifier`. Complex rows use `hasPart`. An unmatched parsed component receives its own empty row so complex completeness can be evaluated. A run that returns more than one taxonomy prints the organisms it included.
+
+The rank columns are internal diagnostics: `identity` is the grouping key for
+accessions treated as one biological identity; `retrieval_identity_rank` is the
+group's order before LLM ranking; `identity_rank` is its final order; and
+`candidate_rank` is the accession's original retrieval order. These columns
+can be omitted from a review copy of the CSV, while the full output should be
+kept for reproducibility and debugging.
 
 When `validation=True`, the ranking LLM is also a constrained selection check:
 it must choose from retrieved IDs. This is not an independent validation of

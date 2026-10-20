@@ -114,3 +114,24 @@ def test_update_annotation_writes_row_qualifier(tmp_path):
     assert uniprot_qual["Raf1"]["P04049"] == "is"
     assert chebi["Raf1"] == ["15377"]
     assert chebi_qual["Raf1"]["15377"] == "is"
+
+
+def test_same_uri_can_have_distinct_qualifiers_without_duplicate_pair(tmp_path):
+    source = tmp_path / "model.xml"
+    updated = tmp_path / "updated.xml"
+    _model(source)  # Raf1 already has CHEBI:15377 under bqbiol:is.
+    table = pd.DataFrame([
+        {"id": "Raf1", "annotation": "CHEBI:15377", "update_annotation": "add", "qualifier": "isVersionOf"},
+        {"id": "Raf1", "annotation": "CHEBI:15377", "update_annotation": "add", "qualifier": "isVersionOf"},
+    ])
+
+    update_annotation(str(source), table, str(updated))
+
+    document = libsbml.readSBML(str(updated))
+    assert document.getNumErrors() == 0
+    species = document.getModel().getSpecies("Raf1")
+    annotation = species.getAnnotation().toXMLString()
+    uri = 'rdf:resource="http://identifiers.org/chebi/CHEBI:15377"'
+    assert annotation.count(uri) == 2
+    assert "<bqbiol:is>" in annotation
+    assert "<bqbiol:isVersionOf>" in annotation

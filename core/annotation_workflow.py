@@ -1296,9 +1296,9 @@ def _print_run_summary(
 def _build_species_annotation_choices(sub_df: pd.DataFrame) -> str:
     """Build one ranking choice per biological identity.
 
-    Several taxon-specific accessions may share an identity.  Only a
-    representative accession is offered to the LLM; selecting it retains every
-    accession in that identity group.
+    Taxon-specific and equal-score accessions may share an identity. A
+    representative accession is selectable, while the prompt also shows the
+    other group members. Selecting it retains every accession in the group.
     """
     lines: List[str] = []
     seen: set[str] = set()
@@ -1327,8 +1327,18 @@ def _build_species_annotation_choices(sub_df: pd.DataFrame) -> str:
             str(value) for value in same_identity.get("tax_id", pd.Series(dtype=str))
             if str(value).strip() not in {"", "nan", "None"}
         ]
+        additional = []
+        for _, grouped_row in same_identity.iterrows():
+            grouped_ann = str(grouped_row.get("annotation", "")).strip()
+            if not grouped_ann or grouped_ann.upper() == ann.upper():
+                continue
+            grouped_label = str(grouped_row.get("annotation_label", "")).strip()
+            additional.append(
+                f"{grouped_ann} ({grouped_label})" if grouped_label else grouped_ann
+            )
+        grouped_suffix = f" [group includes: {', '.join(additional)}]" if additional else ""
         suffix = f" [taxa: {', '.join(dict.fromkeys(taxa))}]" if taxa else ""
-        lines.append(f"{ann}: {label}{suffix}".rstrip())
+        lines.append(f"{ann}: {label}{grouped_suffix}{suffix}".rstrip())
     return "\n".join(lines)
 
 
@@ -1473,9 +1483,10 @@ def rank_species_annotations_with_llm(
     """Re-rank biological identities and keep at most *n_return* per unit.
 
     A unit is a whole ordinary species or one parsed component of a complex.
-    Taxon-specific accessions for one identity stay together. Units with
-    ``n_return`` or fewer identities are left as-is; all remaining units are
-    ranked in one LLM call.
+    Taxon-specific accessions and equal-score accessions within one taxon stay
+    together when they share a biological identity. Thus ``n_return`` limits
+    identity ranks, not accession rows. Units with ``n_return`` or fewer
+    identities are left as-is; all remaining units are ranked in one LLM call.
     """
     if recommendations_df.empty or "annotation" not in recommendations_df.columns:
         return recommendations_df
@@ -2787,7 +2798,8 @@ def annotate_model(model_file: str, **kwargs) -> Tuple[pd.DataFrame, Dict[str, A
     Pass ``annotate="species"`` (default), ``"reactions"``, or ``"both"``.
     Set ``verbose=True`` for a short progress summary.
     ``top_k`` is the species retrieval pool; ``n_return`` (default 3) is
-    how many IDs the final LLM ranking keeps.
+    how many biological identity ranks the final LLM ranking keeps; equal-score
+    accessions for a selected identity can produce multiple rows.
     ``save_to`` is the output file prefix (``<save_to>_species.csv`` /
     ``<save_to>_reactions.csv``).
     ``tax_id`` is one NCBI taxonomy id or a list of them. When omitted, gene

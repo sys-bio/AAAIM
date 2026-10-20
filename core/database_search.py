@@ -296,6 +296,19 @@ def load_uniprot_label_dict(tax_id: Any = None) -> Dict[str, str]:
     load_uniprot_label_dict._cache[cache_key] = label_dict
     return label_dict
 
+
+def _load_uniprot_entry_names(tax_id: str) -> Dict[str, List[str]]:
+    """Load accession-specific names when a gene label denotes multiple proteins."""
+    if not hasattr(_load_uniprot_entry_names, "_cache"):
+        _load_uniprot_entry_names._cache = {}
+    cache = _load_uniprot_entry_names._cache
+    if tax_id not in cache:
+        data_file = get_data_dir() / "uniprot" / f"uniprot2names_tax{tax_id}.lzma"
+        with lzma.open(data_file, "rb") as handle:
+            cache[tax_id] = pickle.load(handle)
+    return cache[tax_id]
+
+
 def load_chebi2kegg_dict() -> Dict[str, str]:
     """
     Load the reference ChEBI → KEGG compound mapping (pickled).
@@ -528,10 +541,9 @@ def _select_taxonomic_identities(
 ) -> Tuple[List[str], List[str], List[float], List[Optional[str]], List[str], List[int]]:
     """Rank biological identities, then expand their taxon accessions.
 
-    Records are clustered by exact normalized canonical label. Approximate
-    symbol matching is deliberately avoided because near symbols such as
-    PDPK1/PDK1 and PXN/PXDN can denote different genes. ``top_k`` limits
-    identity clusters, not accessions.
+    Records are clustered by exact normalized canonical label. Within each
+    taxon, all accessions tied for that label's best match score are retained.
+    ``top_k`` limits identity clusters, not the number of accession rows.
     """
     if not records:
         return [], [], [], [], [], []
@@ -577,10 +589,22 @@ def _select_taxonomic_identities(
     identities: List[str] = []
     identity_ranks: List[int] = []
     for identity_rank, indexes in enumerate(ranked_groups, start=1):
+        best_score_by_taxon: Dict[str, float] = {}
+        for index in indexes:
+            taxon = str(records[index].get("tax_id"))
+            score = float(records[index]["score"])
+            best_score_by_taxon[taxon] = max(
+                score, best_score_by_taxon.get(taxon, float("-inf"))
+            )
+        tied_indexes = [
+            index for index in indexes
+            if float(records[index]["score"])
+            == best_score_by_taxon[str(records[index].get("tax_id"))]
+        ]
         # Prefer a label that exactly matches a query; this keeps a misleading
         # alias such as RAF1->RNASE3 from naming the identity cluster.
         anchor = min(
-            indexes,
+            tied_indexes,
             key=lambda index: (
                 _identity_label_key(records[index]["name"])
                 not in {str(value).upper() for value in records[index]["query_keys"]},
@@ -588,15 +612,39 @@ def _select_taxonomic_identities(
             ),
         )
         identity = str(records[anchor]["name"])
-        for index in sorted(indexes, key=lambda value: records[value]["order"]):
+        for index in sorted(tied_indexes, key=lambda value: records[value]["order"]):
             record = records[index]
             candidates.append(str(record["id"]))
-            names.append(str(record["name"]))
+            names.append(str(record.get("rank_label") or record["name"]))
             scores.append(float(record["score"]))
             taxa.append(record.get("tax_id"))
             identities.append(identity)
             identity_ranks.append(identity_rank)
     return candidates, names, scores, taxa, identities, identity_ranks
+
+
+def _describe_ambiguous_uniprot_records(records: List[Dict[str, Any]]) -> None:
+    """Show distinct protein names when one taxon's entries share a gene label."""
+    counts = Counter(
+        (_identity_label_key(record["name"]), str(record.get("tax_id")))
+        for record in records
+    )
+    for record in records:
+        tax_id = str(record.get("tax_id"))
+        if counts[(_identity_label_key(record["name"]), tax_id)] < 2:
+            continue
+        names: List[str] = []
+        try:
+            names = _load_uniprot_entry_names(tax_id).get(str(record["id"]), [])
+        except OSError:
+            pass
+        distinct_name = next(
+            (name for name in names if re.search(r"\bisoforms?\b", name, re.I)),
+            "",
+        )
+        record["rank_label"] = (
+            f"{record['name']} ({distinct_name or record['id']})"
+        )
 
 
 # def clean_synonym(synonym: str) -> str:
@@ -1064,6 +1112,8 @@ def _get_taxonomic_recommendations_direct(
         records = list(record_by_id.values())
         for record in records:
             record["score"] = record["hits"] / denominator
+        if database == "uniprot":
+            _describe_ambiguous_uniprot_records(records)
         candidates, names, scores, taxa, identities, identity_ranks = (
             _select_taxonomic_identities(records, top_k)
         )
@@ -2209,8 +2259,11 @@ def get_species_recommendations_rag(
                     except Exception as e:
                         logger.warning(f"Error querying synonym '{synonym}' for species '{spec_id}' in tax_id {tid}: {e}")
                         continue
+            records = list(records_by_id.values())
+            if database == "uniprot":
+                _describe_ambiguous_uniprot_records(records)
             all_candidates, all_candidate_names, match_score_list, taxa, identities, identity_ranks = (
-                _select_taxonomic_identities(list(records_by_id.values()), top_k)
+                _select_taxonomic_identities(records, top_k)
             )
             recommendation = Recommendation(
                 id=spec_id,
