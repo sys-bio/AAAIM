@@ -33,6 +33,8 @@ from core.database_search import (
     remove_symbols,
 )
 from core.feedback import AnnotationResult, build_initial_conversation
+from core.identity_support import assess_species_identity_support
+from core.qualifier_workflow import predict_species_qualifiers
 from core.llm_interface import (
     format_component_curated_name,
     get_system_prompt,
@@ -1256,14 +1258,21 @@ def _print_run_summary(
     else:
         work = df[df["id"].astype(str) != "Reason:"] if "id" in df.columns else df
         n_entities = int(work["id"].nunique()) if "id" in work.columns else 0
+        unresolved = (
+            work["identity_status"].astype(str).str.lower() == "unresolved"
+            if "identity_status" in work.columns
+            else pd.Series(False, index=work.index)
+        )
         if "annotation" in work.columns:
             has_ann = work["annotation"].astype(str).str.strip()
-            pred = work[~has_ann.isin(["", "nan"])]
+            pred = work[~has_ann.isin(["", "nan"]) & ~unresolved]
         else:
             pred = work.iloc[0:0]
         n_ann = len(pred)
         n_with = int(pred["id"].nunique()) if "id" in pred.columns and not pred.empty else 0
         print(f"Found {n_ann} annotations for {n_with} of {n_entities} {entity_word}.")
+        if unresolved.any():
+            print(f"Left {int(work.loc[unresolved, 'id'].nunique())} {entity_word} with unresolved identities.")
         if "tax_id" in work.columns:
             taxon_names = {"9606": "human", "10090": "mouse", "10116": "rat"}
             taxa: List[str] = []
@@ -1719,6 +1728,8 @@ def annotate_single_model(
     audit_to: Optional[str] = None,
     species_ids: Optional[Sequence[str]] = None,
     context: bool = True,
+    predict_qualifiers: bool = False,
+    effort: str = "low",
     evaluate_candidates: bool = False,
     include_exchange_reactions: bool = False,
     cofactor_config=None,
@@ -1777,7 +1788,14 @@ def annotate_single_model(
         species_ids: Annotate only these species IDs. Default is every species
             in the model. ``max_entities`` then limits that subset.
         context: If True, include model name, reactions, and notes in the
-            prompt. If False, use display names only.
+            name-normalization prompt. If False, use display names only.
+        predict_qualifiers: Assess support for selected identities, then run a
+            separate automatic qualifier task for supported rows. Off by default
+            for existing workflows.
+        effort: ``"low"`` uses source names for clear matches and consults
+            notes/reaction roles only for ambiguous identities; ``"high"``
+            supplies that context to all identity-support decisions and the
+            qualifier task.
 
     Returns:
         AnnotationResult. Species tables are on ``species_recommendations_df``;
@@ -1801,6 +1819,8 @@ def annotate_single_model(
     # logger.info(f"Using LLM model: {llm_model}")
     # logger.info(f"Using method: {method} for database search")
     entity_type = _normalize_entity_type(entity_type)
+    if effort not in {"low", "high"}:
+        raise ValueError("effort must be 'low' or 'high'")
     if source_fidelity and not validation:
         raise ValueError("source_fidelity requires validation=True")
     databases = _normalize_databases(database)
@@ -1846,6 +1866,12 @@ def annotate_single_model(
             message=message,
             max_completion_tokens=max_completion_tokens,
             validation=validation,
+            predict_qualifiers=predict_qualifiers,
+            effort=effort,
+            source_fidelity=source_fidelity,
+            audit_to=audit_to,
+            species_ids=species_ids,
+            context=context,
         )
         if not hasattr(species_result, "species_recommendations_df"):
             return species_result
@@ -2301,6 +2327,29 @@ def annotate_single_model(
         else:
             logger.info("Skipping species LLM ranking (top_k <= n_return)")
 
+        if predict_qualifiers:
+            logger.info(">>>Step 7: Assessing identity support...<<<")
+            qualifier_start = time.time()
+            recommendations_df = assess_species_identity_support(
+                recommendations_df,
+                model_file=model_file,
+                llm_model=llm_model,
+                effort=effort,
+                max_completion_tokens=max_completion_tokens,
+                usage_callback=llm_usage_records.append,
+            )
+            logger.info(">>>Step 8: Predicting species qualifiers...<<<")
+            recommendations_df = predict_species_qualifiers(
+                recommendations_df,
+                model_file=model_file,
+                llm_model=llm_model,
+                effort=effort,
+                model_info=model_info if effort == "high" else None,
+                max_completion_tokens=max_completion_tokens,
+                usage_callback=llm_usage_records.append,
+            )
+            llm_time += time.time() - qualifier_start
+
     # Step 10: Calculate metrics
     total_time = time.time() - start_time
 
@@ -2707,6 +2756,8 @@ def _calculate_metrics(recommendations_df: pd.DataFrame,
             'total_predictions': 0,
             'matches': 0,
             'accuracy': np.nan,
+            'unresolved_entities': 0,
+            'unresolved_candidates': 0,
             'total_time': total_time,
             'llm_time': llm_time,
             'search_time': search_time
@@ -2718,12 +2769,17 @@ def _calculate_metrics(recommendations_df: pd.DataFrame,
     # Filter out Reason row for metrics calculation
     df = recommendations_df[recommendations_df['id'] != 'Reason:'] if not recommendations_df.empty else recommendations_df
 
-    entities_with_predictions = df[df['annotation'] != '']['id'].nunique()
+    if 'identity_status' in df.columns:
+        unresolved = df['identity_status'].astype(str).str.lower() == 'unresolved'
+    else:
+        unresolved = pd.Series(False, index=df.index)
+    accepted = df[~unresolved]
+    entities_with_predictions = accepted[accepted['annotation'] != '']['id'].nunique()
     annotation_rate = entities_with_predictions / max_entities if max_entities > 0 else np.nan
 
     # Calculate accuracy based on existing annotations
-    total_predictions = len(df[df['annotation'] != ''])
-    matches = len(df[df['status'] == 'original and predicted'])
+    total_predictions = len(accepted[accepted['annotation'] != ''])
+    matches = len(accepted[accepted['status'] == 'original and predicted'])
 
     # Accuracy = matches / entities with existing annotations
     entities_with_existing = len(existing_annotations)
@@ -2739,6 +2795,8 @@ def _calculate_metrics(recommendations_df: pd.DataFrame,
         'total_predictions': total_predictions,
         'matches': matches,
         'accuracy': accuracy,
+        'unresolved_entities': int(df.loc[unresolved, 'id'].nunique()),
+        'unresolved_candidates': int((unresolved & (df['annotation'] != '')).sum()),
         'total_time': total_time,
         'llm_time': llm_time,
         'search_time': search_time

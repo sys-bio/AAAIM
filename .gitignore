@@ -23,6 +23,8 @@ chroma_storage/
 tests/results/**
 tests/prev_results/
 tests/autoType/
+tests/qualifier_biomodels/
+tests/useCase/
 
 analysis/**
 
@@ -54,6 +56,3 @@ benchmark/phase3/phase3b_full/_*
 benchmark/phase3/phase3c_smoke/_*/
 # Phase 3C paired-validation raw cache, attempt ledger, and resumable scratch.
 benchmark/phase3/phase3c_validation/_*
-
-# Use case publications
-tests/useCase/context/publications/**

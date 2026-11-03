@@ -73,6 +73,73 @@ Set `annotate` to choose what to annotate:
 
 Species annotation uses two size knobs. `top_k` is the number of biological identities retained by direct/RAG retrieval per ordinary species or per parsed complex component (default 3). `n_return` is the number of identities retained by the final LLM ranking (default 3). Taxon-specific accessions belonging to one identity do not consume additional identity slots. Synonym generation is fixed at 3 and is not controlled by either parameter. The LLM ranking step runs only when a unit has more identities than `n_return`, and all such units are ranked in one LLM call. For example, `top_k=3, n_return=1` retrieves three identities and reports the top identity; a three-component complex reports one identity for each component. Reactions retain their existing candidate-based interpretation of these parameters.
 
+**What species ranking sees.** For each unit that needs ranking, the LLM
+receives the original SBML species ID and display name; generated curated names
+or synonyms, if present; a complex component name and type, if applicable; and
+one representative ID and database label for each retrieved biological
+identity. The representative's entry also lists other grouped accession IDs
+and labels and their taxonomy IDs. Model notes and the optional `message` are
+included. The ranking prompt does **not** include reaction context, numerical
+match scores, or the retrieval/final rank columns. When `source_fidelity=True`,
+chemical ranking also gets source-name guidance. `context=False` controls the
+earlier name-normalization prompt; it does not remove model notes from ranking.
+Identity support is assessed after this selection and before qualifier choice
+when `predict_qualifiers=True`.
+
+#### Automatic species qualifiers
+
+`predict_qualifiers=True` first assesses whether the selected identity is
+supported by the model, then runs a separate qualifier task on supported
+identities. It never replaces a selected identifier. Unresolved candidates
+remain visible in the CSV with `identity_status="unresolved"`, an
+`identity_reason`, and a concise `Note` to append to that SBML species. The
+candidate URI is not written, even with `add_all=True`. `effort` controls the
+context supplied to these tasks:
+
+| `effort` | Information supplied for each selected row |
+| --- | --- |
+| `"low"` (default) | Original SBML ID/name/type and selected ID/label for clear cases. Ambiguous identities consult model and species notes plus structured reaction roles when a model file is available. The qualifier task sees only selected URI/label and original species ID/name/type. |
+| `"high"` | Notes and structured reaction roles are supplied to all identity-support decisions; the qualifier task additionally sees model notes and relevant reactions. |
+
+Identity support can abstain even when ranking returns one candidate or a
+name-match score of 1. It checks for unsupported isoform/subunit specificity,
+inferred complex components, abstract variables, and terminal degradation
+products. A failed ambiguous decision is unresolved. Tied accessions under
+one biological identity receive one support and qualifier decision; a tie
+does not prove that each accession is an exact identity. Supported complex
+components use `hasPart`; supported active, inactive, or modified species use
+`isVersionOf`; otherwise the qualifier defaults to `is`. Existing qualifiers
+are retained. The CSV records `qualifier_rule`, `qualifier_reason`, and
+`qualifier_status`. `Note` is reserved for unresolved species.
+
+```python
+from core import (annotate_model, assess_species_identity_support,
+                  predict_species_qualifiers, update_annotation)
+
+# One identity run, then compare context without rerunning retrieval.
+result = annotate_model("model.xml", entity_type="auto", database=["chebi", "uniprot"])
+low_support = assess_species_identity_support(
+    result.species_recommendations_df, model_file="model.xml", effort="low"
+)
+low = predict_species_qualifiers(low_support, effort="low")
+high_support = assess_species_identity_support(
+    result.species_recommendations_df, model_file="model.xml", effort="high"
+)
+high = predict_species_qualifiers(
+    high_support, model_file="model.xml", effort="high"
+)
+low.to_csv("model_qualifiers_low.csv", index=False)
+high.to_csv("model_qualifiers_high.csv", index=False)
+update_annotation("model.xml", low, "model_annotated_low.xml", add_all=True)
+
+# Or request one mode directly; its CSV includes the qualifier columns.
+result = annotate_model("model.xml", predict_qualifiers=True, effort="low")
+```
+
+The two mode comparison keeps the identity candidates fixed; support and
+qualifier context differ. LLM usage for an integrated run is included in
+`result.metrics["llm_usage"]`.
+
 Optional `validation=True` changes the species workflow; it is off by default.
 It requests structured JSON for name normalization and candidate ranking,
 checks that every requested species/component is represented, and disallows
@@ -382,7 +449,7 @@ update_annotation(
 )
 ```
 
-The `qualifier` column of each row is the bqbiol qualifier written into the model (`is`, `hasPart`, and so on). Complex predictions are filled with `hasPart`. `qualifier` on the call is used only when that cell is blank. `add_all=True` adds every annotation in the table and does not read `update_annotation`.
+The `qualifier` column of each row is the bqbiol qualifier written into the model (`is`, `hasPart`, and so on). Complex predictions are filled with `hasPart`. `qualifier` on the call is used only when that cell is blank. `add_all=True` adds every supported annotation without reading `update_annotation`; rows with `identity_status="unresolved"` or `qualifier_status="abstain"` are never written. Unresolved `Note` values are appended to the corresponding SBML species, preserving existing notes.
 
 A summary of added/removed annotations will be printed after update.
 

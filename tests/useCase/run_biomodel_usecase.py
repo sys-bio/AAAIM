@@ -21,6 +21,46 @@ RETRIEVAL_TOP_K = 3
 FINAL_N_RETURN = 1
 
 MODEL_CONFIGS = {
+    "MODEL2511090001": {
+        "entity_type": "auto", "database": ["chebi", "uniprot", "ncbigene"],
+        "tax_id": "10090", "max_completion_tokens": 10_000,
+    },
+    "MODEL2511090002": {
+        "entity_type": "auto", "database": ["chebi", "uniprot", "ncbigene"],
+        "tax_id": "10090", "max_completion_tokens": 10_000,
+    },
+    "MODEL2606190001": {
+        "entity_type": "auto", "database": ["chebi", "uniprot", "ncbigene"],
+        "tax_id": "9606", "max_completion_tokens": 10_000, "chunk_size": 20,
+    },
+    "MODEL2412210001": {
+        "entity_type": "auto", "database": ["chebi", "uniprot", "ncbigene"],
+        "tax_id": "9606", "max_completion_tokens": 10_000,
+    },
+    "MODEL2503270001": {
+        "entity_type": "auto", "database": ["chebi", "uniprot", "ncbigene"],
+        "tax_id": "9606", "max_completion_tokens": 10_000,
+    },
+    "MODEL2503270002": {
+        "entity_type": "auto", "database": ["chebi", "uniprot", "ncbigene"],
+        "tax_id": "9606", "max_completion_tokens": 10_000,
+    },
+    "MODEL2504020001": {
+        "entity_type": "chemical", "database": ["chebi"],
+        "tax_id": None, "max_completion_tokens": 10_000,
+    },
+    "MODEL2512170002": {
+        "entity_type": "auto", "database": ["chebi", "uniprot", "ncbigene"],
+        "tax_id": "3702", "max_completion_tokens": 10_000,
+    },
+    "MODEL2306220001": {
+        "entity_type": "auto", "database": ["chebi", "uniprot", "ncbigene"],
+        "tax_id": "9606", "max_completion_tokens": 10_000,
+    },
+    "MODEL2306210001": {
+        "entity_type": "auto", "database": ["chebi", "uniprot", "ncbigene"],
+        "tax_id": "9606", "max_completion_tokens": 10_000,
+    },
     "MODEL2503190002": {
         "entity_type": "auto",
         "database": ["chebi", "uniprot"],
@@ -80,7 +120,7 @@ def run(model_id: str, condition: str, *, validation: bool = False,
         entity_type=config["entity_type"],
         database=config["database"],
         tax_id=config["tax_id"],
-        chunk_size=50,
+        chunk_size=config.get("chunk_size", 50),
         annotate="species",
         save_to=str(output_prefix),
         verbose=True,
@@ -91,7 +131,7 @@ def run(model_id: str, condition: str, *, validation: bool = False,
         ),
         validation=validation,
         source_fidelity=source_fidelity,
-        audit_to=str(output_dir / f"{output_name}_trace.json") if repeat_id is not None else None,
+        audit_to=str(output_dir / f"{output_name}_trace.json"),
     )
     metadata = {
         "model": model_id,
@@ -105,7 +145,7 @@ def run(model_id: str, condition: str, *, validation: bool = False,
             "entity_type": config["entity_type"],
             "database": config["database"],
             "tax_id": config["tax_id"],
-            "chunk_size": 50,
+            "chunk_size": config.get("chunk_size", 50),
             "validation": validation,
             "source_fidelity": source_fidelity,
             "repeat_id": repeat_id,

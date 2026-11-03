@@ -189,7 +189,7 @@ def load_ncbigene_names_dict(tax_id: str = None) -> Dict[str, List[str]]:
 
     return names_dict
 
-def load_ncbigene_label_dict() -> Dict[str, str]:
+def load_ncbigene_label_dict(tax_id: Any = None) -> Dict[str, str]:
     """
     Load the NCBI gene ID to label dictionary.
 
@@ -207,7 +207,16 @@ def load_ncbigene_label_dict() -> Dict[str, str]:
         with lzma.open(data_file, 'rb') as f:
             _NCBIGENE_LABEL_DICT = pickle.load(f)
 
-    return _NCBIGENE_LABEL_DICT
+    if not tax_id:
+        return _NCBIGENE_LABEL_DICT
+    labels = dict(_NCBIGENE_LABEL_DICT)
+    tax_ids = tax_id if isinstance(tax_id, list) else [tax_id]
+    for tid in tax_ids:
+        specific = get_data_dir() / "ncbigene" / f"ncbigene2label_tax{tid}_protein-coding.lzma"
+        if specific.exists():
+            with lzma.open(specific, "rb") as handle:
+                labels.update(pickle.load(handle))
+    return labels
 
 def load_uniprot_names_dict(tax_id: str = None) -> Dict[str, List[str]]:
     """
@@ -1035,7 +1044,7 @@ def _get_taxonomic_recommendations_direct(
     """
     tax_id = _gene_protein_tax_ids(tax_id)
     if database == "ncbigene":
-        label_dict = load_ncbigene_label_dict()
+        label_dict = load_ncbigene_label_dict(tax_id=tax_id)
         names_loader = load_ncbigene_names_dict
     else:
         label_dict = load_uniprot_label_dict(tax_id=tax_id)

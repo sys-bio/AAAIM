@@ -1,6 +1,8 @@
 import pandas as pd
 import libsbml
 import re
+import html
+from xml.sax.saxutils import escape
 from core.model_info import detect_model_format
 
 # XML helpers (adapted from AMAS)
@@ -97,6 +99,22 @@ def clean_items(items):
     # Only deduplicate by full item string
     return sorted(set(items))
 
+
+def _append_species_note(sbml_elem, note):
+    """Append one XHTML paragraph without replacing existing SBML notes."""
+    note = " ".join(str(note).split())
+    if not note:
+        return False
+    existing = sbml_elem.getNotesString() if sbml_elem.isSetNotes() else ''
+    existing_text = " ".join(html.unescape(re.sub(r'<[^>]+>', ' ', existing)).split())
+    if note in existing_text:
+        return False
+    paragraph = f'<p xmlns="http://www.w3.org/1999/xhtml">{escape(note)}</p>'
+    result = sbml_elem.appendNotes(paragraph) if sbml_elem.isSetNotes() else sbml_elem.setNotes(paragraph)
+    if result != libsbml.LIBSBML_OPERATION_SUCCESS:
+        raise ValueError(f"Could not write SBML note: {note}")
+    return True
+
 # Main update logic
 def update_annotation(
     original_model_path, 
@@ -109,7 +127,8 @@ def update_annotation(
     Update SBML model annotations based on a recommendation table.
     Only add/delete the specified ontology (e.g., CHEBI), preserving all other annotation terms (e.g., KEGG).
 
-    add_all: add every annotation in the table and ignore the update_annotation column.
+    add_all: add every supported annotation in the table and ignore the
+        update_annotation column. Unresolved rows are never written as URIs.
     """
     if recommendation_table is None:
         recommendation_table = original_model_path + '_species.csv'
@@ -141,7 +160,17 @@ def update_annotation(
     added, removed, updated_species = 0, 0, set()
     for species_id, group in grouped:
         to_add, to_delete = [], []
+        notes_to_add = []
         for _, row in group.iterrows():
+            if str(row.get('identity_status', '')).strip().lower() == 'unresolved':
+                note = row.get('Note', '')
+                if not pd.isna(note) and str(note).strip():
+                    notes_to_add.append(str(note).strip())
+                continue
+            # An explicit qualifier abstention is never addable, including
+            # when add_all bypasses the ordinary update_action column.
+            if str(row.get('qualifier_status', '')).strip().lower() == 'abstain':
+                continue
             action = 'add' if add_all else str(row.get('update_annotation', 'ignore')).lower()
             annotation = row.get('annotation', '')
             if pd.isna(annotation) or ':' not in str(annotation):
@@ -168,6 +197,9 @@ def update_annotation(
                 sbml_elem = qual.getQualitativeSpecies(species_id)
         if sbml_elem is None:
             continue
+        for note in dict.fromkeys(notes_to_add):
+            if _append_species_note(sbml_elem, note):
+                updated_species.add(species_id)
         if sbml_elem.isSetAnnotation():
             annotation_str = sbml_elem.getAnnotation().toXMLString()
         else:

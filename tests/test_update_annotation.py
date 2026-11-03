@@ -135,3 +135,32 @@ def test_same_uri_can_have_distinct_qualifiers_without_duplicate_pair(tmp_path):
     assert annotation.count(uri) == 2
     assert "<bqbiol:is>" in annotation
     assert "<bqbiol:isVersionOf>" in annotation
+
+
+def test_unresolved_adds_note_without_erasing_existing_notes(tmp_path):
+    source = tmp_path / "model.xml"
+    updated = tmp_path / "updated.xml"
+    _model(source)
+    document = libsbml.readSBMLFromFile(str(source))
+    species = document.getModel().getSpecies("E")
+    assert species.setNotes('<p xmlns="http://www.w3.org/1999/xhtml">Original note.</p>') == 0
+    assert libsbml.writeSBMLToFile(document, str(source))
+    table = pd.DataFrame([{
+        "id": "E", "annotation": "UNIPROT:P00533", "qualifier": "is",
+        "identity_status": "unresolved", "update_annotation": "add",
+        "Note": "E is a modeled activity; its exact protein identity is unresolved.",
+    }])
+    update_annotation(str(source), table, str(updated), add_all=True)
+    result = libsbml.readSBMLFromFile(str(updated))
+    assert result.getNumErrors() == 0
+    species = result.getModel().getSpecies("E")
+    notes = species.getNotesString()
+    assert "Original note." in notes
+    assert "modeled activity" in notes
+    assert species.getNumCVTerms() == 0
+
+    repeated = tmp_path / "repeated.xml"
+    update_annotation(str(updated), table, str(repeated), add_all=True)
+    repeated_document = libsbml.readSBMLFromFile(str(repeated))
+    repeated_notes = repeated_document.getModel().getSpecies("E").getNotesString()
+    assert repeated_notes.count("modeled activity") == 1
