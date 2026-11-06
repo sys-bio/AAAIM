@@ -1,0 +1,13 @@
+{
+  "schema": "phase4-cached-routing-study-v1",
+  "thresholds": [0.05, 0.1, 0.2],
+  "post_llm_confidence_threshold": 0.8,
+  "bootstrap_replicates": 2000,
+  "bootstrap_seed": 20261105,
+  "min_call_reduction": 0.2,
+  "min_delta_lower_bound": -0.02,
+  "new_api_calls_allowed": 0,
+  "new_training_allowed": false,
+  "population": "phase3c_163_validation_only",
+  "calibration": "none; no matched training signals; confidence scores are uncalibrated"
+}
