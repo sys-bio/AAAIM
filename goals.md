@@ -1,7 +1,7 @@
 # AAAIM research project: goals and roadmap
 
 **Status updated:** 2026-11-06
-**Current priority:** prepare the Phase 3C, Phase 4, and implemented Phase 5 integration PRs against current upstream; complete LunaStarr's `MODEL2507280001` handoff; reconcile recent upstream API changes. Phase 5 paid execution is paused.
+**Current priority:** complete GitHub draft-PR creation for the pushed Phase 3C clarification, Phase 4, and implemented Phase 5 branches; the local LunaStarr `MODEL2507280001` handoff is prepared and unsent. Phase 5 paid execution is paused.
 
 ## Current status and agreed sequence
 
@@ -19,13 +19,19 @@ This update preserves historical benchmark results and revises the roadmap using
 | Final method and evaluation freeze | Draft; finalize after Phase 5 and operational gates |
 | Held-out test evaluation | Remains sealed; later one-time evaluation after the final freeze and run authorization |
 | Phase 5 robustness experiments | Local retrieval study and runner preparation complete; corrected GPT-6.1 matched plan preserved; paid comparison paused, no authorization |
-| Upstream integration | Phase 3C is present in upstream history; error-audit PR #17 remains open; Phase 3C clarification and Phase 4/5 integration PRs being prepared against current upstream |
-| LunaStarr MODEL2507280001 request | Existing reaction-review deliverables reconciled; collaborator handoff being prepared; no message sent |
+| Upstream integration | Phase 3C clarification, Phase 4, and Phase 5 branches are pushed; draft PR creation and PR #17 retargeting are blocked by the connected GitHub integration's 403 permission response |
+| LunaStarr MODEL2507280001 request | Existing deliverables reconciled and local handoff prepared; not sent; no grounded Phase 3C calls were made |
 | Phase 6 packaging and manuscript | Remaining work; may proceed alongside Phase 4 |
 
 **Agreed order:** prepare upstream integration PRs and LunaStarr's case-study handoff → resume the paused Phase 5 matched comparison only after a fresh budget proposal and explicit authorization → final method/evaluation freeze → separately authorized held-out evaluation → Phase 6 packaging, scope closure, and manuscript.
 
 Phases 4 and 5 were originally stretch work; the user chose to pursue both. Phase 4 is complete under its bounded protocol. This does not make every older proposed experiment a requirement. Earlier calendar targets below are historical, not current deadlines.
+
+### Current upstream review and integration status
+
+Reviewed current `sys-bio/AAAIM` main at `866be205` and the open error-audit PR #17 (`264881ea`). Since the error-audit integration base, upstream added identity-support and qualifier workflows, list/default taxon handling for gene/protein lookup, score-tie preservation for top-ranked identity accessions, and updates to annotation writing and validation. The Phase 3C clarification, Phase 4 study package, and Phase 5 package change benchmark/docs/scripts/tests only; their branches start from current main (Phase 5 stacks on Phase 4), so no upstream core behavior is replaced. Existing current-main tests for identity support, qualifiers, annotation updates, and complex components returned 29 passed and 3 failures: three `test_auto_complex_components.py` monkeypatch stubs do not accept the newly passed `tax_id` keyword. These failures are in the current upstream test layer, not in the integration changes.
+
+The Phase 3C clarification and Phase 4 draft branches target `main`; Phase 5 targets the Phase 4 branch. PR #16 is merged and Phase 3C is already an ancestor of current main, so the clarification does not need PR #17 as a base. PR #17 remains an open draft based on `codex/benchmark-phase-3c`; retargeting it to current `main` is appropriate after its dependency merged, but the GitHub integration returned HTTP 403 for PR creation and update. The three new branches were pushed successfully; draft PR records remain to be created.
 
 ### Other workstreams requiring a repository status check
 
@@ -356,12 +362,13 @@ After the experimental design stabilizes:
 
 ## Additional docket: Luna's MODEL2507280001 request
 
-- [ ] Inspect the existing `test/MODEL2507280001-reaction-review` branch and reports before purchasing calls or duplicating work.
-- [ ] Confirm the remaining request for BioModels `MODEL2507280001` (SBML model `iLG335`) against LunaStarr's original request: test the existing reaction-annotation workflow without model/pipeline changes, with reproducible commands and results.
-- [ ] Reconcile previously reported retrieval outputs with current artifacts. Prior conversation records describe a 541-reaction Phase 3B review and files including `PHASE3_FULL_REPORT.md`, per-reaction/Top-10 CSVs and summaries; these are leads to verify, not newly certified results.
-- [ ] Identify whether grounded LLM selection, public species-to-reaction integration, or delivery of existing results remains outstanding. Scope and cost any missing run separately.
-- [ ] Deliver a concise collaborator handoff with outputs, coverage, abstentions/no-calls, mapping limitations, runtime/cost, and representative evidence. Treat this as an external case study; do not claim benchmark accuracy without verified independent reaction-level ground truth.
-- [ ] Check development/benchmark overlap before describing it as an independent external demonstration. Keep it separate from the sealed held-out benchmark.
+- [x] Inspect the existing `test/MODEL2507280001-reaction-review` branch and reports before purchasing calls or duplicating work.
+- [x] Reconcile the 541-reaction case-study outputs, BM25 and selected Phase 3B fusion rankings, grounded preflight, runtime, and provenance against the committed files.
+- [x] Determine remaining work: 264 Phase 3C requests were prepared, but no provider calls, grounded selections, abstentions, or final grounded annotations exist; no paid run is needed to hand off the completed retrieval review.
+- [x] Prepare the local collaborator handoff; keep it unsent unless separately requested.
+- [x] Record limitations: this is not independent of development; transformation-support counts are rubric judgments, not accuracy; 257 transport, one biomass, three pseudo-reactions, and 16/280 under-mapped internal reactions remain separate no-call/limitation categories.
+
+The exact original collaborator message was not found in repository records or the connected repository's issue/PR search. The handoff identifies the accession and exact input checksums but no BioModels revision label was recorded. If the original wording or a revision label is required, recover it from the correspondence owner before expanding the request. This case study remains separate from the sealed held-out benchmark.
 
 ## Model-version decision before further paid runs
 
@@ -502,10 +509,10 @@ This is feasible for an October **writing start**, not necessarily an October su
 
 ## Immediate next actions — current
 
-1. Reconcile current upstream API behavior and prepare focused Phase 3C, Phase 4, and implemented Phase 5 draft PRs without including personal audit judgments.
-2. Complete the local handoff for LunaStarr's existing `MODEL2507280001` reaction review; do not send it without a separate request.
-3. Keep the corrected Phase 5 paid run paused. No calls are authorized; preserve all model-specific plans/results and recheck the approximately $20 reported credit before any future request.
-4. After these priorities, resolve whether to resume the matched Phase 5 comparison, then complete the final freeze, separately authorized held-out evaluation, scope decisions and Phase 6 packaging/writing.
+1. Create the three draft PR records from the pushed branches when the GitHub integration has pull-request write permission; retarget existing PR #17 to current `main` if its compare remains clean.
+2. Keep the prepared MODEL2507280001 handoff local and unsent unless separately requested.
+3. Keep Phase 5 paid execution paused; no calls are authorized. Preserve all model-specific plans/results and recheck reported credit and pricing before any future request.
+4. After PR review and case-study handoff, revisit whether to resume Phase 5 only through a new budget decision, then complete the final freeze, separately authorized held-out evaluation, scope decisions and Phase 6 packaging/writing.
 5. Keep the held-out test sealed throughout and prepare manuscript material in parallel where it does not require new experiments.
 
 ## Revision record
@@ -516,3 +523,5 @@ This is feasible for an October **writing start**, not necessarily an October su
 - 2026-11-06: Recorded completed Phase 4, local Phase 5 retrieval results and pending controls, and explicit completion gates after Phase 5. This roadmap edit authorizes no new paid runs or test access.
 - 2026-11-06: Selected GPT-6.1 Terra for the Phase 5 matched run. Preserved GPT-5.6 plans/results; prepared and dry-run verified the new 326-call paired plan and model-specific persistent budget/cache package. Proposed USD 40 cap; USD 0 authorized. No paid or held-out execution occurred.
 - 2026-11-06: Paused Phase 5 paid execution while upstream integration and LunaStarr's MODEL2507280001 handoff take priority. Withdrew the earlier USD 40 cap proposal; the user reports approximately USD 20 total credit, no paid calls are authorized, and any later run requires a new budget review and explicit authorization. The held-out test remains sealed.
+
+- 2026-11-06: Reviewed current upstream API changes, based the Phase 3C clarification and Phase 4 integration branches on current main, and stacked Phase 5 on Phase 4. Pushed all three branches to sys-bio/AAAIM; GitHub draft-PR create/update operations returned HTTP 403. Prepared but did not send the MODEL2507280001 handoff. No paid calls or held-out access occurred.

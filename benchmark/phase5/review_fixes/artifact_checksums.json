@@ -67,7 +67,7 @@
     "benchmark/scripts/phase5_perturb.py": "004e247c6faa08b46dbd4e717b131da744086b193ce4cc6735d0a343840a3c26",
     "benchmark/scripts/phase5_reporting.py": "3f0a9dd33cabd1aecbd392f4bb5e79ab8482dabdf1359c57d7b1ffe471acfc43",
     "benchmark/scripts/phase5_robustness.py": "c6fab0f08c389496eb99db371553e0f23b67243bbb4451cd7fcd8b6f892a3b35",
-    "goals.md": "cf1ba54fca9642ce9e8a4431d2adb3d296cc85559901de5f3d7291b85a751f48",
+    "goals.md": "44849b67efdf3ec07c62f4bd2b0e07d06eaef0de17bd7d1b1d44e52a75e9847b",
     "tests/test_phase5_llm_plan.py": "6315de0192eb8267db59150799507c29297f93f59d09fc75081d300667c321b1",
     "tests/test_phase5_perturb.py": "48f5c08bc910266b7a9b927e1a5fec7c88bfe9e9f49c8274219ecb773b3ad311",
     "tests/test_phase5_reporting_review.py": "a3e57b16a9ae71d7fdffc4e3e9a4e07f356dec1a51e7c93e5b8051f5c89ba7fa",
