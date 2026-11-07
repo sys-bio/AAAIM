@@ -56,3 +56,9 @@ benchmark/phase3/phase3b_full/_*
 benchmark/phase3/phase3c_smoke/_*/
 # Phase 3C paired-validation raw cache, attempt ledger, and resumable scratch.
 benchmark/phase3/phase3c_validation/_*
+# Phase 5 complete provider requests and any raw response/paired-analysis data.
+benchmark/phase5/validation/**/_requests/
+benchmark/phase5/validation/**/_analysis/
+benchmark/phase5/_runner_state/
+benchmark/phase5/validation/_superseded_preflight_*/
+benchmark/phase5/_pytest*/

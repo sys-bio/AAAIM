@@ -1,0 +1,20 @@
+{
+  "bootstrap": "paired cluster and perturbation-replicate resampling",
+  "bootstrap_replicates": 2000,
+  "bootstrap_seed": 20261106,
+  "full_catalog_candidate_recall_note": "query-independent catalog coverage; top-k metrics describe retrieval quality",
+  "human_review_labels_used": false,
+  "mrr_truncation": [
+    10,
+    100
+  ],
+  "n_full_validation": 969,
+  "n_validation": 163,
+  "prediction_sha256": "8e5e2ecafe0e8086d75f062edf51ea3be37c43b2bfaccb4a0a084252eb65e4b6",
+  "primary_metrics": [
+    "recall_at_1",
+    "recall_at_10"
+  ],
+  "reference_join_after_ranking_freeze": true,
+  "test_rows_read": 0
+}

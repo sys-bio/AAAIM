@@ -1,0 +1,17 @@
+{
+  "mode": "dry-run",
+  "plan_digest": "2b80dd9e83108cdba2310121706af387bd770651a1f7648a87645a03ae0b0e8f",
+  "planned_units": 326,
+  "distinct_provider_bodies": 317,
+  "provider_constructions": 0,
+  "paid_attempts": 0,
+  "currently_authorized_usd": 0,
+  "held_out_rows_read": 0,
+  "max_complete_provider_body_bytes": 16840,
+  "max_input_token_bound": 20936,
+  "sum_input_token_bounds": 4527330,
+  "max_per_unit_reservation_usd": 0.07282,
+  "sum_per_unit_reservations_usd": 17.994805,
+  "proposed_cap_usd": 40.0,
+  "cap_after_all_reservations_usd": 22.005195
+}

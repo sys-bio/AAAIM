@@ -1,0 +1,241 @@
+{
+  "adaptation_or_retraining": false,
+  "base_code_revision": "53916fb54c36b834be0ec9b46a9571833a7d1354",
+  "blockers": [
+    "Required 50%-identifier-removal grounded validation outputs missing; budget and live-run authorization not supplied.",
+    "Finish persistent validation runner integration using the frozen degraded requests; dry-run provider/schema/budget/cache behavior is testable without paid calls.",
+    "Later held-out executor/label-sealing integration and held-out budget remain unfinished; held-out execution disabled.",
+    "Lock hosted model identity/availability and drift policy before any final test freeze."
+  ],
+  "budget": {
+    "currently_authorized_usd": 0,
+    "max_attempts_upper_bound": 1350,
+    "max_output_tokens": 2048,
+    "max_serialized_payload_bytes": 32768,
+    "mechanism": "reserve pessimistic full per-call maximum BEFORE each call, retain failed-call reservations; stop before count/dollar cap; no live execution authorized",
+    "not_a_test_prompt_cost_quote": true,
+    "proposed_hard_cap_usd_for_all_call_upper_bound": 125,
+    "proposed_run_population_from_roadmap_only": 1350,
+    "reservation_usd_per_possible_call_at_snapshot_rates": 0.090112,
+    "rough_cost_usd_at_pilot_mix_and_snapshot_rates": 17.460146319018403,
+    "worst_case_all_1350_calls_snapshot_usd": 121.6512
+  },
+  "code_state": "uncommitted Phase 4 files pinned by checksums; no commit created",
+  "comparisons": [
+    "selected method",
+    "frozen fusion Top-1",
+    "frozen grounded all-reaction baseline"
+  ],
+  "dry_run_command": "python -m benchmark.scripts.phase4_freeze --dry-run --out benchmark/phase4/_dry_run_reproduced.json",
+  "exclusions": "prespecified frozen benchmark eligibility only; no new test-dependent exclusions",
+  "execution_command_status": "intentionally fail-closed placeholder; not a working held-out evaluator",
+  "failure_rules": {
+    "automatic_retries": 0,
+    "cache": "persist successes and failures atomically, validate digest before reuse",
+    "cache_key": "canonical full provider payload including model, prompt, evidence, schema, options",
+    "max_attempts_per_reaction": 1,
+    "missing_resources": "abort preflight before unsealing",
+    "oversize_payload": "explicit abstention, no ad hoc truncation",
+    "resume": "same locked requests only, never retry completed failures selectively",
+    "schema_or_compliance_failure": "reported abstention, count in denominator; do not silently drop"
+  },
+  "held_out_status": "sealed; no rows, labels, predictions or diagnostics opened",
+  "later_execution_command": "python -m benchmark.scripts.phase4_freeze --freeze benchmark/phase4/freeze/evaluation_freeze.json --execute",
+  "leakage": "target-local scrubbed queries; no KEGG reaction ID in query, no reference or audit fields in routing/request; labels joined by independent stage only after predictions are frozen",
+  "method_selection": "unchanged grounded_llm_on_every_reaction over BM25 + trained epoch-1 RRF Top-10",
+  "phase5_grounded_run_plan": {
+    "assumed_output_tokens_per_call": 144.85889570552146,
+    "automatic_retries": 0,
+    "command": "python -m benchmark.scripts.phase5_llm_plan --source-root SOURCE_ROOT --out benchmark/phase5/validation --dry-run",
+    "compatible_clean_cache_hits": 0,
+    "condition": "remove_0.5_s20261106",
+    "conservative_32768_input_reservation_total_usd": 14.688255999999999,
+    "currently_authorized_usd": 0,
+    "estimated_cost_usd_at_historical_mean_output": 2.60482,
+    "estimated_cost_usd_at_max_output_tokens": 6.327364,
+    "estimates_not_guarantees": true,
+    "execution_status": "dry-run only; paid calls not authorized",
+    "expected_value": "measure paired clean/degraded grounded correctness, coverage and abstention for 50% identifier removal instead of inferring it from retrieval",
+    "input_token_estimate": 1160738,
+    "live_command_status": "no live command exposed in this task; integrate approved frozen plan into a separately authorized persistent budget/cache runner before any paid execution",
+    "max_output_tokens": 2048,
+    "model": "gpt-5.6-terra",
+    "n_validation": 163,
+    "new_calls_made": 0,
+    "new_calls_needed": 163,
+    "payload_byte_limit": 32768,
+    "payloads_exceeding_byte_limit": 0,
+    "prices": {
+      "cached_input_per_million": 0.2,
+      "currency": "USD",
+      "input_per_million": 2.0,
+      "model": "gpt-5.6-terra",
+      "output_per_million": 12.0,
+      "service_tier": "Standard",
+      "short_context_max_input_tokens": 272000,
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "source_note": "Official API pricing fetched using OpenAI Docs. Public Standard short-context rates; no assumption of account access or cache discounts. Regional/FedRAMP endpoints may have a 10% uplift; account-specific modifiers/taxes are excluded. No explicit cache-write product is requested.",
+      "verified_date_local": "2026-11-06"
+    },
+    "proposed_hard_cap_usd": 15,
+    "reasoning_effort": "low",
+    "regional_modifiers_not_included": true,
+    "requested_decision": "authorize this validation-only 163-row plan with at most its missing new calls, one attempt each, and a USD 15 hard ceiling; retain selected model and all fixed settings",
+    "schema": "phase5-grounded-validation-plan-v1",
+    "test_access": "disabled",
+    "tools": []
+  },
+  "phase5_prediction_freeze": {
+    "catalog_size": 12312,
+    "checkpoint_sha256": "8773b04f09916889b74c956e708044fe2c653fa764fe73c422ecc376ecae81c1",
+    "device": "cuda",
+    "document_encoding_seconds": 18.094000000011874,
+    "labels_loaded_during_ranking": false,
+    "max_length": 256,
+    "normalization": "l2",
+    "pooling": "cls",
+    "query_encoding_seconds": 2.5310000000172295,
+    "ranking_and_fusion_seconds": 1.4849999999860302,
+    "score_arithmetic": "float32 inner products on CUDA after mixed-precision encoding; small historical numerical drift is checked and reported",
+    "sha256": "8e5e2ecafe0e8086d75f062edf51ea3be37c43b2bfaccb4a0a084252eb65e4b6",
+    "snapshot_files": {
+      "config.json": "094f8e891b932f2000c92cfc663bac4c62069f5d8af5b5278c4306aef3084750",
+      "model.safetensors": "3c9f31665447c8911517620762200d2245a2518d6e7208acc78cd9db317e21ad",
+      "special_tokens_map.json": "b6d346be366a7d1d48332dbc9fdf3bf8960b5d879522b7799ddba59e76237ee3",
+      "tokenizer.json": "d241a60d5e8f04cc1b2b3e9ef7a4921b27bf526d9f6050ab90f9267a1f9e5c66",
+      "tokenizer_config.json": "9261e7d79b44c8195c1cada2b453e55b00aeb81e907a6664974b4d7776172ab3",
+      "vocab.txt": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3"
+    },
+    "test_rows_read": 0,
+    "torch": "2.7.1+cu128",
+    "total_seconds": 23.875,
+    "unique_query_encodings": 1573
+  },
+  "phase5_protocol": "benchmark/PHASE5.md",
+  "phase5_provenance_sha256": "dc3f6c37eb125db888143350cad5e9630a02db065efcd5ab2a5d321f59dcaf50",
+  "phase5_reference_policy": "unchanged benchmark labels, no human-audit corrected labels",
+  "phase5_source_and_goals_sha256": {
+    "benchmark/PHASE5.md": "34b9f03cc34f1eecc7b41e1c2c555d051b8af9aa5065d3e760e731a3053fea30",
+    "benchmark/scripts/phase5_llm_plan.py": "b4119703be4243d87fb8ed83faaa29d4ce0d1883d951fe39699fca7a3ba9b8a3",
+    "benchmark/scripts/phase5_perturb.py": "4c14be2adb2044e35414bb929ab5fc66f2f769f5dfeeca6304caef0cf4b540d8",
+    "benchmark/scripts/phase5_reporting.py": "e68d4fd668cfdb66254fe4a88259de2bb80d6ff9fcf1a79288081ae5ca631828",
+    "benchmark/scripts/phase5_robustness.py": "0ab6611193e77372716161c7151d965cc8c32278a53d5f50e8f209d0c26f6cf1",
+    "goals.md": "310244b229c2c634ffe3fa2d5fe147de0b02cd58fa7280b7e0a61154e6d33ab1",
+    "tests/test_phase5_llm_plan.py": "896e34eb930a3715a3f582956312f78de8c216c1eaf3ba3d8e4598452fcff4f2",
+    "tests/test_phase5_perturb.py": "d75ad4330126bcb5d15ab871f10340676b6749c1ae7e797ca7597e3e194e5bb8",
+    "tests/test_phase5_robustness.py": "db12f54ecde6894c79b848cc1af50f4bbae2e3c74dedc354211018aa17a134f5"
+  },
+  "phase5_status": "retrieval study complete; primary grounded robustness comparison blocked",
+  "preserved_history": "Phase 4 draft retained unchanged under benchmark/phase4/freeze; new planning package only",
+  "primary_metric": "exact correct / all prespecified held-out eligible reactions, counting abstentions/failures as noncorrect",
+  "schema": "phase5-evaluation-freeze-draft-v1",
+  "secondary_metrics": [
+    "coverage",
+    "accuracy among answered",
+    "cluster/model macro exact accuracy",
+    "BRITE/orthology-aware secondary accuracy",
+    "per retrieval stratum",
+    "risk-coverage and partial/normalized AURC",
+    "reference-absence detection",
+    "correctness detection among answered",
+    "cost/tokens/attempts/provider latency and end-to-end latency if measured"
+  ],
+  "selected_method": "grounded",
+  "sequence": "Phase 5 development -> final method/evaluation freeze -> later separately authorized held-out evaluation",
+  "source_and_baseline_hashes": {
+    "benchmark/PHASE4.md": {
+      "sha256_bytes": "5db3faae53e4757fa8e853af565a2fdd5fe4803549a0532d253b02dc4a741ef9",
+      "sha256_portable": "5db3faae53e4757fa8e853af565a2fdd5fe4803549a0532d253b02dc4a741ef9"
+    },
+    "benchmark/phase3/phase3b_full/full_training_config.json": {
+      "sha256_bytes": "a942dd64356ce04b58ac12af4f49bb0aa6728acf817cb524fbf6365e0f7a930b",
+      "sha256_portable": "a942dd64356ce04b58ac12af4f49bb0aa6728acf817cb524fbf6365e0f7a930b"
+    },
+    "benchmark/phase3/phase3b_full/selected_checkpoint.json": {
+      "sha256_bytes": "fb15fa7f6a0a31d252a2c397b03a47da3f6239c0bf060bf9a19dd27487c87f03",
+      "sha256_portable": "fb15fa7f6a0a31d252a2c397b03a47da3f6239c0bf060bf9a19dd27487c87f03"
+    },
+    "benchmark/phase3/phase3b_fusion/config.json": {
+      "sha256_bytes": "04e7bea59ce9b3e3c2efdcf0503e180794b08838864a2f9cee73a9edd2bf1974",
+      "sha256_portable": "748e8cc40b21339fa05679666f22f0959557009a5d63ff55262d9a2f1ee1fddc"
+    },
+    "benchmark/phase3/phase3c_validation/answer_key_join.jsonl": {
+      "sha256_bytes": "1548ba2435d452720115d87afdb0452d9a51b4d6c21c4302055628d63c0d70fb",
+      "sha256_portable": "01844afb38ff036a0c139896e1b0ea70163b8e0324c74c952e431bba01f4ad43"
+    },
+    "benchmark/phase3/phase3c_validation/artifact_manifest.json": {
+      "sha256_bytes": "87bf9400334a046000599eb854731fb4f848c43046af9bf4ca00884d6a81da46",
+      "sha256_portable": "376c7e34e20afb5e72f45a40dc698330e85ca5489c6e50eecd842f63995c3647"
+    },
+    "benchmark/phase3/phase3c_validation/config.json": {
+      "sha256_bytes": "826c239d77bf321daed2e09e2bd1efefc3c8018ecba94a39f704a532441ac5dd",
+      "sha256_portable": "1a4f76d14ffaa5f25627cfaeb2f74225190e71c4ff71bcdfa9266e94206cafd8"
+    },
+    "benchmark/phase3/phase3c_validation/frozen_evidence.jsonl": {
+      "sha256_bytes": "1726b7d5589aaa5cacdb0bf60edf54745aec8a46e65fb5b6e7f7a3fad0f93ffd",
+      "sha256_portable": "b6045e9a77c22c884642b567dd8f011a76ad4f943b2fa3e33b96f87fcf490a53"
+    },
+    "benchmark/phase3/phase3c_validation/frozen_responses.jsonl": {
+      "sha256_bytes": "eb8e150e275c439b73324ec09139da6c1ae658bd4599983c60768f05826c48f8",
+      "sha256_portable": "72e14d505b67a2aebeaebd844de26164da0d404bd7cff7df662cd765cf344999"
+    },
+    "benchmark/phase3/phase3c_validation/requests.jsonl": {
+      "sha256_bytes": "e3d2505b3a1b77e222af20d9ff59c91b6be84edd6aedd1187ffc79669ec9c3c2",
+      "sha256_portable": "ce962521b6503ed217c22dd640ab7cc46a5f8ead1f49c747107904cf746ccf95"
+    },
+    "benchmark/phase3/phase3c_validation/sample_ids.jsonl": {
+      "sha256_bytes": "737208d5588bf53a872ea12946fbab1677fbb337f2318e2db4b7e067102407d1",
+      "sha256_portable": "42f1d2164110f774b362be6335c13b2b2b44d8eddf7546e3defedb922d167f5e"
+    },
+    "benchmark/phase3/pricing.openai.gpt-5.6-terra.json": {
+      "sha256_bytes": "d13d15001b6879317ccda17eac998c86deecd24d3812c3f7741ec121e056e7a4",
+      "sha256_portable": "d13d15001b6879317ccda17eac998c86deecd24d3812c3f7741ec121e056e7a4"
+    },
+    "benchmark/phase4/study_config.json": {
+      "sha256_bytes": "1656ef4f60361a13da52388d55751b01170d0a83544d2041036fb237ed7a08c4",
+      "sha256_portable": "1656ef4f60361a13da52388d55751b01170d0a83544d2041036fb237ed7a08c4"
+    },
+    "benchmark/scripts/phase3_biencoder.py": {
+      "sha256_bytes": "6efa7dd29095e6e325eae495c92ab3c32f621dbefefa204c1dffaa85d3ea7f9f",
+      "sha256_portable": "6efa7dd29095e6e325eae495c92ab3c32f621dbefefa204c1dffaa85d3ea7f9f"
+    },
+    "benchmark/scripts/phase3_retrieval.py": {
+      "sha256_bytes": "0c35dc5a4546e1c1a05738e7c8aaaccf1d318c660c34bd6e9483bd041dcd4eac",
+      "sha256_portable": "0c35dc5a4546e1c1a05738e7c8aaaccf1d318c660c34bd6e9483bd041dcd4eac"
+    },
+    "benchmark/scripts/phase3c_grounded.py": {
+      "sha256_bytes": "4a902beb1e85af6230f01633d32c8294dfeaeaabebfb5bef49af9016edd7c689",
+      "sha256_portable": "4a902beb1e85af6230f01633d32c8294dfeaeaabebfb5bef49af9016edd7c689"
+    },
+    "benchmark/scripts/phase3c_validation.py": {
+      "sha256_bytes": "8bef9567c8c7f325c498cbf197cd29b9fb9d58be54b87791788f79e60975751d",
+      "sha256_portable": "8bef9567c8c7f325c498cbf197cd29b9fb9d58be54b87791788f79e60975751d"
+    },
+    "benchmark/scripts/phase4_freeze.py": {
+      "sha256_bytes": "48b61c4b286d8645f3aa12a6072c38db08a96ad4103c4fe96a5a881ab845435b",
+      "sha256_portable": "48b61c4b286d8645f3aa12a6072c38db08a96ad4103c4fe96a5a881ab845435b"
+    },
+    "benchmark/scripts/phase4_routing.py": {
+      "sha256_bytes": "40d4f0d789df5acd5e474481eb5fb24d157bf073c7ad10d0b3c9eb6b1e235f26",
+      "sha256_portable": "40d4f0d789df5acd5e474481eb5fb24d157bf073c7ad10d0b3c9eb6b1e235f26"
+    },
+    "tests/test_phase4_freeze.py": {
+      "sha256_bytes": "02c1ca2e97bc99dccdbbf59bf8e690367c538d776b0b61e64323a10af32a08f1",
+      "sha256_portable": "02c1ca2e97bc99dccdbbf59bf8e690367c538d776b0b61e64323a10af32a08f1"
+    },
+    "tests/test_phase4_routing.py": {
+      "sha256_bytes": "a49adb69a56288ee13aca1d78aa79517b26086e6728eeb72ee170a883c51d1b0",
+      "sha256_portable": "a49adb69a56288ee13aca1d78aa79517b26086e6728eeb72ee170a883c51d1b0"
+    }
+  },
+  "status": "draft",
+  "test_change_policy": "one locked test run; no test-driven model/threshold/prompt changes or selective reruns; technical amendments require new documented protocol and invalidate a confirmatory interpretation if outcomes informed them",
+  "uncertainty": {
+    "interval": "percentile 95%",
+    "no_test_driven_threshold_changes": true,
+    "replicates": 10000,
+    "scheme": "paired cluster bootstrap, resample test model clusters only after predictions freeze",
+    "seed": 20261105
+  },
+  "validation_selection_complete": true
+}
