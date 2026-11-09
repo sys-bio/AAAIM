@@ -23,6 +23,14 @@ benchmark/PHASE4.md -text
 benchmark/requirements-phase4.txt -text
 benchmark/scripts/phase4_*.py -text
 tests/test_phase4_*.py -text
+
+# Phase 5 source/state and artifact manifests also use exact byte checksums.
+benchmark/phase5/** -text whitespace=trailing-space,space-before-tab,cr-at-eol
+benchmark/phase5/**/*.svg -whitespace
+benchmark/PHASE5.md -text whitespace=cr-at-eol
+benchmark/scripts/phase5_*.py -text whitespace=cr-at-eol
+tests/test_phase5_*.py -text whitespace=cr-at-eol
+goals.md -text whitespace=cr-at-eol
 # Reviewer pages are byte-manifested and must remain double-clickable after checkout.
 benchmark/phase3/error_audit/reviewer/* text eol=lf
 benchmark/scripts/phase3_error_analysis.py -text

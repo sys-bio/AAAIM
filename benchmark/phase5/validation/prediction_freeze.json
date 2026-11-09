@@ -1,0 +1,26 @@
+{
+  "catalog_size": 12312,
+  "checkpoint_sha256": "8773b04f09916889b74c956e708044fe2c653fa764fe73c422ecc376ecae81c1",
+  "device": "cuda",
+  "document_encoding_seconds": 18.094000000011874,
+  "labels_loaded_during_ranking": false,
+  "max_length": 256,
+  "normalization": "l2",
+  "pooling": "cls",
+  "query_encoding_seconds": 2.5310000000172295,
+  "ranking_and_fusion_seconds": 1.4849999999860302,
+  "score_arithmetic": "float32 inner products on CUDA after mixed-precision encoding; small historical numerical drift is checked and reported",
+  "sha256": "8e5e2ecafe0e8086d75f062edf51ea3be37c43b2bfaccb4a0a084252eb65e4b6",
+  "snapshot_files": {
+    "config.json": "094f8e891b932f2000c92cfc663bac4c62069f5d8af5b5278c4306aef3084750",
+    "model.safetensors": "3c9f31665447c8911517620762200d2245a2518d6e7208acc78cd9db317e21ad",
+    "special_tokens_map.json": "b6d346be366a7d1d48332dbc9fdf3bf8960b5d879522b7799ddba59e76237ee3",
+    "tokenizer.json": "d241a60d5e8f04cc1b2b3e9ef7a4921b27bf526d9f6050ab90f9267a1f9e5c66",
+    "tokenizer_config.json": "9261e7d79b44c8195c1cada2b453e55b00aeb81e907a6664974b4d7776172ab3",
+    "vocab.txt": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3"
+  },
+  "test_rows_read": 0,
+  "torch": "2.7.1+cu128",
+  "total_seconds": 23.875,
+  "unique_query_encodings": 1573
+}

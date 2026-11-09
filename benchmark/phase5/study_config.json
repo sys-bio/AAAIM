@@ -1,0 +1,21 @@
+{
+  "schema": "phase5-robustness-v1",
+  "seeds": [20261106, 20261107, 20261108],
+  "removal_fractions": [0.1, 0.25, 0.5, 0.75],
+  "wrong_mapping_fraction": 0.25,
+  "bootstrap_replicates": 2000,
+  "bootstrap_seed": 20261106,
+  "n_validation": 163,
+  "n_conditions": 19,
+  "max_query_conditions": 3097,
+  "cpu_time_limit_seconds": 900,
+  "dense_time_limit_seconds": 300,
+  "new_api_calls_allowed": 0,
+  "trained_checkpoint_sha256": "8773b04f09916889b74c956e708044fe2c653fa764fe73c422ecc376ecae81c1",
+  "catalog_sha256": "00acb4de1bbfb1ddae0298a09d218f93eb22241844179439ff34a2912fba046c",
+  "max_length": 256,
+  "batch_size": 64,
+  "rrf_k": 60,
+  "component_depth": 100,
+  "rule_control": "strict, no iterative ontology relaxation"
+}
