@@ -1,0 +1,3 @@
+entry_number,model_id,reaction_id,nomination_reason,prior_source,status,matching_status,validation_status,test_status,diagnostic
+1,model_id,reaction_id,nomination_reason,prior_source,unresolved_malformed,malformed,not_checked,not_checked,required fields missing or repeated CSV header row
+2,BIOMD0000000013,E12,R01429 contains xylonolactone which is not reflected in the reaction E12,prior manual observation,unresolved_not_validation,not_in_validation_inventory,not_validation,confirmed_not_test,exact key belongs only to non-validation split(s): train

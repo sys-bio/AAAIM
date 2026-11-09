@@ -1,0 +1,83 @@
+{
+  "files": [
+    {
+      "bytes": 1987,
+      "n_lines": null,
+      "path": "benchmark/phase3/error_audit/reviewer/README.md",
+      "sha256": "fc2c14b774fd177e3d6d6097ecb15f644281346ffcf75f200724bef857d9309b"
+    },
+    {
+      "bytes": 1980910,
+      "n_lines": null,
+      "path": "benchmark/phase3/error_audit/reviewer/browse_phase3c_noncorrect.html",
+      "sha256": "79c8a260de1999984cd058e2cff6c4e5e59f0a0e83051c516dcfad01a946c2dc"
+    },
+    {
+      "bytes": 2423188,
+      "n_lines": null,
+      "path": "benchmark/phase3/error_audit/reviewer/browse_phase3c_noncorrect_data.json",
+      "sha256": "42ba481afbc38d76f0ec3fba0880c0eac0ee1d66d438cf9e28d80e8762cdfbb4"
+    },
+    {
+      "bytes": 273013,
+      "n_lines": null,
+      "path": "benchmark/phase3/error_audit/reviewer/formal_pass1.html",
+      "sha256": "0902738b51280a10e1eee1f2883a642394060f07a27f5182871e368499974775"
+    },
+    {
+      "bytes": 372327,
+      "n_lines": null,
+      "path": "benchmark/phase3/error_audit/reviewer/formal_pass1_data.json",
+      "sha256": "5901a82fd4f7eb0e4fc0ad4da7e84f7e26c53046f01e98fb37c2735f58c6d10b"
+    },
+    {
+      "bytes": 2014040,
+      "n_lines": null,
+      "path": "benchmark/phase3/error_audit/reviewer/formal_pass2.html",
+      "sha256": "ffe3f74ba3132021f9ab421ae7f9f82c47d3bf0391a6f1fcd70bfa8c5bd63e3f"
+    },
+    {
+      "bytes": 2465306,
+      "n_lines": null,
+      "path": "benchmark/phase3/error_audit/reviewer/formal_pass2_data.json",
+      "sha256": "b25bff3f06481d307e94dde5cdba326b7000a3968404dadc271cbdd8c0da42d0"
+    },
+    {
+      "bytes": 2372,
+      "n_lines": null,
+      "path": "benchmark/phase3/error_audit/reviewer/index.html",
+      "sha256": "aaf9fd1fa42d70fdc03a7c214386cb04a5783eef43e6fd9b3d8283518d6ddb4e"
+    },
+    {
+      "bytes": 3376,
+      "n_lines": null,
+      "path": "benchmark/phase3/error_audit/reviewer/review_schema.json",
+      "sha256": "7cd2c42797c1f15e450ece3b6b4ff9fc41b25d9fd28adf50822b858f5d74a559"
+    },
+    {
+      "bytes": 4091,
+      "n_lines": null,
+      "path": "benchmark/phase3/error_audit/reviewer/reviewer.css",
+      "sha256": "f11f28b3dda881a6e5c7ad682b5193385bf9cbd1a3144f835f894b617377c16c"
+    },
+    {
+      "bytes": 3685,
+      "n_lines": null,
+      "path": "benchmark/phase3/error_audit/reviewer/reviewer_build_config.json",
+      "sha256": "642bb3f8524d78d3b4efa939c3d91da8c11758324376356e905fe94599103c61"
+    },
+    {
+      "bytes": 18700,
+      "n_lines": null,
+      "path": "benchmark/phase3/error_audit/reviewer/supplemental_cases.html",
+      "sha256": "96e5fbc96b81f339fbfdf3497a8882330a02ba49395aa2954b5ba47b0902fda3"
+    },
+    {
+      "bytes": 4197,
+      "n_lines": null,
+      "path": "benchmark/phase3/error_audit/reviewer/supplemental_cases_data.json",
+      "sha256": "29cea3dde19e543a7a929b4c0734d66c0c5b6f490a79548452ed8bd9c61b955e"
+    }
+  ],
+  "n_files": 13
+}

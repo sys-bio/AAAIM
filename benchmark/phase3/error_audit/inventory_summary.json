@@ -1,0 +1,27 @@
+{
+  "abstentions": 39,
+  "api_calls": 0,
+  "biological_adjudication": false,
+  "compliance_cases": 2,
+  "formal_60_case_sample_built": false,
+  "grounded_exact": 102,
+  "incorrect_selections": 22,
+  "inventory_files": [
+    "all_method_disagreements.csv",
+    "all_validation_outcomes.csv",
+    "phase3c_abstentions.csv",
+    "phase3c_compliance_cases.csv",
+    "phase3c_incorrect_selections.csv",
+    "phase3c_noncorrect_review.csv"
+  ],
+  "labels_modified": false,
+  "method_disagreements": 142,
+  "new_inference": false,
+  "noncorrect": 61,
+  "schema": "phase3-error-audit-inventory-summary-v1",
+  "test_labels_loaded": 0,
+  "test_rows_loaded": 0,
+  "total": 163,
+  "unsupported": 0,
+  "validation_only": true
+}
