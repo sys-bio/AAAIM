@@ -11,7 +11,7 @@ from core.database_search import _get_kegg_recommendations_rulebased
 from core.llm_interface import query_llm
 from core.model_info import (
     extract_model_info,
-    extract_reactions_from_sbml,
+    extract_reactions_with_ids_from_sbml,
     find_species_with_annotations_and_qualifiers,
     find_species_with_chebi_annotations,
     get_all_reaction_ids,
@@ -110,7 +110,9 @@ def run_kegg_annotation_workflow_rulebased(
     else:
         mapped_species_ids = list(high_score_recommendations["id"].astype(str).unique())
 
-    reactions, _ = extract_reactions_from_sbml(model_file, mapped_species_ids)
+    extracted_reaction_ids, reactions, _ = extract_reactions_with_ids_from_sbml(
+        model_file, mapped_species_ids
+    )
 
     if high_score_recommendations.empty or "id" not in high_score_recommendations.columns:
         match_results: List[Any] = []
@@ -118,7 +120,7 @@ def run_kegg_annotation_workflow_rulebased(
     else:
         _, match_results, _species_relax_levels = map_reactions_to_kegg_with_relaxation(
             reactions,
-            reaction_ids,
+            extracted_reaction_ids,
             high_score_recommendations,
             spectators=False,
             cofactors_to_ignore=cofactor_config.kegg_ids,
@@ -417,6 +419,7 @@ def rank_kegg_annotations_with_llm(
     *,
     top_k: Optional[int] = None,
     only_rank_meaningful: bool = True,
+    max_completion_tokens: Optional[int] = None,
 ) -> pd.DataFrame:
     """Re-rank KEGG reaction candidates using an LLM and return a filtered DataFrame.
 
@@ -557,7 +560,12 @@ Model:
 {model_context}
 
         """
-        response_text = query_llm(prompt, model=llm_model, entity_type=EntityType.REACTION)
+        response_text = query_llm(
+            prompt,
+            model=llm_model,
+            entity_type=EntityType.REACTION,
+            max_completion_tokens=max_completion_tokens,
+        )
         logger.info("LLM meaningful evaluation: %s", response_text)
         meaningful = response_text.strip().lower() == "true"
     else:
@@ -607,7 +615,12 @@ Model:
         if len(choice_lines) == 1:
             single_candidate_kegg = choice_lines[0].split(":", 1)[0].strip()
 
-        response_text = query_llm(prompt, model=llm_model, entity_type=EntityType.REACTION)
+        response_text = query_llm(
+            prompt,
+            model=llm_model,
+            entity_type=EntityType.REACTION,
+            max_completion_tokens=max_completion_tokens,
+        )
         response_lines = [
             ln.strip() for ln in (response_text or "").splitlines() if ln.strip()
         ]

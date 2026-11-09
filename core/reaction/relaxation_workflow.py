@@ -507,6 +507,7 @@ def map_reactions_to_kegg_with_relaxation(
             max_ancestor_depth=max_ancestor_depth,
             max_descendant_depth=down_depth,
             strict_errors=strict_errors,
+            ontology_expansion_cache=ontology_expansion_cache,
         )
 
         # Merge: baseline scores for unaffected reactions + new scores for affected ones.
@@ -548,6 +549,9 @@ def map_reactions_to_kegg_with_relaxation(
     relax_level: Dict[str, int] = {sid: 0 for sid in species_to_chebi}
 
     cofactors = cofactors_to_ignore if cofactors_to_ignore is not None else set()
+    # Maps and ontology are fixed during this run, so expanded reference-reaction
+    # sides can be reused across model reactions and relaxation trials.
+    ontology_expansion_cache: Dict[Tuple[Tuple[str, ...], int, int], frozenset] = {}
     normalized_reactions: List[Dict[str, Any]] = []
     match_results: List[Any] = []
 
@@ -592,6 +596,7 @@ def map_reactions_to_kegg_with_relaxation(
             max_ancestor_depth=max_ancestor_depth,
             max_descendant_depth=down_depth,
             strict_errors=strict_errors,
+            ontology_expansion_cache=ontology_expansion_cache,
         )
         if not evaluate_candidates:
             # Generation-only mode: do not score, do not relax, return after first pass.

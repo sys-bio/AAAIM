@@ -2044,6 +2044,7 @@ def annotate_single_model(
                 model_notes=_notes_plus_message(
                     (model_info or {}).get("model_notes", ""), message
                 ),
+                max_completion_tokens=max_completion_tokens,
             )
             llm_time = time.time() - llm_start
             recommendations_df = ranked_df if not ranked_df.empty else kegg_df
