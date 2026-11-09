@@ -1,0 +1,6 @@
+# Tested Phase 4 cached analysis and synthetic-only freeze runner.
+# Install into an isolated environment alongside existing benchmark dependencies.
+numpy==2.2.2
+scikit-learn==1.9.0
+pydantic==2.13.5
+matplotlib==3.11.2

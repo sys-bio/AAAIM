@@ -1,0 +1,1562 @@
+{
+  "fusion": {
+    "abstained": 0,
+    "accuracy": 0.5705521472392638,
+    "answered": 163,
+    "answered_reference_absent": 30,
+    "bootstrap": {
+      "accuracy_ci95": [
+        0.31333132530120483,
+        0.7349091985787604
+      ],
+      "accuracy_delta_vs_grounded_ci95": [
+        -0.14285714285714285,
+        -0.009893849961919308
+      ],
+      "clusters": 12,
+      "replicates": 2000,
+      "seed": 20261105,
+      "simulated_call_rate_ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "cluster_id_macro_accuracy": 0.4862715137140425,
+    "correct": 93,
+    "correctness_detection_answered_only": {
+      "auroc": 0.6387864823348693,
+      "average_precision": 0.6511401286804531,
+      "n": 163,
+      "positives": 93
+    },
+    "coverage": 1.0,
+    "model_id_macro_accuracy": 0.4538169290704787,
+    "n": 163,
+    "reference_absence_consistent_abstention": 0,
+    "reference_present_abstention": 0,
+    "replayed_cached_input_tokens": 0,
+    "replayed_cost_usd": 0.0,
+    "replayed_input_tokens": 0,
+    "replayed_output_tokens": 0,
+    "replayed_serial_provider_latency_ms": 0.0,
+    "risk_coverage": {
+      "aurc_normalized": 0.3661988124065402,
+      "aurc_partial": 0.3661988124065402,
+      "curve": [
+        {
+          "answered": 1,
+          "coverage": 0.006134969325153374,
+          "risk": 0.0,
+          "score": 0.4765624999937637
+        },
+        {
+          "answered": 2,
+          "coverage": 0.012269938650306749,
+          "risk": 0.5,
+          "score": 0.3742993125430101
+        },
+        {
+          "answered": 3,
+          "coverage": 0.018404907975460124,
+          "risk": 0.3333333333333333,
+          "score": 0.25786601028153294
+        },
+        {
+          "answered": 5,
+          "coverage": 0.03067484662576687,
+          "risk": 0.6,
+          "score": 0.23462651139000093
+        },
+        {
+          "answered": 6,
+          "coverage": 0.03680981595092025,
+          "risk": 0.5,
+          "score": 0.20119047620739644
+        },
+        {
+          "answered": 7,
+          "coverage": 0.04294478527607362,
+          "risk": 0.42857142857142855,
+          "score": 0.1807081807114579
+        },
+        {
+          "answered": 8,
+          "coverage": 0.049079754601226995,
+          "risk": 0.375,
+          "score": 0.1716891033680165
+        },
+        {
+          "answered": 9,
+          "coverage": 0.05521472392638037,
+          "risk": 0.3333333333333333,
+          "score": 0.1572317460370065
+        },
+        {
+          "answered": 10,
+          "coverage": 0.06134969325153374,
+          "risk": 0.4,
+          "score": 0.14839076396371928
+        },
+        {
+          "answered": 11,
+          "coverage": 0.06748466257668712,
+          "risk": 0.45454545454545453,
+          "score": 0.1474349452294855
+        },
+        {
+          "answered": 12,
+          "coverage": 0.0736196319018405,
+          "risk": 0.4166666666666667,
+          "score": 0.1290898274919633
+        },
+        {
+          "answered": 13,
+          "coverage": 0.07975460122699386,
+          "risk": 0.46153846153846156,
+          "score": 0.12189312345513428
+        },
+        {
+          "answered": 14,
+          "coverage": 0.08588957055214724,
+          "risk": 0.5,
+          "score": 0.11237194640799432
+        },
+        {
+          "answered": 15,
+          "coverage": 0.09202453987730061,
+          "risk": 0.4666666666666667,
+          "score": 0.10371085369918888
+        },
+        {
+          "answered": 16,
+          "coverage": 0.09815950920245399,
+          "risk": 0.4375,
+          "score": 0.10216450217419347
+        },
+        {
+          "answered": 17,
+          "coverage": 0.10429447852760736,
+          "risk": 0.4117647058823529,
+          "score": 0.0998263888882005
+        },
+        {
+          "answered": 18,
+          "coverage": 0.11042944785276074,
+          "risk": 0.3888888888888889,
+          "score": 0.0922619047617232
+        },
+        {
+          "answered": 19,
+          "coverage": 0.1165644171779141,
+          "risk": 0.3684210526315789,
+          "score": 0.08629555109524112
+        },
+        {
+          "answered": 20,
+          "coverage": 0.12269938650306748,
+          "risk": 0.4,
+          "score": 0.08596205962890231
+        },
+        {
+          "answered": 21,
+          "coverage": 0.12883435582822086,
+          "risk": 0.42857142857142855,
+          "score": 0.08140851450125579
+        },
+        {
+          "answered": 22,
+          "coverage": 0.13496932515337423,
+          "risk": 0.4090909090909091,
+          "score": 0.07575757576127268
+        },
+        {
+          "answered": 23,
+          "coverage": 0.1411042944785276,
+          "risk": 0.391304347826087,
+          "score": 0.07554535017327339
+        },
+        {
+          "answered": 24,
+          "coverage": 0.147239263803681,
+          "risk": 0.375,
+          "score": 0.07519681709182398
+        },
+        {
+          "answered": 26,
+          "coverage": 0.15950920245398773,
+          "risk": 0.34615384615384615,
+          "score": 0.07490808823627525
+        },
+        {
+          "answered": 27,
+          "coverage": 0.1656441717791411,
+          "risk": 0.3333333333333333,
+          "score": 0.0709950761572854
+        },
+        {
+          "answered": 30,
+          "coverage": 0.18404907975460122,
+          "risk": 0.36666666666666664,
+          "score": 0.06864801865479407
+        },
+        {
+          "answered": 31,
+          "coverage": 0.1901840490797546,
+          "risk": 0.3548387096774194,
+          "score": 0.06734360410979796
+        },
+        {
+          "answered": 32,
+          "coverage": 0.19631901840490798,
+          "risk": 0.375,
+          "score": 0.06714662149785329
+        },
+        {
+          "answered": 33,
+          "coverage": 0.20245398773006135,
+          "risk": 0.36363636363636365,
+          "score": 0.06603553063230187
+        },
+        {
+          "answered": 35,
+          "coverage": 0.2147239263803681,
+          "risk": 0.4,
+          "score": 0.06175631921591472
+        },
+        {
+          "answered": 37,
+          "coverage": 0.22699386503067484,
+          "risk": 0.3783783783783784,
+          "score": 0.06131628786681604
+        },
+        {
+          "answered": 38,
+          "coverage": 0.2331288343558282,
+          "risk": 0.39473684210526316,
+          "score": 0.06079116907456942
+        },
+        {
+          "answered": 41,
+          "coverage": 0.25153374233128833,
+          "risk": 0.36585365853658536,
+          "score": 0.053055011970069406
+        },
+        {
+          "answered": 42,
+          "coverage": 0.25766871165644173,
+          "risk": 0.35714285714285715,
+          "score": 0.05284063554684151
+        },
+        {
+          "answered": 43,
+          "coverage": 0.26380368098159507,
+          "risk": 0.37209302325581395,
+          "score": 0.050393700777852275
+        },
+        {
+          "answered": 44,
+          "coverage": 0.26993865030674846,
+          "risk": 0.38636363636363635,
+          "score": 0.04944462075507505
+        },
+        {
+          "answered": 46,
+          "coverage": 0.2822085889570552,
+          "risk": 0.3695652173913043,
+          "score": 0.04664224663386015
+        },
+        {
+          "answered": 50,
+          "coverage": 0.3067484662576687,
+          "risk": 0.34,
+          "score": 0.04594330399786223
+        },
+        {
+          "answered": 51,
+          "coverage": 0.3128834355828221,
+          "risk": 0.35294117647058826,
+          "score": 0.0421190877831231
+        },
+        {
+          "answered": 52,
+          "coverage": 0.31901840490797545,
+          "risk": 0.36538461538461536,
+          "score": 0.041403041405160115
+        },
+        {
+          "answered": 53,
+          "coverage": 0.32515337423312884,
+          "risk": 0.37735849056603776,
+          "score": 0.04133770490515988
+        },
+        {
+          "answered": 57,
+          "coverage": 0.3496932515337423,
+          "risk": 0.3684210526315789,
+          "score": 0.03931051587638198
+        },
+        {
+          "answered": 58,
+          "coverage": 0.3558282208588957,
+          "risk": 0.3620689655172414,
+          "score": 0.03912601625970944
+        },
+        {
+          "answered": 59,
+          "coverage": 0.3619631901840491,
+          "risk": 0.3559322033898305,
+          "score": 0.0388913705868964
+        },
+        {
+          "answered": 62,
+          "coverage": 0.3803680981595092,
+          "risk": 0.3387096774193548,
+          "score": 0.03883374689138352
+        },
+        {
+          "answered": 63,
+          "coverage": 0.38650306748466257,
+          "risk": 0.3492063492063492,
+          "score": 0.03863309940748852
+        },
+        {
+          "answered": 64,
+          "coverage": 0.39263803680981596,
+          "risk": 0.359375,
+          "score": 0.038111888115038094
+        },
+        {
+          "answered": 66,
+          "coverage": 0.4049079754601227,
+          "risk": 0.36363636363636365,
+          "score": 0.03174603174990479
+        },
+        {
+          "answered": 75,
+          "coverage": 0.4601226993865031,
+          "risk": 0.3333333333333333,
+          "score": 0.031502016133905554
+        },
+        {
+          "answered": 76,
+          "coverage": 0.4662576687116564,
+          "risk": 0.34210526315789475,
+          "score": 0.030553270263133845
+        },
+        {
+          "answered": 77,
+          "coverage": 0.4723926380368098,
+          "risk": 0.35064935064935066,
+          "score": 0.030108810798545795
+        },
+        {
+          "answered": 78,
+          "coverage": 0.4785276073619632,
+          "risk": 0.34615384615384615,
+          "score": 0.03005666421687585
+        },
+        {
+          "answered": 80,
+          "coverage": 0.49079754601226994,
+          "risk": 0.3625,
+          "score": 0.02978142074402219
+        },
+        {
+          "answered": 81,
+          "coverage": 0.49693251533742333,
+          "risk": 0.37037037037037035,
+          "score": 0.029180176005558098
+        },
+        {
+          "answered": 82,
+          "coverage": 0.5030674846625767,
+          "risk": 0.3780487804878049,
+          "score": 0.026524932150707895
+        },
+        {
+          "answered": 83,
+          "coverage": 0.50920245398773,
+          "risk": 0.3855421686746988,
+          "score": 0.02418154762026514
+        },
+        {
+          "answered": 102,
+          "coverage": 0.6257668711656442,
+          "risk": 0.3431372549019608,
+          "score": 0.02393753200742816
+        },
+        {
+          "answered": 103,
+          "coverage": 0.6319018404907976,
+          "risk": 0.33980582524271846,
+          "score": 0.023874048264807976
+        },
+        {
+          "answered": 104,
+          "coverage": 0.6380368098159509,
+          "risk": 0.33653846153846156,
+          "score": 0.023628048782011142
+        },
+        {
+          "answered": 105,
+          "coverage": 0.6441717791411042,
+          "risk": 0.34285714285714286,
+          "score": 0.023298563597240425
+        },
+        {
+          "answered": 106,
+          "coverage": 0.6503067484662577,
+          "risk": 0.33962264150943394,
+          "score": 0.022889305802335887
+        },
+        {
+          "answered": 107,
+          "coverage": 0.656441717791411,
+          "risk": 0.34579439252336447,
+          "score": 0.02061808329350212
+        },
+        {
+          "answered": 108,
+          "coverage": 0.6625766871165644,
+          "risk": 0.35185185185185186,
+          "score": 0.017199677518114284
+        },
+        {
+          "answered": 109,
+          "coverage": 0.6687116564417178,
+          "risk": 0.3486238532110092,
+          "score": 0.016914070806103004
+        },
+        {
+          "answered": 110,
+          "coverage": 0.6748466257668712,
+          "risk": 0.34545454545454546,
+          "score": 0.01637692114064958
+        },
+        {
+          "answered": 128,
+          "coverage": 0.7852760736196319,
+          "risk": 0.3203125,
+          "score": 0.016129032264951527
+        },
+        {
+          "answered": 129,
+          "coverage": 0.7914110429447853,
+          "risk": 0.3178294573643411,
+          "score": 0.015881080908322468
+        },
+        {
+          "answered": 130,
+          "coverage": 0.7975460122699386,
+          "risk": 0.3230769230769231,
+          "score": 0.015765756815335805
+        },
+        {
+          "answered": 131,
+          "coverage": 0.803680981595092,
+          "risk": 0.32061068702290074,
+          "score": 0.015497967477698299
+        },
+        {
+          "answered": 132,
+          "coverage": 0.8098159509202454,
+          "risk": 0.32575757575757575,
+          "score": 0.012058212082874633
+        },
+        {
+          "answered": 133,
+          "coverage": 0.8159509202453987,
+          "risk": 0.3308270676691729,
+          "score": 0.009227898977170863
+        },
+        {
+          "answered": 134,
+          "coverage": 0.8220858895705522,
+          "risk": 0.3283582089552239,
+          "score": 0.008507936510450967
+        },
+        {
+          "answered": 135,
+          "coverage": 0.8282208588957055,
+          "risk": 0.3333333333333333,
+          "score": 0.008366141742355943
+        },
+        {
+          "answered": 137,
+          "coverage": 0.8404907975460123,
+          "risk": 0.34306569343065696,
+          "score": 0.00819458897333838
+        },
+        {
+          "answered": 138,
+          "coverage": 0.8466257668711656,
+          "risk": 0.34057971014492755,
+          "score": 0.00787198348024746
+        },
+        {
+          "answered": 139,
+          "coverage": 0.852760736196319,
+          "risk": 0.34532374100719426,
+          "score": 0.0065016400098451355
+        },
+        {
+          "answered": 140,
+          "coverage": 0.8588957055214724,
+          "risk": 0.35,
+          "score": 0.006175339399801616
+        },
+        {
+          "answered": 142,
+          "coverage": 0.8711656441717791,
+          "risk": 0.3591549295774648,
+          "score": 0.004891076685109348
+        },
+        {
+          "answered": 143,
+          "coverage": 0.8773006134969326,
+          "risk": 0.36363636363636365,
+          "score": 0.0022548608601025678
+        },
+        {
+          "answered": 144,
+          "coverage": 0.8834355828220859,
+          "risk": 0.3680555555555556,
+          "score": 0.0022109724537900063
+        },
+        {
+          "answered": 145,
+          "coverage": 0.8895705521472392,
+          "risk": 0.3724137931034483,
+          "score": 0.0018939393780310664
+        },
+        {
+          "answered": 163,
+          "coverage": 1.0,
+          "risk": 0.4294478527607362,
+          "score": 0.0
+        }
+      ],
+      "native_max_coverage": 1.0
+    },
+    "selective_accuracy": 0.5705521472392638,
+    "selective_risk": 0.42944785276073616,
+    "simulated_call_rate": 0.0,
+    "simulated_llm_calls": 0
+  },
+  "grounded": {
+    "abstained": 39,
+    "accuracy": 0.6257668711656442,
+    "answered": 124,
+    "answered_reference_absent": 12,
+    "bootstrap": {
+      "accuracy_ci95": [
+        0.3833294392523365,
+        0.7878818181818181
+      ],
+      "accuracy_delta_vs_grounded_ci95": [
+        0.0,
+        0.0
+      ],
+      "clusters": 12,
+      "replicates": 2000,
+      "seed": 20261105,
+      "simulated_call_rate_ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "cluster_id_macro_accuracy": 0.5598202882685642,
+    "correct": 102,
+    "correctness_detection_answered_only": {
+      "auroc": 0.49754901960784303,
+      "average_precision": 0.8345209986169796,
+      "n": 124,
+      "positives": 102
+    },
+    "coverage": 0.7607361963190185,
+    "model_id_macro_accuracy": 0.49320647799349626,
+    "n": 163,
+    "reference_absence_consistent_abstention": 18,
+    "reference_present_abstention": 21,
+    "replayed_cached_input_tokens": 47065,
+    "replayed_cost_usd": 2.108151,
+    "replayed_input_tokens": 954762,
+    "replayed_output_tokens": 23612,
+    "replayed_serial_provider_latency_ms": 423692.6,
+    "risk_coverage": {
+      "aurc_normalized": 0.1688829577167004,
+      "aurc_partial": 0.12847537887650828,
+      "curve": [
+        {
+          "answered": 6,
+          "coverage": 0.03680981595092025,
+          "risk": 0.0,
+          "score": 1.0
+        },
+        {
+          "answered": 17,
+          "coverage": 0.10429447852760736,
+          "risk": 0.23529411764705882,
+          "score": 0.999
+        },
+        {
+          "answered": 101,
+          "coverage": 0.6196319018404908,
+          "risk": 0.16831683168316833,
+          "score": 0.99
+        },
+        {
+          "answered": 112,
+          "coverage": 0.6871165644171779,
+          "risk": 0.1875,
+          "score": 0.98
+        },
+        {
+          "answered": 117,
+          "coverage": 0.7177914110429447,
+          "risk": 0.1794871794871795,
+          "score": 0.97
+        },
+        {
+          "answered": 119,
+          "coverage": 0.7300613496932515,
+          "risk": 0.17647058823529413,
+          "score": 0.93
+        },
+        {
+          "answered": 120,
+          "coverage": 0.7361963190184049,
+          "risk": 0.18333333333333332,
+          "score": 0.91
+        },
+        {
+          "answered": 121,
+          "coverage": 0.7423312883435583,
+          "risk": 0.18181818181818182,
+          "score": 0.9
+        },
+        {
+          "answered": 122,
+          "coverage": 0.7484662576687117,
+          "risk": 0.18032786885245902,
+          "score": 0.88
+        },
+        {
+          "answered": 123,
+          "coverage": 0.754601226993865,
+          "risk": 0.17886178861788618,
+          "score": 0.86
+        },
+        {
+          "answered": 124,
+          "coverage": 0.7607361963190185,
+          "risk": 0.1774193548387097,
+          "score": 0.78
+        }
+      ],
+      "native_max_coverage": 0.7607361963190185
+    },
+    "selective_accuracy": 0.8225806451612904,
+    "selective_risk": 0.17741935483870963,
+    "simulated_call_rate": 1.0,
+    "simulated_llm_calls": 163
+  },
+  "post_llm_threshold_0.8": {
+    "abstained": 40,
+    "accuracy": 0.6196319018404908,
+    "answered": 123,
+    "answered_reference_absent": 12,
+    "bootstrap": {
+      "accuracy_ci95": [
+        0.36556619623655917,
+        0.7867925579322637
+      ],
+      "accuracy_delta_vs_grounded_ci95": [
+        -0.02400240963855422,
+        0.0
+      ],
+      "clusters": 12,
+      "replicates": 2000,
+      "seed": 20261105,
+      "simulated_call_rate_ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "cluster_id_macro_accuracy": 0.5542647327130087,
+    "correct": 101,
+    "correctness_detection_answered_only": {
+      "auroc": 0.5024752475247524,
+      "average_precision": 0.834639219938323,
+      "n": 123,
+      "positives": 101
+    },
+    "coverage": 0.754601226993865,
+    "model_id_macro_accuracy": 0.4892849093660453,
+    "n": 163,
+    "reference_absence_consistent_abstention": 18,
+    "reference_present_abstention": 22,
+    "replayed_cached_input_tokens": 47065,
+    "replayed_cost_usd": 2.108151,
+    "replayed_input_tokens": 954762,
+    "replayed_output_tokens": 23612,
+    "replayed_serial_provider_latency_ms": 423692.6,
+    "risk_coverage": {
+      "aurc_normalized": 0.1688135561140824,
+      "aurc_partial": 0.12738691657688428,
+      "curve": [
+        {
+          "answered": 6,
+          "coverage": 0.03680981595092025,
+          "risk": 0.0,
+          "score": 1.0
+        },
+        {
+          "answered": 17,
+          "coverage": 0.10429447852760736,
+          "risk": 0.23529411764705882,
+          "score": 0.999
+        },
+        {
+          "answered": 101,
+          "coverage": 0.6196319018404908,
+          "risk": 0.16831683168316833,
+          "score": 0.99
+        },
+        {
+          "answered": 112,
+          "coverage": 0.6871165644171779,
+          "risk": 0.1875,
+          "score": 0.98
+        },
+        {
+          "answered": 117,
+          "coverage": 0.7177914110429447,
+          "risk": 0.1794871794871795,
+          "score": 0.97
+        },
+        {
+          "answered": 119,
+          "coverage": 0.7300613496932515,
+          "risk": 0.17647058823529413,
+          "score": 0.93
+        },
+        {
+          "answered": 120,
+          "coverage": 0.7361963190184049,
+          "risk": 0.18333333333333332,
+          "score": 0.91
+        },
+        {
+          "answered": 121,
+          "coverage": 0.7423312883435583,
+          "risk": 0.18181818181818182,
+          "score": 0.9
+        },
+        {
+          "answered": 122,
+          "coverage": 0.7484662576687117,
+          "risk": 0.18032786885245902,
+          "score": 0.88
+        },
+        {
+          "answered": 123,
+          "coverage": 0.754601226993865,
+          "risk": 0.17886178861788618,
+          "score": 0.86
+        }
+      ],
+      "native_max_coverage": 0.754601226993865
+    },
+    "selective_accuracy": 0.8211382113821138,
+    "selective_risk": 0.17886178861788615,
+    "simulated_call_rate": 1.0,
+    "simulated_llm_calls": 163
+  },
+  "routed_0.05": {
+    "abstained": 39,
+    "accuracy": 0.6257668711656442,
+    "answered": 124,
+    "answered_reference_absent": 12,
+    "bootstrap": {
+      "accuracy_ci95": [
+        0.3833294392523365,
+        0.7878818181818181
+      ],
+      "accuracy_delta_vs_grounded_ci95": [
+        0.0,
+        0.0
+      ],
+      "clusters": 12,
+      "replicates": 2000,
+      "seed": 20261105,
+      "simulated_call_rate_ci95": [
+        0.8204081632653061,
+        0.9540360501567396
+      ]
+    },
+    "cluster_id_macro_accuracy": 0.5598202882685642,
+    "correct": 102,
+    "correctness_detection_answered_only": {
+      "auroc": 0.49732620320855614,
+      "average_precision": 0.8299179188434094,
+      "n": 124,
+      "positives": 102
+    },
+    "coverage": 0.7607361963190185,
+    "model_id_macro_accuracy": 0.49320647799349626,
+    "n": 163,
+    "reference_absence_consistent_abstention": 18,
+    "reference_present_abstention": 21,
+    "replayed_cached_input_tokens": 47065,
+    "replayed_cost_usd": 1.826527,
+    "replayed_input_tokens": 827936,
+    "replayed_output_tokens": 21281,
+    "replayed_serial_provider_latency_ms": 384520.2,
+    "risk_coverage": {
+      "aurc_normalized": 0.1724883153530277,
+      "aurc_partial": 0.13121810493113764,
+      "curve": [
+        {
+          "answered": 4,
+          "coverage": 0.024539877300613498,
+          "risk": 0.0,
+          "score": 1.0
+        },
+        {
+          "answered": 13,
+          "coverage": 0.07975460122699386,
+          "risk": 0.23076923076923078,
+          "score": 0.999
+        },
+        {
+          "answered": 82,
+          "coverage": 0.5030674846625767,
+          "risk": 0.17073170731707318,
+          "score": 0.99
+        },
+        {
+          "answered": 91,
+          "coverage": 0.558282208588957,
+          "risk": 0.18681318681318682,
+          "score": 0.98
+        },
+        {
+          "answered": 96,
+          "coverage": 0.588957055214724,
+          "risk": 0.17708333333333334,
+          "score": 0.97
+        },
+        {
+          "answered": 98,
+          "coverage": 0.6012269938650306,
+          "risk": 0.17346938775510204,
+          "score": 0.93
+        },
+        {
+          "answered": 99,
+          "coverage": 0.6073619631901841,
+          "risk": 0.18181818181818182,
+          "score": 0.91
+        },
+        {
+          "answered": 100,
+          "coverage": 0.6134969325153374,
+          "risk": 0.18,
+          "score": 0.9
+        },
+        {
+          "answered": 101,
+          "coverage": 0.6196319018404908,
+          "risk": 0.1782178217821782,
+          "score": 0.88
+        },
+        {
+          "answered": 102,
+          "coverage": 0.6257668711656442,
+          "risk": 0.17647058823529413,
+          "score": 0.86
+        },
+        {
+          "answered": 103,
+          "coverage": 0.6319018404907976,
+          "risk": 0.17475728155339806,
+          "score": 0.78
+        },
+        {
+          "answered": 104,
+          "coverage": 0.6380368098159509,
+          "risk": 0.17307692307692307,
+          "score": 0.20119047620739644
+        },
+        {
+          "answered": 105,
+          "coverage": 0.6441717791411042,
+          "risk": 0.17142857142857143,
+          "score": 0.1807081807114579
+        },
+        {
+          "answered": 106,
+          "coverage": 0.6503067484662577,
+          "risk": 0.1792452830188679,
+          "score": 0.12189312345513428
+        },
+        {
+          "answered": 107,
+          "coverage": 0.656441717791411,
+          "risk": 0.17757009345794392,
+          "score": 0.10371085369918888
+        },
+        {
+          "answered": 108,
+          "coverage": 0.6625766871165644,
+          "risk": 0.17592592592592593,
+          "score": 0.10216450217419347
+        },
+        {
+          "answered": 109,
+          "coverage": 0.6687116564417178,
+          "risk": 0.1743119266055046,
+          "score": 0.0998263888882005
+        },
+        {
+          "answered": 110,
+          "coverage": 0.6748466257668712,
+          "risk": 0.17272727272727273,
+          "score": 0.0922619047617232
+        },
+        {
+          "answered": 111,
+          "coverage": 0.6809815950920245,
+          "risk": 0.17117117117117117,
+          "score": 0.08629555109524112
+        },
+        {
+          "answered": 112,
+          "coverage": 0.6871165644171779,
+          "risk": 0.17857142857142858,
+          "score": 0.08140851450125579
+        },
+        {
+          "answered": 113,
+          "coverage": 0.6932515337423313,
+          "risk": 0.17699115044247787,
+          "score": 0.07575757576127268
+        },
+        {
+          "answered": 114,
+          "coverage": 0.6993865030674846,
+          "risk": 0.17543859649122806,
+          "score": 0.07554535017327339
+        },
+        {
+          "answered": 116,
+          "coverage": 0.7116564417177914,
+          "risk": 0.1724137931034483,
+          "score": 0.07490808823627525
+        },
+        {
+          "answered": 119,
+          "coverage": 0.7300613496932515,
+          "risk": 0.18487394957983194,
+          "score": 0.06864801865479407
+        },
+        {
+          "answered": 120,
+          "coverage": 0.7361963190184049,
+          "risk": 0.18333333333333332,
+          "score": 0.06734360410979796
+        },
+        {
+          "answered": 121,
+          "coverage": 0.7423312883435583,
+          "risk": 0.18181818181818182,
+          "score": 0.06603553063230187
+        },
+        {
+          "answered": 123,
+          "coverage": 0.754601226993865,
+          "risk": 0.17886178861788618,
+          "score": 0.06131628786681604
+        },
+        {
+          "answered": 124,
+          "coverage": 0.7607361963190185,
+          "risk": 0.1774193548387097,
+          "score": 0.05284063554684151
+        }
+      ],
+      "native_max_coverage": 0.7607361963190185
+    },
+    "selective_accuracy": 0.8225806451612904,
+    "selective_risk": 0.17741935483870963,
+    "simulated_call_rate": 0.8711656441717791,
+    "simulated_llm_calls": 142
+  },
+  "routed_0.1": {
+    "abstained": 39,
+    "accuracy": 0.6257668711656442,
+    "answered": 124,
+    "answered_reference_absent": 12,
+    "bootstrap": {
+      "accuracy_ci95": [
+        0.3833294392523365,
+        0.7878818181818181
+      ],
+      "accuracy_delta_vs_grounded_ci95": [
+        0.0,
+        0.0
+      ],
+      "clusters": 12,
+      "replicates": 2000,
+      "seed": 20261105,
+      "simulated_call_rate_ci95": [
+        0.9486136321226822,
+        1.0
+      ]
+    },
+    "cluster_id_macro_accuracy": 0.5598202882685642,
+    "correct": 102,
+    "correctness_detection_answered_only": {
+      "auroc": 0.5173796791443851,
+      "average_precision": 0.8387146526264666,
+      "n": 124,
+      "positives": 102
+    },
+    "coverage": 0.7607361963190185,
+    "model_id_macro_accuracy": 0.49320647799349626,
+    "n": 163,
+    "reference_absence_consistent_abstention": 18,
+    "reference_present_abstention": 21,
+    "replayed_cached_input_tokens": 47065,
+    "replayed_cost_usd": 2.039711,
+    "replayed_input_tokens": 923488,
+    "replayed_output_tokens": 23121,
+    "replayed_serial_provider_latency_ms": 415027.4,
+    "risk_coverage": {
+      "aurc_normalized": 0.16363606624736754,
+      "aurc_partial": 0.1244838786176293,
+      "curve": [
+        {
+          "answered": 6,
+          "coverage": 0.03680981595092025,
+          "risk": 0.0,
+          "score": 1.0
+        },
+        {
+          "answered": 16,
+          "coverage": 0.09815950920245399,
+          "risk": 0.1875,
+          "score": 0.999
+        },
+        {
+          "answered": 96,
+          "coverage": 0.588957055214724,
+          "risk": 0.16666666666666666,
+          "score": 0.99
+        },
+        {
+          "answered": 107,
+          "coverage": 0.656441717791411,
+          "risk": 0.18691588785046728,
+          "score": 0.98
+        },
+        {
+          "answered": 112,
+          "coverage": 0.6871165644171779,
+          "risk": 0.17857142857142858,
+          "score": 0.97
+        },
+        {
+          "answered": 114,
+          "coverage": 0.6993865030674846,
+          "risk": 0.17543859649122806,
+          "score": 0.93
+        },
+        {
+          "answered": 115,
+          "coverage": 0.7055214723926381,
+          "risk": 0.1826086956521739,
+          "score": 0.91
+        },
+        {
+          "answered": 116,
+          "coverage": 0.7116564417177914,
+          "risk": 0.1810344827586207,
+          "score": 0.9
+        },
+        {
+          "answered": 117,
+          "coverage": 0.7177914110429447,
+          "risk": 0.1794871794871795,
+          "score": 0.88
+        },
+        {
+          "answered": 118,
+          "coverage": 0.7239263803680982,
+          "risk": 0.17796610169491525,
+          "score": 0.86
+        },
+        {
+          "answered": 119,
+          "coverage": 0.7300613496932515,
+          "risk": 0.17647058823529413,
+          "score": 0.78
+        },
+        {
+          "answered": 120,
+          "coverage": 0.7361963190184049,
+          "risk": 0.175,
+          "score": 0.20119047620739644
+        },
+        {
+          "answered": 121,
+          "coverage": 0.7423312883435583,
+          "risk": 0.17355371900826447,
+          "score": 0.1807081807114579
+        },
+        {
+          "answered": 122,
+          "coverage": 0.7484662576687117,
+          "risk": 0.18032786885245902,
+          "score": 0.12189312345513428
+        },
+        {
+          "answered": 123,
+          "coverage": 0.754601226993865,
+          "risk": 0.17886178861788618,
+          "score": 0.10371085369918888
+        },
+        {
+          "answered": 124,
+          "coverage": 0.7607361963190185,
+          "risk": 0.1774193548387097,
+          "score": 0.10216450217419347
+        }
+      ],
+      "native_max_coverage": 0.7607361963190185
+    },
+    "selective_accuracy": 0.8225806451612904,
+    "selective_risk": 0.17741935483870963,
+    "simulated_call_rate": 0.9693251533742331,
+    "simulated_llm_calls": 158
+  },
+  "routed_0.2": {
+    "abstained": 39,
+    "accuracy": 0.6257668711656442,
+    "answered": 124,
+    "answered_reference_absent": 12,
+    "bootstrap": {
+      "accuracy_ci95": [
+        0.3833294392523365,
+        0.7878818181818181
+      ],
+      "accuracy_delta_vs_grounded_ci95": [
+        0.0,
+        0.0
+      ],
+      "clusters": 12,
+      "replicates": 2000,
+      "seed": 20261105,
+      "simulated_call_rate_ci95": [
+        0.9877538474406156,
+        1.0
+      ]
+    },
+    "cluster_id_macro_accuracy": 0.5598202882685642,
+    "correct": 102,
+    "correctness_detection_answered_only": {
+      "auroc": 0.4924242424242423,
+      "average_precision": 0.832997565759831,
+      "n": 124,
+      "positives": 102
+    },
+    "coverage": 0.7607361963190185,
+    "model_id_macro_accuracy": 0.49320647799349626,
+    "n": 163,
+    "reference_absence_consistent_abstention": 18,
+    "reference_present_abstention": 21,
+    "replayed_cached_input_tokens": 47065,
+    "replayed_cost_usd": 2.093277,
+    "replayed_input_tokens": 947823,
+    "replayed_output_tokens": 23529,
+    "replayed_serial_provider_latency_ms": 422115.7,
+    "risk_coverage": {
+      "aurc_normalized": 0.17037947959211347,
+      "aurc_partial": 0.12961383723571823,
+      "curve": [
+        {
+          "answered": 6,
+          "coverage": 0.03680981595092025,
+          "risk": 0.0,
+          "score": 1.0
+        },
+        {
+          "answered": 17,
+          "coverage": 0.10429447852760736,
+          "risk": 0.23529411764705882,
+          "score": 0.999
+        },
+        {
+          "answered": 100,
+          "coverage": 0.6134969325153374,
+          "risk": 0.17,
+          "score": 0.99
+        },
+        {
+          "answered": 111,
+          "coverage": 0.6809815950920245,
+          "risk": 0.1891891891891892,
+          "score": 0.98
+        },
+        {
+          "answered": 116,
+          "coverage": 0.7116564417177914,
+          "risk": 0.1810344827586207,
+          "score": 0.97
+        },
+        {
+          "answered": 118,
+          "coverage": 0.7239263803680982,
+          "risk": 0.17796610169491525,
+          "score": 0.93
+        },
+        {
+          "answered": 119,
+          "coverage": 0.7300613496932515,
+          "risk": 0.18487394957983194,
+          "score": 0.91
+        },
+        {
+          "answered": 120,
+          "coverage": 0.7361963190184049,
+          "risk": 0.18333333333333332,
+          "score": 0.9
+        },
+        {
+          "answered": 121,
+          "coverage": 0.7423312883435583,
+          "risk": 0.18181818181818182,
+          "score": 0.88
+        },
+        {
+          "answered": 122,
+          "coverage": 0.7484662576687117,
+          "risk": 0.18032786885245902,
+          "score": 0.86
+        },
+        {
+          "answered": 123,
+          "coverage": 0.754601226993865,
+          "risk": 0.17886178861788618,
+          "score": 0.78
+        },
+        {
+          "answered": 124,
+          "coverage": 0.7607361963190185,
+          "risk": 0.1774193548387097,
+          "score": 0.20119047620739644
+        }
+      ],
+      "native_max_coverage": 0.7607361963190185
+    },
+    "selective_accuracy": 0.8225806451612904,
+    "selective_risk": 0.17741935483870963,
+    "simulated_call_rate": 0.9938650306748467,
+    "simulated_llm_calls": 162
+  },
+  "threshold_0.05": {
+    "abstained": 142,
+    "accuracy": 0.10429447852760736,
+    "answered": 21,
+    "answered_reference_absent": 3,
+    "bootstrap": {
+      "accuracy_ci95": [
+        0.02,
+        0.1562525447882736
+      ],
+      "accuracy_delta_vs_grounded_ci95": [
+        -0.6470694033008887,
+        -0.3434101286841014
+      ],
+      "clusters": 12,
+      "replicates": 2000,
+      "seed": 20261105,
+      "simulated_call_rate_ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "cluster_id_macro_accuracy": 0.059675849905734955,
+    "correct": 17,
+    "correctness_detection_answered_only": {
+      "auroc": 0.47058823529411764,
+      "average_precision": 0.8310572453306018,
+      "n": 21,
+      "positives": 17
+    },
+    "coverage": 0.12883435582822086,
+    "model_id_macro_accuracy": 0.06423741910557326,
+    "n": 163,
+    "reference_absence_consistent_abstention": 27,
+    "reference_present_abstention": 115,
+    "replayed_cached_input_tokens": 0,
+    "replayed_cost_usd": 0.0,
+    "replayed_input_tokens": 0,
+    "replayed_output_tokens": 0,
+    "replayed_serial_provider_latency_ms": 0.0,
+    "risk_coverage": {
+      "aurc_normalized": 0.18702773261596792,
+      "aurc_partial": 0.02409559745359096,
+      "curve": [
+        {
+          "answered": 1,
+          "coverage": 0.006134969325153374,
+          "risk": 0.0,
+          "score": 0.20119047620739644
+        },
+        {
+          "answered": 2,
+          "coverage": 0.012269938650306749,
+          "risk": 0.0,
+          "score": 0.1807081807114579
+        },
+        {
+          "answered": 3,
+          "coverage": 0.018404907975460124,
+          "risk": 0.3333333333333333,
+          "score": 0.12189312345513428
+        },
+        {
+          "answered": 4,
+          "coverage": 0.024539877300613498,
+          "risk": 0.25,
+          "score": 0.10371085369918888
+        },
+        {
+          "answered": 5,
+          "coverage": 0.03067484662576687,
+          "risk": 0.2,
+          "score": 0.10216450217419347
+        },
+        {
+          "answered": 6,
+          "coverage": 0.03680981595092025,
+          "risk": 0.16666666666666666,
+          "score": 0.0998263888882005
+        },
+        {
+          "answered": 7,
+          "coverage": 0.04294478527607362,
+          "risk": 0.14285714285714285,
+          "score": 0.0922619047617232
+        },
+        {
+          "answered": 8,
+          "coverage": 0.049079754601226995,
+          "risk": 0.125,
+          "score": 0.08629555109524112
+        },
+        {
+          "answered": 9,
+          "coverage": 0.05521472392638037,
+          "risk": 0.2222222222222222,
+          "score": 0.08140851450125579
+        },
+        {
+          "answered": 10,
+          "coverage": 0.06134969325153374,
+          "risk": 0.2,
+          "score": 0.07575757576127268
+        },
+        {
+          "answered": 11,
+          "coverage": 0.06748466257668712,
+          "risk": 0.18181818181818182,
+          "score": 0.07554535017327339
+        },
+        {
+          "answered": 13,
+          "coverage": 0.07975460122699386,
+          "risk": 0.15384615384615385,
+          "score": 0.07490808823627525
+        },
+        {
+          "answered": 16,
+          "coverage": 0.09815950920245399,
+          "risk": 0.25,
+          "score": 0.06864801865479407
+        },
+        {
+          "answered": 17,
+          "coverage": 0.10429447852760736,
+          "risk": 0.23529411764705882,
+          "score": 0.06734360410979796
+        },
+        {
+          "answered": 18,
+          "coverage": 0.11042944785276074,
+          "risk": 0.2222222222222222,
+          "score": 0.06603553063230187
+        },
+        {
+          "answered": 20,
+          "coverage": 0.12269938650306748,
+          "risk": 0.2,
+          "score": 0.06131628786681604
+        },
+        {
+          "answered": 21,
+          "coverage": 0.12883435582822086,
+          "risk": 0.19047619047619047,
+          "score": 0.05284063554684151
+        }
+      ],
+      "native_max_coverage": 0.12883435582822086
+    },
+    "selective_accuracy": 0.8095238095238095,
+    "selective_risk": 0.19047619047619047,
+    "simulated_call_rate": 0.0,
+    "simulated_llm_calls": 0
+  },
+  "threshold_0.1": {
+    "abstained": 158,
+    "accuracy": 0.024539877300613498,
+    "answered": 5,
+    "answered_reference_absent": 1,
+    "bootstrap": {
+      "accuracy_ci95": [
+        0.0,
+        0.03937067525650202
+      ],
+      "accuracy_delta_vs_grounded_ci95": [
+        -0.7619196428571429,
+        -0.3714143803216652
+      ],
+      "clusters": 12,
+      "replicates": 2000,
+      "seed": 20261105,
+      "simulated_call_rate_ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "cluster_id_macro_accuracy": 0.0073967645806726256,
+    "correct": 4,
+    "correctness_detection_answered_only": {
+      "auroc": 0.5,
+      "average_precision": 0.8875,
+      "n": 5,
+      "positives": 4
+    },
+    "coverage": 0.03067484662576687,
+    "model_id_macro_accuracy": 0.017748478701825558,
+    "n": 163,
+    "reference_absence_consistent_abstention": 29,
+    "reference_present_abstention": 129,
+    "replayed_cached_input_tokens": 0,
+    "replayed_cost_usd": 0.0,
+    "replayed_input_tokens": 0,
+    "replayed_output_tokens": 0,
+    "replayed_serial_provider_latency_ms": 0.0,
+    "risk_coverage": {
+      "aurc_normalized": 0.15666666666666665,
+      "aurc_partial": 0.004805725971370143,
+      "curve": [
+        {
+          "answered": 1,
+          "coverage": 0.006134969325153374,
+          "risk": 0.0,
+          "score": 0.20119047620739644
+        },
+        {
+          "answered": 2,
+          "coverage": 0.012269938650306749,
+          "risk": 0.0,
+          "score": 0.1807081807114579
+        },
+        {
+          "answered": 3,
+          "coverage": 0.018404907975460124,
+          "risk": 0.3333333333333333,
+          "score": 0.12189312345513428
+        },
+        {
+          "answered": 4,
+          "coverage": 0.024539877300613498,
+          "risk": 0.25,
+          "score": 0.10371085369918888
+        },
+        {
+          "answered": 5,
+          "coverage": 0.03067484662576687,
+          "risk": 0.2,
+          "score": 0.10216450217419347
+        }
+      ],
+      "native_max_coverage": 0.03067484662576687
+    },
+    "selective_accuracy": 0.8,
+    "selective_risk": 0.19999999999999996,
+    "simulated_call_rate": 0.0,
+    "simulated_llm_calls": 0
+  },
+  "threshold_0.2": {
+    "abstained": 162,
+    "accuracy": 0.006134969325153374,
+    "answered": 1,
+    "answered_reference_absent": 0,
+    "bootstrap": {
+      "accuracy_ci95": [
+        0.0,
+        0.012246152559384401
+      ],
+      "accuracy_delta_vs_grounded_ci95": [
+        -0.7794179960119642,
+        -0.3833294392523365
+      ],
+      "clusters": 12,
+      "replicates": 2000,
+      "seed": 20261105,
+      "simulated_call_rate_ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "cluster_id_macro_accuracy": 0.0014367816091954023,
+    "correct": 1,
+    "correctness_detection_answered_only": {
+      "auroc": null,
+      "average_precision": null,
+      "n": 1,
+      "positives": 1
+    },
+    "coverage": 0.006134969325153374,
+    "model_id_macro_accuracy": 0.0010141987829614604,
+    "n": 163,
+    "reference_absence_consistent_abstention": 30,
+    "reference_present_abstention": 132,
+    "replayed_cached_input_tokens": 0,
+    "replayed_cost_usd": 0.0,
+    "replayed_input_tokens": 0,
+    "replayed_output_tokens": 0,
+    "replayed_serial_provider_latency_ms": 0.0,
+    "risk_coverage": {
+      "aurc_normalized": 0.0,
+      "aurc_partial": 0.0,
+      "curve": [
+        {
+          "answered": 1,
+          "coverage": 0.006134969325153374,
+          "risk": 0.0,
+          "score": 0.20119047620739644
+        }
+      ],
+      "native_max_coverage": 0.006134969325153374
+    },
+    "selective_accuracy": 1.0,
+    "selective_risk": 0.0,
+    "simulated_call_rate": 0.0,
+    "simulated_llm_calls": 0
+  }
+}

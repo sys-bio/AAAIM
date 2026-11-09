@@ -1,0 +1,12 @@
+{
+  "budget_reservation_usd": 0.090112,
+  "cache_replay_identical": true,
+  "held_out_executor_available": false,
+  "injected_fake_provider_calls": 1,
+  "payload_digest": "69c78a9f72358759b8cc0cd6563ca653bebe1be4bb924dd91b6c2d94271d27a5",
+  "prompt_schema_validated": true,
+  "provider_network_calls": 0,
+  "status": "succeeded",
+  "synthetic_only": true,
+  "test_files_opened": 0
+}
