@@ -31,3 +31,8 @@ benchmark/PHASE5.md -text whitespace=cr-at-eol
 benchmark/scripts/phase5_*.py -text whitespace=cr-at-eol
 tests/test_phase5_*.py -text whitespace=cr-at-eol
 goals.md -text whitespace=cr-at-eol
+# Reviewer pages are byte-manifested and must remain double-clickable after checkout.
+benchmark/phase3/error_audit/reviewer/* text eol=lf
+benchmark/scripts/phase3_error_analysis.py -text
+tests/test_phase3_error_analysis.py -text
+benchmark/phase3/error_audit/ANALYSIS.md -text

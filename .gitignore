@@ -62,3 +62,9 @@ benchmark/phase5/validation/**/_analysis/
 benchmark/phase5/_runner_state/
 benchmark/phase5/validation/_superseded_preflight_*/
 benchmark/phase5/_pytest*/
+# Human-review exports are working records, not frozen benchmark artifacts.
+benchmark/phase3/error_audit/review_work/
+benchmark/phase3/error_audit/reviewer/pass*_review_*.json
+benchmark/phase3/error_audit/reviewer/pass*_review_*.csv
+benchmark/phase3/error_audit/formal_pass1/raw/
+benchmark/integration_worktrees/

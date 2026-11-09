@@ -1,7 +1,7 @@
 # AAAIM research project: goals and roadmap
 
-**Status updated:** 2026-11-06
-**Current priority:** complete GitHub draft-PR creation for the pushed Phase 3C clarification, Phase 4, and implemented Phase 5 branches; the local LunaStarr `MODEL2507280001` handoff is prepared and unsent. Phase 5 paid execution is paused.
+**Status updated:** 2026-11-07
+**Current priority:** review the consolidated canonical phase branches and Luna handoff; preserve Phase 5's paid-run pause. Luna's 541-request grounded plan prefers 2,048 total output tokens under a proposed $16 cap, with no execution authorization.
 
 ## Current status and agreed sequence
 
@@ -18,20 +18,13 @@ This update preserves historical benchmark results and revises the roadmap using
 | Phase 4 routing, uncertainty, and abstention | Bounded cached study complete; grounded method retained |
 | Final method and evaluation freeze | Draft; finalize after Phase 5 and operational gates |
 | Held-out test evaluation | Remains sealed; later one-time evaluation after the final freeze and run authorization |
-| Phase 5 robustness experiments | Local retrieval study and runner preparation complete; corrected GPT-6.1 matched plan preserved; paid comparison paused, no authorization |
-| Upstream integration | Phase 3C clarification, Phase 4, and Phase 5 branches are pushed; draft PR creation and PR #17 retargeting are blocked by the connected GitHub integration's 403 permission response |
-| LunaStarr MODEL2507280001 request | Existing deliverables reconciled and local handoff prepared; not sent; no grounded Phase 3C calls were made |
+| Phase 5 robustness experiments | Local retrieval study and runner preparation complete; matched paid comparison paused, no funds allocated or execution authorized |
+| LunaStarr MODEL2507280001 request | Selected RRF retrieval verified for all 541 reactions; exact grounded plans prepared; predictions and biological review pending |
 | Phase 6 packaging and manuscript | Remaining work; may proceed alongside Phase 4 |
 
-**Agreed order:** prepare upstream integration PRs and LunaStarr's case-study handoff → resume the paused Phase 5 matched comparison only after a fresh budget proposal and explicit authorization → final method/evaluation freeze → separately authorized held-out evaluation → Phase 6 packaging, scope closure, and manuscript.
+**Agreed order:** consolidate and review the phase/task branches and Luna handoff → execute Luna's grounded plan only after separate explicit authorization → revisit Phase 5 only through a fresh budget decision → final method/evaluation freeze → separately authorized held-out evaluation → Phase 6 packaging, scope closure, and manuscript.
 
 Phases 4 and 5 were originally stretch work; the user chose to pursue both. Phase 4 is complete under its bounded protocol. This does not make every older proposed experiment a requirement. Earlier calendar targets below are historical, not current deadlines.
-
-### Current upstream review and integration status
-
-Reviewed current `sys-bio/AAAIM` main at `866be205` and the open error-audit PR #17 (`264881ea`). Since the error-audit integration base, upstream added identity-support and qualifier workflows, list/default taxon handling for gene/protein lookup, score-tie preservation for top-ranked identity accessions, and updates to annotation writing and validation. The Phase 3C clarification, Phase 4 study package, and Phase 5 package change benchmark/docs/scripts/tests only; their branches start from current main (Phase 5 stacks on Phase 4), so no upstream core behavior is replaced. Existing current-main tests for identity support, qualifiers, annotation updates, and complex components returned 29 passed and 3 failures: three `test_auto_complex_components.py` monkeypatch stubs do not accept the newly passed `tax_id` keyword. These failures are in the current upstream test layer, not in the integration changes.
-
-The Phase 3C clarification and Phase 4 draft branches target `main`; Phase 5 targets the Phase 4 branch. PR #16 is merged and Phase 3C is already an ancestor of current main, so the clarification does not need PR #17 as a base. PR #17 remains an open draft based on `codex/benchmark-phase-3c`; retargeting it to current `main` is appropriate after its dependency merged, but the GitHub integration returned HTTP 403 for PR creation and update. The three new branches were pushed successfully; draft PR records remain to be created.
 
 ### Other workstreams requiring a repository status check
 
@@ -246,7 +239,11 @@ The revised exports validated with the expected frozen IDs, digests, required fi
 
 **Single-reviewer decision:** independent second review and inter-reviewer adjudication are deferred. This explicitly supersedes the original two-reviewer plan for the present scoped audit. The two passes are not independent reviews. Do not claim inter-reviewer agreement or independently adjudicated labels.
 
-The detailed personal review exports and derived case-level analysis are local-only and excluded from Git. The reported 22 flagged cases remain findings or limitations, rather than automatic completion blockers; an insufficient-information case remains unresolved.
+The final analysis is recorded locally under:
+
+`benchmark/phase3/error_audit/review_work/analysis_20261105_single_reviewer_final/`
+
+Consult `AUDIT_SCOPE.md`, `FINAL_ASSESSMENT.md`, and `PHASE3C_CHECKLIST.md` for the decision and evidence. The reported 22 flagged cases remain findings or limitations, rather than automatic completion blockers; an insufficient-information case remains unresolved.
 
 Audit counts describe a stratified sample. Do not generalize unweighted sample rates to the full validation set or benchmark. Do not convert reviewer judgments into corrected reference labels or corrected benchmark accuracy automatically. Disclose single-reviewer limitations, potential Pass 2 anchoring, and reviewer involvement in development where applicable.
 
@@ -327,7 +324,7 @@ If required outputs or decisions are missing, label the package a **draft freeze
 
 Execute the planned held-out evaluation only after the final freeze and separate authorization for the concrete run and any cost. Apply the frozen protocol without tuning on test outcomes. Document operational failures and deviations transparently; rerun only under predeclared failure/retry rules.
 
-## Phase 5: Robustness to degraded biological information — retrieval complete; paid comparison paused
+## Phase 5: Robustness to degraded biological information — retrieval complete; grounded comparison pending
 
 Objective: measure dependence on metabolite identifiers while preserving names, equation text, and stoichiometry. The local study covered 163 validation reactions across 19 conditions (3,097 aligned query conditions), recomputing strict-rule, BM25, trained-encoder, and fusion retrieval.
 
@@ -337,7 +334,7 @@ The selected end-to-end method is unchanged. Retrieval findings alone do not est
 
 The request-control finding is resolved by a matched `phase5-grounded-no-provenance-v2` design: accurate operational provenance is retained in sidecars, and both arms are rebuilt from the same frozen retrieval artifact and serializer. Historical clean requests are not a compatible baseline; all 326 matched requests are new calls. The historical GPT-5.6 plan/results are preserved, not reused. By user direction, the active plan is GPT-6.1 Terra in both arms, with a new model-specific cache namespace and plan digest. Public API/schema support is documented; account-level availability remains unverified.
 
-The local review verified perturbation reconstruction and saved retrieval metrics; GPU inference was not independently rerun. The corrected GPT-6.1 matched clean/degraded comparison and persistent runner are prepared and preserved, but paid execution is paused by user decision. Phase 5 remains incomplete pending that comparison and analysis; no calls are authorized.
+The local review verified perturbation reconstruction and saved retrieval metrics; GPU inference was not independently rerun. Phase 5 remains incomplete pending a valid grounded comparison and analysis.
 
 The roadmap perturbation families are:
 
@@ -362,19 +359,21 @@ After the experimental design stabilizes:
 
 ## Additional docket: Luna's MODEL2507280001 request
 
-- [x] Inspect the existing `test/MODEL2507280001-reaction-review` branch and reports before purchasing calls or duplicating work.
-- [x] Reconcile the 541-reaction case-study outputs, BM25 and selected Phase 3B fusion rankings, grounded preflight, runtime, and provenance against the committed files.
-- [x] Determine remaining work: 264 Phase 3C requests were prepared, but no provider calls, grounded selections, abstentions, or final grounded annotations exist; no paid run is needed to hand off the completed retrieval review.
-- [x] Prepare the local collaborator handoff; keep it unsent unless separately requested.
-- [x] Record limitations: this is not independent of development; transformation-support counts are rubric judgments, not accuracy; 257 transport, one biomass, three pseudo-reactions, and 16/280 under-mapped internal reactions remain separate no-call/limitation categories.
+- [x] Inspect and reconcile the historical case-study branch and original 541-reaction SBML.
+- [x] Keep the public ChEBI-to-KEGG rule-based diagnostic separately named; its 222 candidate-bearing and 319 no-candidate outcomes do not exclude cases from RRF.
+- [x] Verify the selected full-catalog BM25 + trained epoch-1 bi-encoder RRF rankings and all 541 reconstructed query texts; retain Top-10 evidence for every reaction.
+- [x] Prepare exact GPT-6.1 Terra grounded requests with accurate sidecar provenance and unit-specific cache identities.
+- [x] Assess 512 versus 2,048 total output tokens; prefer 2,048 because GPT-5.6 observations do not validate reducing GPT-6.1's output budget. Proposed 541-attempt reservation is USD 15.010828750 under a USD 16 cap, not authorized; current credit of USD 19.97 is user-reported and independently unverified.
+- [x] Prepare the local collaborator handoff and keep it unsent.
+- [ ] Produce grounded predictions only after explicit authorization, then review selections, abstentions and failures separately. Prior support judgments are descriptive, not independent ground truth or benchmark accuracy.
 
-The exact original collaborator message was not found in repository records or the connected repository's issue/PR search. The handoff identifies the accession and exact input checksums but no BioModels revision label was recorded. If the original wording or a revision label is required, recover it from the correspondence owner before expanding the request. This case study remains separate from the sealed held-out benchmark.
+The canonical task branch is `feature/luna-model2507280001`. Physical worktree paths and ignored request/case artifacts are preserved. The held-out benchmark remains sealed; Phase 5 receives no allocation. See `benchmark/BRANCHES.md` for branch ownership and archival recovery.
 
 ## Model-version decision before further paid runs
 
-The selected model for the next matched clean/degraded validation comparison is `gpt-6.1-terra`, by user decision on 2026-11-06. The active dry-run package is `benchmark/phase5/validation/persistent_runner_gpt61_v2/`, plan digest `2b80dd9e83108cdba2310121706af387bd770651a1f7648a87645a03ae0b0e8f`; the matched request plan is `benchmark/phase5/validation/matched_prompt_gpt61_v2/`. It covers 163 pairs / 326 calls and 317 distinct bodies. GPT-5.6 plans/results and the intermediate GPT-6.1 v1 plan remain preserved as historical artifacts; their responses and authorizations do not transfer.
+The selected model for the next matched clean/degraded validation comparison is `gpt-6.1-terra`, by user decision on 2026-11-06. The active dry-run package is `benchmark/phase5/validation/persistent_runner_gpt61_v1/`, plan digest `c1c8cbec4df627983efc235d52c2a0e248689cf068ebc153327e0fdf7e3e95b0`; the matched request plan is `benchmark/phase5/validation/matched_prompt_gpt61_v1/`. It covers 163 pairs / 326 calls and 317 distinct bodies. GPT-5.6 plans and results remain preserved as model-specific historical artifacts; their responses and authorization do not transfer.
 
-The preserved request-bound calculation estimates $1.74 at estimated input plus historical mean output, $2.12 assuming all default 30-minute cache writes at that output scenario, or $5.22 with all cache writes and maximum 2,048-token outputs. Per-request reservations use the complete provider-body UTF-8 bytes plus a 4,096-token framing allowance, maximum output, all input at the 30-minute cache-write rate, and Fast 2x protection; long-context multipliers apply only if a request bound exceeds 272,000 tokens. The largest request bound is 20,936 input tokens; the largest per-unit reserve is $0.072820; all 326 pessimistic reservations sum to $17.994805. The user reports approximately $20 total API credit; this is not confirmed available balance or authorization and leaves little room for excluded charges. The previous $40 proposal is withdrawn; no cap is authorized. No paid calls are authorized. A successful identity-checked, compliant response with in-bound provider-reported usage may release excess to a write-priced usage ceiling; this is not invoice reconciliation. Failed and uncertain attempts retain their full per-unit reservation. Any future run requires a new budget proposal for the then-current digest and separate explicit authorization.
+Budget proposal for the new plan: public Standard estimates are $1.74 at estimated input plus historical mean output, $2.12 assuming all default 30-minute cache writes at that output scenario, or $5.22 with all cache writes and maximum 2,048-token outputs. The persistent runner reserves $4.640720 per dispatch against maximum documented input/output exposure; the all-326 full-reservation scenario is $1,512.87. Proposed hard cap: $40; currently authorized: $0. The cap can stop early and is not a guarantee all calls complete. Recheck pricing and obtain separate authorization for this exact digest before any paid execution.
 
 Official short-context Standard prices checked 2026-11-06: GPT-5.6 Terra $2 input/$12 output per million tokens; GPT-6.1 Terra $1 input/$5 output per million tokens. Actual task cost also depends on token usage, caching, tier and endpoint modifiers.
 
@@ -394,10 +393,10 @@ Official short-context Standard prices checked 2026-11-06: GPT-5.6 Terra $2 inpu
 
 - [x] Resolve Phase 5 prompt controls and prepare the valid matched clean/degraded request design.
 - [x] Integrate and verify the persistent validation budget/cache runner using dry runs first.
-- [ ] Resume the matched validation run only after the user revisits the paused priority, a current budget is verified against available credit, and the exact plan/cap receive separate explicit authorization; then execute and analyze it.
+- [ ] Obtain authorization for the concrete validation request plan and hard budget, then execute and analyze it.
 - [ ] Report paired grounded correctness, coverage, selective accuracy, and reference-based abstention with clear denominators and uncertainty.
 - [ ] Finalize Phase 5 results, limitations, and experiment-coverage checklist.
-- [x] Add the Phase 3C support-metric clarification: direct-mode in-catalog guesses without retrieved evidence and grounded out-of-evidence predictions have different definitions. The “130 → 0” count does not establish elimination of 130 biological errors or hallucinations. Preserve the independently measured 102/163 versus 93/163 accuracy result.
+- [ ] Add the Phase 3C support-metric clarification: direct-mode in-catalog guesses without retrieved evidence and grounded out-of-evidence predictions have different definitions. The “130 → 0” count does not establish elimination of 130 biological errors or hallucinations. Preserve the independently measured 102/163 versus 93/163 accuracy result.
 - [ ] Preserve frozen historical artifacts; publish corrections in versioned amendments or addenda.
 
 The single-reviewer audit is already complete under its agreed scope. Independent second review and further adjudication are deferred, not completion blockers.
@@ -509,11 +508,20 @@ This is feasible for an October **writing start**, not necessarily an October su
 
 ## Immediate next actions — current
 
-1. Create the three draft PR records from the pushed branches when the GitHub integration has pull-request write permission; retarget existing PR #17 to current `main` if its compare remains clean.
-2. Keep the prepared MODEL2507280001 handoff local and unsent unless separately requested.
-3. Keep Phase 5 paid execution paused; no calls are authorized. Preserve all model-specific plans/results and recheck reported credit and pricing before any future request.
-4. After PR review and case-study handoff, revisit whether to resume Phase 5 only through a new budget decision, then complete the final freeze, separately authorized held-out evaluation, scope decisions and Phase 6 packaging/writing.
-5. Keep the held-out test sealed throughout and prepare manuscript material in parallel where it does not require new experiments.
+1. Review the consolidated canonical phase branches and the separate Luna task branch using `benchmark/BRANCHES.md`.
+2. Keep Luna's 541-request GPT-6.1 Terra plan at 2,048 total output tokens; its proposed USD 16 cap requires separate authorization before any paid execution.
+3. Keep Phase 5 paid execution paused and preserve every model-specific plan and completed result.
+4. Resolve broader scope/ownership, final freeze, later authorized held-out evaluation, and Phase 6 packaging/writing without launching new experiments during branch cleanup.
+5. Keep the held-out benchmark sealed and the collaborator handoff unsent unless separately authorized.
+
+### LunaStarr MODEL2507280001 request — local status, updated 2026-11-07
+
+- The existing 541-reaction Phase 3B report is a separate research benchmark review, not a run of the current public `annotate="reactions"` workflow. Its historical source model parses identically to the current use-case SBML (593 species, 541 reaction IDs); the raw worktree hash differs from the Git blob because of CRLF conversion. No BioModels revision label is recorded.
+- The current public reaction workflow has been exercised through `annotate_model()` with the actual SBML and cached 552-row species recommendation CSV, while local candidate retrieval and the provider were mocked. Output/result alignment, CSV serialization, and `max_completion_tokens` forwarding passed; this is plumbing verification, not a prediction run.
+- Full local candidate generation is complete in the isolated current-upstream worktree. Runtime was 150.451 seconds, including 138.691 seconds in repeated catalog/ontology filtering (1,797 filter calls; 21,321 unique side expansions). A run-scoped cache preserved candidate signatures across empty, ambiguous, and large fixtures. A positional reaction-ID alignment defect exposed by extraction omissions was fixed. `max_completion_tokens` reaches both ranking stages.
+- Of 541 reactions, 518 were extracted; 23 had no mapped participant species. The output recommendation table has 3,789 rows, including 296 blank placeholders. Actual candidates total 3,493 across 222 reactions; 319 reactions have zero candidates (296 extracted without a candidate ID plus 23 not extracted). Candidate-count distribution: 0:319, 1:146, 2:32, 3:2, 4:1, 5:3, 6:1, 7:4, 8:3, 9:6, 10:2, 11:3, 12:1, 13:3, 15:5, 18:1, 19:2, 28:3, 112:1, 443:1, 1,136:2. These counts do not make biological judgments.
+- No-call construction through the real ranker generated 223 requests in each mutually exclusive branch: one meaningfulness call plus 222 reaction ranking calls. Complete payloads and hashes, input-size bounds, and cost estimates are in ignored artifacts at `benchmark/integration_worktrees/luna_public/tests/useCase/results/MODEL2507280001/public_reaction_audit/`. The approximately $20 API credit was not verified. Existing five-retry policy has a pessimistic TRUE-context bound of $46.13 uncached / $110.19 at 12-hour cache-write prices; even one attempt is up to $18.37 under that cache-write bound. No paid calls or held-out/external biological access occurred.
+- The historical human-review summary remains descriptive rubric evidence (e.g. 182/264 strict Top-1 support for selected fusion), not independent gold-standard accuracy. Do not describe mocked output as a biological prediction or alter frozen artifacts.
 
 ## Revision record
 
@@ -522,6 +530,9 @@ This is feasible for an October **writing start**, not necessarily an October su
 
 - 2026-11-06: Recorded completed Phase 4, local Phase 5 retrieval results and pending controls, and explicit completion gates after Phase 5. This roadmap edit authorizes no new paid runs or test access.
 - 2026-11-06: Selected GPT-6.1 Terra for the Phase 5 matched run. Preserved GPT-5.6 plans/results; prepared and dry-run verified the new 326-call paired plan and model-specific persistent budget/cache package. Proposed USD 40 cap; USD 0 authorized. No paid or held-out execution occurred.
-- 2026-11-06: Paused Phase 5 paid execution while upstream integration and LunaStarr's MODEL2507280001 handoff take priority. Withdrew the earlier USD 40 cap proposal; the user reports approximately USD 20 total credit, no paid calls are authorized, and any later run requires a new budget review and explicit authorization. The held-out test remains sealed.
+- 2026-11-06: Recorded LunaStarr request assessment. Existing research review is reusable descriptive evidence, but the current public reaction workflow has only had mocked integration coverage; full candidate generation and any actual public reaction ranking remain outstanding. No paid calls or held-out access.
+- 2026-11-07: Completed the full local public reaction candidate stage, profiled and optimized repeated ontology expansion, corrected reaction-ID alignment, and froze complete no-call GPT-6.1 Terra request branches with pessimistic cost accounting. Targeted tests: 53 passed. Actual inference and biological review remain pending separate authorization and a verified spend guard; this work does not complete LunaStarr's full prediction/review request.
+- 2026-11-07: Corrected the LunaStarr MODEL2507280001 research analysis to use the selected full-catalog BM25 + trained epoch-1 bi-encoder RRF Top-10 pipeline, separately from public rule-based diagnostics. Reused archived retrieval outputs after validating the inference archive/checkpoint, catalog, SBML identity, all 541 rebuilt query texts, component ranks, RRF Top-100, and Top-10 evidence. Prepared 541 exact GPT-6.1 Terra grounded requests; no calls or held-out access. Estimated pessimistic reservation USD 10.855272500, proposed USD 12 cap conditional on verified available balance, not authorized. Candidate retrieval and request preparation are complete; actual grounded predictions and biological review remain pending.
+- 2026-11-07: Reassessed Luna's output budget: retain the established 2,048-token total output limit because no GPT-6.1 grounded usage validates reducing it. Preserved the 512-token plan and prepared both options from identical frozen inputs. Preferred 541-attempt plan reserves USD 15.010828750 under a proposed USD 16 cap (not authorized); current USD 19.97 credit is user-reported, independently unverified, leaving USD 3.97 unallocated at that cap. Phase 5 stays paused with no allocation. Exact plans, usage assessment, failure accounting and execution proposal are under the ignored isolated-worktree `selected_rrf_output_budget_20261107/` directory; actual grounded predictions and review remain pending.
 
-- 2026-11-06: Reviewed current upstream API changes, based the Phase 3C clarification and Phase 4 integration branches on current main, and stacked Phase 5 on Phase 4. Pushed all three branches to sys-bio/AAAIM; GitHub draft-PR create/update operations returned HTTP 403. Prepared but did not send the MODEL2507280001 handoff. No paid calls or held-out access occurred.
+- 2026-11-07: Consolidated duplicate local integration branches into the canonical phase histories and renamed the Luna branch to `feature/luna-model2507280001`. Preserved all original tips in archive refs plus a verified local bundle, all frozen experiment artifacts, and ignored personal reports. Upstream review branches remain untouched. This cleanup authorizes no paid execution or held-out access.
