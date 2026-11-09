@@ -2,7 +2,12 @@
 
 from unittest.mock import patch
 
-from core.annotation_workflow import _search_databases, rank_species_annotations_with_llm
+from core.annotation_workflow import (
+    _generate_recommendation_table,
+    _print_run_summary,
+    _search_databases,
+    rank_species_annotations_with_llm,
+)
 from core.database_search import expand_lookup_synonyms, get_species_recommendations_direct
 from core import database_search
 from core.data_types import Recommendation
@@ -143,6 +148,81 @@ def test_rank_complex_species_per_component_and_keeps_taxon_accessions():
     assert list(out["identity_rank"]) == [1, 1, 1]
 
 
+def test_single_taxon_equal_score_uniprot_entries_stay_tied_at_n_return_one(monkeypatch):
+    names = {"puma": ["Q96PG8", "Q9BXH1"], "bbc3": ["Q96PG8", "Q9BXH1"]}
+    labels = {"Q96PG8": "BBC3", "Q9BXH1": "BBC3"}
+    entry_names = {
+        "Q96PG8": ["PUMA", "Bcl-2-binding component 3, isoforms 3/4"],
+        "Q9BXH1": ["PUMA", "Bcl-2-binding component 3, isoforms 1/2"],
+    }
+    monkeypatch.setattr(database_search, "load_uniprot_names_dict", lambda tax_id=None: names)
+    monkeypatch.setattr(database_search, "load_uniprot_label_dict", lambda tax_id=None: labels)
+    monkeypatch.setattr(database_search, "_load_uniprot_entry_names", lambda tax_id: entry_names)
+    database_search._NORMALIZED_TAXON_NAMES_CACHE.clear()
+
+    rec = get_species_recommendations_direct(
+        ["PUMA"], {"PUMA": ["PUMA", "BBC3"]}, database="uniprot",
+        tax_id="9606", top_k=3,
+    )[0]
+    assert rec.candidates == ["Q96PG8", "Q9BXH1"]
+    assert rec.match_score == [1.0, 1.0]
+    assert rec.candidate_identity_ranks == [1, 1]
+    assert rec.candidate_identities == ["BBC3", "BBC3"]
+    assert "isoforms 3/4" in rec.candidate_names[0]
+    assert "isoforms 1/2" in rec.candidate_names[1]
+
+    table = _generate_recommendation_table(
+        "model.xml", [rec], {}, {"display_names": {"PUMA": "PUMA"}},
+        entity_type="protein", database="uniprot",
+    )
+    with patch("core.annotation_workflow.query_llm") as mock_llm:
+        ranked = rank_species_annotations_with_llm(
+            "model.xml", table, n_return=1,
+        )
+    mock_llm.assert_not_called()
+    assert list(ranked["annotation"]) == ["UNIPROT:Q96PG8", "UNIPROT:Q9BXH1"]
+    assert list(ranked["update_annotation"]) == ["add", "add"]
+
+    with patch("core.annotation_workflow.query_llm") as mock_llm:
+        validated = rank_species_annotations_with_llm(
+            "model.xml", table, n_return=1, validation=True, source_fidelity=True,
+        )
+    mock_llm.assert_not_called()
+    assert list(validated["annotation"]) == ["UNIPROT:Q96PG8", "UNIPROT:Q9BXH1"]
+
+    alternative = table.iloc[[0]].copy()
+    alternative["annotation"] = "UNIPROT:Q07812"
+    alternative["annotation_label"] = "BAX"
+    alternative["identity"] = "BAX"
+    alternative["identity_rank"] = 2
+    alternative["retrieval_identity_rank"] = 2
+    alternatives_table = pd.concat([table, alternative], ignore_index=True)
+    response = '{"units": [{"id": "PUMA", "selected_ids": ["UNIPROT:Q96PG8"]}]}'
+    with patch("core.annotation_workflow.query_llm", return_value=response) as mock_llm:
+        chosen = rank_species_annotations_with_llm(
+            "model.xml", alternatives_table, n_return=1,
+            validation=True, source_fidelity=True,
+        )
+    assert "UNIPROT:Q9BXH1" in mock_llm.call_args.args[0]
+    assert list(chosen["annotation"]) == ["UNIPROT:Q96PG8", "UNIPROT:Q9BXH1"]
+
+
+def test_single_taxon_same_label_lower_score_is_not_a_tie(monkeypatch):
+    names = {"puma": ["Q96PG8", "Q9BXH1"], "bbc3": ["Q9BXH1"]}
+    labels = {"Q96PG8": "BBC3", "Q9BXH1": "BBC3"}
+    monkeypatch.setattr(database_search, "load_uniprot_names_dict", lambda tax_id=None: names)
+    monkeypatch.setattr(database_search, "load_uniprot_label_dict", lambda tax_id=None: labels)
+    monkeypatch.setattr(database_search, "_load_uniprot_entry_names", lambda tax_id: {})
+    database_search._NORMALIZED_TAXON_NAMES_CACHE.clear()
+
+    rec = get_species_recommendations_direct(
+        ["PUMA"], {"PUMA": ["PUMA", "BBC3"]}, database="uniprot",
+        tax_id="9606", top_k=3,
+    )[0]
+    assert rec.candidates == ["Q9BXH1"]
+    assert rec.match_score == [1.0]
+
+
 def test_expand_composite_gene_synonyms():
     expanded = expand_lookup_synonyms(
         ["MAP2K1 (MEK1), MAP2K2 (MEK2)", "p21 mRNA (CDKN1A transcript)"],
@@ -172,6 +252,35 @@ def test_direct_top_k_limits_identity_before_taxon(monkeypatch):
     assert rec.candidates == ["h_raf", "m_raf", "r_raf"]
     assert rec.candidate_taxa == ["9606", "10090", "10116"]
     assert rec.candidate_identity_ranks == [1, 1, 1]
+
+
+def test_skipped_tax_id_returns_human_and_mouse(monkeypatch, capsys):
+    names = {
+        "9606": {"egfr": ["P00533"]},
+        "10090": {"egfr": ["Q01279"]},
+    }
+    labels = {"P00533": "EGFR_HUMAN", "Q01279": "EGFR_MOUSE"}
+    monkeypatch.setattr(database_search, "load_ncbigene_names_dict", lambda tax_id=None: names[str(tax_id)])
+    monkeypatch.setattr(database_search, "load_ncbigene_label_dict", lambda: labels)
+    database_search._NORMALIZED_TAXON_NAMES_CACHE.clear()
+    rec = get_species_recommendations_direct(
+        ["x"], {"x": ["EGFR"]}, database="ncbigene", tax_id=None, top_k=1,
+    )[0]
+    assert rec.candidates == ["P00533", "Q01279"]
+    assert rec.candidate_taxa == ["9606", "10090"]
+    human = get_species_recommendations_direct(
+        ["x"], {"x": ["EGFR"]}, database="ncbigene", tax_id="9606", top_k=1,
+    )[0]
+    assert human.candidate_taxa == ["9606"]
+
+    df = _generate_recommendation_table(
+        "model.xml", [rec], {}, {"display_names": {}},
+        entity_type="gene", database="kegg",
+    )
+    assert list(df["tax_id"]) == ["9606", "10090"]
+    _print_run_summary(df)
+    message = capsys.readouterr().out
+    assert "Results for 2 taxonomies were returned: human (9606) and mouse (10090)." in message
 
 
 def test_similar_explicit_gene_symbols_are_not_merged(monkeypatch):

@@ -189,7 +189,7 @@ def load_ncbigene_names_dict(tax_id: str = None) -> Dict[str, List[str]]:
 
     return names_dict
 
-def load_ncbigene_label_dict() -> Dict[str, str]:
+def load_ncbigene_label_dict(tax_id: Any = None) -> Dict[str, str]:
     """
     Load the NCBI gene ID to label dictionary.
 
@@ -207,7 +207,16 @@ def load_ncbigene_label_dict() -> Dict[str, str]:
         with lzma.open(data_file, 'rb') as f:
             _NCBIGENE_LABEL_DICT = pickle.load(f)
 
-    return _NCBIGENE_LABEL_DICT
+    if not tax_id:
+        return _NCBIGENE_LABEL_DICT
+    labels = dict(_NCBIGENE_LABEL_DICT)
+    tax_ids = tax_id if isinstance(tax_id, list) else [tax_id]
+    for tid in tax_ids:
+        specific = get_data_dir() / "ncbigene" / f"ncbigene2label_tax{tid}_protein-coding.lzma"
+        if specific.exists():
+            with lzma.open(specific, "rb") as handle:
+                labels.update(pickle.load(handle))
+    return labels
 
 def load_uniprot_names_dict(tax_id: str = None) -> Dict[str, List[str]]:
     """
@@ -295,6 +304,19 @@ def load_uniprot_label_dict(tax_id: Any = None) -> Dict[str, str]:
 
     load_uniprot_label_dict._cache[cache_key] = label_dict
     return label_dict
+
+
+def _load_uniprot_entry_names(tax_id: str) -> Dict[str, List[str]]:
+    """Load accession-specific names when a gene label denotes multiple proteins."""
+    if not hasattr(_load_uniprot_entry_names, "_cache"):
+        _load_uniprot_entry_names._cache = {}
+    cache = _load_uniprot_entry_names._cache
+    if tax_id not in cache:
+        data_file = get_data_dir() / "uniprot" / f"uniprot2names_tax{tax_id}.lzma"
+        with lzma.open(data_file, "rb") as handle:
+            cache[tax_id] = pickle.load(handle)
+    return cache[tax_id]
+
 
 def load_chebi2kegg_dict() -> Dict[str, str]:
     """
@@ -512,16 +534,25 @@ def _identity_label_key(label: str) -> str:
     return remove_symbols(text)
 
 
+# Human and mouse. Used when a gene/protein search omits tax_id.
+DEFAULT_GENE_PROTEIN_TAX_IDS = ["9606", "10090"]
+
+
+def _gene_protein_tax_ids(tax_id: Any) -> Any:
+    if not tax_id:
+        return list(DEFAULT_GENE_PROTEIN_TAX_IDS)
+    return tax_id
+
+
 def _select_taxonomic_identities(
     records: List[Dict[str, Any]],
     top_k: Optional[int],
 ) -> Tuple[List[str], List[str], List[float], List[Optional[str]], List[str], List[int]]:
     """Rank biological identities, then expand their taxon accessions.
 
-    Records are clustered by exact normalized canonical label. Approximate
-    symbol matching is deliberately avoided because near symbols such as
-    PDPK1/PDK1 and PXN/PXDN can denote different genes. ``top_k`` limits
-    identity clusters, not accessions.
+    Records are clustered by exact normalized canonical label. Within each
+    taxon, all accessions tied for that label's best match score are retained.
+    ``top_k`` limits identity clusters, not the number of accession rows.
     """
     if not records:
         return [], [], [], [], [], []
@@ -567,10 +598,22 @@ def _select_taxonomic_identities(
     identities: List[str] = []
     identity_ranks: List[int] = []
     for identity_rank, indexes in enumerate(ranked_groups, start=1):
+        best_score_by_taxon: Dict[str, float] = {}
+        for index in indexes:
+            taxon = str(records[index].get("tax_id"))
+            score = float(records[index]["score"])
+            best_score_by_taxon[taxon] = max(
+                score, best_score_by_taxon.get(taxon, float("-inf"))
+            )
+        tied_indexes = [
+            index for index in indexes
+            if float(records[index]["score"])
+            == best_score_by_taxon[str(records[index].get("tax_id"))]
+        ]
         # Prefer a label that exactly matches a query; this keeps a misleading
         # alias such as RAF1->RNASE3 from naming the identity cluster.
         anchor = min(
-            indexes,
+            tied_indexes,
             key=lambda index: (
                 _identity_label_key(records[index]["name"])
                 not in {str(value).upper() for value in records[index]["query_keys"]},
@@ -578,15 +621,39 @@ def _select_taxonomic_identities(
             ),
         )
         identity = str(records[anchor]["name"])
-        for index in sorted(indexes, key=lambda value: records[value]["order"]):
+        for index in sorted(tied_indexes, key=lambda value: records[value]["order"]):
             record = records[index]
             candidates.append(str(record["id"]))
-            names.append(str(record["name"]))
+            names.append(str(record.get("rank_label") or record["name"]))
             scores.append(float(record["score"]))
             taxa.append(record.get("tax_id"))
             identities.append(identity)
             identity_ranks.append(identity_rank)
     return candidates, names, scores, taxa, identities, identity_ranks
+
+
+def _describe_ambiguous_uniprot_records(records: List[Dict[str, Any]]) -> None:
+    """Show distinct protein names when one taxon's entries share a gene label."""
+    counts = Counter(
+        (_identity_label_key(record["name"]), str(record.get("tax_id")))
+        for record in records
+    )
+    for record in records:
+        tax_id = str(record.get("tax_id"))
+        if counts[(_identity_label_key(record["name"]), tax_id)] < 2:
+            continue
+        names: List[str] = []
+        try:
+            names = _load_uniprot_entry_names(tax_id).get(str(record["id"]), [])
+        except OSError:
+            pass
+        distinct_name = next(
+            (name for name in names if re.search(r"\bisoforms?\b", name, re.I)),
+            "",
+        )
+        record["rank_label"] = (
+            f"{record['name']} ({distinct_name or record['id']})"
+        )
 
 
 # def clean_synonym(synonym: str) -> str:
@@ -973,9 +1040,11 @@ def _get_taxonomic_recommendations_direct(
     Candidate IDs are first grouped into biological identities across requested
     taxa. ``top_k`` is applied to those identities and all accessions belonging
     to a selected identity are then emitted with explicit taxon provenance.
+    Omitted ``tax_id`` searches human (9606) and mouse (10090).
     """
+    tax_id = _gene_protein_tax_ids(tax_id)
     if database == "ncbigene":
-        label_dict = load_ncbigene_label_dict()
+        label_dict = load_ncbigene_label_dict(tax_id=tax_id)
         names_loader = load_ncbigene_names_dict
     else:
         label_dict = load_uniprot_label_dict(tax_id=tax_id)
@@ -1052,6 +1121,8 @@ def _get_taxonomic_recommendations_direct(
         records = list(record_by_id.values())
         for record in records:
             record["score"] = record["hits"] / denominator
+        if database == "uniprot":
+            _describe_ambiguous_uniprot_records(records)
         candidates, names, scores, taxa, identities, identity_ranks = (
             _select_taxonomic_identities(records, top_k)
         )
@@ -2118,13 +2189,15 @@ def get_species_recommendations_rag(
     - persist_directory (str): ChromaDB storage directory.
     - top_k (int): Number of top candidates to retrieve per species.
     - database (str): Database to search ("chebi", "ncbigene").
-    - tax_id (str/list): For ncbigene database, the organism's tax_id for organism-specific lookup. Use 9606 by default. If list, search all tax_ids for each species.
+    - tax_id (str/list): For ncbigene/uniprot, one taxonomy id or a list. When omitted, human (9606) and mouse (10090) are both searched.
 
     Returns:
     - list: List of Recommendation objects with candidates and similarity scores.
     """
     persist_directory = os.path.join(get_data_dir(), persist_directory)
     recommendations = []
+    if database in ("ncbigene", "uniprot"):
+        tax_id = _gene_protein_tax_ids(tax_id)
 
     # Helper to get collection for a given tax_id
     def get_collection_for_taxid(tid):
@@ -2195,8 +2268,11 @@ def get_species_recommendations_rag(
                     except Exception as e:
                         logger.warning(f"Error querying synonym '{synonym}' for species '{spec_id}' in tax_id {tid}: {e}")
                         continue
+            records = list(records_by_id.values())
+            if database == "uniprot":
+                _describe_ambiguous_uniprot_records(records)
             all_candidates, all_candidate_names, match_score_list, taxa, identities, identity_ranks = (
-                _select_taxonomic_identities(list(records_by_id.values()), top_k)
+                _select_taxonomic_identities(records, top_k)
             )
             recommendation = Recommendation(
                 id=spec_id,
@@ -2213,10 +2289,6 @@ def get_species_recommendations_rag(
         return recommendations
     # If database is ncbigene/uniprot and tax_id is a str or None (single organism)
     if database in ["ncbigene", "uniprot"]:
-        if not tax_id:
-            default_tax_id = 9606
-            logger.warning(f"No tax_id provided for {database} RAG search. Using default tax_id {default_tax_id}.")
-            tax_id = default_tax_id
         if collection_name is None and model_type == "default":
             collection_name = f"{database}_default_tax{tax_id}"
         elif collection_name is None and model_type == "openai":

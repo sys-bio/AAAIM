@@ -1,0 +1,2663 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" version="4">
+  <model metaid="COPASI0" id="Integrated_Model_of_DNA_Damage_Response_and_p53_Signaling_in_ATM_ATR_Deficient_Ataxia_Telangiectasia__Exploring_the_Therapeutic_Roles_of_Possible_repurposed_drugs" name="Integrated Model of DNA Damage Response and p53 Signaling in ATM/ATR-Deficient Ataxia Telangiectasia: Exploring the Therapeutic Roles of Possible repurposed drugs">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <pre>Comprehensive Model Description
+
+Overview
+This model simulates the cellular response to DNA damage under conditions of ATM/ATR deficiency—such as in ataxia telangiectasia—and predicts the potential benefits of drug repositioning with Omaveloxolone and spermidine. It integrates several interconnected modules: DNA damage production and repair, ATM/ATR–p53 signaling, NRF2/KEAP1 regulation, spermidine-induced autophagy (with additional positive modulation of ATR signaling), and downstream p53 effectors involved in cell fate decisions.
+
+1. DNA Damage Production and Repair Module
+Basal DNA Damage Production:
+DNA damage is continuously generated at a constant rate, representing both endogenous processes and low-level environmental stress. This reaction acts as a source term for the DNA_damage species.
+
+Repair Pathways:
+Several mechanisms work to reduce DNA damage:
+ATM-Mediated Repair: Active ATM facilitates the direct repair of DNA damage.
+ATR-Mediated Repair: Active ATR, in cooperation with CHK1, repairs DNA damage.
+NRF2-Mediated Repair: Active NRF2 triggers antioxidant responses that reduce DNA damage.
+Autophagy-Mediated Repair: The autophagy pathway, induced by spermidine, repairs DNA damage in a saturable manner (modeled using Michaelis–Menten kinetics). This ensures that even a significant pulse of damage is only partially repaired, leaving a nonzero steady-state level.
+
+2. ATM/ATR–p53 Signaling Module
+ATM and ATR Activation:
+DNA damage, along with a positive input from TOPBP1, converts inactive ATM and ATR to their active forms. Under ATM/ATR-deficient conditions (as in ataxia telangiectasia), the activation is severely reduced, resulting in higher levels of unrepaired DNA damage.
+p53 Activation:
+Both ATM_active and ATR_active phosphorylate and activate p53. Active p53 then acts as a central integrator of the DNA damage signal.
+Regulatory Proteins:
+HDAC4:
+HDAC4 cycles between inactive and active states. Its active form can attenuate p53 activity.
+TOPBP1:
+TOPBP1 is activated in a DNA damage–dependent manner and helps promote ATR activation.
+CK2:
+CK2 is a constitutively active kinase that supports TOPBP1 activation.
+
+3. NRF2/KEAP1 Module and Omaveloxolone
+NRF2 Activation:
+DNA damage stimulates the conversion of NRF2_inactive to NRF2_active. Active NRF2 enhances antioxidant defenses and promotes DNA repair.
+KEAP1-Mediated Degradation:
+Under normal conditions, KEAP1 targets NRF2_inactive for degradation, keeping NRF2 activity low.
+Modulation by Omaveloxolone:
+Omaveloxolone is modeled as a constant (boundary) species. It inhibits KEAP1’s activity, thereby reducing NRF2 degradation. This shifts the balance in favor of increased NRF2_active, which boosts the cell’s antioxidant and repair responses.
+
+4. Spermidine-Induced Autophagy and Positive Modulation of ATR Signaling
+Spermidine is modeled as a constant species and has two major effects:
+
+Induction of Autophagy:
+Spermidine promotes the conversion of Autophagy_inactive to Autophagy_active. The active autophagy machinery repairs DNA damage using a saturable (Michaelis–Menten) mechanism. This pathway helps clear DNA damage but is limited by its maximum capacity.
+Enhancement of ATR Signaling:
+Spermidine also positively modulates ATR signaling by enhancing the CK2-mediated activation of TOPBP1. In the model, the effective rate of TOPBP1 activation is increased proportionally to the concentration of spermidine. This is represented by a modulation factor, where the effective rate constant for TOPBP1 activation is multiplied by a term that increases with spermidine concentration. The boosted TOPBP1_active level in turn enhances ATR activation, partially compensating for the loss of ATM/ATR function.
+
+5. Downstream p53 Targets: Cell Fate Decisions
+Activated p53 regulates cell fate by inducing the production of several downstream effectors:
+
+p21:
+p21 is produced in response to p53 activation and is associated with cell cycle arrest and senescence. Its production is balanced by a degradation reaction.
+BAX and PUMA:
+Both BAX and PUMA are pro-apoptotic proteins. They are produced in proportion to p53_active and are subsequently degraded. Their relative levels help determine whether the cell will undergo apoptosis.
+
+6. Reaction Kinetics (Qualitative Overview)
+Mass-Action and Michaelis–Menten Kinetics:
+Most reactions in the model are governed by mass-action kinetics. For example, activation and deactivation reactions (such as ATM activation by DNA damage or p53 activation by ATM/ATR) follow simple proportional relationships.
+Saturable Repair Processes:
+The autophagy-mediated DNA repair reaction uses Michaelis–Menten kinetics to reflect a saturation effect; when DNA damage is high, the repair rate approaches a maximum value, ensuring that not all damage is cleared immediately.
+Modulatory Effects:
+Spermidine increases the effective rate of TOPBP1 activation (and hence ATR activation) via a modulation term that is proportional to its concentration. Omaveloxolone reduces the degradation rate of NRF2 by inhibiting KEAP1.
+Biological Implications and Model Utility
+ATM/ATR Deficiency:
+In ataxia telangiectasia, ATM/ATR functions are diminished, leading to increased DNA damage. The model simulates this scenario and examines how alternative pathways (NRF2-mediated repair, autophagy, and enhanced ATR signaling via spermidine) help mitigate the damage.
+Drug Repositioning Predictions:
+The model can be used to predict the outcomes of repositioning drugs:
+Omaveloxolone is expected to stabilize NRF2, enhancing antioxidant defenses and reducing DNA damage.
+Spermidine acts dually by promoting autophagy (with a saturable repair capacity) and by boosting ATR signaling via TOPBP1 activation.
+Cell Fate Outcomes:
+The downstream p53 targets (p21, BAX, and PUMA) serve as markers for cell cycle arrest/senescence and apoptosis. By simulating the dynamics of these proteins, the model can predict whether a cell is likely to survive, arrest its cycle, or undergo apoptosis based on the integrated response to DNA damage and drug interventions.
+
+Conclusion
+This detailed and comprehensive model integrates multiple layers of the cellular response to DNA damage in ATM/ATR-deficient conditions. It includes upstream damage sensing, multiple repair pathways (including direct kinase-mediated repair, antioxidant responses via NRF2, and autophagy-mediated repair), and downstream effectors that determine cell fate. Omaveloxolone and spermidine are modeled to specifically modulate the NRF2/KEAP1 pathway and ATR signaling (via TOPBP1 activation), respectively. This framework provides a robust platform for exploring drug repositioning strategies and predicting cellular outcomes in diseases such as ataxia telangiectasia.</pre>
+      </body>
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+        <rdf:Description rdf:about="#COPASI0">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Pappalardo</vCard:Family>
+                  <vCard:Given>Francesco</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>francesco.pappalardo@unict.it</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Catania</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Russo</vCard:Family>
+                  <vCard:Given>Giulia</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>giulia.russo@unict.it</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Catania</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2025-02-16T17:37:59Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2025-02-16T18:44:32Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="https://identifiers.org/biomodels.db:MODEL2503190002"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqbiol:hasProperty>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/mamo/MAMO_0000045"/>
+            </rdf:Bag>
+          </bqbiol:hasProperty>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="https://identifiers.org/doi:10.1038/s41540-025-00629-4"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+      <copasi:COPASI xmlns:copasi="http://www.copasi.org/static/sbml">
+        <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#">
+          <rdf:Description rdf:about="#COPASI0">
+            <dcterms:created>
+              <rdf:Description>
+                <dcterms:W3CDTF>2025-02-16T17:37:59Z</dcterms:W3CDTF>
+              </rdf:Description>
+            </dcterms:created>
+            <dcterms:creator>
+              <rdf:Description>
+                <vCard:EMAIL>francesco.pappalardo@unict.it</vCard:EMAIL>
+                <vCard:N>
+                  <rdf:Description>
+                    <vCard:Family>Pappalardo</vCard:Family>
+                    <vCard:Given>Francesco</vCard:Given>
+                  </rdf:Description>
+                </vCard:N>
+                <vCard:ORG>
+                  <rdf:Description>
+                    <vCard:Orgname>University of Catania</vCard:Orgname>
+                  </rdf:Description>
+                </vCard:ORG>
+              </rdf:Description>
+            </dcterms:creator>
+            <dcterms:creator>
+              <rdf:Description>
+                <vCard:EMAIL>giulia.russo@unict.it</vCard:EMAIL>
+                <vCard:N>
+                  <rdf:Description>
+                    <vCard:Family>Russo</vCard:Family>
+                    <vCard:Given>Giulia</vCard:Given>
+                  </rdf:Description>
+                </vCard:N>
+                <vCard:ORG>
+                  <rdf:Description>
+                    <vCard:Orgname>University of Catania</vCard:Orgname>
+                  </rdf:Description>
+                </vCard:ORG>
+              </rdf:Description>
+            </dcterms:creator>
+            <dcterms:modified>
+              <rdf:Description>
+                <dcterms:W3CDTF>2025-02-16T18:44:32</dcterms:W3CDTF>
+              </rdf:Description>
+            </dcterms:modified>
+          </rdf:Description>
+        </rdf:RDF>
+      </copasi:COPASI>
+    </annotation>
+    <listOfFunctionDefinitions>
+      <functionDefinition id="Function_for_ATM_deactivation" name="Function for ATM_deactivation">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> ATM_active </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_deactivation </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_deactivation </ci>
+                <ci> ATM_active </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_ATR_activation" name="Function for ATR_activation">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> ATR_inactive </ci>
+            </bvar>
+            <bvar>
+              <ci> DNA_damage </ci>
+            </bvar>
+            <bvar>
+              <ci> HDAC4_active </ci>
+            </bvar>
+            <bvar>
+              <ci> TOPBP1_active </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_ATR_activation </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_ATR_activation </ci>
+                <ci> DNA_damage </ci>
+                <ci> TOPBP1_active </ci>
+                <apply>
+                  <divide/>
+                  <cn> 1 </cn>
+                  <apply>
+                    <plus/>
+                    <cn> 1 </cn>
+                    <ci> HDAC4_active </ci>
+                  </apply>
+                </apply>
+                <ci> ATR_inactive </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_ATR_deactivation" name="Function for ATR_deactivation">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> ATR_active </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_ATR_deactivation </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_ATR_deactivation </ci>
+                <ci> ATR_active </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_p53_activation_ATR" name="Function for p53_activation_ATR">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> ATR_active </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_p53_activation_ATR </ci>
+            </bvar>
+            <bvar>
+              <ci> p53_inactive </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_p53_activation_ATR </ci>
+                <ci> ATR_active </ci>
+                <ci> p53_inactive </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_DNA_damage_repair_ATM" name="Function for DNA_damage_repair_ATM">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> ATM_active </ci>
+            </bvar>
+            <bvar>
+              <ci> DNA_damage </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_repair </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_repair </ci>
+                <ci> ATM_active </ci>
+                <ci> DNA_damage </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_p53_activation_ATM" name="Function for p53_activation_ATM">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> ATM_active </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_p53_activation </ci>
+            </bvar>
+            <bvar>
+              <ci> p53_inactive </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_p53_activation </ci>
+                <ci> ATM_active </ci>
+                <ci> p53_inactive </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_p53_deactivation" name="Function for p53_deactivation">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_p53_deactivation </ci>
+            </bvar>
+            <bvar>
+              <ci> p53_active </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_p53_deactivation </ci>
+                <ci> p53_active </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_HDAC4_activation" name="Function for HDAC4_activation">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> HDAC4_inactive </ci>
+            </bvar>
+            <bvar>
+              <ci> PP2A </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_HDAC4_activation </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_HDAC4_activation </ci>
+                <ci> PP2A </ci>
+                <ci> HDAC4_inactive </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_HDAC4_deactivation" name="Function for HDAC4_deactivation">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> ATM_active </ci>
+            </bvar>
+            <bvar>
+              <ci> HDAC4_active </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_HDAC4_deactivation </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_HDAC4_deactivation </ci>
+                <ci> ATM_active </ci>
+                <ci> HDAC4_active </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_p53_deactivation_HDAC4" name="Function for p53_deactivation_HDAC4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> HDAC4_active </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_HDAC4_p53 </ci>
+            </bvar>
+            <bvar>
+              <ci> p53_active </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_HDAC4_p53 </ci>
+                <ci> HDAC4_active </ci>
+                <ci> p53_active </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_I2PP2A_production" name="Function for I2PP2A_production">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> ATM_active </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_I2PP2A_production </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_I2PP2A_production </ci>
+                <ci> ATM_active </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_I2PP2A_degradation" name="Function for I2PP2A_degradation">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> I2PP2A </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_I2PP2A_degradation </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_I2PP2A_degradation </ci>
+                <ci> I2PP2A </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_PP2A_binding" name="Function for PP2A_binding">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> I2PP2A </ci>
+            </bvar>
+            <bvar>
+              <ci> PP2A </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_binding </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_binding </ci>
+                <ci> PP2A </ci>
+                <ci> I2PP2A </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_PP2A_unbinding" name="Function for PP2A_unbinding">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> PP2A_I2PP2A </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_unbinding </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_unbinding </ci>
+                <ci> PP2A_I2PP2A </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_TOPBP1_activation" name="Function for TOPBP1_activation">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> DNA_damage </ci>
+            </bvar>
+            <bvar>
+              <ci> TOPBP1_inactive </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_TOPBP1_activation </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_TOPBP1_activation </ci>
+                <ci> DNA_damage </ci>
+                <ci> TOPBP1_inactive </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_TOPBP1_deactivation" name="Function for TOPBP1_deactivation">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> TOPBP1_active </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_TOPBP1_deactivation </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_TOPBP1_deactivation </ci>
+                <ci> TOPBP1_active </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_DNA_damage_repair_ATR" name="Function for DNA_damage_repair_ATR">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> ATR_active </ci>
+            </bvar>
+            <bvar>
+              <ci> CHK1_active </ci>
+            </bvar>
+            <bvar>
+              <ci> DNA_damage </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_repair_ATR </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_repair_ATR </ci>
+                <ci> ATR_active </ci>
+                <ci> DNA_damage </ci>
+                <apply>
+                  <plus/>
+                  <cn> 1 </cn>
+                  <ci> CHK1_active </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_CK2_phosphorylation_HDAC4" name="Function for CK2_phosphorylation_HDAC4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> CK2 </ci>
+            </bvar>
+            <bvar>
+              <ci> HDAC4_active </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_CK2 </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_CK2 </ci>
+                <ci> CK2 </ci>
+                <ci> HDAC4_active </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_HDAC4_dephosphorylation" name="Function for HDAC4_dephosphorylation">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> HDAC4_phospho </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_dephos </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_dephos </ci>
+                <ci> HDAC4_phospho </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_CK2_TOPBP1_activation" name="Function for CK2_TOPBP1_activation">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> Spermidine </ci>
+            </bvar>
+            <bvar>
+              <ci> TOPBP1_inactive </ci>
+            </bvar>
+            <bvar>
+              <ci> alpha_spermidine </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_CK2_TOPBP1 </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_CK2_TOPBP1 </ci>
+                <apply>
+                  <plus/>
+                  <cn> 1 </cn>
+                  <apply>
+                    <times/>
+                    <ci> alpha_spermidine </ci>
+                    <ci> Spermidine </ci>
+                  </apply>
+                </apply>
+                <ci> TOPBP1_inactive </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_CHK1_activation" name="Function for CHK1_activation">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> ATR_active </ci>
+            </bvar>
+            <bvar>
+              <ci> CHK1_inactive </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_CHK1_activation </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_CHK1_activation </ci>
+                <ci> ATR_active </ci>
+                <ci> CHK1_inactive </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_CHK1_deactivation" name="Function for CHK1_deactivation">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> CHK1_active </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_CHK1_deactivation </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_CHK1_deactivation </ci>
+                <ci> CHK1_active </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_CHK2_activation" name="Function for CHK2_activation">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> ATM_active </ci>
+            </bvar>
+            <bvar>
+              <ci> CHK2_inactive </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_CHK2_activation </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_CHK2_activation </ci>
+                <ci> ATM_active </ci>
+                <ci> CHK2_inactive </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_CHK2_deactivation" name="Function for CHK2_deactivation">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> CHK2_active </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_CHK2_deactivation </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_CHK2_deactivation </ci>
+                <ci> CHK2_active </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_p53_activation_CHK2" name="Function for p53_activation_CHK2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> CHK2_active </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_p53_activation_CHK2 </ci>
+            </bvar>
+            <bvar>
+              <ci> p53_inactive </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_p53_activation_CHK2 </ci>
+                <ci> CHK2_active </ci>
+                <ci> p53_inactive </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_NRF2_activation" name="Function for NRF2_activation">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> DNA_damage </ci>
+            </bvar>
+            <bvar>
+              <ci> NRF2_inactive </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_NRF2_activation </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_NRF2_activation </ci>
+                <ci> DNA_damage </ci>
+                <ci> NRF2_inactive </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_NRF2_deactivation" name="Function for NRF2_deactivation">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> NRF2_active </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_NRF2_deactivation </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_NRF2_deactivation </ci>
+                <ci> NRF2_active </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_NRF2_DNA_repair" name="Function for NRF2_DNA_repair">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> DNA_damage </ci>
+            </bvar>
+            <bvar>
+              <ci> NRF2_active </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_NRF2_repair </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_NRF2_repair </ci>
+                <ci> NRF2_active </ci>
+                <ci> DNA_damage </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_NRF2_degradation_KEAP1" name="Function for NRF2_degradation_KEAP1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> KEAP1 </ci>
+            </bvar>
+            <bvar>
+              <ci> K_omav </ci>
+            </bvar>
+            <bvar>
+              <ci> NRF2_inactive </ci>
+            </bvar>
+            <bvar>
+              <ci> Omaveloxolone </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_NRF2_KEAP1 </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_NRF2_KEAP1 </ci>
+                <apply>
+                  <divide/>
+                  <cn> 1 </cn>
+                  <apply>
+                    <plus/>
+                    <cn> 1 </cn>
+                    <apply>
+                      <divide/>
+                      <ci> Omaveloxolone </ci>
+                      <ci> K_omav </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> KEAP1 </ci>
+                <ci> NRF2_inactive </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_Autophagy_activation" name="Function for Autophagy_activation">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> Autophagy_inactive </ci>
+            </bvar>
+            <bvar>
+              <ci> Spermidine </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_spermidine_activation </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_spermidine_activation </ci>
+                <ci> Spermidine </ci>
+                <ci> Autophagy_inactive </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_Autophagy_deactivation" name="Function for Autophagy_deactivation">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> Autophagy_active </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_autophagy_deactivation </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_autophagy_deactivation </ci>
+                <ci> Autophagy_active </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_Autophagy_DNA_repair" name="Function for Autophagy_DNA_repair">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> Autophagy_active </ci>
+            </bvar>
+            <bvar>
+              <ci> DNA_damage </ci>
+            </bvar>
+            <bvar>
+              <ci> Km_autophagy </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_autophagy_repair </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> k_autophagy_repair </ci>
+                  <ci> Autophagy_active </ci>
+                  <ci> DNA_damage </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km_autophagy </ci>
+                  <ci> DNA_damage </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_DNA_damage_production" name="Function for DNA_damage_production">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_damage_production </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <ci> k_damage_production </ci>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_p21_production" name="Function for p21_production">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_p21 </ci>
+            </bvar>
+            <bvar>
+              <ci> p53_active </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_p21 </ci>
+                <ci> p53_active </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_p21_degradation" name="Function for p21_degradation">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_p21_deg </ci>
+            </bvar>
+            <bvar>
+              <ci> p21 </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_p21_deg </ci>
+                <ci> p21 </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_BAX_production" name="Function for BAX_production">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_BAX </ci>
+            </bvar>
+            <bvar>
+              <ci> p53_active </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_BAX </ci>
+                <ci> p53_active </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_BAX_degradation" name="Function for BAX_degradation">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> BAX </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_BAX_deg </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_BAX_deg </ci>
+                <ci> BAX </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_PUMA_production" name="Function for PUMA_production">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_PUMA </ci>
+            </bvar>
+            <bvar>
+              <ci> p53_active </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_PUMA </ci>
+                <ci> p53_active </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_PUMA_degradation" name="Function for PUMA_degradation">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> PUMA </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_PUMA_deg </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_PUMA_deg </ci>
+                <ci> PUMA </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Function_for_ATM_activation" name="Function for ATM_activation">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> ATM_inactive </ci>
+            </bvar>
+            <bvar>
+              <ci> DNA_damage </ci>
+            </bvar>
+            <bvar>
+              <ci> TOPBP1_active </ci>
+            </bvar>
+            <bvar>
+              <ci> cell </ci>
+            </bvar>
+            <bvar>
+              <ci> k_activation </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> k_activation </ci>
+                <ci> DNA_damage </ci>
+                <apply>
+                  <plus/>
+                  <cn> 1 </cn>
+                  <ci> TOPBP1_active </ci>
+                </apply>
+                <ci> ATM_inactive </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+    </listOfFunctionDefinitions>
+    <listOfUnitDefinitions>
+      <unitDefinition id="length" name="length">
+        <listOfUnits>
+          <unit kind="metre" exponent="1" scale="0" multiplier="1"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="area" name="area">
+        <listOfUnits>
+          <unit kind="metre" exponent="2" scale="0" multiplier="1"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="volume" name="volume">
+        <listOfUnits>
+          <unit kind="litre" exponent="1" scale="0" multiplier="1"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time">
+        <listOfUnits>
+          <unit kind="second" exponent="1" scale="0" multiplier="1"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="substance" name="substance">
+        <listOfUnits>
+          <unit kind="mole" exponent="1" scale="0" multiplier="1"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="cell" name="Cell" spatialDimensions="3" size="1" constant="true"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species metaid="ATM_inactive" id="ATM_inactive" name="ATM_inactive" compartment="cell" initialConcentration="100" boundaryCondition="false" constant="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+            <rdf:Description rdf:about="#ATM_inactive">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/Q13315"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species metaid="ATM_active" id="ATM_active" name="ATM_active" compartment="cell" initialConcentration="0" boundaryCondition="false" constant="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+            <rdf:Description rdf:about="#ATM_active">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/Q13315"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species metaid="ATR_inactive" id="ATR_inactive" name="ATR_inactive" compartment="cell" initialConcentration="100" boundaryCondition="false" constant="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+            <rdf:Description rdf:about="#ATR_inactive">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/Q13535"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species metaid="ATR_active" id="ATR_active" name="ATR_active" compartment="cell" initialConcentration="0" boundaryCondition="false" constant="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+            <rdf:Description rdf:about="#ATR_active">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/Q13535"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="DNA_damage" name="DNA_damage" compartment="cell" initialConcentration="0.999999999999999" boundaryCondition="false" constant="false"/>
+      <species metaid="p53_inactive" id="p53_inactive" name="p53_inactive" compartment="cell" initialConcentration="50" boundaryCondition="false" constant="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+            <rdf:Description rdf:about="#p53_inactive">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P04637"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species metaid="p53_active" id="p53_active" name="p53_active" compartment="cell" initialConcentration="0" boundaryCondition="false" constant="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+            <rdf:Description rdf:about="#p53_active">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P04637"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species metaid="HDAC4_inactive" id="HDAC4_inactive" name="HDAC4_inactive" compartment="cell" initialConcentration="10000" boundaryCondition="false" constant="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+            <rdf:Description rdf:about="#HDAC4_inactive">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P56524"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species metaid="HDAC4_active" id="HDAC4_active" name="HDAC4_active" compartment="cell" initialConcentration="0" boundaryCondition="false" constant="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+            <rdf:Description rdf:about="#HDAC4_active">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P56524"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species metaid="HDAC4_phospho" id="HDAC4_phospho" name="HDAC4_phospho" compartment="cell" initialConcentration="0" boundaryCondition="false" constant="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+            <rdf:Description rdf:about="#HDAC4_phospho">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P56524"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="PP2A" name="PP2A" compartment="cell" initialConcentration="50" boundaryCondition="false" constant="false"/>
+      <species metaid="I2PP2A" id="I2PP2A" name="I2PP2A" compartment="cell" initialConcentration="0" boundaryCondition="false" constant="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+            <rdf:Description rdf:about="#I2PP2A">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/Q01105"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species metaid="PP2A_I2PP2A" id="PP2A_I2PP2A" name="PP2A_I2PP2A" compartment="cell" initialConcentration="0" boundaryCondition="false" constant="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+            <rdf:Description rdf:about="#PP2A_I2PP2A">
+              <bqbiol:hasPart>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/Q01105"/>
+                </rdf:Bag>
+              </bqbiol:hasPart>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species metaid="TOPBP1_inactive" id="TOPBP1_inactive" name="TOPBP1_inactive" compartment="cell" initialConcentration="100" boundaryCondition="false" constant="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+            <rdf:Description rdf:about="#TOPBP1_inactive">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/Q92547"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species metaid="TOPBP1_active" id="TOPBP1_active" name="TOPBP1_active" compartment="cell" initialConcentration="0" boundaryCondition="false" constant="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+            <rdf:Description rdf:about="#TOPBP1_active">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/Q92547"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="CK2" name="CK2" compartment="cell" initialConcentration="50" boundaryCondition="true" constant="true"/>
+      <species metaid="CHK1_inactive" id="CHK1_inactive" name="CHK1_inactive" compartment="cell" initialConcentration="100" boundaryCondition="false" constant="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+            <rdf:Description rdf:about="#CHK1_inactive">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/O14757"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species metaid="CHK1_active" id="CHK1_active" name="CHK1_active" compartment="cell" initialConcentration="0" boundaryCondition="false" constant="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+            <rdf:Description rdf:about="#CHK1_active">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/O14757"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species metaid="CHK2_inactive" id="CHK2_inactive" name="CHK2_inactive" compartment="cell" initialConcentration="100" boundaryCondition="false" constant="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+            <rdf:Description rdf:about="#CHK2_inactive">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/O96017"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species metaid="CHK2_active" id="CHK2_active" name="CHK2_active" compartment="cell" initialConcentration="0" boundaryCondition="false" constant="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+            <rdf:Description rdf:about="#CHK2_active">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/O96017"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species metaid="NRF2_inactive" id="NRF2_inactive" name="NRF2_inactive" compartment="cell" initialConcentration="100" boundaryCondition="false" constant="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+            <rdf:Description rdf:about="#NRF2_inactive">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/Q16236"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species metaid="NRF2_active" id="NRF2_active" name="NRF2_active" compartment="cell" initialConcentration="0" boundaryCondition="false" constant="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+            <rdf:Description rdf:about="#NRF2_active">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/Q16236"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species metaid="KEAP1" id="KEAP1" name="KEAP1" compartment="cell" initialConcentration="100" boundaryCondition="true" constant="true">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+            <rdf:Description rdf:about="#KEAP1">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/Q14145"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species metaid="NRF2_degraded" id="NRF2_degraded" name="NRF2_degraded" compartment="cell" initialConcentration="0" boundaryCondition="false" constant="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+            <rdf:Description rdf:about="#NRF2_degraded">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/Q16236"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species metaid="Omaveloxolone" id="Omaveloxolone" name="Omaveloxolone" compartment="cell" initialConcentration="0" boundaryCondition="true" constant="true">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+            <rdf:Description rdf:about="#Omaveloxolone">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:229661"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species metaid="Spermidine" id="Spermidine" name="Spermidine" compartment="cell" initialConcentration="0" boundaryCondition="true" constant="true">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+            <rdf:Description rdf:about="#Spermidine">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:16610"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="Autophagy_inactive" name="Autophagy_inactive" compartment="cell" initialConcentration="100" boundaryCondition="false" constant="false"/>
+      <species id="Autophagy_active" name="Autophagy_active" compartment="cell" initialConcentration="0" boundaryCondition="false" constant="false"/>
+      <species metaid="p21" id="p21" name="p21" compartment="cell" initialConcentration="0" boundaryCondition="false" constant="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+            <rdf:Description rdf:about="#p21">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P38936"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species metaid="BAX" id="BAX" name="BAX" compartment="cell" initialConcentration="0" boundaryCondition="false" constant="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+            <rdf:Description rdf:about="#BAX">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/Q07812"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species metaid="PUMA" id="PUMA" name="PUMA" compartment="cell" initialConcentration="0" boundaryCondition="false" constant="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/">
+            <rdf:Description rdf:about="#PUMA">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/Q96PG8"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="k_activation" name="k_activation" value="0.01" constant="true"/>
+      <parameter id="k_deactivation" name="k_deactivation" value="0.1" constant="true"/>
+      <parameter id="k_repair" name="k_repair" value="0.05" constant="true"/>
+      <parameter id="k_damage_production" name="k_damage_production" value="0.1" constant="true"/>
+      <parameter id="k_p53_activation" name="k_p53_activation" value="0.02" constant="true"/>
+      <parameter id="k_p53_deactivation" name="k_p53_deactivation" value="0.1" constant="true"/>
+      <parameter id="k_HDAC4_activation" name="k_HDAC4_activation" value="0.02" constant="true"/>
+      <parameter id="k_HDAC4_deactivation" name="k_HDAC4_deactivation" value="0.05" constant="true"/>
+      <parameter id="k_HDAC4_p53" name="k_HDAC4_p53" value="0.03" constant="true"/>
+      <parameter id="k_I2PP2A_production" name="k_I2PP2A_production" value="0.005" constant="true"/>
+      <parameter id="k_I2PP2A_degradation" name="k_I2PP2A_degradation" value="0.01" constant="true"/>
+      <parameter id="k_binding" name="k_binding" value="0.1" constant="true"/>
+      <parameter id="k_unbinding" name="k_unbinding" value="0.01" constant="true"/>
+      <parameter id="k_TOPBP1_activation" name="k_TOPBP1_activation" value="0.02" constant="true"/>
+      <parameter id="k_TOPBP1_deactivation" name="k_TOPBP1_deactivation" value="0.1" constant="true"/>
+      <parameter id="k_ATR_activation" name="k_ATR_activation" value="0.02" constant="true"/>
+      <parameter id="k_ATR_deactivation" name="k_ATR_deactivation" value="0.1" constant="true"/>
+      <parameter id="k_p53_activation_ATR" name="k_p53_activation_ATR" value="0.015" constant="true"/>
+      <parameter id="k_repair_ATR" name="k_repair_ATR" value="5e-07" constant="true"/>
+      <parameter id="k_CK2" name="k_CK2" value="0.02" constant="true"/>
+      <parameter id="k_dephos" name="k_dephos" value="0.05" constant="true"/>
+      <parameter id="k_CK2_TOPBP1" name="k_CK2_TOPBP1" value="0.02" constant="true"/>
+      <parameter id="alpha_spermidine" name="alpha_spermidine" value="0.5" constant="true"/>
+      <parameter id="k_CHK1_activation" name="k_CHK1_activation" value="0.02" constant="true"/>
+      <parameter id="k_CHK1_deactivation" name="k_CHK1_deactivation" value="0.1" constant="true"/>
+      <parameter id="k_CHK2_activation" name="k_CHK2_activation" value="0.02" constant="true"/>
+      <parameter id="k_CHK2_deactivation" name="k_CHK2_deactivation" value="0.1" constant="true"/>
+      <parameter id="k_p53_activation_CHK2" name="k_p53_activation_CHK2" value="0.02" constant="true"/>
+      <parameter id="k_NRF2_activation" name="k_NRF2_activation" value="0.01" constant="true"/>
+      <parameter id="k_NRF2_deactivation" name="k_NRF2_deactivation" value="0.05" constant="true"/>
+      <parameter id="k_NRF2_repair" name="k_NRF2_repair" value="0.02" constant="true"/>
+      <parameter id="k_NRF2_KEAP1" name="k_NRF2_KEAP1" value="0.01" constant="true"/>
+      <parameter id="K_omav" name="K_omav" value="1" constant="true"/>
+      <parameter id="k_spermidine_activation" name="k_spermidine_activation" value="0.05" constant="true"/>
+      <parameter id="k_autophagy_deactivation" name="k_autophagy_deactivation" value="0.05" constant="true"/>
+      <parameter id="k_autophagy_repair" name="k_autophagy_repair" value="0.001" constant="true"/>
+      <parameter id="Km_autophagy" name="Km_autophagy" value="10" constant="true"/>
+      <parameter id="k_p21" name="k_p21" value="0.09" constant="true"/>
+      <parameter id="k_p21_deg" name="k_p21_deg" value="0.01" constant="true"/>
+      <parameter id="k_BAX" name="k_BAX" value="0.05" constant="true"/>
+      <parameter id="k_BAX_deg" name="k_BAX_deg" value="0.01" constant="true"/>
+      <parameter id="k_PUMA" name="k_PUMA" value="0.03" constant="true"/>
+      <parameter id="k_PUMA_deg" name="k_PUMA_deg" value="0.01" constant="true"/>
+    </listOfParameters>
+    <listOfReactions>
+      <reaction id="ATM_activation" name="ATM_activation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ATM_inactive" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ATM_active" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="DNA_damage"/>
+          <modifierSpeciesReference species="TOPBP1_active"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_ATM_activation </ci>
+                <ci> ATM_inactive </ci>
+                <ci> DNA_damage </ci>
+                <ci> TOPBP1_active </ci>
+                <ci> cell </ci>
+                <ci> k_activation </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="ATM_deactivation" name="ATM_deactivation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ATM_active" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ATM_inactive" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_ATM_deactivation </ci>
+                <ci> ATM_active </ci>
+                <ci> cell </ci>
+                <ci> k_deactivation </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="DNA_damage_repair_ATM" name="DNA_damage_repair_ATM" reversible="false">
+        <listOfReactants>
+          <speciesReference species="DNA_damage" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="ATM_active"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_DNA_damage_repair_ATM </ci>
+                <ci> ATM_active </ci>
+                <ci> DNA_damage </ci>
+                <ci> cell </ci>
+                <ci> k_repair </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="p53_activation_ATM" name="p53_activation_ATM" reversible="false">
+        <listOfReactants>
+          <speciesReference species="p53_inactive" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="p53_active" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="ATM_active"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_p53_activation_ATM </ci>
+                <ci> ATM_active </ci>
+                <ci> cell </ci>
+                <ci> k_p53_activation </ci>
+                <ci> p53_inactive </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="p53_deactivation" name="p53_deactivation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="p53_active" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="p53_inactive" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_p53_deactivation </ci>
+                <ci> cell </ci>
+                <ci> k_p53_deactivation </ci>
+                <ci> p53_active </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="HDAC4_activation" name="HDAC4_activation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="HDAC4_inactive" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="HDAC4_active" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="PP2A"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_HDAC4_activation </ci>
+                <ci> HDAC4_inactive </ci>
+                <ci> PP2A </ci>
+                <ci> cell </ci>
+                <ci> k_HDAC4_activation </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="HDAC4_deactivation" name="HDAC4_deactivation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="HDAC4_active" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="HDAC4_inactive" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="ATM_active"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_HDAC4_deactivation </ci>
+                <ci> ATM_active </ci>
+                <ci> HDAC4_active </ci>
+                <ci> cell </ci>
+                <ci> k_HDAC4_deactivation </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="p53_deactivation_HDAC4" name="p53_deactivation_HDAC4" reversible="false">
+        <listOfReactants>
+          <speciesReference species="p53_active" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="p53_inactive" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="HDAC4_active"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_p53_deactivation_HDAC4 </ci>
+                <ci> HDAC4_active </ci>
+                <ci> cell </ci>
+                <ci> k_HDAC4_p53 </ci>
+                <ci> p53_active </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="I2PP2A_production" name="I2PP2A_production" reversible="false">
+        <listOfProducts>
+          <speciesReference species="I2PP2A" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="ATM_active"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_I2PP2A_production </ci>
+                <ci> ATM_active </ci>
+                <ci> cell </ci>
+                <ci> k_I2PP2A_production </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="I2PP2A_degradation" name="I2PP2A_degradation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="I2PP2A" stoichiometry="1"/>
+        </listOfReactants>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_I2PP2A_degradation </ci>
+                <ci> I2PP2A </ci>
+                <ci> cell </ci>
+                <ci> k_I2PP2A_degradation </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="PP2A_binding" name="PP2A_binding" reversible="false">
+        <listOfReactants>
+          <speciesReference species="PP2A" stoichiometry="1"/>
+          <speciesReference species="I2PP2A" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PP2A_I2PP2A" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_PP2A_binding </ci>
+                <ci> I2PP2A </ci>
+                <ci> PP2A </ci>
+                <ci> cell </ci>
+                <ci> k_binding </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="PP2A_unbinding" name="PP2A_unbinding" reversible="false">
+        <listOfReactants>
+          <speciesReference species="PP2A_I2PP2A" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PP2A" stoichiometry="1"/>
+          <speciesReference species="I2PP2A" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_PP2A_unbinding </ci>
+                <ci> PP2A_I2PP2A </ci>
+                <ci> cell </ci>
+                <ci> k_unbinding </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="TOPBP1_activation" name="TOPBP1_activation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="TOPBP1_inactive" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="TOPBP1_active" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="DNA_damage"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_TOPBP1_activation </ci>
+                <ci> DNA_damage </ci>
+                <ci> TOPBP1_inactive </ci>
+                <ci> cell </ci>
+                <ci> k_TOPBP1_activation </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="TOPBP1_deactivation" name="TOPBP1_deactivation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="TOPBP1_active" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="TOPBP1_inactive" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_TOPBP1_deactivation </ci>
+                <ci> TOPBP1_active </ci>
+                <ci> cell </ci>
+                <ci> k_TOPBP1_deactivation </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="ATR_activation" name="ATR_activation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ATR_inactive" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ATR_active" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="DNA_damage"/>
+          <modifierSpeciesReference species="TOPBP1_active"/>
+          <modifierSpeciesReference species="HDAC4_active"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_ATR_activation </ci>
+                <ci> ATR_inactive </ci>
+                <ci> DNA_damage </ci>
+                <ci> HDAC4_active </ci>
+                <ci> TOPBP1_active </ci>
+                <ci> cell </ci>
+                <ci> k_ATR_activation </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="ATR_deactivation" name="ATR_deactivation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ATR_active" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ATR_inactive" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_ATR_deactivation </ci>
+                <ci> ATR_active </ci>
+                <ci> cell </ci>
+                <ci> k_ATR_deactivation </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="p53_activation_ATR" name="p53_activation_ATR" reversible="false">
+        <listOfReactants>
+          <speciesReference species="p53_inactive" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="p53_active" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="ATR_active"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_p53_activation_ATR </ci>
+                <ci> ATR_active </ci>
+                <ci> cell </ci>
+                <ci> k_p53_activation_ATR </ci>
+                <ci> p53_inactive </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="DNA_damage_repair_ATR" name="DNA_damage_repair_ATR" reversible="false">
+        <listOfReactants>
+          <speciesReference species="DNA_damage" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="ATR_active"/>
+          <modifierSpeciesReference species="CHK1_active"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_DNA_damage_repair_ATR </ci>
+                <ci> ATR_active </ci>
+                <ci> CHK1_active </ci>
+                <ci> DNA_damage </ci>
+                <ci> cell </ci>
+                <ci> k_repair_ATR </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="CK2_phosphorylation_HDAC4" name="CK2_phosphorylation_HDAC4" reversible="false">
+        <listOfReactants>
+          <speciesReference species="HDAC4_active" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="HDAC4_phospho" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="CK2"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_CK2_phosphorylation_HDAC4 </ci>
+                <ci> CK2 </ci>
+                <ci> HDAC4_active </ci>
+                <ci> cell </ci>
+                <ci> k_CK2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="HDAC4_dephosphorylation" name="HDAC4_dephosphorylation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="HDAC4_phospho" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="HDAC4_inactive" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_HDAC4_dephosphorylation </ci>
+                <ci> HDAC4_phospho </ci>
+                <ci> cell </ci>
+                <ci> k_dephos </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="CK2_TOPBP1_activation" name="CK2_TOPBP1_activation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="TOPBP1_inactive" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="TOPBP1_active" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="CK2"/>
+          <modifierSpeciesReference species="Spermidine"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_CK2_TOPBP1_activation </ci>
+                <ci> Spermidine </ci>
+                <ci> TOPBP1_inactive </ci>
+                <ci> alpha_spermidine </ci>
+                <ci> cell </ci>
+                <ci> k_CK2_TOPBP1 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="CHK1_activation" name="CHK1_activation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="CHK1_inactive" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CHK1_active" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="ATR_active"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_CHK1_activation </ci>
+                <ci> ATR_active </ci>
+                <ci> CHK1_inactive </ci>
+                <ci> cell </ci>
+                <ci> k_CHK1_activation </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="CHK1_deactivation" name="CHK1_deactivation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="CHK1_active" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CHK1_inactive" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_CHK1_deactivation </ci>
+                <ci> CHK1_active </ci>
+                <ci> cell </ci>
+                <ci> k_CHK1_deactivation </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="CHK2_activation" name="CHK2_activation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="CHK2_inactive" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CHK2_active" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="ATM_active"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_CHK2_activation </ci>
+                <ci> ATM_active </ci>
+                <ci> CHK2_inactive </ci>
+                <ci> cell </ci>
+                <ci> k_CHK2_activation </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="CHK2_deactivation" name="CHK2_deactivation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="CHK2_active" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CHK2_inactive" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_CHK2_deactivation </ci>
+                <ci> CHK2_active </ci>
+                <ci> cell </ci>
+                <ci> k_CHK2_deactivation </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="p53_activation_CHK2" name="p53_activation_CHK2" reversible="false">
+        <listOfReactants>
+          <speciesReference species="p53_inactive" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="p53_active" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="CHK2_active"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_p53_activation_CHK2 </ci>
+                <ci> CHK2_active </ci>
+                <ci> cell </ci>
+                <ci> k_p53_activation_CHK2 </ci>
+                <ci> p53_inactive </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="NRF2_activation" name="NRF2_activation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="NRF2_inactive" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="NRF2_active" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="DNA_damage"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_NRF2_activation </ci>
+                <ci> DNA_damage </ci>
+                <ci> NRF2_inactive </ci>
+                <ci> cell </ci>
+                <ci> k_NRF2_activation </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="NRF2_deactivation" name="NRF2_deactivation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="NRF2_active" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="NRF2_inactive" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_NRF2_deactivation </ci>
+                <ci> NRF2_active </ci>
+                <ci> cell </ci>
+                <ci> k_NRF2_deactivation </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="NRF2_DNA_repair" name="NRF2_DNA_repair" reversible="false">
+        <listOfReactants>
+          <speciesReference species="DNA_damage" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="NRF2_active"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_NRF2_DNA_repair </ci>
+                <ci> DNA_damage </ci>
+                <ci> NRF2_active </ci>
+                <ci> cell </ci>
+                <ci> k_NRF2_repair </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="NRF2_degradation_KEAP1" name="NRF2_degradation_KEAP1" reversible="false">
+        <listOfReactants>
+          <speciesReference species="NRF2_inactive" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="NRF2_degraded" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="KEAP1"/>
+          <modifierSpeciesReference species="Omaveloxolone"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_NRF2_degradation_KEAP1 </ci>
+                <ci> KEAP1 </ci>
+                <ci> K_omav </ci>
+                <ci> NRF2_inactive </ci>
+                <ci> Omaveloxolone </ci>
+                <ci> cell </ci>
+                <ci> k_NRF2_KEAP1 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Autophagy_activation" name="Autophagy_activation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Autophagy_inactive" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Autophagy_active" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Spermidine"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_Autophagy_activation </ci>
+                <ci> Autophagy_inactive </ci>
+                <ci> Spermidine </ci>
+                <ci> cell </ci>
+                <ci> k_spermidine_activation </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Autophagy_deactivation" name="Autophagy_deactivation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Autophagy_active" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Autophagy_inactive" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_Autophagy_deactivation </ci>
+                <ci> Autophagy_active </ci>
+                <ci> cell </ci>
+                <ci> k_autophagy_deactivation </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Autophagy_DNA_repair" name="Autophagy_DNA_repair" reversible="false">
+        <listOfReactants>
+          <speciesReference species="DNA_damage" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Autophagy_active"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_Autophagy_DNA_repair </ci>
+                <ci> Autophagy_active </ci>
+                <ci> DNA_damage </ci>
+                <ci> Km_autophagy </ci>
+                <ci> cell </ci>
+                <ci> k_autophagy_repair </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="DNA_damage_production" name="DNA_damage_production" reversible="false">
+        <listOfProducts>
+          <speciesReference species="DNA_damage" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_DNA_damage_production </ci>
+                <ci> cell </ci>
+                <ci> k_damage_production </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="p21_production" name="p21_production" reversible="false">
+        <listOfProducts>
+          <speciesReference species="p21" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="p53_active"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_p21_production </ci>
+                <ci> cell </ci>
+                <ci> k_p21 </ci>
+                <ci> p53_active </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="p21_degradation" name="p21_degradation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="p21" stoichiometry="1"/>
+        </listOfReactants>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_p21_degradation </ci>
+                <ci> cell </ci>
+                <ci> k_p21_deg </ci>
+                <ci> p21 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="BAX_production" name="BAX_production" reversible="false">
+        <listOfProducts>
+          <speciesReference species="BAX" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="p53_active"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_BAX_production </ci>
+                <ci> cell </ci>
+                <ci> k_BAX </ci>
+                <ci> p53_active </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="BAX_degradation" name="BAX_degradation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="BAX" stoichiometry="1"/>
+        </listOfReactants>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_BAX_degradation </ci>
+                <ci> BAX </ci>
+                <ci> cell </ci>
+                <ci> k_BAX_deg </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="PUMA_production" name="PUMA_production" reversible="false">
+        <listOfProducts>
+          <speciesReference species="PUMA" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="p53_active"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_PUMA_production </ci>
+                <ci> cell </ci>
+                <ci> k_PUMA </ci>
+                <ci> p53_active </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="PUMA_degradation" name="PUMA_degradation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="PUMA" stoichiometry="1"/>
+        </listOfReactants>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <ci> Function_for_PUMA_degradation </ci>
+                <ci> PUMA </ci>
+                <ci> cell </ci>
+                <ci> k_PUMA_deg </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

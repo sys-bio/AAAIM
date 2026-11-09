@@ -46,7 +46,7 @@ def curate_single_model(model_file: str,
                   max_entities: int = None,
                   entity_type: str | EntityType = EntityType.CHEMICAL,
                   database: str | DatabaseID = DatabaseID.CHEBI,
-                  tax_id: str = None,
+                  tax_id: str | int | list | None = None,
                   chunk_size: int = 50,
                   save_to: Optional[str] = None,
                   verbose: bool = False,
@@ -68,7 +68,8 @@ def curate_single_model(model_file: str,
         max_entities: Maximum number of entities to annotate (None for all)
         entity_type: Type of entities to annotate ("chemical", "gene", "protein", "auto")
         database: Target database ("chebi", "ncbigene", "uniprot")
-        tax_id: For gene/protein annotations, the organism's tax_id for species-specific lookup
+        tax_id: For gene/protein annotations, one taxonomy id or a list of them.
+            When omitted, human (9606) and mouse (10090) are both returned.
         chunk_size: Size of chunks to split large models into (default: 50, None for no chunking)
         save_to: Output file prefix. Recommendations are saved to
             ``<save_to>_species.csv``. Default is the model filename.
@@ -635,7 +636,8 @@ def curate_model(model_file: str, **kwargs) -> Tuple[pd.DataFrame, Dict[str, Any
         model_file: Path to SBML model file
         **kwargs: Additional arguments passed to curate_single_model
             (``top_k`` for retrieval, ``n_return`` for the final LLM ranking,
-            ``save_to`` for the output file prefix)
+            ``save_to`` for the output file prefix, ``tax_id`` as one taxonomy
+            id or a list; omitted gene/protein searches use human and mouse)
         
     Returns:
         Tuple of (recommendations_df, metrics_dict)

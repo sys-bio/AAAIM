@@ -33,6 +33,8 @@ from core.database_search import (
     remove_symbols,
 )
 from core.feedback import AnnotationResult, build_initial_conversation
+from core.identity_support import assess_species_identity_support
+from core.qualifier_workflow import predict_species_qualifiers
 from core.llm_interface import (
     format_component_curated_name,
     get_system_prompt,
@@ -466,7 +468,7 @@ def _search_one_database(
     database: str,
     method: str,
     top_k: int,
-    tax_id: str = None,
+    tax_id: str | int | list | None = None,
     model_info: Dict[str, Any] = None,
     model_type: str = None,
 ) -> List[Recommendation]:
@@ -530,7 +532,7 @@ def _search_with_entity_type_validation(
     allowed_names: Sequence[str],
     method: str,
     top_k: int,
-    tax_id: str = None,
+    tax_id: str | int | list | None = None,
     model_info: Dict[str, Any] = None,
     model_type: str = None,
     validation_events: Optional[List[Dict[str, Any]]] = None,
@@ -808,7 +810,7 @@ def _search_complex_species(
     allowed_names: List[str],
     method: str,
     top_k: int,
-    tax_id: str = None,
+    tax_id: str | int | list | None = None,
     model_info: Dict[str, Any] = None,
     components: Optional[List[Tuple[str, List[str]]]] = None,
     model_type: str = None,
@@ -929,7 +931,7 @@ def _search_databases(
     databases: List[DatabaseID],
     method: str,
     top_k: int,
-    tax_id: str = None,
+    tax_id: str | int | list | None = None,
     entity_type_dict: Optional[Dict[str, str]] = None,
     model_info: Dict[str, Any] = None,
     component_dict: Optional[Dict[str, List[Tuple[str, List[str]]]]] = None,
@@ -1256,14 +1258,35 @@ def _print_run_summary(
     else:
         work = df[df["id"].astype(str) != "Reason:"] if "id" in df.columns else df
         n_entities = int(work["id"].nunique()) if "id" in work.columns else 0
+        unresolved = (
+            work["identity_status"].astype(str).str.lower() == "unresolved"
+            if "identity_status" in work.columns
+            else pd.Series(False, index=work.index)
+        )
         if "annotation" in work.columns:
             has_ann = work["annotation"].astype(str).str.strip()
-            pred = work[~has_ann.isin(["", "nan"])]
+            pred = work[~has_ann.isin(["", "nan"]) & ~unresolved]
         else:
             pred = work.iloc[0:0]
         n_ann = len(pred)
         n_with = int(pred["id"].nunique()) if "id" in pred.columns and not pred.empty else 0
         print(f"Found {n_ann} annotations for {n_with} of {n_entities} {entity_word}.")
+        if unresolved.any():
+            print(f"Left {int(work.loc[unresolved, 'id'].nunique())} {entity_word} with unresolved identities.")
+        if "tax_id" in work.columns:
+            taxon_names = {"9606": "human", "10090": "mouse", "10116": "rat"}
+            taxa: List[str] = []
+            for value in work["tax_id"].tolist():
+                text = str(value).strip()
+                if text and text.lower() not in {"nan", "none"} and text not in taxa:
+                    taxa.append(text)
+            if len(taxa) > 1:
+                shown = [
+                    f"{taxon_names[tax]} ({tax})" if tax in taxon_names else tax
+                    for tax in taxa
+                ]
+                joined = " and ".join(shown) if len(shown) == 2 else ", ".join(shown)
+                print(f"Results for {len(taxa)} taxonomies were returned: {joined}.")
 
     texts: List[str] = []
     if isinstance(reason, dict):
@@ -1282,9 +1305,9 @@ def _print_run_summary(
 def _build_species_annotation_choices(sub_df: pd.DataFrame) -> str:
     """Build one ranking choice per biological identity.
 
-    Several taxon-specific accessions may share an identity.  Only a
-    representative accession is offered to the LLM; selecting it retains every
-    accession in that identity group.
+    Taxon-specific and equal-score accessions may share an identity. A
+    representative accession is selectable, while the prompt also shows the
+    other group members. Selecting it retains every accession in the group.
     """
     lines: List[str] = []
     seen: set[str] = set()
@@ -1313,8 +1336,18 @@ def _build_species_annotation_choices(sub_df: pd.DataFrame) -> str:
             str(value) for value in same_identity.get("tax_id", pd.Series(dtype=str))
             if str(value).strip() not in {"", "nan", "None"}
         ]
+        additional = []
+        for _, grouped_row in same_identity.iterrows():
+            grouped_ann = str(grouped_row.get("annotation", "")).strip()
+            if not grouped_ann or grouped_ann.upper() == ann.upper():
+                continue
+            grouped_label = str(grouped_row.get("annotation_label", "")).strip()
+            additional.append(
+                f"{grouped_ann} ({grouped_label})" if grouped_label else grouped_ann
+            )
+        grouped_suffix = f" [group includes: {', '.join(additional)}]" if additional else ""
         suffix = f" [taxa: {', '.join(dict.fromkeys(taxa))}]" if taxa else ""
-        lines.append(f"{ann}: {label}{suffix}".rstrip())
+        lines.append(f"{ann}: {label}{grouped_suffix}{suffix}".rstrip())
     return "\n".join(lines)
 
 
@@ -1459,9 +1492,10 @@ def rank_species_annotations_with_llm(
     """Re-rank biological identities and keep at most *n_return* per unit.
 
     A unit is a whole ordinary species or one parsed component of a complex.
-    Taxon-specific accessions for one identity stay together. Units with
-    ``n_return`` or fewer identities are left as-is; all remaining units are
-    ranked in one LLM call.
+    Taxon-specific accessions and equal-score accessions within one taxon stay
+    together when they share a biological identity. Thus ``n_return`` limits
+    identity ranks, not accession rows. Units with ``n_return`` or fewer
+    identities are left as-is; all remaining units are ranked in one LLM call.
     """
     if recommendations_df.empty or "annotation" not in recommendations_df.columns:
         return recommendations_df
@@ -1680,7 +1714,7 @@ def annotate_single_model(
     max_entities: int = None,
     entity_type: str | EntityType = EntityType.CHEMICAL,
     database: str | DatabaseID | Sequence[str | DatabaseID] = DatabaseID.CHEBI,
-    tax_id: str = None,
+    tax_id: str | int | list | None = None,
     chunk_size: int = 50,
     species_recommendations_df = None,
     annotate: str = "species",
@@ -1692,6 +1726,10 @@ def annotate_single_model(
     validation: bool = False,
     source_fidelity: bool = False,
     audit_to: Optional[str] = None,
+    species_ids: Optional[Sequence[str]] = None,
+    context: bool = True,
+    predict_qualifiers: bool = False,
+    effort: str = "low",
     evaluate_candidates: bool = False,
     include_exchange_reactions: bool = False,
     cofactor_config=None,
@@ -1723,7 +1761,8 @@ def annotate_single_model(
             "auto", "reaction")
         database: Target database ("chebi", "ncbigene", "uniprot") or a list of
             databases when entity_type is "auto"
-        tax_id: For gene/protein annotations, the organism's tax_id for species-specific lookup
+        tax_id: For gene/protein annotations, one taxonomy id or a list of them.
+            When omitted, human (9606) and mouse (10090) are both returned.
         chunk_size: Size of chunks to split large models into (default: 50, None for no chunking)
         species_recommendations_df: Species recommendation table or CSV path. Used
             when annotating reactions; if omitted, ChEBI terms already in the model
@@ -1746,6 +1785,17 @@ def annotate_single_model(
             specificity at top-one ranking. Default False.
         audit_to: Optional JSON path for species normalization, retrieved
             candidates before ranking, and final rows. Does not change decisions.
+        species_ids: Annotate only these species IDs. Default is every species
+            in the model. ``max_entities`` then limits that subset.
+        context: If True, include model name, reactions, and notes in the
+            name-normalization prompt. If False, use display names only.
+        predict_qualifiers: Assess support for selected identities, then run a
+            separate automatic qualifier task for supported rows. Off by default
+            for existing workflows.
+        effort: ``"low"`` uses source names for clear matches and consults
+            notes/reaction roles only for ambiguous identities; ``"high"``
+            supplies that context to all identity-support decisions and the
+            qualifier task.
 
     Returns:
         AnnotationResult. Species tables are on ``species_recommendations_df``;
@@ -1769,6 +1819,8 @@ def annotate_single_model(
     # logger.info(f"Using LLM model: {llm_model}")
     # logger.info(f"Using method: {method} for database search")
     entity_type = _normalize_entity_type(entity_type)
+    if effort not in {"low", "high"}:
+        raise ValueError("effort must be 'low' or 'high'")
     if source_fidelity and not validation:
         raise ValueError("source_fidelity requires validation=True")
     databases = _normalize_databases(database)
@@ -1814,6 +1866,12 @@ def annotate_single_model(
             message=message,
             max_completion_tokens=max_completion_tokens,
             validation=validation,
+            predict_qualifiers=predict_qualifiers,
+            effort=effort,
+            source_fidelity=source_fidelity,
+            audit_to=audit_to,
+            species_ids=species_ids,
+            context=context,
         )
         if not hasattr(species_result, "species_recommendations_df"):
             return species_result
@@ -1896,7 +1954,31 @@ def annotate_single_model(
         _collect_existing_annotations(model_file, entity_type, databases)
     )
 
-    if max_entities:
+    if species_ids is not None:
+        wanted = {str(species_id) for species_id in species_ids}
+        entities_to_evaluate = [
+            species_id for species_id in all_entity_ids if str(species_id) in wanted
+        ]
+        if max_entities:
+            entities_to_evaluate = entities_to_evaluate[:max_entities]
+        kept = set(entities_to_evaluate)
+        existing_annotations = {
+            species_id: ids
+            for species_id, ids in existing_annotations.items()
+            if species_id in kept
+        }
+        qualifier_annotations = {
+            species_id: quals
+            for species_id, quals in qualifier_annotations.items()
+            if species_id in kept
+        }
+        existing_annotation_databases = {
+            key: db
+            for key, db in existing_annotation_databases.items()
+            if key[0] in kept
+        }
+        logger.info(f"Annotating {len(entities_to_evaluate)} requested entities")
+    elif max_entities:
         entities_to_evaluate = all_entity_ids[:max_entities]
         logger.info(f"Selected {max_entities} entities for annotation")
     else:
@@ -2004,6 +2086,7 @@ def annotate_single_model(
                     entity_type,
                     message=message,
                     structured_output=validation,
+                    context=context,
                 )
 
                 if not prompt:
@@ -2086,6 +2169,7 @@ def annotate_single_model(
                 entity_type,
                 message=message,
                 structured_output=validation,
+                context=context,
             )
 
             if not prompt:
@@ -2242,6 +2326,29 @@ def annotate_single_model(
                 recommendations_df = ranked_df
         else:
             logger.info("Skipping species LLM ranking (top_k <= n_return)")
+
+        if predict_qualifiers:
+            logger.info(">>>Step 7: Assessing identity support...<<<")
+            qualifier_start = time.time()
+            recommendations_df = assess_species_identity_support(
+                recommendations_df,
+                model_file=model_file,
+                llm_model=llm_model,
+                effort=effort,
+                max_completion_tokens=max_completion_tokens,
+                usage_callback=llm_usage_records.append,
+            )
+            logger.info(">>>Step 8: Predicting species qualifiers...<<<")
+            recommendations_df = predict_species_qualifiers(
+                recommendations_df,
+                model_file=model_file,
+                llm_model=llm_model,
+                effort=effort,
+                model_info=model_info if effort == "high" else None,
+                max_completion_tokens=max_completion_tokens,
+                usage_callback=llm_usage_records.append,
+            )
+            llm_time += time.time() - qualifier_start
 
     # Step 10: Calculate metrics
     total_time = time.time() - start_time
@@ -2455,6 +2562,15 @@ def _generate_recommendation_table(model_file: str,
     def candidate_value(values: Sequence[Any], index: int, default: Any) -> Any:
         return values[index] if index < len(values) else default
 
+    def qualifier_for(species_id: str, candidate: Optional[str] = None, existing: bool = False) -> str:
+        if existing:
+            recorded = (qualifier_annotations.get(species_id) or {}).get(candidate)
+            if recorded:
+                return recorded
+        if row_type(species_id).lower() == 'complex':
+            return 'hasPart'
+        return 'is'
+
     def empty_row_for(
         rec: Recommendation,
         curated_name: str,
@@ -2462,11 +2578,7 @@ def _generate_recommendation_table(model_file: str,
         component: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         component = component or {}
-        if rec.id in qualifier_annotations and qualifier_annotations[rec.id]:
-            all_qualifiers = list(qualifier_annotations[rec.id].values())
-            specific_qualifier = ', '.join(all_qualifiers) if all_qualifiers else 'is'
-        else:
-            specific_qualifier = 'is'
+        specific_qualifier = qualifier_for(rec.id)
         rec_db = row_database(rec.id)
         return {
             'file': filename,
@@ -2521,10 +2633,7 @@ def _generate_recommendation_table(model_file: str,
                 else:
                     update_action = 'ignore'
 
-            if is_existing and qualifier_annotations:
-                specific_qualifier = qualifier_annotations.get(rec.id, {}).get(candidate, 'is')
-            else:
-                specific_qualifier = 'is'
+            specific_qualifier = qualifier_for(rec.id, candidate, existing=is_existing)
 
             row = {
                 'file': filename,
@@ -2569,10 +2678,7 @@ def _generate_recommendation_table(model_file: str,
                     candidate_display = f"{rec_db.upper()}:{ann}"
                     curated_name = curated_for(species_id)
 
-                    if qualifier_annotations:
-                        specific_qualifier = qualifier_annotations.get(species_id, {}).get(ann, 'is')
-                    else:
-                        specific_qualifier = 'is'
+                    specific_qualifier = qualifier_for(species_id, ann, existing=True)
 
                     row = {
                         'file': filename,
@@ -2650,6 +2756,8 @@ def _calculate_metrics(recommendations_df: pd.DataFrame,
             'total_predictions': 0,
             'matches': 0,
             'accuracy': np.nan,
+            'unresolved_entities': 0,
+            'unresolved_candidates': 0,
             'total_time': total_time,
             'llm_time': llm_time,
             'search_time': search_time
@@ -2661,12 +2769,17 @@ def _calculate_metrics(recommendations_df: pd.DataFrame,
     # Filter out Reason row for metrics calculation
     df = recommendations_df[recommendations_df['id'] != 'Reason:'] if not recommendations_df.empty else recommendations_df
 
-    entities_with_predictions = df[df['annotation'] != '']['id'].nunique()
+    if 'identity_status' in df.columns:
+        unresolved = df['identity_status'].astype(str).str.lower() == 'unresolved'
+    else:
+        unresolved = pd.Series(False, index=df.index)
+    accepted = df[~unresolved]
+    entities_with_predictions = accepted[accepted['annotation'] != '']['id'].nunique()
     annotation_rate = entities_with_predictions / max_entities if max_entities > 0 else np.nan
 
     # Calculate accuracy based on existing annotations
-    total_predictions = len(df[df['annotation'] != ''])
-    matches = len(df[df['status'] == 'original and predicted'])
+    total_predictions = len(accepted[accepted['annotation'] != ''])
+    matches = len(accepted[accepted['status'] == 'original and predicted'])
 
     # Accuracy = matches / entities with existing annotations
     entities_with_existing = len(existing_annotations)
@@ -2682,6 +2795,8 @@ def _calculate_metrics(recommendations_df: pd.DataFrame,
         'total_predictions': total_predictions,
         'matches': matches,
         'accuracy': accuracy,
+        'unresolved_entities': int(df.loc[unresolved, 'id'].nunique()),
+        'unresolved_candidates': int((unresolved & (df['annotation'] != '')).sum()),
         'total_time': total_time,
         'llm_time': llm_time,
         'search_time': search_time
@@ -2741,9 +2856,12 @@ def annotate_model(model_file: str, **kwargs) -> Tuple[pd.DataFrame, Dict[str, A
     Pass ``annotate="species"`` (default), ``"reactions"``, or ``"both"``.
     Set ``verbose=True`` for a short progress summary.
     ``top_k`` is the species retrieval pool; ``n_return`` (default 3) is
-    how many IDs the final LLM ranking keeps.
+    how many biological identity ranks the final LLM ranking keeps; equal-score
+    accessions for a selected identity can produce multiple rows.
     ``save_to`` is the output file prefix (``<save_to>_species.csv`` /
     ``<save_to>_reactions.csv``).
+    ``tax_id`` is one NCBI taxonomy id or a list of them. When omitted, gene
+    and protein searches return human (9606) and mouse (10090).
     Other keyword arguments are forwarded to :func:`annotate_single_model`
     (including ``message`` for extra LLM prompt text).
     """

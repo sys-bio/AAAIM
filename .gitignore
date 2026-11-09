@@ -23,6 +23,8 @@ chroma_storage/
 tests/results/**
 tests/prev_results/
 tests/autoType/
+tests/qualifier_biomodels/
+tests/useCase/
 
 analysis/**
 

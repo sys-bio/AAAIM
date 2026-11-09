@@ -6,6 +6,8 @@ from .annotation_workflow import (
     print_results,
 )
 from .curation_workflow import curate_model, curate_single_model
+from .identity_support import assess_species_identity_support
+from .qualifier_workflow import predict_species_qualifiers
 from .feedback import AnnotationResult
 
 from .database_search import (
@@ -78,6 +80,8 @@ __all__ = [
     "curate_single_model",
     "print_results",
     "update_annotation",
+    "assess_species_identity_support",
+    "predict_species_qualifiers",
     "AnnotationResult",
     
     # Model + LLM
