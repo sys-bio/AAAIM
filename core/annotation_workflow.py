@@ -1707,7 +1707,7 @@ def _output_csv(save_to: Optional[str], model_file: str, kind: str) -> str:
 
 def annotate_single_model(
     model_file: str,
-    llm_model: str = "gpt-4o-mini",
+    llm_model: Optional[str] = None,
     method: str = "direct",
     top_k: int = 3,
     n_return: int = 3,
@@ -1734,6 +1734,12 @@ def annotate_single_model(
     include_exchange_reactions: bool = False,
     cofactor_config=None,
     disable_ontology_relaxation: bool = False,
+    reaction_method: str = "rulebased",
+    reaction_resources=None,
+    reaction_retriever=None,
+    reaction_transport=None,
+    reaction_reasoning_effort: str = "low",
+    dry_run: bool = False,
 ) -> Tuple[pd.DataFrame, Dict[str, Any]]:
     """
     Annotate a single model that has no or limited existing annotations.
@@ -1796,6 +1802,14 @@ def annotate_single_model(
             notes/reaction roles only for ambiguous identities; ``"high"``
             supplies that context to all identity-support decisions and the
             qualifier task.
+        reaction_method: ``"rulebased"`` (existing default) or ``"rrf_grounded"``.
+            The latter searches the full frozen catalog, independent of species
+            ``method``. Requires explicit local ``reaction_resources``; see
+            docs/rrf_grounded_api.md. Defaults to GPT-6.1 Terra when llm_model
+            is omitted and uses a 2,048 total output-token budget by default.
+        dry_run: For grounded reactions/both, prepare requests with no provider
+            calls. Combined dry-run skips species inference and uses supplied
+            species recommendations or source SBML evidence.
 
     Returns:
         AnnotationResult. Species tables are on ``species_recommendations_df``;
@@ -1805,6 +1819,52 @@ def annotate_single_model(
     """
     start_time = time.time()
     _silence_internal_logs()
+
+    if reaction_method not in {"rulebased", "rrf_grounded"}:
+        raise ValueError("reaction_method must be rulebased or rrf_grounded")
+    selected_mode = _resolve_annotate(annotate, _normalize_entity_type(entity_type), method)
+    if llm_model is None:
+        llm_model = "gpt-6.1-terra" if reaction_method == "rrf_grounded" and selected_mode in {"reactions", "both"} else "gpt-4o-mini"
+    if reaction_method == "rrf_grounded" and selected_mode in {"reactions", "both"}:
+        from core.reaction.grounded import annotate_grounded
+        species_result = None
+        species_df = species_recommendations_df
+        skip_species_resource_error = False
+        if selected_mode == "both" and not dry_run and reaction_retriever is None:
+            from core.reaction.retrieval import load_retriever
+            try:
+                if reaction_resources is None:
+                    raise ValueError("reaction_resources required")
+                reaction_retriever = load_retriever(reaction_resources)
+            except (ValueError, OSError, ImportError, RuntimeError):
+                skip_species_resource_error = True
+        if selected_mode == "both" and not dry_run and not skip_species_resource_error:
+            species_result = annotate_single_model(
+                model_file, llm_model=llm_model, method="direct" if method == "rulebased" else method,
+                top_k=top_k, n_return=n_return, max_entities=max_entities,
+                entity_type=EntityType.CHEMICAL if _normalize_entity_type(entity_type) == EntityType.REACTION else entity_type,
+                database=DatabaseID.CHEBI if _normalize_entity_type(entity_type) == EntityType.REACTION else database,
+                tax_id=tax_id, chunk_size=chunk_size, annotate="species",
+                save_to=save_to, verbose=verbose, message=message,
+                max_completion_tokens=max_completion_tokens, validation=validation,
+                source_fidelity=source_fidelity, audit_to=audit_to, species_ids=species_ids,
+                context=context, predict_qualifiers=predict_qualifiers, effort=effort)
+            if not isinstance(species_result, AnnotationResult):
+                raise RuntimeError("Species stage failed; grounded reaction stage was not attempted")
+            species_df = species_result.species_recommendations_df
+        species_stage = None
+        if selected_mode == "both":
+            species_stage = (species_result.metrics if species_result else
+                {"status": "skipped_resource_error" if skip_species_resource_error else "skipped_dry_run",
+                 "note": "No species inference; supplied table or SBML evidence only"})
+        result = annotate_grounded(model_file, species_recommendations_df=species_df,
+            resources=reaction_resources, retriever=reaction_retriever, transport=reaction_transport,
+            dry_run=dry_run, llm_model=llm_model, reasoning_effort=reaction_reasoning_effort,
+            max_output_tokens=2048 if max_completion_tokens is None else max_completion_tokens,
+            save_to=save_to, species_stage=species_stage)
+        return result
+    if dry_run:
+        raise ValueError("dry_run is supported only for reaction_method='rrf_grounded' with reactions/both")
 
     # Ensure these locals always exist (rulebased path doesn't query the LLM).
     all_prompts: List[str] = []

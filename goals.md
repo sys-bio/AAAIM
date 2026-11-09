@@ -1,7 +1,50 @@
 # AAAIM research project: goals and roadmap
 
-**Status updated:** 2026-09-03  
+**Status updated:** 2026-11-09
 **Target:** begin manuscript drafting in October 2026 without waiting for every stretch experiment
+
+## Current implementation status (public API integration)
+
+This status supplements the historical roadmap below. Research work on the
+phase branches must be distinguished from what is integrated on current main.
+This integration branch starts from upstream `866be205` and does not
+merge, replace or modify the existing phase branches or review PRs.
+
+- **Completed research:** the selected Phase 3B epoch-1 encoder/full-catalog RRF
+  and Phase 3C grounded validation pilot remain frozen. The scoped single-reviewer
+  human audit remains complete; independent review is deferred. Phase 4 research
+  implementation/results remain on their existing review branch. This integration
+  does not declare the broader experimental roadmap fulfilled.
+- **New public functionality:** explicit `reaction_method="rrf_grounded"` connects
+  arbitrary SBML reactions to full-catalog BM25 + selected encoder Top-100 RRF
+  (`k=60`), then strict Top-10 grounded selection/abstention. Reaction-only
+  SBML/table/CSV and combined species handoff preserve support uncertainty,
+  qualifiers, components, tied alternatives and explicit legacy provenance.
+  Existing rule-based defaults remain selectable. Resource hashes, CPU loading,
+  response statuses, complete payload hashes, usage, reviewable outputs and an
+  explicit additive reaction SBML writer are included.
+- **Locally tested, not a new biological result:** offline tests cover arbitrary
+  models, real selected-resource CPU loading, public handoff, mocked provider
+  outcomes, schema/evidence validation, request serialization, usage and SBML
+  round trips. See [verification](docs/rrf_grounded_verification.md). No new
+  grounded predictions or accuracy estimates are claimed.
+- **Luna prepared run protected:** 541 queries, BM25 Top-100 rankings, reconstructed
+  Top-10 evidence and complete preferred 2,048-token requests match the preserved
+  plan. Her existing guarded run remains a separate, unexecuted proposal; this
+  public API is not its spending runner. Actual inference and biological review
+  remain pending. Any future changed payload requires a new plan/cache identity.
+- **Deferred:** Phase 5 paid robustness execution stays paused and its valid
+  matched grounded comparison remains incomplete. No allocation or authorization
+  transfers to this integration. The later held-out evaluation remains sealed.
+
+The integration and reviewed qualifier fix `509ec09` have been committed and
+pushed on `janisshin:feature/rrf-grounded-public-api`. Current upstream main is
+still `866be205`; this focused integration targets `sys-bio:main` and does not
+depend on the open research/audit/Luna-analysis PRs.
+[Draft PR #25](https://github.com/sys-bio/AAAIM/pull/25) is open against `main`;
+the integration is not merged. Offline validation (138 targeted passes) and
+frozen Luna payload parity remain exact. Real inference and biological review remain
+pending separate scope and authorization; this status grants neither.
 
 ## Project objective
 
