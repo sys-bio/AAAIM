@@ -40,9 +40,10 @@ merge, replace or modify the existing phase branches or review PRs.
 The integration and reviewed qualifier fix `509ec09` have been committed and
 pushed on `janisshin:feature/rrf-grounded-public-api`. Current upstream main is
 still `866be205`; this focused integration targets `sys-bio:main` and does not
-depend on the open research/audit/Luna-analysis PRs. Draft PR preparation is in
-progress; the integration is not merged. Offline validation and frozen Luna
-payload parity remain exact. Real inference and biological review remain
+depend on the open research/audit/Luna-analysis PRs.
+[Draft PR #25](https://github.com/sys-bio/AAAIM/pull/25) is open against `main`;
+the integration is not merged. Offline validation (138 targeted passes) and
+frozen Luna payload parity remain exact. Real inference and biological review remain
 pending separate scope and authorization; this status grants neither.
 
 ## Project objective
