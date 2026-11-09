@@ -71,13 +71,38 @@ def species_evidence(model, recommendations=None):
         allowed, veto = set(), set()
         for row in rows:
             identifier = row["identifier"]
-            eligible = (row["identity_status"] in {"supported", "legacy_unassessed"}
-                and row["qualifier"] == "is" and not row["component_id"]
-                and row["qualifier_status"] != "abstain" and identifier is not None)
-            row["usable"] = eligible
-            if identifier:
-                (allowed if eligible else veto).add(identifier)
+            if row["component_id"] or row["qualifier"] == "hasPart":
+                scope = "component_relationship"
+            elif row["qualifier"] != "is":
+                scope = "non_identity_relationship"
+            else:
+                scope = "whole_species_identity"
+            row["assertion_scope"] = scope
+            if scope != "whole_species_identity":
+                reason = scope
+            elif identifier is None:
+                reason = "unrecognized_identifier"
+            elif row["identity_status"] not in {"supported", "legacy_unassessed"}:
+                reason = "unsupported_identity_status"
+            elif row["qualifier_status"] == "abstain":
+                reason = "qualifier_abstention"
+            else:
+                reason = None
+            row["eligible"] = reason is None
+            row["exclusion_reason"] = reason
+            # Relationships describe a different assertion, not a negative
+            # whole-species identity judgment about the same URI.
+            row["identity_veto"] = scope == "whole_species_identity" and identifier is not None and not row["eligible"]
+            if row["eligible"]:
+                allowed.add(identifier)
+            elif row["identity_veto"]:
+                veto.add(identifier)
         usable = sorted(allowed - veto)
+        for row in rows:
+            row["included"] = row["eligible"] and row["identifier"] not in veto
+            row["usable"] = row["included"]
+            if row["eligible"] and not row["included"]:
+                row["exclusion_reason"] = "identity_conflict"
         output[sid] = {"name": species[sid].getName() or sid,
             "chebi": [x for x in usable if x.startswith("CHEBI:")],
             "kegg_compound": [x for x in usable if x.startswith("C") and not x.startswith("CHEBI:")],

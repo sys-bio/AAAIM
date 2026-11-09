@@ -136,6 +136,114 @@ def test_ties_alternatives_conflicts_legacy_and_direct_compound(model_file):
     assert query["species_evidence"]["a"]["conflicting_identifiers"] == ["CHEBI:123"]
 
 
+@pytest.mark.parametrize("qualifier,component", [("hasPart", ""), ("isVersionOf", ""),
+    ("isDescribedBy", ""), ("is", "component")])
+@pytest.mark.parametrize("legacy", [False, True])
+def test_identity_survives_same_identifier_relationship_rows(model_file, qualifier, component, legacy):
+    rows = [{"id": "a", "annotation": "CHEBI:15422", "qualifier": "is", "component_id": ""},
+            {"id": "a", "annotation": "CHEBI:15422", "qualifier": qualifier, "component_id": component}]
+    if not legacy:
+        for row in rows:
+            row["identity_status"] = "supported"
+    queries = []
+    for ordered in [rows, rows[::-1]]:
+        query = build_queries(model_file, pd.DataFrame(ordered))[1]
+        queries.append(query["query"])
+        ev = query["species_evidence"]["a"]
+        assert ev["chebi"] == ["CHEBI:15422"]
+        assert ev["conflicting_identifiers"] == []
+        identity = next(r for r in ev["records"] if r["qualifier"] == "is" and not r["component_id"])
+        relation = next(r for r in ev["records"] if r is not identity)
+        assert identity["eligible"] and identity["included"] and identity["usable"]
+        assert identity["assertion_scope"] == "whole_species_identity"
+        assert not relation["eligible"] and not relation["included"] and not relation["identity_veto"]
+        assert relation["raw_annotation"] == "CHEBI:15422" and relation["exclusion_reason"]
+        assert relation["identity_status"] == ("legacy_unassessed" if legacy else "supported")
+    assert queries[0] == queries[1]
+
+
+@pytest.mark.parametrize("status", ["unresolved", "", None, "not_applicable", "unknown"])
+def test_actual_identity_conflicts_veto_independent_of_order(model_file, status):
+    rows = [{"id": "a", "annotation": "CHEBI:15422", "qualifier": "is", "identity_status": "supported"},
+            {"id": "a", "annotation": "CHEBI:15422", "qualifier": "", "identity_status": status}]
+    for ordered in [rows, rows[::-1]]:
+        ev = build_queries(model_file, pd.DataFrame(ordered))[1]["species_evidence"]["a"]
+        assert ev["chebi"] == [] and ev["conflicting_identifiers"] == ["CHEBI:15422"]
+        allowed = next(r for r in ev["records"] if r["identity_status"] == "supported")
+        rejected = next(r for r in ev["records"] if r is not allowed)
+        assert allowed["eligible"] and not allowed["included"] and not allowed["usable"]
+        assert allowed["exclusion_reason"] == "identity_conflict"
+        assert rejected["identity_veto"] and not rejected["eligible"]
+
+
+def test_qualifier_abstention_on_whole_identity_still_vetoes(model_file):
+    rows = [{"id": "a", "annotation": "CHEBI:15422", "identity_status": "supported", "qualifier": "is"},
+            {"id": "a", "annotation": "CHEBI:15422", "identity_status": "supported", "qualifier": "is", "qualifier_status": "abstain"}]
+    for ordered in [rows, rows[::-1]]:
+        ev = build_queries(model_file, pd.DataFrame(ordered))[1]["species_evidence"]["a"]
+        assert ev["chebi"] == [] and ev["conflicting_identifiers"] == ["CHEBI:15422"]
+        assert any(r["identity_veto"] and r["exclusion_reason"] == "qualifier_abstention" for r in ev["records"])
+
+
+@pytest.mark.parametrize("status", ["supported", "unresolved", "", "unknown"])
+def test_component_and_relationship_only_rows_never_become_identity_or_veto(model_file, status):
+    rows = [{"id": "a", "annotation": "CHEBI:15422", "identity_status": status, "qualifier": "hasPart"},
+            {"id": "a", "annotation": "CHEBI:15422", "identity_status": status, "qualifier": "is", "component_id": "part"}]
+    for ordered in [rows, rows[::-1]]:
+        ev = build_queries(model_file, pd.DataFrame(ordered))[1]["species_evidence"]["a"]
+        assert ev["chebi"] == [] and ev["conflicting_identifiers"] == []
+        assert len(ev["records"]) == 2
+        assert all(not r["eligible"] and not r["included"] and not r["identity_veto"] for r in ev["records"])
+        # Even unresolved component statements cannot veto a separate whole identity.
+        whole = {"id": "a", "annotation": "CHEBI:15422", "identity_status": "supported", "qualifier": "is"}
+        assert build_queries(model_file, pd.DataFrame(ordered + [whole]))[1]["species_evidence"]["a"]["chebi"] == ["CHEBI:15422"]
+
+
+def test_legacy_column_absence_differs_from_modern_missing_status(model_file):
+    frame = pd.DataFrame([{"id": "a", "annotation": "CHEBI:15422", "qualifier": "is"}])
+    legacy = build_queries(model_file, frame)[1]["species_evidence"]["a"]
+    frame["identity_status"] = None
+    modern = build_queries(model_file, frame)[1]["species_evidence"]["a"]
+    assert legacy["chebi"] == ["CHEBI:15422"] and modern["chebi"] == []
+    assert legacy["records"][0]["identity_status"] == "legacy_unassessed"
+    assert modern["records"][0]["identity_status"] == "missing"
+    assert modern["records"][0]["identity_veto"]
+
+
+@pytest.mark.parametrize("qualifier", [libsbml.BQB_HAS_PART, libsbml.BQB_IS_VERSION_OF, libsbml.BQB_IS_DESCRIBED_BY])
+@pytest.mark.parametrize("with_identity", [False, True])
+def test_same_sbml_uri_under_multiple_qualifiers(model_file, qualifier, with_identity):
+    doc = load_model(model_file)
+    queries = []
+    qualifiers = [libsbml.BQB_IS, qualifier] if with_identity else [qualifier]
+    for order in [qualifiers, qualifiers[::-1]]:
+        species = doc.getModel().getSpecies("a")
+        # addCVTerm deduplicates the URI across qualifiers. Construct the RDF
+        # directly, as upstream's updated annotation writer does, then reparse.
+        blocks = "".join(
+            f'<bqbiol:{name}><rdf:Bag><rdf:li rdf:resource="https://identifiers.org/chebi/CHEBI:15422"/>'
+            f'</rdf:Bag></bqbiol:{name}>'
+            for name in [libsbml.BiolQualifierType_toString(kind) for kind in order])
+        assert species.setAnnotation(
+            '<annotation><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" '
+            'xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">'
+            f'<rdf:Description rdf:about="#meta_a">{blocks}</rdf:Description>'
+            '</rdf:RDF></annotation>') == 0
+        assert libsbml.writeSBMLToFile(doc, str(model_file))
+        query = build_queries(model_file)[1]
+        queries.append(query["query"])
+        ev = query["species_evidence"]["a"]
+        assert ev["chebi"] == (["CHEBI:15422"] if with_identity else [])
+        assert ev["conflicting_identifiers"] == []
+        assert len(ev["records"]) == len(qualifiers)
+        assert all(r["included"] == (r["qualifier"] == "is") for r in ev["records"])
+        # An authoritative table still suppresses the old SBML identity.
+        modern = pd.DataFrame([{"id": "a", "annotation": "CHEBI:15422", "identity_status": "unresolved"}])
+        handoff = build_queries(model_file, modern)[1]["species_evidence"]["a"]
+        assert handoff["chebi"] == [] and {r["source"] for r in handoff["records"]} == {"recommendation"}
+    assert queries[0] == queries[1]
+
+
 def test_sbml_evidence_qualifiers_and_unresolved_override(model_file):
     doc = load_model(model_file)
     species = doc.getModel().getSpecies("a")

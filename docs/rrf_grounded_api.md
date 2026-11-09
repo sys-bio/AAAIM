@@ -110,6 +110,11 @@ unresolved, missing, legacy, tied, conflicting and component evidence. Names
 survive unusable IDs. Identifier presence does not establish correctness.
 Unresolved candidates and complex components remain in the sidecar audit but
 do not become whole-species compound mappings.
+An eligible whole-species `is` mapping survives the same URI under `hasPart`,
+another non-identity qualifier, or a component row. Only conflicting
+whole-species identity assertions can veto it. Row provenance distinguishes
+pre-conflict `eligible` from final `included`/`usable` and records exclusion
+reasons; different qualifiers alone are not identity conflicts.
 
 Queries use the selected target-local equation/participant template, including
 stoichiometry and names, with KEGG reaction accessions redacted. Reaction names
