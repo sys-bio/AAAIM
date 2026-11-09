@@ -142,4 +142,54 @@ results and the completed scoped human audit remain valid and unchanged.
 Phase 5 remains paused/incomplete. This integration does not supply independent
 review, finish the broader roadmap, or authorize Luna's pending 541-call run.
 No commits, pushes, merges, tags, releases, PR changes or external messages were
-made. See [usage and remaining work](rrf_grounded_api.md).
+made during the initial local implementation verification. See
+[usage and remaining work](rrf_grounded_api.md).
+
+## Draft PR preflight (2026-11-09)
+
+Fresh fetches confirm upstream main remains `866be205`, the integration's base.
+The reviewed qualifier fix `509ec09` is retained as an ancestor. The complete
+diff against main contains only the public runtime, API plumbing, species
+contract, reaction writer, offline tests, compatibility helper, examples,
+documentation and ignore/status updates. There is no dependency on the open
+Phase 4/5, audit or Luna analysis PRs. No frozen benchmark file is changed.
+
+Preflight found and corrected the analogous explicit reaction-writer edge
+case: libSBML's `addCVTerm` suppresses a new `is` assertion if the URI already
+appears under another qualifier. The writer now appends that RDF assertion
+without discarding existing biological or model CVTerms. Round-trip tests
+cover `isVersionOf`/`hasPart`, repeated writes, and unrelated URI namespaces.
+This does not change inference, retrieval or provider payloads.
+
+Current targeted verification: **96 passed, 1 deselected** (public integration,
+qualifier regressions, identity support, qualifiers, writer and usage), plus
+**42 passed** (Phase 3B release, Phase 3C grounded/validation compatibility).
+The small real CPU encoder fixture passes. The full-catalog CPU test was not
+repeated: its earlier passing result remains applicable because retrieval
+code/resources are unchanged. All 969 frozen validation RRF rankings match.
+
+The three existing taxonomy-stub failures reproduce with the same traces on
+both this branch and the preserved upstream-equivalent audit worktree: each
+rejects the upstream loader's `tax_id` keyword. `git diff --exit-code` confirms
+the database search implementation and test file are identical to upstream
+main on both checkouts. Nine other tests in that file pass on each checkout.
+
+Luna's new, separate ignored report is
+`_rrf_grounded_work/luna_pr_compatibility_20261109/`: all 541 queries and BM25
+Top-100 lists, 5,410 reconstructed evidence records and complete preferred
+provider payloads remain identical. Protected inputs are checksum-unchanged.
+The prior plan verifier confirms both 512/2,048 versions unchanged. Dense
+rankings were reused only after exact query checks; no Luna encoder/provider
+inference ran. There is no unavailable parity check within this frozen-artifact
+comparison; new real-model behavior and biological correctness remain untested.
+
+Retrieval, fusion, selected archive, smoke and validation verifiers pass; the
+prior scanner checks eight manifests with zero problems. `git diff --check`
+passes. No paid calls, held-out access or benchmark regeneration occurred.
+
+The selected encoder archive is already published on upstream's
+`model2507280001-reaction-review` release, despite the historical export
+registry recording no upload at export time. The API instructions link that
+existing asset and its pinned verification/install path; no release was made
+as part of PR preparation. PR creation and branch publication do not mean
+merge, authorize execution, or complete Luna's pending inference/review.

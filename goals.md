@@ -1,13 +1,13 @@
 # AAAIM research project: goals and roadmap
 
-**Status updated:** 2026-11-08
+**Status updated:** 2026-11-09
 **Target:** begin manuscript drafting in October 2026 without waiting for every stretch experiment
 
 ## Current implementation status (public API integration)
 
 This status supplements the historical roadmap below. Research work on the
 phase branches must be distinguished from what is integrated on current main.
-This local integration branch starts from upstream `866be205` and does not
+This integration branch starts from upstream `866be205` and does not
 merge, replace or modify the existing phase branches or review PRs.
 
 - **Completed research:** the selected Phase 3B epoch-1 encoder/full-catalog RRF
@@ -37,9 +37,13 @@ merge, replace or modify the existing phase branches or review PRs.
   matched grounded comparison remains incomplete. No allocation or authorization
   transfers to this integration. The later held-out evaluation remains sealed.
 
-Next technical step is review of this local public integration and its species
-contract against upstream, followed by separately scoped/authorized real-inference
-validation if desired. No paid calls, commits, pushes or PR changes were made.
+The integration and reviewed qualifier fix `509ec09` have been committed and
+pushed on `janisshin:feature/rrf-grounded-public-api`. Current upstream main is
+still `866be205`; this focused integration targets `sys-bio:main` and does not
+depend on the open research/audit/Luna-analysis PRs. Draft PR preparation is in
+progress; the integration is not merged. Offline validation and frozen Luna
+payload parity remain exact. Real inference and biological review remain
+pending separate scope and authorization; this status grants neither.
 
 ## Project objective
 

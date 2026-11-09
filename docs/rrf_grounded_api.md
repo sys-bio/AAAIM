@@ -9,8 +9,18 @@ examples and execution plans.
 
 ## Local resources
 
-Obtain the selected inference archive and frozen KEGG catalog explicitly using
-the [selected release/restore instructions](../benchmark/dist/RESTORE_phase3b-selected-epoch1.md).
+The selected encoder ZIP is available on the existing
+[MODEL2507280001 reaction review release](https://github.com/sys-bio/AAAIM/releases/tag/model2507280001-reaction-review).
+Download it explicitly (no API inference is involved):
+
+```bash
+gh release download model2507280001-reaction-review --repo sys-bio/AAAIM \
+  --pattern aaaim-phase3b-selected-epoch1-inference.zip --dir _rrf_grounded_work
+```
+
+The frozen catalog is tracked at `data/kegg/kegg_reaction_features.lzma` in the
+repository. The [restore instructions](../benchmark/dist/RESTORE_phase3b-selected-epoch1.md)
+also record archive verification details. No new release/tag is required.
 The runtime never downloads models or reads benchmark populations, labels,
 judgments or frozen rankings. It needs only a local catalog and extracted
 inference resources. From the repository root:
@@ -18,7 +28,7 @@ inference resources. From the repository root:
 ```python
 from core.reaction.retrieval import install_resources
 
-install_resources("/local/aaaim-phase3b-selected-epoch1-inference.zip",
+install_resources("_rrf_grounded_work/aaaim-phase3b-selected-epoch1-inference.zip",
                   "_rrf_grounded_work/encoder")
 ```
 
@@ -179,6 +189,9 @@ Annotation never writes SBML automatically. This additive writer requires
 `model.getReaction`, and uses `bqbiol:is`. It preserves existing CVTerms and
 meta IDs, creates a unique meta ID if needed, rejects species/component
 qualifiers and source-path overwrite, and refuses an existing output file.
+If the same reaction URI already occurs under another qualifier, the explicit
+writer adds the reviewed `is` relationship while retaining the other CVTerms,
+including model qualifiers. Repeated writes do not duplicate the identity.
 Upstream's species writer and identity/qualifier workflow remain unchanged.
 
 ## Local evidence and remaining work
@@ -187,4 +200,5 @@ See [verification and compatibility](rrf_grounded_verification.md). This is
 public API integration of completed research components, not a new accuracy
 experiment. Real inference on unseen models and biological review remain
 pending. The completed human audit is not reopened. Phase 5 remains paused;
-the held-out test remains sealed. No commit, push or PR change was made.
+the held-out test remains sealed. The feature branch is proposed for review;
+PR creation does not mean the functionality is merged or Luna's request is complete.

@@ -475,6 +475,41 @@ def test_runtime_has_no_benchmark_imports():
                 assert all(not alias.name.startswith("benchmark") for alias in node.names)
 
 
+@pytest.mark.parametrize("existing_qualifier", ["isVersionOf", "hasPart"])
+def test_reaction_writer_retains_same_uri_under_distinct_qualifiers(model_file, tmp_path, existing_qualifier):
+    uri = "https://identifiers.org/kegg.reaction/R00001"
+    document = load_model(model_file)
+    reaction = document.getModel().getReaction("first")
+    reaction.setMetaId("original_meta")
+    assert reaction.setAnnotation(
+        '<annotation><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" '
+        'xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" '
+        'xmlns:bqmodel="http://biomodels.net/model-qualifiers/">'
+        '<rdf:Description rdf:about="#original_meta">'
+        f'<bqbiol:{existing_qualifier}><rdf:Bag><rdf:li rdf:resource="{uri}"/>'
+        f'</rdf:Bag></bqbiol:{existing_qualifier}>'
+        '<bqmodel:isDescribedBy><rdf:Bag><rdf:li rdf:resource="urn:kept:model"/>'
+        '</rdf:Bag></bqmodel:isDescribedBy></rdf:Description></rdf:RDF></annotation>') == 0
+    assert libsbml.writeSBMLToFile(document, str(model_file))
+    original = model_file.read_bytes()
+    rows = pd.DataFrame([{"id": "first", "annotation": "KEGG:R00001", "status": "selected",
+                          "qualifier": "is", "update_annotation": "add"}])
+    output = tmp_path / "reviewed.xml"
+    write_reaction_annotations(model_file, rows, output)
+    doc = load_model(output)
+    reaction = doc.getModel().getReaction("first")
+    biology = {libsbml.BiolQualifierType_toString(term.getBiologicalQualifierType()):
+               [term.getResourceURI(i) for i in range(term.getNumResources())]
+               for term in reaction.getCVTerms() if term.getQualifierType() == libsbml.BIOLOGICAL_QUALIFIER}
+    assert biology == {existing_qualifier: [uri], "is": [uri]}
+    assert "urn:kept:model" in reaction.getAnnotationString()
+    assert reaction.getMetaId() == "original_meta" and model_file.read_bytes() == original
+    repeated = tmp_path / "reviewed_again.xml"
+    write_reaction_annotations(output, rows, repeated)
+    second = load_model(repeated)
+    assert second.getModel().getReaction("first").getAnnotationString() == reaction.getAnnotationString()
+
+
 def test_frozen_validation_components_fusion_parity():
     """Only frozen validation queries/rankings; no split, labels or test data."""
     import lzma
@@ -490,6 +525,25 @@ def test_frozen_validation_components_fusion_parity():
         key = row["model_id"], row["reaction_id"]
         assert row["split"] == "validation"
         assert retrieval.fusion([bm[key], dense[key]], row["ranked_ids"]) == row["ranked_ids"]
+
+
+def test_reaction_writer_does_not_confuse_identifier_namespaces(model_file, tmp_path):
+    document = load_model(model_file)
+    reaction = document.getModel().getReaction("first")
+    reaction.setMetaId("original_meta")
+    term = libsbml.CVTerm(libsbml.BIOLOGICAL_QUALIFIER)
+    term.setBiologicalQualifierType(libsbml.BQB_IS)
+    term.addResource("https://example.invalid/other/R00001")
+    assert reaction.addCVTerm(term) == 0
+    assert libsbml.writeSBMLToFile(document, str(model_file))
+    rows = pd.DataFrame([{"id": "first", "annotation": "KEGG:R00001", "status": "selected",
+                          "qualifier": "is", "update_annotation": "add"}])
+    output = tmp_path / "reviewed.xml"
+    write_reaction_annotations(model_file, rows, output)
+    doc = load_model(output)
+    resources = {term.getResourceURI(i) for term in doc.getModel().getReaction("first").getCVTerms()
+                 for i in range(term.getNumResources())}
+    assert resources == {"https://example.invalid/other/R00001", "https://identifiers.org/kegg.reaction/R00001"}
 
 
 def test_deep_payload_diff_detects_order_settings_and_numerical_drift():

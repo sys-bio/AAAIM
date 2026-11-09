@@ -8,6 +8,33 @@ import pandas as pd
 from .species_evidence import load_model
 
 
+def _append_identity(reaction, uri):
+    """Append RDF directly: addCVTerm deduplicates a URI across qualifiers."""
+    rdf_uri = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    node = libsbml.XMLNode.convertStringToXMLNode(
+        f'<annotation><rdf:RDF xmlns:rdf="{rdf_uri}" '
+        'xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">'
+        f'<rdf:Description rdf:about="#{reaction.getMetaId()}"><bqbiol:is><rdf:Bag>'
+        f'<rdf:li rdf:resource="{uri}"/></rdf:Bag></bqbiol:is>'
+        '</rdf:Description></rdf:RDF></annotation>')
+    if not reaction.isSetAnnotation():
+        return reaction.setAnnotation(node)
+    annotation = reaction.getAnnotation().clone()
+    rdf = next((annotation.getChild(i) for i in range(annotation.getNumChildren())
+                if annotation.getChild(i).getName() == "RDF" and annotation.getChild(i).getURI() == rdf_uri), None)
+    if rdf is None:
+        annotation.addChild(node.getChild(0))
+    else:
+        description = next((rdf.getChild(i) for i in range(rdf.getNumChildren())
+            if rdf.getChild(i).getName() == "Description" and rdf.getChild(i).getURI() == rdf_uri
+            and rdf.getChild(i).getAttributes().getValue("about", rdf_uri) == "#" + reaction.getMetaId()), None)
+        if description is None:
+            rdf.addChild(node.getChild(0).getChild(0))
+        else:
+            description.addChild(node.getChild(0).getChild(0).getChild(0))
+    return reaction.setAnnotation(annotation)
+
+
 def write_reaction_annotations(model_file, recommendations, output_file):
     """Write only explicitly approved, successful selections; preserve all CVTerms.
 
@@ -35,7 +62,8 @@ def write_reaction_annotations(model_file, recommendations, output_file):
     for reaction, identifier in additions:
         uri = "https://identifiers.org/kegg.reaction/" + identifier
         present = any(term.getBiologicalQualifierType() == libsbml.BQB_IS and
-                      any(term.getResourceURI(i).rstrip("/").endswith(identifier) for i in range(term.getNumResources()))
+                      any(re.fullmatch(r"https?://identifiers\.org/kegg\.reaction[/:]" + identifier + r"/?",
+                                       term.getResourceURI(i)) for i in range(term.getNumResources()))
                       for term in reaction.getCVTerms() or [])
         if present:
             continue
@@ -47,10 +75,7 @@ def write_reaction_annotations(model_file, recommendations, output_file):
                 index += 1
                 meta_id = base + "_" + str(index)
             reaction.setMetaId(meta_id)
-        term = libsbml.CVTerm(libsbml.BIOLOGICAL_QUALIFIER)
-        term.setBiologicalQualifierType(libsbml.BQB_IS)
-        term.addResource(uri)
-        if reaction.addCVTerm(term) != libsbml.LIBSBML_OPERATION_SUCCESS:
+        if _append_identity(reaction, uri) != libsbml.LIBSBML_OPERATION_SUCCESS:
             raise ValueError("Could not add reaction CVTerm")
     if not libsbml.writeSBMLToFile(document, str(output_file)):
         raise OSError("Could not save output SBML")
