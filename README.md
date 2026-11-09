@@ -2,6 +2,12 @@
 
 AAAIM is an LLM-powered tool that annotates biosimulation models (SBML) with standardized ontology terms from ChEBI, NCBI Gene, UniProt, and KEGG. You can annotate **species**, **reactions**, or **both**.
 
+An explicit `reaction_method="rrf_grounded"` option now connects the selected
+full-catalog BM25 + trained bi-encoder RRF retrieval to evidence-constrained
+reaction selection/abstention. The existing rule-based reaction default remains
+available. See [the public grounded API, local resources and dry-run example](docs/rrf_grounded_api.md)
+and [local verification/compatibility evidence](docs/rrf_grounded_verification.md).
+
 ![AAAIM Workflow](docs/AAAIM%20workflow.png)
 
 ---
