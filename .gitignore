@@ -58,3 +58,7 @@ benchmark/phase3/phase3b_full/_*
 benchmark/phase3/phase3c_smoke/_*/
 # Phase 3C paired-validation raw cache, attempt ledger, and resumable scratch.
 benchmark/phase3/phase3c_validation/_*
+benchmark/phase3/error_audit/reviewer/pass*_review_*.json
+benchmark/phase3/error_audit/reviewer/pass*_review_*.csv
+benchmark/phase3/error_audit/formal_pass1/raw/
+benchmark/integration_worktrees/

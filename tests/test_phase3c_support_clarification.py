@@ -51,3 +51,4 @@ def test_frozen_validation_counts_preserve_accuracy_result():
     assert result["grounded_exact_correct_all"] == 102
     assert result["fusion_exact_correct_all"] == 93
     assert result["grounded_in_evidence_reference_incorrect"] == 22
+    assert result["grounded_full_evidence_compliant"] == 161
