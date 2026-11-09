@@ -23,3 +23,8 @@ benchmark/PHASE4.md -text
 benchmark/requirements-phase4.txt -text
 benchmark/scripts/phase4_*.py -text
 tests/test_phase4_*.py -text
+# Reviewer pages are byte-manifested and must remain double-clickable after checkout.
+benchmark/phase3/error_audit/reviewer/* text eol=lf
+benchmark/scripts/phase3_error_analysis.py -text
+tests/test_phase3_error_analysis.py -text
+benchmark/phase3/error_audit/ANALYSIS.md -text
