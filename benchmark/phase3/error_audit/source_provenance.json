@@ -1,0 +1,56 @@
+{
+  "api_calls": 0,
+  "hash_function": "sha256_portable (LF-normalized for text)",
+  "live_sources": [],
+  "schema": "phase3-error-audit-source-provenance-v1",
+  "source_artifacts": [
+    {
+      "path": "benchmark/phase3/pilot_sample.csv",
+      "sha256": "be086250023be617df278ab62549756b23bd477f8f5d6de92531608dcbf1088a"
+    },
+    {
+      "path": "benchmark/phase3/pilot_answer_key.csv",
+      "sha256": "62415034be49a11dd672e0940675f8ebe827cb217b79a773386f1c4d20bb4c83"
+    },
+    {
+      "path": "benchmark/phase3/phase3c_validation/answer_key_join.jsonl",
+      "sha256": "01844afb38ff036a0c139896e1b0ea70163b8e0324c74c952e431bba01f4ad43"
+    },
+    {
+      "path": "benchmark/phase3/phase3c_validation/frozen_evidence.jsonl",
+      "sha256": "b6045e9a77c22c884642b567dd8f011a76ad4f943b2fa3e33b96f87fcf490a53"
+    },
+    {
+      "path": "benchmark/phase3/phase3c_validation/frozen_responses.jsonl",
+      "sha256": "72e14d505b67a2aebeaebd844de26164da0d404bd7cff7df662cd765cf344999"
+    },
+    {
+      "path": "benchmark/phase3/phase3c_validation/requests.jsonl",
+      "sha256": "ce962521b6503ed217c22dd640ab7cc46a5f8ead1f49c747107904cf746ccf95"
+    },
+    {
+      "path": "benchmark/phase3/retrieval_baselines/rankings_phase2_rule_based.jsonl",
+      "sha256": "e22954bb0b8cee75ff17511d96fc42b923217003388f3e4e4a7e03200ef31c0d"
+    },
+    {
+      "path": "benchmark/phase3/retrieval_baselines/rankings_bm25.jsonl",
+      "sha256": "f0b700248e388bd75fb7bca9c05a46ecbb6b5802861a8631eadb944e0b1572f0"
+    },
+    {
+      "path": "benchmark/phase3/phase3b_full/rankings_epoch_1.jsonl",
+      "sha256": "660c7ff55d787928050ba963cf4236788de21f661a523a5ebc1c47abbfc2f304"
+    },
+    {
+      "path": "benchmark/phase3/phase3b_fusion/rankings_bm25_trained_epoch1_rrf.jsonl.xz",
+      "sha256": "9601149e0297831ebfbfb4fde24b725a9b00287cf1b4d74270bf2921be138b31"
+    },
+    {
+      "path": "data/kegg/kegg_reaction_features.lzma",
+      "sha256": "00acb4de1bbfb1ddae0298a09d218f93eb22241844179439ff34a2912fba046c"
+    }
+  ],
+  "source_phase3c_commit": "c61f2ff5e259e82f4eddc5725861a67fa51998b9",
+  "split": "validation",
+  "test_labels_loaded": 0,
+  "test_rows_loaded": 0
+}

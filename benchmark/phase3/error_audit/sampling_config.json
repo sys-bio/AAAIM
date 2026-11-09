@@ -1,0 +1,124 @@
+{
+  "algorithm_version": "phase3-formal-audit-sampling-v1",
+  "api_calls": 0,
+  "biological_judgments_made": false,
+  "blinded_seed": 20260911,
+  "blinded_seed_derivation": "sampling_seed + 1",
+  "builds_required_for_freeze": 2,
+  "category_presentation_order": [
+    "random_control",
+    "phase3c_failure_harm",
+    "cross_method_disagreement",
+    "mechanically_suspicious",
+    "manual_nomination_or_documented_edge_case"
+  ],
+  "category_quotas": {
+    "cross_method_disagreement": 10,
+    "manual_nomination_or_documented_edge_case": 5,
+    "mechanically_suspicious": 10,
+    "phase3c_failure_harm": 15,
+    "random_control": 20
+  },
+  "category_selection_order": [
+    "random_control",
+    "manual_nomination_or_documented_edge_case",
+    "phase3c_failure_harm",
+    "cross_method_disagreement",
+    "mechanically_suspicious"
+  ],
+  "cluster_balancing": "lowest prior total cluster count, then lowest category cluster count, then seeded SHA-256 cluster tie-break; one case per cluster per round",
+  "deduplication": "first assigned primary category wins; later categories refill from remaining eligible reactions",
+  "disagreement_diversity_order": [
+    "bm25_correct_trained_incorrect",
+    "trained_correct_bm25_incorrect",
+    "fusion_correct_components_differ",
+    "grounded_correct_phase3a_incorrect",
+    "phase3a_correct_grounded_incorrect",
+    "fusion_correct_grounded_harms",
+    "fusion_incorrect_grounded_recovers",
+    "exact_mismatch_brite_orthology_match",
+    "large_ground_truth_rank_change",
+    "one_method_abstains_another_correct"
+  ],
+  "documented_edge_sources": {
+    "benchmark/phase3/phase3b_fusion/qualitative_examples.json": "187232dad72996b3c49f357066beda79ff015a3bdc5dec388c0147ab003f91c8",
+    "benchmark/phase3/phase3c_validation/qualitative_examples.json": "33e91e50e9be45d06d8669ede2f12823ffcf032f5a67e175a71a68758cbab990",
+    "benchmark/phase3/retrieval_baselines/qualitative_examples.json": "2502b9373ec9edecc10711d2648119edeadb61bd3678b9550135a55f4fc46aae"
+  },
+  "earlier_frozen_artifact_digests": {
+    "benchmark/PHASE2_MANIFEST.json": "438f6058bea5d85cabdb4174459e340827fda34ceb6778a38901600af0510ba8",
+    "benchmark/manifest/model_registry.json": "8ba6de7b4171309828a043fa83835dcb1c47d202952152fa945119fa8cb1e367",
+    "benchmark/phase3/phase3b_full/artifact_manifest.json": "47aab9b3bea664e7078b9839619fb1c984305a1e5fa69fdd093ea2c066a5e0d9",
+    "benchmark/phase3/phase3b_fusion/artifact_manifest.json": "6f4f6107c85174ed546818ce61b0e42f1e8db7c8ec723940fa164011a769ab7b",
+    "benchmark/phase3/phase3b_smoke/artifact_manifest.json": "f95ee881a0517f208462db4ad85016713b562a917ce19577ec2a592655bf2007",
+    "benchmark/phase3/phase3c_smoke/artifact_manifest.json": "ce7ebcd2459e22498fa1d3cee22696d0ea7f7402a63436503cd84678a10f7128",
+    "benchmark/phase3/phase3c_validation/artifact_manifest.json": "376c7e34e20afb5e72f45a40dc698330e85ca5489c6e50eecd842f63995c3647",
+    "benchmark/phase3/retrieval_baselines/artifact_manifest.json": "32b80d73f6d078977ed7e2559b14bc7b1a116a5980463b06589e7c31c730f08e",
+    "benchmark/phase3/validation/artifact_manifest.json": "8001818f261f861c0f463012821cc06ee5f1651a000d1ac48ca99e2437817693",
+    "benchmark/phase3/validation_rescue_2048/artifact_manifest.json": "6f89c2ea102e228982d3dbd0bb846f2505bba88bf8c99362be062358dec33ca1",
+    "benchmark/phase3/validation_rescue_2048/sensitivity/artifact_manifest.json": "5c269b63150a03974dbe999533d7fc7b9ab3e7b528711a3d49950e9108d3601e"
+  },
+  "failure_additional_balancing": "after cluster and model balance, prefer the least represented corrected stratum and seen/unseen group within the failure category",
+  "failure_priority_order": [
+    "fusion_top1_correct_grounded_incorrect",
+    "fusion_top1_correct_grounded_abstained",
+    "truth_fusion_ranks2_10_grounded_incorrect",
+    "truth_fusion_ranks2_10_grounded_abstained",
+    "truth_absent_fusion_top10_grounded_incorrect_in_evidence",
+    "other_grounded_nonexact",
+    "evidence_compliance_case"
+  ],
+  "mechanical_suspicion_rule_order": [
+    "multiple_ground_truth_kegg_ids",
+    "ground_truth_id_absent_from_frozen_catalog",
+    "exact_mismatch_resolved_by_frozen_brite_orthology"
+  ],
+  "model_balancing": "within the chosen cluster, lowest prior total model count, then lowest category model count, then seeded SHA-256 audit-ID tie-break",
+  "new_inference": false,
+  "nomination_split_membership_source": {
+    "path": "benchmark/phase3/splits.csv",
+    "sha256": "7df9566693ea1f2c170fe9d442fde47d8927ee6668a9d5c1c2e762d52cf55a4b",
+    "targeted_membership_only": {
+      "BIOMD0000000013,E12": [
+        "train"
+      ]
+    },
+    "test_labels_loaded": 0,
+    "test_rows_loaded": 0
+  },
+  "random_control_allowed_selection_fields": [
+    "audit_id",
+    "sample_id",
+    "model_id",
+    "reaction_id",
+    "cluster_id",
+    "split"
+  ],
+  "random_control_excluded_features": [
+    "correctness",
+    "abstention",
+    "disagreement",
+    "suspicion",
+    "catalog_presence",
+    "method_outcome"
+  ],
+  "sampling_seed": 20260910,
+  "schema": "phase3-formal-audit-sampling-config-v1",
+  "source_prompt1_artifact_digests": {
+    "README.md": "108cb3648d9b285c716abc5ba31f4bb6d2d755248e00ef5388c22b7bf6d7a08f",
+    "all_method_disagreements.csv": "7eea9fcb73a3ec0f5d57f03bb13d98742e8fbe03be4f908c10c9ae807fb6d995",
+    "all_validation_outcomes.csv": "14a70bc7144ed47d08e2e2dafe74ae286e792e00758a1424003c560de43c4eb6",
+    "deterministic_rebuild.json": "4461180ee9bc8ef0503641899f4aecfae4ee0de7fe2696531f514299fa41fadf",
+    "inventory_summary.json": "66654f7096fcd76be3d69aa8ea92d8b325bad4b9c70257575bdf204c7cbbd8d3",
+    "phase3c_abstentions.csv": "39b768af179cdef205ca31a1dab62b771d7fa0d8206cbfef9e16a42ae3392e68",
+    "phase3c_compliance_cases.csv": "36af96b47707e9b53e4d72f931aa53c52180c517689087748f1f36903530cacc",
+    "phase3c_incorrect_selections.csv": "53a7db0908edaee033d98ac695dddda1f2d243341622b4a55f7b9c9a52409f32",
+    "phase3c_noncorrect_review.csv": "a2fd3e4016112ebc8bc11e13903df49e9f49b6313695a9457d867b69bf846b7c",
+    "source_provenance.json": "519757f37f578515be387147b54ffa4df73dab929b9a678445e3d06157f2d133"
+  },
+  "source_prompt1_commit": "46844578de89df7db4d0deca258be4f33ccd2ead",
+  "source_prompt1_manifest_sha256_at_commit": "28d4f25aa1cd705f83ed6cc1c395fd48171956292e113903c37080ef88787c73",
+  "stable_tie_break": "SHA-256(seed, namespace, stable identifier), then audit_id",
+  "test_labels_loaded": 0,
+  "test_rows_loaded": 0
+}
