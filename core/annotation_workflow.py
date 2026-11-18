@@ -6,6 +6,7 @@ Provides the primary function that users will call to get recommendation tables
 for all species in a model.
 """
 
+import contextvars
 import json
 import logging
 import re
@@ -59,12 +60,20 @@ from core.model_info import (
     get_species_display_names,
     get_species_chemical_properties,
 )
+from core.reaction.deprecation import (
+    DEFAULT_REACTION_METHOD,
+    REACTION_METHODS,
+    warn_rulebased_deprecated,
+)
 
 
 logger = logging.getLogger(__name__)
 
 # Suppress pandas FutureWarning noise (e.g., concat dtype changes)
 warnings.filterwarnings("ignore", category=FutureWarning)
+
+# Set while a nested call runs on behalf of an outer call that already warned.
+_RULEBASED_WARNING_ISSUED = contextvars.ContextVar("rulebased_warning_issued", default=False)
 
 SUPPORTED_SEARCH_DATABASES = {
     DatabaseID.CHEBI.value,
@@ -1159,6 +1168,17 @@ def _resolve_annotate(annotate: str, entity_type: EntityType, method: str) -> st
     return "species"
 
 
+def _resolve_reaction_method(reaction_method: Optional[str], method: str) -> str:
+    """Return the reaction method; omitted means grounded unless legacy ``method="rulebased"``."""
+    if reaction_method is None:
+        return "rulebased" if method == "rulebased" else DEFAULT_REACTION_METHOD
+    if reaction_method not in REACTION_METHODS:
+        raise ValueError(
+            "reaction_method must be 'rrf_grounded' (default) or 'rulebased' (deprecated)"
+        )
+    return reaction_method
+
+
 def _chebi_rows(df: Optional[pd.DataFrame]) -> pd.DataFrame:
     """Keep recommendation rows whose annotation is a ChEBI identifier."""
     if df is None or df.empty or "annotation" not in df.columns:
@@ -1734,7 +1754,7 @@ def annotate_single_model(
     include_exchange_reactions: bool = False,
     cofactor_config=None,
     disable_ontology_relaxation: bool = False,
-    reaction_method: str = "rulebased",
+    reaction_method: Optional[str] = None,
     reaction_resources=None,
     reaction_retriever=None,
     reaction_transport=None,
@@ -1752,8 +1772,10 @@ def annotate_single_model(
     Args:
         model_file: Path to SBML model file
         llm_model: LLM model to use ("gpt-4o-mini" or an OpenRouter "meta-llama/..." model)
-        method: Method to use for database search ("direct", "rag"); reactions use
-            rule-based KEGG matching plus LLM ranking
+        method: Method to use for species database search ("direct", "rag").
+            Reactions are selected separately by ``reaction_method``. The
+            legacy value ``"rulebased"`` selects deprecated rule-based reaction
+            annotation when ``reaction_method`` is omitted.
         top_k: Number of biological identities to retrieve per ordinary species
             or parsed complex component (direct/RAG). Taxon accessions belonging
             to one identity do not consume extra slots. Synonym generation is
@@ -1802,9 +1824,13 @@ def annotate_single_model(
             notes/reaction roles only for ambiguous identities; ``"high"``
             supplies that context to all identity-support decisions and the
             qualifier task.
-        reaction_method: ``"rulebased"`` (existing default) or ``"rrf_grounded"``.
-            The latter searches the full frozen catalog, independent of species
-            ``method``. Requires explicit local ``reaction_resources``; see
+        reaction_method: ``"rrf_grounded"`` (default when omitted) or
+            ``"rulebased"`` (deprecated; emits ``DeprecationWarning``). Only
+            consulted when reactions are annotated; it does not change the
+            ``annotate`` scope. ``"rrf_grounded"`` searches the full frozen
+            catalog, independent of species ``method``, and requires explicit
+            local ``reaction_resources``; missing or invalid resources yield
+            ``resource_error`` rows, never a rule-based fallback. See
             docs/rrf_grounded_api.md. Defaults to GPT-6.1 Terra when llm_model
             is omitted and uses a 2,048 total output-token budget by default.
         dry_run: For grounded reactions/both, prepare requests with no provider
@@ -1820,9 +1846,12 @@ def annotate_single_model(
     start_time = time.time()
     _silence_internal_logs()
 
-    if reaction_method not in {"rulebased", "rrf_grounded"}:
-        raise ValueError("reaction_method must be rulebased or rrf_grounded")
+    explicit_reaction_method = reaction_method is not None
+    reaction_method = _resolve_reaction_method(reaction_method, method)
     selected_mode = _resolve_annotate(annotate, _normalize_entity_type(entity_type), method)
+    if (reaction_method == "rulebased" and selected_mode in {"reactions", "both"}
+            and not _RULEBASED_WARNING_ISSUED.get()):
+        warn_rulebased_deprecated(via_method_alias=not explicit_reaction_method)
     if llm_model is None:
         llm_model = "gpt-6.1-terra" if reaction_method == "rrf_grounded" and selected_mode in {"reactions", "both"} else "gpt-4o-mini"
     if reaction_method == "rrf_grounded" and selected_mode in {"reactions", "both"}:
@@ -1941,26 +1970,31 @@ def annotate_single_model(
             logger.warning("No ChEBI species annotations to drive reaction annotation")
             species_result.reaction_recommendations_df = pd.DataFrame()
             return species_result
-        reaction_result = annotate_single_model(
-            model_file,
-            llm_model=llm_model,
-            method="rulebased",
-            top_k=top_k,
-            n_return=n_return,
-            max_entities=max_entities,
-            entity_type=EntityType.REACTION,
-            database=DatabaseID.KEGG,
-            tax_id=tax_id,
-            chunk_size=chunk_size,
-            species_recommendations_df=chebi_df,
-            annotate="reactions",
-            save_to=save_to,
-            verbose=verbose,
-            em_max_iterations=em_max_iterations,
-            message=message,
-            max_completion_tokens=max_completion_tokens,
-            validation=validation,
-        )
+        warned = _RULEBASED_WARNING_ISSUED.set(True)
+        try:
+            reaction_result = annotate_single_model(
+                model_file,
+                llm_model=llm_model,
+                method="rulebased",
+                top_k=top_k,
+                n_return=n_return,
+                max_entities=max_entities,
+                entity_type=EntityType.REACTION,
+                database=DatabaseID.KEGG,
+                tax_id=tax_id,
+                chunk_size=chunk_size,
+                species_recommendations_df=chebi_df,
+                annotate="reactions",
+                save_to=save_to,
+                verbose=verbose,
+                em_max_iterations=em_max_iterations,
+                message=message,
+                max_completion_tokens=max_completion_tokens,
+                validation=validation,
+                reaction_method="rulebased",
+            )
+        finally:
+            _RULEBASED_WARNING_ISSUED.reset(warned)
         if hasattr(reaction_result, "recommendations_df"):
             reaction_result.species_recommendations_df = species_df
             reaction_result.metrics = {**species_result.metrics, "reaction": reaction_result.metrics}
@@ -2067,12 +2101,12 @@ def annotate_single_model(
     if method == 'rulebased':
         logger.info(f">>>Step 3: Rule-based search of KEGG Reaction Annotations...<<<")
         from core.reaction.annotation_workflow import (
+            _run_kegg_annotation_workflow_rulebased,
             rank_kegg_annotations_with_llm,
-            run_kegg_annotation_workflow_rulebased,
         )
         search_start = time.time()
         from core.reaction.amendment_config import ConvergenceConfig
-        kegg_annotation_workflow_result = run_kegg_annotation_workflow_rulebased(
+        kegg_annotation_workflow_result = _run_kegg_annotation_workflow_rulebased(
             model_file,
             species_recommendations_df,
             existing_annotations=existing_annotations,
@@ -2914,6 +2948,9 @@ def annotate_model(model_file: str, **kwargs) -> Tuple[pd.DataFrame, Dict[str, A
     Annotate species, reactions, or both in an SBML model.
 
     Pass ``annotate="species"`` (default), ``"reactions"``, or ``"both"``.
+    Reactions use ``reaction_method="rrf_grounded"`` unless another method is
+    passed; it needs explicit local ``reaction_resources``.
+    ``reaction_method="rulebased"`` is deprecated but still supported.
     Set ``verbose=True`` for a short progress summary.
     ``top_k`` is the species retrieval pool; ``n_return`` (default 3) is
     how many biological identity ranks the final LLM ranking keeps; equal-score

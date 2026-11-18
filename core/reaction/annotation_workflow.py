@@ -22,6 +22,7 @@ from .amendment import LikelihoodCalculator, update_participant_likelihoods
 from .matching import map_reactions_to_kegg
 from .scoring import SimilarityCalculator
 from .amendment_config import CofactorConfig, ConvergenceConfig, MatchingConfig
+from .deprecation import warn_rulebased_deprecated
 from .kegg_features import KEGGReactionFeatures, REF_KEGG_REACTION_FEATURES
 from .relaxation_workflow import map_reactions_to_kegg_with_relaxation
 from .species_probability import init_species_probs_from_dict
@@ -41,7 +42,18 @@ class KeggAnnotationWorkflowResult(NamedTuple):
     updated_participants: pd.DataFrame
 
 
-def run_kegg_annotation_workflow_rulebased(
+def run_kegg_annotation_workflow_rulebased(*args, **kwargs) -> Optional[KeggAnnotationWorkflowResult]:
+    """Deprecated direct entry point to rule-based KEGG reaction annotation.
+
+    Emits ``DeprecationWarning`` and otherwise behaves exactly like before;
+    prefer ``annotate_model(annotate="reactions")`` with ``reaction_resources``.
+    Arguments are those of :func:`_run_kegg_annotation_workflow_rulebased`.
+    """
+    warn_rulebased_deprecated()
+    return _run_kegg_annotation_workflow_rulebased(*args, **kwargs)
+
+
+def _run_kegg_annotation_workflow_rulebased(
     model_file: str,
     recommendations_df: pd.DataFrame,
     existing_annotations: Optional[Dict[str, List[str]]] = None,
@@ -713,7 +725,7 @@ def curate_reactions_kegg_rulebased(
         if species_recommendations_df.empty:
             return pd.DataFrame(), {"error": "Empty species ChEBI table"}
 
-        result = run_kegg_annotation_workflow_rulebased(
+        result = _run_kegg_annotation_workflow_rulebased(
             model_file=model_file,
             recommendations_df=species_recommendations_df,
             existing_annotations=existing_annotations,

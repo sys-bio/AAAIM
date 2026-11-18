@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""KEGG reaction annotation example.
+"""Legacy rule-based KEGG reaction annotation example.
 
-Species-only, reactions-only, and combined (species then reactions) workflows.
+Rule-based reaction annotation is deprecated and is no longer the default; it
+is selected here explicitly with ``reaction_method="rulebased"`` and emits a
+``DeprecationWarning``. The default grounded method is shown in
+``examples/grounded_reactions.py``.
 """
 
 from __future__ import annotations
@@ -39,6 +42,7 @@ def main() -> None:
         model_file=model_file,
         llm_model=llm_model,
         annotate="reactions",
+        reaction_method="rulebased",
         n_return=TOP_K,
         species_recommendations_df=species_csv,
     )
@@ -48,6 +52,7 @@ def main() -> None:
     #     model_file=model_file,
     #     llm_model=llm_model,
     #     annotate="both",
+    #     reaction_method="rulebased",
     #     entity_type="chemical",
     #     database="chebi",
     #     top_k=TOP_K,

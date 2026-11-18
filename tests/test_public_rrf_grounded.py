@@ -1,5 +1,11 @@
 """Offline public API contract tests; provider transport is always blocked/mocked."""
+import ast
+import importlib.util
 import json
+import subprocess
+import sys
+import textwrap
+import warnings
 from pathlib import Path
 
 import libsbml
@@ -10,6 +16,7 @@ import httpx
 
 import core.annotation_workflow as workflow
 from core import AnnotationResult, annotate_model, write_reaction_annotations
+from core.reaction import annotation_workflow as reaction_workflow
 from core.reaction import grounded, retrieval
 from core.reaction.species_evidence import build_queries, compound_id, load_model, species_evidence
 
@@ -360,17 +367,17 @@ def test_resource_and_input_failure_accounting(model_file):
     assert result.metrics["provider_attempts"] == 0
 
 
-def test_rulebased_default_and_explicit_option_keep_existing_dispatch(model_file, monkeypatch):
+def test_explicit_rulebased_option_keeps_existing_dispatch(model_file, monkeypatch):
     calls = []
     def old_loader(model, species):
         calls.append(model)
         return pd.DataFrame()
     monkeypatch.setattr(workflow, "_load_species_recommendations", old_loader)
     monkeypatch.setattr(grounded, "annotate_grounded", lambda *a, **k: pytest.fail("grounded path entered for baseline"))
-    for options in [{}, {"reaction_method": "rulebased"}]:
-        frame, metrics = annotate_model(str(model_file), annotate="reactions", **options)
-        assert frame.empty and "No species ChEBI annotations" in metrics["error"]
-    assert len(calls) == 2
+    with pytest.warns(DeprecationWarning, match="reaction_method='rulebased'"):
+        frame, metrics = annotate_model(str(model_file), annotate="reactions", reaction_method="rulebased")
+    assert frame.empty and "No species ChEBI annotations" in metrics["error"]
+    assert len(calls) == 1
 
 
 def test_payload_identity_includes_every_provider_input_excludes_sidecar():
@@ -619,3 +626,256 @@ def test_full_catalog_cpu_public_dry_run_when_requested(model_file):
         assert len(retrieval.load_retriever(resources).catalog) == 12312
     finally:
         torch.set_num_threads(threads)
+
+
+# --- Grounded reaction default and rule-based deprecation ----------------------------------
+
+ROOT = Path(__file__).resolve().parents[1]
+LEGACY_NOTICE = "Rule-based KEGG reaction annotation"
+SPECIES_TABLE = pd.DataFrame([{"id": "a", "annotation": "CHEBI:15422", "match_score": 1.0}])
+
+
+def forbidden(*args, **kwargs):
+    pytest.fail("unexpected call on this path")
+
+
+def reaction_deprecations(record):
+    return [w for w in record if issubclass(w.category, DeprecationWarning) and LEGACY_NOTICE in str(w.message)]
+
+
+def recorded(call, *args, **kwargs):
+    with warnings.catch_warnings(record=True) as record:
+        warnings.simplefilter("always")
+        result = call(*args, **kwargs)
+    return result, reaction_deprecations(record)
+
+
+@pytest.fixture
+def no_legacy(monkeypatch):
+    monkeypatch.setattr(reaction_workflow, "_run_kegg_annotation_workflow_rulebased", forbidden)
+    monkeypatch.setattr(workflow, "_load_species_recommendations", forbidden)
+
+
+@pytest.fixture
+def legacy_calls(monkeypatch):
+    calls = []
+    def legacy(model_file, recommendations_df, **kwargs):
+        calls.append({"model_file": model_file, "species": recommendations_df, **kwargs})
+        return None
+    monkeypatch.setattr(reaction_workflow, "_run_kegg_annotation_workflow_rulebased", legacy)
+    monkeypatch.setattr(grounded, "annotate_grounded", forbidden)
+    return calls
+
+
+def species_stage_stub(monkeypatch, model_file, frame):
+    """Replace only nested species-only calls; reaction calls run the real implementation."""
+    real = workflow.annotate_single_model
+    calls = []
+    def stub(*args, **kwargs):
+        if kwargs.get("annotate") != "species":
+            return real(*args, **kwargs)
+        calls.append(kwargs)
+        result = AnnotationResult(frame, {"species_stub": True}, model_file=str(model_file), conversation_history=[],
+            entities_to_evaluate=["a"], entity_type="chemical", database="chebi", method=kwargs["method"],
+            llm_model=kwargs["llm_model"], top_k=3)
+        result.species_recommendations_df = frame
+        return result
+    monkeypatch.setattr(workflow, "annotate_single_model", stub)
+    return real, calls
+
+
+def test_reaction_method_resolution_is_separate_from_species_method():
+    resolve = workflow._resolve_reaction_method
+    assert resolve(None, "direct") == resolve(None, "rag") == "rrf_grounded"
+    assert resolve(None, "rulebased") == "rulebased"
+    assert resolve("rrf_grounded", "rulebased") == "rrf_grounded"
+    assert resolve("rulebased", "rag") == "rulebased"
+    with pytest.raises(ValueError, match="'rrf_grounded' \\(default\\) or 'rulebased' \\(deprecated\\)"):
+        resolve("rag", "direct")
+
+
+@pytest.mark.parametrize("scope", [{"annotate": "reactions"}, {"annotate": "both"}, {"entity_type": "reaction"},
+                                   {"annotate": "reactions", "reaction_method": "rrf_grounded"},
+                                   {"annotate": "both", "reaction_method": "rrf_grounded", "method": "rulebased"}])
+def test_omitted_or_explicit_grounded_selects_grounded_dry_run(model_file, monkeypatch, no_legacy, scope):
+    monkeypatch.setattr(workflow, "get_species_recommendations_direct", forbidden)
+    result, warned = recorded(annotate_model, str(model_file), reaction_retriever=TinyRetriever(),
+                              reaction_transport=forbidden, dry_run=True, **scope)
+    assert not warned
+    assert result.metrics["method"] == "rrf_grounded"
+    assert result.metrics["configuration"]["model"] == "gpt-6.1-terra"
+    assert result.metrics["provider_attempts"] == 0
+    assert set(result.recommendations_df.status) == {"planned"}
+    if scope.get("annotate") == "both":
+        assert result.metrics["species_stage"]["status"] == "skipped_dry_run"
+
+
+def test_omitted_method_reactions_live_mocked_transport(model_file, no_legacy):
+    bodies = []
+    result, warned = recorded(annotate_model, str(model_file), annotate="reactions",
+        reaction_retriever=TinyRetriever(), reaction_transport=lambda body: bodies.append(body) or response())
+    assert not warned and len(bodies) == 3
+    assert all(body["model"] == "gpt-6.1-terra" and body["max_output_tokens"] == 2048 for body in bodies)
+    assert set(result.recommendations_df.status) == {"selected"}
+    assert result.metrics["coverage"] == {"total_reactions": 3, "status_counts": {"selected": 3}}
+
+
+def test_omitted_method_combined_runs_species_then_grounded(model_file, monkeypatch, no_legacy):
+    frame = pd.DataFrame([{"id": "a", "annotation": "KEGG:C00001", "identity_status": "supported"}])
+    real, species_calls = species_stage_stub(monkeypatch, model_file, frame)
+    result, warned = recorded(real, str(model_file), annotate="both", predict_qualifiers=True,
+        reaction_retriever=TinyRetriever(), reaction_transport=lambda body: response())
+    assert not warned
+    assert len(species_calls) == 1 and species_calls[0]["method"] == "direct"
+    assert species_calls[0]["predict_qualifiers"] and "reaction_method" not in species_calls[0]
+    # Model selection unchanged from the explicit grounded path: an omitted llm_model is GPT-6.1 Terra.
+    assert species_calls[0]["llm_model"] == "gpt-6.1-terra"
+    assert result.species_recommendations_df is frame
+    assert result.metrics["species_stage"] == {"species_stub": True}
+    assert "KEGG-compound=C00001" in result.reaction_evidence[1]["query"]
+
+
+@pytest.mark.parametrize("entry", ["annotate_model", "annotate_single_model"])
+@pytest.mark.parametrize("options,alias", [({"reaction_method": "rulebased"}, False),
+                                           ({"method": "rulebased"}, True),
+                                           ({"method": "rulebased", "reaction_method": "rulebased"}, False)])
+def test_explicit_rulebased_reaches_legacy_and_warns_once(model_file, legacy_calls, entry, options, alias):
+    call = annotate_model if entry == "annotate_model" else workflow.annotate_single_model
+    (frame, metrics), warned = recorded(call, str(model_file), annotate="reactions",
+        species_recommendations_df=SPECIES_TABLE, em_max_iterations=0, **options)
+    assert frame.empty and metrics == {"error": "KEGG reaction annotation failed"}
+    assert len(legacy_calls) == 1
+    assert legacy_calls[0]["species"]["annotation"].tolist() == ["CHEBI:15422"]
+    assert len(warned) == 1
+    assert Path(warned[0].filename).resolve() == Path(__file__).resolve()
+    message = str(warned[0].message)
+    for text in ["reaction_method='rrf_grounded'", "reaction_resources=RetrievalResources",
+                 "install_resources", "docs/rrf_grounded_api.md", "remains available on explicit request"]:
+        assert text in message
+    assert ("legacy alias" in message) == alias
+    assert "removed in" not in message and "will be removed" not in message
+
+
+def test_legacy_combined_warns_once_and_keeps_its_model_default(model_file, monkeypatch, legacy_calls):
+    real, species_calls = species_stage_stub(monkeypatch, model_file, SPECIES_TABLE)
+    result, warned = recorded(real, str(model_file), annotate="both", reaction_method="rulebased", em_max_iterations=0)
+    assert len(warned) == 1
+    assert len(species_calls) == 1 and species_calls[0]["llm_model"] == "gpt-4o-mini"
+    assert len(legacy_calls) == 1
+    assert result.metrics["reaction"] == {"error": "KEGG reaction annotation failed"}
+    assert workflow._RULEBASED_WARNING_ISSUED.get() is False
+
+
+@pytest.mark.parametrize("options", [{}, {"reaction_method": "rulebased"}, {"reaction_method": "rrf_grounded"}])
+def test_species_only_unchanged_needs_no_reaction_resources_or_warning(model_file, monkeypatch, tmp_path, options):
+    monkeypatch.setattr(grounded, "annotate_grounded", forbidden)
+    monkeypatch.setattr(reaction_workflow, "_run_kegg_annotation_workflow_rulebased", forbidden)
+    monkeypatch.setattr(retrieval, "load_retriever", forbidden)
+    models = []
+    def normalization(prompt, system_prompt, model=None, **kwargs):
+        models.append(model)
+        return {"role": "assistant", "content": 'a: "ATP"\nb: "ADP"\nunmapped: "unknown mixture"\nReason: synthetic'}
+    monkeypatch.setattr(workflow, "query_llm_message", normalization)
+    monkeypatch.setattr(workflow, "query_llm", lambda *a, **k: "")
+    result, warned = recorded(annotate_model, str(model_file), save_to=str(tmp_path / "species"), **options)
+    assert not warned
+    assert models == ["gpt-4o-mini"]
+    assert result.reaction_recommendations_df is None or result.reaction_recommendations_df.empty
+    rows = result.recommendations_df
+    assert {"a", "b"} <= set(rows.id)
+    assert rows.loc[rows.id.eq("a"), "annotation"].str.startswith("CHEBI:").any()
+    assert (tmp_path / "species_species.csv").exists()
+
+
+def test_default_missing_resources_is_actionable_without_fallback(model_file, no_legacy, caplog):
+    result, warned = recorded(annotate_model, str(model_file), annotate="reactions")
+    assert not warned
+    rows = result.recommendations_df
+    assert set(rows.status) == {"resource_error"} and len(rows) == 3
+    message = rows.error.iloc[0]
+    for text in ["reaction_resources is required", "install_resources", "RetrievalResources(",
+                 "docs/rrf_grounded_api.md", "never used as a fallback", "reaction_method='rulebased'"]:
+        assert text in message
+    assert result.metrics["provider_attempts"] == 0
+    assert "Grounded reaction annotation could not start" in caplog.text
+
+
+@pytest.mark.parametrize("catalog_bytes", [None, b"tampered catalog"])
+def test_default_combined_invalid_resources_block_species_spending(model_file, monkeypatch, no_legacy, tmp_path, catalog_bytes):
+    monkeypatch.setattr(workflow, "get_species_recommendations_direct", forbidden)
+    monkeypatch.setattr(workflow, "query_llm_message", forbidden)
+    catalog = tmp_path / "catalog.lzma"
+    if catalog_bytes is not None:
+        catalog.write_bytes(catalog_bytes)
+    resources = retrieval.RetrievalResources(str(catalog), str(tmp_path / "missing_encoder"))
+    result, warned = recorded(annotate_model, str(model_file), annotate="both",
+                              reaction_resources=resources, save_to=str(tmp_path / "out"))
+    assert not warned
+    assert set(result.recommendations_df.status) == {"resource_error"}
+    assert result.recommendations_df.error.str.startswith("Invalid reaction_resources").all()
+    assert result.metrics["species_stage"]["status"] == "skipped_resource_error"
+    assert result.metrics["provider_attempts"] == 0
+
+
+def test_direct_legacy_workflow_entry_point_warns_once_and_delegates(monkeypatch):
+    calls = []
+    monkeypatch.setattr(reaction_workflow, "_run_kegg_annotation_workflow_rulebased",
+                        lambda *a, **k: calls.append((a, k)) or "legacy result")
+    result, warned = recorded(reaction_workflow.run_kegg_annotation_workflow_rulebased, "m.xml", "table", em=1)
+    assert result == "legacy result" and calls == [(("m.xml", "table"), {"em": 1})]
+    assert len(warned) == 1 and "legacy alias" not in str(warned[0].message)
+
+
+def test_reaction_curation_uses_legacy_implementation_without_annotation_warning(model_file, monkeypatch):
+    doc = load_model(model_file)
+    term = libsbml.CVTerm(libsbml.BIOLOGICAL_QUALIFIER)
+    term.setBiologicalQualifierType(libsbml.BQB_IS)
+    term.addResource("http://identifiers.org/chebi/CHEBI:15422")
+    doc.getModel().getSpecies("a").addCVTerm(term)
+    libsbml.writeSBMLToFile(doc, str(model_file))
+    calls = []
+    monkeypatch.setattr(reaction_workflow, "_run_kegg_annotation_workflow_rulebased", lambda **k: calls.append(k))
+    (frame, metrics), warned = recorded(reaction_workflow.curate_reactions_kegg_rulebased, str(model_file), {}, {}, [])
+    assert frame.empty and metrics == {"error": "Rulebased KEGG reaction curation failed"}
+    assert len(calls) == 1 and not warned
+
+
+def test_importing_public_and_legacy_modules_does_not_warn():
+    code = textwrap.dedent(f"""
+        import warnings
+        with warnings.catch_warnings(record=True) as record:
+            warnings.simplefilter("always")
+            import core
+            from core import annotate_model, annotate_single_model, curate_model
+            from core.reaction.annotation_workflow import run_kegg_annotation_workflow_rulebased
+        print(sum({LEGACY_NOTICE!r} in str(w.message) for w in record))
+    """)
+    out = subprocess.run([sys.executable, "-c", code], cwd=ROOT, capture_output=True, text=True, check=True)
+    assert out.stdout.strip().splitlines()[-1] == "0"
+
+
+def test_grounded_cli_example_forwards_method_and_always_dry_runs(monkeypatch):
+    spec = importlib.util.spec_from_file_location("grounded_reactions_example", ROOT / "examples" / "grounded_reactions.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    captured = []
+    class Result:
+        reaction_recommendations_df = pd.DataFrame(columns=["id", "status", "annotation"])
+        metrics = {"coverage": {}}
+    monkeypatch.setattr(module, "annotate_model", lambda model, **kwargs: captured.append((model, kwargs)) or Result())
+    for extra, scope in [([], "reactions"), (["--both"], "both")]:
+        monkeypatch.setattr(sys, "argv", ["grounded_reactions.py", "unseen.xml", "--encoder", "enc", *extra])
+        module.main()
+        model, kwargs = captured[-1]
+        assert model == "unseen.xml" and kwargs["annotate"] == scope
+        assert kwargs["reaction_method"] == "rrf_grounded" and kwargs["dry_run"] is True
+        assert kwargs["reaction_resources"] == retrieval.RetrievalResources(
+            "data/kegg/kegg_reaction_features.lzma", "enc", device="cpu")
+
+
+def test_legacy_example_opts_in_explicitly():
+    tree = ast.parse((ROOT / "examples" / "kegg_rulebased_annotation_example.py").read_text(encoding="utf-8"))
+    calls = [node for node in ast.walk(tree) if isinstance(node, ast.Call)
+             and getattr(node.func, "id", None) == "annotate_model"]
+    assert calls and all(any(k.arg == "reaction_method" and k.value.value == "rulebased" for k in call.keywords)
+                         for call in calls)

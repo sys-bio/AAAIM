@@ -3,14 +3,18 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 from pathlib import Path
 from typing import Optional
 
 import pandas as pd
 from pydantic import BaseModel, ConfigDict, Field
 
+from .deprecation import RESOURCE_HELP
 from .retrieval import CONFIG, load_retriever, sha256
 from .species_evidence import CONTRACT_VERSION, build_queries
+
+logger = logging.getLogger(__name__)
 
 SYSTEM_INSTRUCTIONS = "You annotate one biochemical reaction using only the supplied TARGET and EVIDENCE records. Do not use recalled knowledge, external tools, web search, or identifiers absent from EVIDENCE. If you answer, predicted_kegg_id must be the kegg_id at selected_evidence_rank, and supporting_evidence_ids must name one or more supplied evidence_id values including that selected record. If the evidence is insufficient, abstain. Return only the required structured response."
 VISIBLE_FIELDS = ("evidence_id", "kegg_id", "fused_rank", "fused_score", "bm25_rank",
@@ -145,13 +149,17 @@ def annotate_grounded(model_file, *, species_recommendations_df=None, resources=
         # A valid SBML still defines coverage when its recommendation input fails.
         queries = build_queries(model_file)
         error, input_error = str(exc), True
-    try:
-        if retriever is None and not error:
-            if resources is None:
-                raise ValueError("reaction_resources is required; install the verified local encoder and catalog")
-            retriever = load_retriever(resources)
-    except (OSError, ValueError, ImportError, RuntimeError) as exc:
-        error = str(exc)
+    if retriever is None and not error:
+        if resources is None:
+            error = ("reaction_resources is required for reaction_method='rrf_grounded' "
+                     "(the default reaction method). " + RESOURCE_HELP)
+        else:
+            try:
+                retriever = load_retriever(resources)
+            except (OSError, ValueError, ImportError, RuntimeError) as exc:
+                error = f"Invalid reaction_resources ({type(exc).__name__}: {exc}). " + RESOURCE_HELP
+        if error:
+            logger.error("Grounded reaction annotation could not start: %s", error)
     rows, artifacts, usage = [], [], []
     source_provenance = {"sbml_sha256": sha256(model_file), "species_contract": CONTRACT_VERSION}
     if isinstance(species_recommendations_df, (str, Path)) and Path(species_recommendations_df).is_file():

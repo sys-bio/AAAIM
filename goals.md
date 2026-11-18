@@ -46,6 +46,19 @@ the integration is not merged. Offline validation (138 targeted passes) and
 frozen Luna payload parity remain exact. Real inference and biological review remain
 pending separate scope and authorization; this status grants neither.
 
+**Default reaction method (2026-11-17, proposed):** a dependent branch,
+`feature/rag-default-reaction-method`, based on the #25 head, makes
+`rrf_grounded` the default whenever reactions are requested and deprecates (does
+not remove) `reaction_method="rulebased"`, which now emits a
+`DeprecationWarning`. Species-only defaults, prompts, retrieval settings, model
+IDs and output-token limits are unchanged. Callers that previously omitted
+`reaction_method` now need explicit local `reaction_resources`; see the
+[migration notes](docs/rrf_grounded_api.md#migration-from-the-rule-based-default).
+All experiments and frozen results above were produced when rule-based matching
+was the default (or with explicit method selection) and are not changed.
+Offline mocked tests only; no paid calls, downloads, benchmark regeneration or
+held-out access.
+
 ## Project objective
 
 AAAIM is already a biological annotation tool. This project is therefore not simply to build an annotation tool, but to turn AAAIM into a reproducible research system for studying metabolic reaction annotation when metabolite evidence and database retrieval are incomplete.

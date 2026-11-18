@@ -1,10 +1,19 @@
 # Grounded full-catalog reaction recommendations
 
-`annotate_model(..., reaction_method="rrf_grounded")` integrates the selected
-research pipeline into the public API. The default reaction method remains
-`rulebased`. `method="direct"`/`"rag"` continues to control species retrieval.
-An omitted `llm_model` still means `gpt-4o-mini` for existing paths; it means
-`gpt-6.1-terra` for the new grounded path. Pass the model explicitly in saved
+`reaction_method="rrf_grounded"` integrates the selected research pipeline
+into the public API. It is now the **default reaction method**: when
+`annotate="reactions"`/`"both"` (or `entity_type="reaction"`) is requested
+without `reaction_method`, reactions use this grounded RRF path. The default
+annotation scope is unchanged (`annotate="species"`), and species-only calls
+neither load reaction resources nor emit reaction warnings.
+`method="direct"`/`"rag"` continues to control species retrieval only; the
+species `"rag"` embedding search is unrelated to this reaction method.
+The rule-based reaction method is deprecated but remains available with an
+explicit `reaction_method="rulebased"`; see [migration](#migration-from-the-rule-based-default).
+
+An omitted `llm_model` means `gpt-4o-mini` for species-only and rule-based
+paths; it means `gpt-6.1-terra` whenever the grounded path runs, including the
+species stage of `annotate="both"`. Pass the model explicitly in saved
 examples and execution plans.
 
 ## Local resources
@@ -69,8 +78,7 @@ resources = RetrievalResources(
 )
 result = annotate_model(
     "unseen_model.xml",
-    annotate="reactions",
-    reaction_method="rrf_grounded",
+    annotate="reactions",               # reaction_method defaults to "rrf_grounded"
     reaction_resources=resources,
     llm_model="gpt-6.1-terra",
     reaction_reasoning_effort="low",
@@ -81,6 +89,17 @@ result = annotate_model(
 print(result.reaction_recommendations_df[["id", "status", "annotation"]])
 print(result.metrics["coverage"])
 ```
+
+Passing `reaction_method="rrf_grounded"` explicitly behaves identically.
+
+Missing or invalid `reaction_resources` do not raise and never fall back to
+rule-based matching. Every enumerable reaction is reported with
+`status="resource_error"` and an `error` message naming the required
+`RetrievalResources(catalog_path=..., encoder_dir=...)`, the
+`install_resources` helper and this page; the same message is logged at
+error level. In `annotate="both"` mode resources are validated before the
+species stage, so a resource problem also skips potentially paid species
+inference (`species_stage.status="skipped_resource_error"`).
 
 The [command-line example](../examples/grounded_reactions.py) always performs
 a dry-run and accepts any local SBML plus an optional species CSV.
@@ -112,6 +131,48 @@ including FBC models, are supported; qualitative transitions are not reaction
 elements. Invalid/unparseable SBML raises an input error because reaction
 coverage cannot be enumerated. A bad species table yields `input_error` records
 for every enumerable reaction, without retrieving or calling a provider.
+
+## Migration from the rule-based default
+
+Earlier versions used rule-based KEGG matching plus LLM ranking whenever
+reactions were requested without `reaction_method`. Those calls now enter the
+grounded path:
+
+| Call | Before | Now |
+| --- | --- | --- |
+| `annotate="species"` (default) | species only | unchanged |
+| `annotate="reactions"`/`"both"` or `entity_type="reaction"`, no `reaction_method` | rule-based | `rrf_grounded` |
+| `reaction_method="rrf_grounded"` | grounded | unchanged |
+| `reaction_method="rulebased"` | rule-based | rule-based + `DeprecationWarning` |
+| `method="rulebased"`, no `reaction_method` (legacy alias) | rule-based | rule-based + `DeprecationWarning` |
+
+If you previously omitted `reaction_method`:
+
+- Install the local resources above and pass `reaction_resources`. Without
+  them each reaction returns `resource_error`; nothing falls back silently.
+- An omitted `llm_model` now means `gpt-6.1-terra` for reactions and for the
+  species stage of `annotate="both"` (previously `gpt-4o-mini`). Without
+  `dry_run`, up to one provider request is made per SBML reaction, with no
+  cross-invocation spending cap, ledger or response cache (see above). Pass
+  `llm_model`, `max_completion_tokens` and `dry_run=True` explicitly to preview
+  before any live run.
+- The output contract differs: one selection or abstention per reaction with
+  `status`, sidecar evidence/metrics files, and `.revise()` disabled;
+  `n_return`, EM and ontology options do not apply to grounded reactions.
+  Use `write_reaction_annotations` to write reviewed selections.
+- To keep the previous behavior, pass `reaction_method="rulebased"`.
+
+The rule-based reaction method is deprecated, not removed. No removal date or
+version is set. Selecting it emits a standard `DeprecationWarning` attributed
+to the calling line; nested public wrappers warn once per call, and imports,
+species-only calls and species `method` settings do not warn. Python shows
+`DeprecationWarning` by default for code run as `__main__` (scripts and
+notebooks); for library code or test runs enable it with
+`python -W default::DeprecationWarning` or `warnings.simplefilter("default", DeprecationWarning)`.
+The direct entry point `core.reaction.annotation_workflow.run_kegg_annotation_workflow_rulebased`
+warns the same way. Rule-based reaction **curation** (`curate_model` with
+`entity_type="reaction"`) has no grounded replacement and is not deprecated;
+the lower-level matching/scoring helpers it shares also do not warn.
 
 ## Evidence and response contract
 
