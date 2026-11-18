@@ -119,6 +119,8 @@ class AnnotationResult:
             A versioned CSV is saved automatically so previous results
             are never overwritten.
         """
+        if self._method == "rrf_grounded":
+            raise ValueError("Grounded results require a new evidence-validated run; generic species feedback is not supported")
         self._revision_count += 1
         print(f"Revising recommendations (v{self._revision_count})...")
 

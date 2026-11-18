@@ -36,6 +36,13 @@ analysis/**
 **/reaction_likelihood*.csv
 
 # benchmark artifacts
+benchmark/integration_worktrees/
+_rrf_grounded_work/
+# Runtime recommendations/evidence can contain private model information.
+*_reaction_evidence.jsonl
+*_reaction_metrics.json
+*_reactions.csv
+*_species.csv
 # Downloaded SBML is reproducible from the manifest + checksums, so it is not vendored.
 benchmark/models/
 # Transient build scratch and logs (leading underscore = not a frozen artifact).

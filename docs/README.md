@@ -2,6 +2,14 @@
 
 AAAIM is a LLM-powered system for annotating biosimulation models with standardized ontology terms. It supports chemical, gene, and protein annotation for species, and KEGG annotation for reactions. You can annotate species only, reactions only, or both in one call.
 
+For full-catalog learned retrieval and evidence-constrained reaction selection,
+use the explicit [grounded reaction API](rrf_grounded_api.md):
+`reaction_method="rrf_grounded"`. `reaction_method="rulebased"` remains the
+default baseline. The species `method` parameter is separate. Review the
+[species evidence contract](reaction_species_contract.md) before handing off
+identity-support and qualifier outputs. The new path supports a zero-call
+dry-run; its generic species feedback helper is intentionally disabled.
+
 ## Installation
 
 ```bash

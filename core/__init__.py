@@ -9,6 +9,8 @@ from .curation_workflow import curate_model, curate_single_model
 from .identity_support import assess_species_identity_support
 from .qualifier_workflow import predict_species_qualifiers
 from .feedback import AnnotationResult
+from .reaction.retrieval import RetrievalResources
+from .reaction.writer import write_reaction_annotations
 
 from .database_search import (
     Recommendation,
@@ -73,6 +75,8 @@ from .reaction.matching import (
 from .update_model import update_annotation
 
 __all__ = [
+    "RetrievalResources",
+    "write_reaction_annotations",
     # Annotation / curation
     "annotate_model",
     "annotate_single_model",
