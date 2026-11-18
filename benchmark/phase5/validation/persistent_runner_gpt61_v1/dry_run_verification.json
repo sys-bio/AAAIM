@@ -1,0 +1,12 @@
+{
+  "mode": "dry-run",
+  "plan_digest": "c1c8cbec4df627983efc235d52c2a0e248689cf068ebc153327e0fdf7e3e95b0",
+  "planned_units": 326,
+  "distinct_provider_bodies": 317,
+  "provider_constructions": 0,
+  "paid_attempts": 0,
+  "currently_authorized_usd": 0,
+  "held_out_rows_read": 0,
+  "per_call_reservation_usd": 4.64072,
+  "proposed_cap_usd": 40.0
+}

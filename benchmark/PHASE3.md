@@ -775,3 +775,13 @@ python -m pytest tests/test_phase3b_release.py -q --basetemp benchmark/phase3/_p
 All scientific outputs, complete metrics, strata, overlaps/transitions, bootstrap
 results, qualitative examples, deterministic rebuild record, and read-only manifest
 are in `benchmark/phase3/phase3b_fusion/`.
+
+## Phase 3C support-metric clarification
+
+The frozen Phase 3C report's direct-mode “unsupported” count measures in-catalog
+answers made without retrieved evidence, while its grounded count measures answers
+outside supplied Top-10 evidence. These are different support conditions, not a shared
+biological-hallucination endpoint. The independent paired accuracy result remains
+grounded 102/163 versus fusion 93/163. See the [Phase 3C support addendum](PHASE3C_SUPPORT_ADDENDUM.md)
+for definitions, denominators, and interpretation. Historical reports and manifests
+remain unchanged.

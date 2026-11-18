@@ -1,0 +1,16 @@
+{
+  "direct_exact_correct_all": 49,
+  "direct_in_catalog_without_retrieved_evidence": 130,
+  "direct_reference_correct_without_retrieved_evidence": 49,
+  "direct_reference_incorrect_without_retrieved_evidence": 81,
+  "fusion_exact_correct_all": 93,
+  "grounded_abstained": 39,
+  "grounded_answered": 124,
+  "grounded_exact_correct_all": 102,
+  "grounded_full_evidence_compliant": 161,
+  "grounded_in_evidence_reference_incorrect": 22,
+  "grounded_out_of_supplied_evidence": 0,
+  "n_validation": 163,
+  "support_interval_establishes_reduced_biological_hallucination": false,
+  "support_outcomes_have_same_definition": false
+}

@@ -1,0 +1,100 @@
+{
+  "cases": [
+    {
+      "audit_id": "SUP-BIOMD0000000013-E12",
+      "existing_labels": [
+        {
+          "brite_or_orthology": "Enzymatic reactions [BR:br08201]\n1. Oxidoreductase reactions\n1.1  Acting on the CH-OH group of donors\n1.1.1  With NAD+ or NADP+ as acceptor\n1.1.1.121\nR01429  D-Xylose + NAD+ <=> D-Xylonolactone + NADH + H+\n1.1.1.175\nR01429  D-Xylose + NAD+ <=> D-Xylonolactone + NADH + H+\nIUBMB reaction hierarchy [BR:br08202]\n1. Oxidoreductase reactions\n1.1.1.121\nR02847  D-Aldose <=> D-Aldonolactone\nR01429  D-Xylose <=> D-Xylonolactone",
+          "catalog_sha256": "00acb4de1bbfb1ddae0298a09d218f93eb22241844179439ff34a2912fba046c",
+          "catalog_status": "present_in_frozen_catalog",
+          "database_links": "RHEA: 13864",
+          "definition": "D-Xylose + NAD+ <=> D-Xylonolactone + NADH + H+",
+          "enzyme_ec": "1.1.1.121       1.1.1.175",
+          "equation": "C00181 + C00003 <=> C02266 + C00004 + C00080",
+          "kegg_id": "R01429",
+          "name": "D-xylose:NAD+ 1-oxidoreductase",
+          "rclass": "RC00001  C00003_C00004\nRC00066  C00181_C02266"
+        }
+      ],
+      "existing_method_results": null,
+      "existing_method_results_status": "No frozen validation-method result exists for this training-only reaction; no new inference was run.",
+      "formal_validation_audit_inclusion": false,
+      "manual_nomination": {
+        "concern": "R01429 contains xylonolactone which is not reflected in reaction E12",
+        "interpretation": "Nomination reason only; not a biological verdict.",
+        "prior_source": "prior manual observation"
+      },
+      "model_id": "BIOMD0000000013",
+      "model_reaction": {
+        "bounded_local_context": [],
+        "direction": "reversible",
+        "kinetic_law_present": true,
+        "model_id": "BIOMD0000000013",
+        "model_name": "Poolman2004_CalvinCycle",
+        "modifiers": [],
+        "normalized_equation": "X5P_ch [chloroplast] \u21cc Ru5P_ch [chloroplast]",
+        "products": [
+          {
+            "annotation_resources": [
+              "http://identifiers.org/chebi/CHEBI:17363",
+              "http://identifiers.org/kegg.compound/C00199"
+            ],
+            "chebi_annotations": [
+              "CHEBI:17363"
+            ],
+            "compartment_id": "chloroplast",
+            "compartment_name": null,
+            "display_name": null,
+            "kegg_compound_annotations": [
+              "C00199"
+            ],
+            "role": "product",
+            "species_id": "Ru5P_ch",
+            "stoichiometry": 1
+          }
+        ],
+        "reactants": [
+          {
+            "annotation_resources": [
+              "http://identifiers.org/chebi/CHEBI:16332",
+              "http://identifiers.org/kegg.compound/C00231"
+            ],
+            "chebi_annotations": [
+              "CHEBI:16332"
+            ],
+            "compartment_id": "chloroplast",
+            "compartment_name": null,
+            "display_name": null,
+            "kegg_compound_annotations": [
+              "C00231"
+            ],
+            "role": "reactant",
+            "species_id": "X5P_ch",
+            "stoichiometry": 1
+          }
+        ],
+        "reaction_id": "E12",
+        "reaction_name": null,
+        "readable_equation": "X5P_ch [chloroplast] \u21cc Ru5P_ch [chloroplast]",
+        "reversible": true,
+        "source_annotation_provenance": {
+          "reaction_annotation_resources": [
+            "http://identifiers.org/ec-code/5.1.3.1",
+            "http://identifiers.org/kegg.reaction/R01429",
+            "http://identifiers.org/reactome/REACT_1522"
+          ],
+          "sbml_level_version": "L2V1",
+          "sbml_path": "benchmark/models/BIOMD0000000013.xml",
+          "sbml_sha256": "e4a9445a74eef88a9783c178f873eebccba72464e8da1fee5cc84e5b4b9192bc"
+        }
+      },
+      "reaction_id": "E12",
+      "split_status": "training"
+    }
+  ],
+  "dataset_digest": "6a8aaa06bc4d2205fb0591de05f325870d8269b08c1277ec3a1af584b259ca33",
+  "dataset_id": "aaaim-supplemental-training-cases-20260910",
+  "expected_case_count": 1,
+  "kind": "supplemental_training",
+  "review_schema_version": "aaaim-human-review-v1"
+}

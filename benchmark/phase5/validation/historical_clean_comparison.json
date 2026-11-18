@@ -1,0 +1,18 @@
+{
+  "bm25": {
+    "exact_top100_list_matches": 163,
+    "exact_top10_list_matches": 163,
+    "exact_top1_list_matches": 163,
+    "n": 163
+  },
+  "fusion": {
+    "exact_top10_list_matches": 163,
+    "n": 163
+  },
+  "trained": {
+    "exact_top100_list_matches": 162,
+    "exact_top10_list_matches": 163,
+    "exact_top1_list_matches": 163,
+    "n": 163
+  }
+}

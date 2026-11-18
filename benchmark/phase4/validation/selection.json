@@ -1,0 +1,28 @@
+{
+  "criteria": {
+    "routed_0.05": {
+      "accuracy_preserved": true,
+      "call_reduction": false,
+      "cluster_screen": true,
+      "coverage_preserved": true,
+      "selective_risk_preserved": true
+    },
+    "routed_0.1": {
+      "accuracy_preserved": true,
+      "call_reduction": false,
+      "cluster_screen": true,
+      "coverage_preserved": true,
+      "selective_risk_preserved": true
+    },
+    "routed_0.2": {
+      "accuracy_preserved": true,
+      "call_reduction": false,
+      "cluster_screen": true,
+      "coverage_preserved": true,
+      "selective_risk_preserved": true
+    }
+  },
+  "eligible_routed_candidates": [],
+  "scope": "validation-selected cached replay only; not independent confirmation",
+  "selected_method": "grounded"
+}

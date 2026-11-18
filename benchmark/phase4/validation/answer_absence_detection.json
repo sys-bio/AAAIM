@@ -1,0 +1,26 @@
+{
+  "0.05": {
+    "false_negative_absent": 3,
+    "false_positive_absent": 115,
+    "true_negative_absent": 18,
+    "true_positive_absent": 27
+  },
+  "0.1": {
+    "false_negative_absent": 1,
+    "false_positive_absent": 129,
+    "true_negative_absent": 4,
+    "true_positive_absent": 29
+  },
+  "0.2": {
+    "false_negative_absent": 0,
+    "false_positive_absent": 132,
+    "true_negative_absent": 1,
+    "true_positive_absent": 30
+  },
+  "negative_margin_detection": {
+    "auroc": 0.5146616541353384,
+    "average_precision": 0.19550340455437415,
+    "n": 163,
+    "positives": 30
+  }
+}

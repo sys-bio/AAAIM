@@ -1,0 +1,75 @@
+{
+  "additionalProperties": false,
+  "description": "Strict provider schema; semantic evidence rules are checked afterward.",
+  "properties": {
+    "abstain": {
+      "title": "Abstain",
+      "type": "boolean"
+    },
+    "abstention_reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Abstention Reason"
+    },
+    "confidence": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Confidence",
+      "type": "number"
+    },
+    "predicted_kegg_id": {
+      "anyOf": [
+        {
+          "pattern": "^R[0-9]{5}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Predicted Kegg Id"
+    },
+    "reasoning_summary": {
+      "title": "Reasoning Summary",
+      "type": "string"
+    },
+    "selected_evidence_rank": {
+      "anyOf": [
+        {
+          "maximum": 10,
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Selected Evidence Rank"
+    },
+    "supporting_evidence_ids": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 10,
+      "title": "Supporting Evidence Ids",
+      "type": "array"
+    }
+  },
+  "required": [
+    "abstain",
+    "predicted_kegg_id",
+    "selected_evidence_rank",
+    "supporting_evidence_ids",
+    "confidence",
+    "reasoning_summary",
+    "abstention_reason"
+  ],
+  "title": "GroundedAnnotation",
+  "type": "object"
+}

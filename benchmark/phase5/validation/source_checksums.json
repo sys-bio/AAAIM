@@ -1,0 +1,9 @@
+{
+  "benchmark/phase3/phase3b_full/_checkpoints/best.pt": "8773b04f09916889b74c956e708044fe2c653fa764fe73c422ecc376ecae81c1",
+  "benchmark/phase3/phase3c_validation/sample_ids.jsonl": "42f1d2164110f774b362be6335c13b2b2b44d8eddf7546e3defedb922d167f5e",
+  "benchmark/phase3/retrieval_baselines/queries.jsonl": "37aafef84eb5bd0bb259f6d93bfbccd51cde1cbab6a4f184073be703216be964",
+  "data/chebi/chebi_parent_map.json.gz": "0ad60e5c2d2e6bcb726742e3e122d4d1de785dab9e027e8f28fd5e612d950cfe",
+  "data/kegg/chebi_to_kegg_map.lzma": "5fad31bca2b45cdb6017836ac8c313d35f3d83e36db177a7b0b2b9ad2cb4528f",
+  "data/kegg/kegg_reaction_features.lzma": "00acb4de1bbfb1ddae0298a09d218f93eb22241844179439ff34a2912fba046c",
+  "data/kegg/parsed_kegg_reactions.lzma": "36c6c05cdc9fa7564363d4565a7af225567d87baac740d7e42ea936364358f04"
+}

@@ -1,0 +1,8 @@
+{
+  "path_in_original_workspace": "benchmark/phase3/phase3b_full/_checkpoints/best.pt",
+  "bytes": 399385639,
+  "sha256": "8773b04f09916889b74c956e708044fe2c653fa764fe73c422ecc376ecae81c1",
+  "expected_sha256": "8773b04f09916889b74c956e708044fe2c653fa764fe73c422ecc376ecae81c1",
+  "access": "checkpoint bytes only; no inference or reaction data loaded",
+  "worktree_copy_present": false
+}

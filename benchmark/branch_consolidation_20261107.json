@@ -1,0 +1,78 @@
+{
+  "date": "2026-11-07",
+  "source_heads": {
+    "codex/phase3c-clarification": "1fb44ed39e5de0b1d485449e5c11345d4e5e98d9",
+    "codex/phase3c-main": "281684c39a67b45e6863bb8e37cca6e195b48a03",
+    "codex/phase4-integration": "89cb4033183a5b5387b2e2b6b344550335466ad2",
+    "codex/phase4-main": "a6d94c4befd868ff809f79db90d2fbcdf0f5b46c",
+    "codex/phase5-integration": "ec8e4055cebf1f70a56e07945f1334a8db4e8237",
+    "codex/phase5-main": "145f52d7305353d515d7877e36b42b6a1870a5b8",
+    "codex/luna-public-workflow": "e42d28165df8ef666b74cba173e1c59b1f4b239c"
+  },
+  "comparisons": [
+    {
+      "canonical": "benchmark/phase-4",
+      "substantive_phase_source_differences": [],
+      "variant": "codex/phase4-integration"
+    },
+    {
+      "canonical": "benchmark/phase-4",
+      "substantive_phase_source_differences": [],
+      "variant": "codex/phase4-main"
+    },
+    {
+      "canonical": "benchmark/phase-5",
+      "substantive_phase_source_differences": [],
+      "variant": "codex/phase5-integration"
+    },
+    {
+      "canonical": "benchmark/phase-5",
+      "substantive_phase_source_differences": [
+        "tests/test_phase5_runner.py"
+      ],
+      "variant": "codex/phase5-main"
+    }
+  ],
+  "phase3c_source": "1fb44ed (same standalone patch as 281684c)",
+  "phase5_pause_docs_source": "codex/phase5-integration",
+  "phase5_fixture_fix_source": "codex/phase5-main:tests/test_phase5_runner.py",
+  "canonical_frozen_artifact_policy": "Preserve every pre-existing frozen tree entry; add pause notice separately rather than rewrite original scientific reports/plans.",
+  "remote_changes": false,
+  "paid_execution": false,
+  "heldout_access": false,
+  "verification": {
+    "tests_passed": 197,
+    "frozen_artifact_checks": [
+      {
+        "branch": "benchmark/error-audit",
+        "preexisting_frozen_entries_preserved": 91,
+        "changed": []
+      },
+      {
+        "branch": "benchmark/phase-3c",
+        "preexisting_frozen_entries_preserved": 91,
+        "changed": []
+      },
+      {
+        "branch": "benchmark/phase-4",
+        "preexisting_frozen_entries_preserved": 117,
+        "changed": []
+      },
+      {
+        "branch": "benchmark/phase-5",
+        "preexisting_frozen_entries_preserved": 233,
+        "changed": []
+      },
+      {
+        "branch": "feature/luna-model2507280001",
+        "preexisting_frozen_entries_preserved": 46,
+        "changed": []
+      }
+    ],
+    "private_ignored_files_unchanged": 92,
+    "archive_refs_verified": 16,
+    "phase3c_smoke_validation_and_phase3b_fusion_manifests": "passed",
+    "selected_inference_archive": "passed",
+    "luna_complete_request_plans": "passed; original plan digests unchanged"
+  }
+}
